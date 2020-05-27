@@ -1,14 +1,12 @@
 ## Java XMind
 
-![](https://img.shields.io/badge/version-8 pro-red.svg)
+![](https://img.shields.io/badge/version-8%20pro-red.svg)
 
-
-![](https://img.shields.io/badge/version-ZEN-#e84393.svg)
-
+![](https://img.shields.io/badge/version-ZEN-pink.svg)
 
 ![](https://img.shields.io/badge/适合人群-基础-blue?logo=appveyor&style=for-the-badge)
 
-[TOC]
+
 
 ### 序言
 
