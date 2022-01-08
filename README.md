@@ -10,6 +10,8 @@
 ## Java
 
 * [Java-Basic-BrainMind ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Java-Basic-BrainMind)  Java基础思维导图
+* [Spring-Cloud-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Cloud-Notes)  Spring-Cloud笔记
+* [Spring-Security-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Security-Notes)  Spring-Security笔记
 
 
 
