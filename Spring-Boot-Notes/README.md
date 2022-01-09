@@ -1,5 +1,100 @@
-Spring-Boot-Note
-
+# Spring-Boot-Note
+- [Spring-Boot-Note](#spring-boot-note)
+  - [环境搭建 & 简化部署](#环境搭建--简化部署)
+    - [环境搭建](#环境搭建)
+    - [简化部署](#简化部署)
+  - [@SpringBootApplication启动原理](#springbootapplication启动原理)
+  - [IDEA 快速构建](#idea-快速构建)
+  - [YAML](#yaml)
+    - [YAML基本语法](#yaml基本语法)
+  - [单元测试](#单元测试)
+    - [SSM](#ssm)
+    - [SpringBoot](#springboot)
+  - [@ConfigurationProperties&@Value](#configurationpropertiesvalue)
+  - [@PropertySource&@ImportResource](#propertysourceimportresource)
+    - [【推荐】自己创建个配置类](#推荐自己创建个配置类)
+    - [配置文件的占位符](#配置文件的占位符)
+    - [多Profile支持](#多profile支持)
+  - [加载配置文件的位置和优先级](#加载配置文件的位置和优先级)
+  - [自动配置原理](#自动配置原理)
+    - [自动配置原理](#自动配置原理-1)
+    - [以HttpEncodingAutoConfiguration为例解释自动配置原理](#以httpencodingautoconfiguration为例解释自动配置原理)
+    - [小结](#小结)
+  - [@Conditional相关注解和Debug](#conditional相关注解和debug)
+  - [日志框架SL4J](#日志框架sl4j)
+    - [其他日志框架转换为SL4J](#其他日志框架转换为sl4j)
+    - [SpringBoot和日志关系](#springboot和日志关系)
+    - [日志的配置](#日志的配置)
+    - [指定日志框架](#指定日志框架)
+    - [切换日志框架](#切换日志框架)
+  - [静态资源映射规则](#静态资源映射规则)
+  - [模板引擎Thymeleaf](#模板引擎thymeleaf)
+  - [SpringMVC自动配置原理](#springmvc自动配置原理)
+    - [默认配置](#默认配置)
+    - [ContentNegotiatingViewResolver](#contentnegotiatingviewresolver)
+    - [HttpMessageConverters](#httpmessageconverters)
+    - [MessageCodesResolver](#messagecodesresolver)
+    - [SpringBoot在SpringMVC的配置模式](#springboot在springmvc的配置模式)
+    - [接管SpringBoot的SpringMVC](#接管springboot的springmvc)
+    - [小结：](#小结-1)
+  - [国际化](#国际化)
+    - [使用thymeleaf国际化](#使用thymeleaf国际化)
+    - [SpringBoot区域信息解析器](#springboot区域信息解析器)
+    - [自定义国际化](#自定义国际化)
+  - [拦截器](#拦截器)
+  - [错误处理原理](#错误处理原理)
+  - [定制错误页面和JSON错误数据](#定制错误页面和json错误数据)
+    - [定制一个JSON数据](#定制一个json数据)
+  - [嵌入式Servlet](#嵌入式servlet)
+    - [Spring两种配置方式：](#spring两种配置方式)
+    - [嵌入式Servlet两种修改相关配置](#嵌入式servlet两种修改相关配置)
+    - [注册三大组件](#注册三大组件)
+      - [定制Servlet](#定制servlet)
+      - [定制Filter](#定制filter)
+      - [定制Listener](#定制listener)
+  - [源码刨析 嵌入式Servlet原理](#源码刨析-嵌入式servlet原理)
+      - [以Tomcat为例](#以tomcat为例)
+    - [配置是如何修改原理](#配置是如何修改原理)
+    - [小结：](#小结-2)
+  - [嵌入式Servlet自动配置原理](#嵌入式servlet自动配置原理)
+  - [整合JDBC](#整合jdbc)
+    - [自动配置原理](#自动配置原理-2)
+  - [整合Druid](#整合druid)
+  - [整合Mybatis](#整合mybatis)
+    - [Maven](#maven)
+    - [使用注解](#使用注解)
+    - [使用配置文件](#使用配置文件)
+  - [SpringBoot启动原理](#springboot启动原理)
+    - [第一步：创建SpringApplication对象](#第一步创建springapplication对象)
+    - [第二步：启动应用](#第二步启动应用)
+  - [（基于原理的测试笔记）测试启动的四个类](#基于原理的测试笔记测试启动的四个类)
+  - [自定义starters【暂时无法理解】](#自定义starters暂时无法理解)
+  - [SpringBoot缓存基本使用](#springboot缓存基本使用)
+    - [基本使用](#基本使用)
+    - [几个属性介绍](#几个属性介绍)
+  - [缓存自动配置原理](#缓存自动配置原理)
+    - [以@Cacheable为例](#以cacheable为例)
+    - [小结：](#小结-3)
+      - [核心：](#核心)
+      - [思路整理](#思路整理)
+  - [@CachePut的使用](#cacheput的使用)
+  - [@CacheEvict 清除缓存](#cacheevict-清除缓存)
+  - [@Caching和@CacheConfig](#caching和cacheconfig)
+    - [@Caching](#caching)
+    - [@CacheConfig](#cacheconfig)
+  - [整合缓存中间件Redis](#整合缓存中间件redis)
+  - [自定义RedisCacheManager](#自定义rediscachemanager)
+      - [扩展CacheManager的用法](#扩展cachemanager的用法)
+  - [SpringSecurity的简单使用](#springsecurity的简单使用)
+    - [Thymeleaf整合SpringSecurity](#thymeleaf整合springsecurity)
+    - [**记住我**](#记住我)
+    - [定制自己的登录页面](#定制自己的登录页面)
+  - [Shiro的简单使用](#shiro的简单使用)
+    - [开始配置一个shiro](#开始配置一个shiro)
+    - [整合Shiro启动器](#整合shiro启动器)
+    - [扩展：](#扩展)
+      - [shiro默认过滤器](#shiro默认过滤器)
+      - [shiro常用的权限控制注解，可以在控制器类上使用](#shiro常用的权限控制注解可以在控制器类上使用)
 ## 环境搭建 & 简化部署
 
 ### 环境搭建
@@ -61,54 +156,54 @@ java -jar 包名既可以运行
 
 一些场景启动器：
 
-| 名称                                          | 描述                                                         | Pom  |
-| --------------------------------------------- | ------------------------------------------------------------ | ---- |
-| `spring-boot-starter`                         | 核心 starter，包括 auto-configuration 支持，logging 和 YAML  | Pom  |
-| `spring-boot-starter-activemq`                | Starter 使用 Apache ActiveMQ 进行 JMS 消息传递               | Pom  |
-| `spring-boot-starter-amqp`                    | Starter 用于使用 Spring AMQP 和 Rabbit MQ                    | Pom  |
-| `spring-boot-starter-aop`                     | 使用 Spring AOP 和 AspectJ 进行 aspect-oriented 编程的 Starter | Pom  |
-| `spring-boot-starter-artemis`                 | Starter 使用 Apache Artemis 进行 JMS 消息传递                | Pom  |
-| `spring-boot-starter-batch`                   | Starter 使用 Spring Batch                                    | Pom  |
-| `spring-boot-starter-cache`                   | Starter 用于使用 Spring Framework 的缓存支持                 | Pom  |
-| `spring-boot-starter-cloud-connectors`        | Starter 使用 Spring Cloud 连接器简化连接到云平台中的服务，如 Cloud Foundry 和 Heroku | Pom  |
-| `spring-boot-starter-data-cassandra`          | Starter 用于使用 Cassandra 分布式数据库和 Spring Data Cassandra | Pom  |
-| `spring-boot-starter-data-cassandra-reactive` | Starter 用于使用 Cassandra 分布式数据库和 Spring Data Cassandra Reactive | Pom  |
-| `spring-boot-starter-data-couchbase`          | Starter 用于使用 Couchbase document-oriented 数据库和 Spring Data Couchbase | Pom  |
-| `spring-boot-starter-data-couchbase-reactive` | Starter 用于使用 Couchbase document-oriented 数据库和 Spring Data Couchbase Reactive | Pom  |
-| `spring-boot-starter-data-elasticsearch`      | Starter 用于使用 Elasticsearch 搜索和分析引擎和 Spring Data Elasticsearch | Pom  |
-| `spring-boot-starter-data-jdbc`               | Starter 使用 Spring Data JDBC                                | Pom  |
-| `spring-boot-starter-data-jpa`                | Starter 使用 Spring Data JPA 和 Hibernate                    | Pom  |
-| `spring-boot-starter-data-ldap`               | Starter 使用 Spring Data LDAP                                | Pom  |
-| `spring-boot-starter-data-mongodb`            | Starter 用于使用 MongoDB document-oriented 数据库和 Spring Data MongoDB | Pom  |
-| `spring-boot-starter-data-mongodb-reactive`   | Starter 用于使用 MongoDB document-oriented 数据库和 Spring Data MongoDB Reactive | Pom  |
-| `spring-boot-starter-data-neo4j`              | Starter 用于使用 Neo4j 图形数据库和 Spring Data Neo4j        | Pom  |
-| `spring-boot-starter-data-redis`              | Starter 使用 Redis key-value data store 与 Spring Data Redis 和 Lettuce client | Pom  |
-| `spring-boot-starter-data-redis-reactive`     | Starter 用于将 Redis key-value data store 与 Spring Data Redis reactive 和 Lettuce client 一起使用 | Pom  |
-| `spring-boot-starter-data-rest`               | Starter 使用 Spring Data REST 在 REST 上公开 Spring Data repositories | Pom  |
-| `spring-boot-starter-data-solr`               | Starter 将 Apache Solr 搜索平台与 Spring Data Solr 一起使用  | Pom  |
-| `spring-boot-starter-freemarker`              | Starter for building MVC web applications 使用 FreeMarker 视图 | Pom  |
-| `spring-boot-starter-groovy-templates`        | Starter for building MVC web applications 使用 Groovy 模板视图 | Pom  |
-| `spring-boot-starter-hateoas`                 | Starter for building hypermedia-based RESTful web application with Spring MVC and Spring HATEOAS | Pom  |
-| `spring-boot-starter-integration`             | Starter 使用 Spring Integration                              | Pom  |
-| `spring-boot-starter-jdbc`                    | Starter 用于将 JDBC 与 HikariCP 连接池一起使用               | Pom  |
-| `spring-boot-starter-jersey`                  | Starter for building RESTful web applications 使用 JAX-RS 和 Jersey。 spring-boot-starter-web的替代方案 | Pom  |
-| `spring-boot-starter-jooq`                    | Starter 用于使用 jOOQ 访问 SQL 数据库。 spring-boot-starter-data-jpa或spring-boot-starter-jdbc的替代方案 | Pom  |
-| `spring-boot-starter-json`                    | Starter 用于读写 json                                        | Pom  |
-| `spring-boot-starter-jta-atomikos`            | Starter for JTA transactions 使用 Atomikos                   | Pom  |
-| `spring-boot-starter-jta-bitronix`            | Starter for JTA transactions 使用 Bitronix                   | Pom  |
-| `spring-boot-starter-mail`                    | Starter 用于使用 Java Mail 和 Spring Framework 的电子邮件发送支持 | Pom  |
-| `spring-boot-starter-mustache`                | Starter for building web applications 使用 Mustache 视图     | Pom  |
-| `spring-boot-starter-oauth2-client`           | Starter 使用 Spring Security 的 OAuth2/OpenID Connect client features | Pom  |
-| `spring-boot-starter-oauth2-resource-server`  | Starter 用于使用 Spring Security 的 OAuth2 资源服务器 features | Pom  |
-| `spring-boot-starter-quartz`                  | Starter 用于使用 Quartz 调度程序                             | Pom  |
-| `spring-boot-starter-security`                | Starter 使用 Spring Security                                 | Pom  |
-| `spring-boot-starter-test`                    | Starter 用于测试 Spring Boot applications with libraries，包括 JUnit，Hamcrest 和 Mockito | Pom  |
-| `spring-boot-starter-thymeleaf`               | Starter for building MVC web applications 使用 Thymeleaf 视图 | Pom  |
-| `spring-boot-starter-validation`              | Starter 用于使用 Hibernate Validator 进行 Java Bean 验证     | Pom  |
-| `spring-boot-starter-web`                     | Starter for building web，包括使用 Spring MVC 的 RESTful，applications。使用 Tomcat 作为默认嵌入式容器 | Pom  |
-| `spring-boot-starter-web-services`            | Starter 使用 Spring Web Services                             | Pom  |
-| `spring-boot-starter-webflux`                 | Starter for building WebFlux applications 使用 Spring Framework 的 Reactive Web 支持 | Pom  |
-| `spring-boot-starter-websocket`               | Starter for building WebSocket applications 使用 Spring Framework 的 WebSocket 支持 | Pom  |
+| 名称                                          | 描述                                                                                                     | Pom |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --- |
+| `spring-boot-starter`                         | 核心 starter，包括 auto-configuration 支持，logging 和 YAML                                              | Pom |
+| `spring-boot-starter-activemq`                | Starter 使用 Apache ActiveMQ 进行 JMS 消息传递                                                           | Pom |
+| `spring-boot-starter-amqp`                    | Starter 用于使用 Spring AMQP 和 Rabbit MQ                                                                | Pom |
+| `spring-boot-starter-aop`                     | 使用 Spring AOP 和 AspectJ 进行 aspect-oriented 编程的 Starter                                           | Pom |
+| `spring-boot-starter-artemis`                 | Starter 使用 Apache Artemis 进行 JMS 消息传递                                                            | Pom |
+| `spring-boot-starter-batch`                   | Starter 使用 Spring Batch                                                                                | Pom |
+| `spring-boot-starter-cache`                   | Starter 用于使用 Spring Framework 的缓存支持                                                             | Pom |
+| `spring-boot-starter-cloud-connectors`        | Starter 使用 Spring Cloud 连接器简化连接到云平台中的服务，如 Cloud Foundry 和 Heroku                     | Pom |
+| `spring-boot-starter-data-cassandra`          | Starter 用于使用 Cassandra 分布式数据库和 Spring Data Cassandra                                          | Pom |
+| `spring-boot-starter-data-cassandra-reactive` | Starter 用于使用 Cassandra 分布式数据库和 Spring Data Cassandra Reactive                                 | Pom |
+| `spring-boot-starter-data-couchbase`          | Starter 用于使用 Couchbase document-oriented 数据库和 Spring Data Couchbase                              | Pom |
+| `spring-boot-starter-data-couchbase-reactive` | Starter 用于使用 Couchbase document-oriented 数据库和 Spring Data Couchbase Reactive                     | Pom |
+| `spring-boot-starter-data-elasticsearch`      | Starter 用于使用 Elasticsearch 搜索和分析引擎和 Spring Data Elasticsearch                                | Pom |
+| `spring-boot-starter-data-jdbc`               | Starter 使用 Spring Data JDBC                                                                            | Pom |
+| `spring-boot-starter-data-jpa`                | Starter 使用 Spring Data JPA 和 Hibernate                                                                | Pom |
+| `spring-boot-starter-data-ldap`               | Starter 使用 Spring Data LDAP                                                                            | Pom |
+| `spring-boot-starter-data-mongodb`            | Starter 用于使用 MongoDB document-oriented 数据库和 Spring Data MongoDB                                  | Pom |
+| `spring-boot-starter-data-mongodb-reactive`   | Starter 用于使用 MongoDB document-oriented 数据库和 Spring Data MongoDB Reactive                         | Pom |
+| `spring-boot-starter-data-neo4j`              | Starter 用于使用 Neo4j 图形数据库和 Spring Data Neo4j                                                    | Pom |
+| `spring-boot-starter-data-redis`              | Starter 使用 Redis key-value data store 与 Spring Data Redis 和 Lettuce client                           | Pom |
+| `spring-boot-starter-data-redis-reactive`     | Starter 用于将 Redis key-value data store 与 Spring Data Redis reactive 和 Lettuce client 一起使用       | Pom |
+| `spring-boot-starter-data-rest`               | Starter 使用 Spring Data REST 在 REST 上公开 Spring Data repositories                                    | Pom |
+| `spring-boot-starter-data-solr`               | Starter 将 Apache Solr 搜索平台与 Spring Data Solr 一起使用                                              | Pom |
+| `spring-boot-starter-freemarker`              | Starter for building MVC web applications 使用 FreeMarker 视图                                           | Pom |
+| `spring-boot-starter-groovy-templates`        | Starter for building MVC web applications 使用 Groovy 模板视图                                           | Pom |
+| `spring-boot-starter-hateoas`                 | Starter for building hypermedia-based RESTful web application with Spring MVC and Spring HATEOAS         | Pom |
+| `spring-boot-starter-integration`             | Starter 使用 Spring Integration                                                                          | Pom |
+| `spring-boot-starter-jdbc`                    | Starter 用于将 JDBC 与 HikariCP 连接池一起使用                                                           | Pom |
+| `spring-boot-starter-jersey`                  | Starter for building RESTful web applications 使用 JAX-RS 和 Jersey。 spring-boot-starter-web的替代方案  | Pom |
+| `spring-boot-starter-jooq`                    | Starter 用于使用 jOOQ 访问 SQL 数据库。 spring-boot-starter-data-jpa或spring-boot-starter-jdbc的替代方案 | Pom |
+| `spring-boot-starter-json`                    | Starter 用于读写 json                                                                                    | Pom |
+| `spring-boot-starter-jta-atomikos`            | Starter for JTA transactions 使用 Atomikos                                                               | Pom |
+| `spring-boot-starter-jta-bitronix`            | Starter for JTA transactions 使用 Bitronix                                                               | Pom |
+| `spring-boot-starter-mail`                    | Starter 用于使用 Java Mail 和 Spring Framework 的电子邮件发送支持                                        | Pom |
+| `spring-boot-starter-mustache`                | Starter for building web applications 使用 Mustache 视图                                                 | Pom |
+| `spring-boot-starter-oauth2-client`           | Starter 使用 Spring Security 的 OAuth2/OpenID Connect client features                                    | Pom |
+| `spring-boot-starter-oauth2-resource-server`  | Starter 用于使用 Spring Security 的 OAuth2 资源服务器 features                                           | Pom |
+| `spring-boot-starter-quartz`                  | Starter 用于使用 Quartz 调度程序                                                                         | Pom |
+| `spring-boot-starter-security`                | Starter 使用 Spring Security                                                                             | Pom |
+| `spring-boot-starter-test`                    | Starter 用于测试 Spring Boot applications with libraries，包括 JUnit，Hamcrest 和 Mockito                | Pom |
+| `spring-boot-starter-thymeleaf`               | Starter for building MVC web applications 使用 Thymeleaf 视图                                            | Pom |
+| `spring-boot-starter-validation`              | Starter 用于使用 Hibernate Validator 进行 Java Bean 验证                                                 | Pom |
+| `spring-boot-starter-web`                     | Starter for building web，包括使用 Spring MVC 的 RESTful，applications。使用 Tomcat 作为默认嵌入式容器   | Pom |
+| `spring-boot-starter-web-services`            | Starter 使用 Spring Web Services                                                                         | Pom |
+| `spring-boot-starter-webflux`                 | Starter for building WebFlux applications 使用 Spring Framework 的 Reactive Web 支持                     | Pom |
+| `spring-boot-starter-websocket`               | Starter for building WebSocket applications 使用 Spring Framework 的 WebSocket 支持                      | Pom |
 
 
 
@@ -3173,26 +3268,26 @@ org.springframework.boot.autoconfigure.
 几个重要的缓存注解：
 
 | Cache          | 缓存接口，定义缓存操作。实现有：RedisCache、EhCacheCache、ConcurrentMapCache等 |
-| -------------- | ------------------------------------------------------------ |
-| CacheManager   | 缓存管理器，管理各种缓存（Cache）组件                        |
-| @Cacheable     | 主要针对方法配置，能够根据方法的请求参数对其结果进行缓存     |
-| @CacheEvict    | 清空缓存                                                     |
-| @CachePut      | 保证方法被调用，又希望结果被缓存。                           |
-| @EnableCaching | 开启基于注解的缓存                                           |
-| keyGenerator   | 缓存数据时key生成策略                                        |
-| serialize      | 缓存数据时value序列化策略                                    |
+| -------------- | ------------------------------------------------------------------------------ |
+| CacheManager   | 缓存管理器，管理各种缓存（Cache）组件                                          |
+| @Cacheable     | 主要针对方法配置，能够根据方法的请求参数对其结果进行缓存                       |
+| @CacheEvict    | 清空缓存                                                                       |
+| @CachePut      | 保证方法被调用，又希望结果被缓存。                                             |
+| @EnableCaching | 开启基于注解的缓存                                                             |
+| keyGenerator   | 缓存数据时key生成策略                                                          |
+| serialize      | 缓存数据时value序列化策略                                                      |
 
 缓存的spel
 
-| 名字            | 位置               | 描述                                                         | 示例                 |
-| --------------- | ------------------ | ------------------------------------------------------------ | -------------------- |
-| methodName      | root object        | 当前被调用的方法名                                           | #root.methodName     |
-| method          | root object        | 当前被调用的方法                                             | #root.method.name    |
-| target          | root object        | 当前被调用的目标对象                                         | #root.target         |
-| targetClass     | root object        | 当前被调用的目标对象类                                       | #root.targetClass    |
-| args            | root object        | 当前被调用的方法的参数列表                                   | #root.args[0]        |
-| caches          | root object        | 当前方法调用使用的缓存列表（如@Cacheable(value={"cache1", "cache2"})），则有两个cache | #root.caches[0].name |
-| *argument name* | evaluation context | 方法参数的名字. 可以直接 #参数名 ，也可以使用 #p0或#a0 的形式，0代表参数的索引； | #iban 、 #a0 、 #p0  |
+| 名字            | 位置               | 描述                                                                                                                          | 示例                 |
+| --------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| methodName      | root object        | 当前被调用的方法名                                                                                                            | #root.methodName     |
+| method          | root object        | 当前被调用的方法                                                                                                              | #root.method.name    |
+| target          | root object        | 当前被调用的目标对象                                                                                                          | #root.target         |
+| targetClass     | root object        | 当前被调用的目标对象类                                                                                                        | #root.targetClass    |
+| args            | root object        | 当前被调用的方法的参数列表                                                                                                    | #root.args[0]        |
+| caches          | root object        | 当前方法调用使用的缓存列表（如@Cacheable(value={"cache1", "cache2"})），则有两个cache                                         | #root.caches[0].name |
+| *argument name* | evaluation context | 方法参数的名字. 可以直接 #参数名 ，也可以使用 #p0或#a0 的形式，0代表参数的索引；                                              | #iban 、 #a0 、 #p0  |
 | result          | evaluation context | 方法执行后的返回值（仅当方法执行之后的判断有效，如‘unless’，’cache put’的表达式 ’cache evict’的表达式beforeInvocation=false） | #result              |
 
 
