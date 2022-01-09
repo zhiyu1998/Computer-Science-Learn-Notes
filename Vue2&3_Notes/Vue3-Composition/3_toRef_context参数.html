@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+
+<!-- 大纲：toRef, context  -->
+<script>
+    const app = Vue.createApp({
+        template: `
+            <child @change='handleClick'>parent</child>
+        `,
+        methods: {
+            handleClick() {
+                console.log('HELLO');
+            }
+        },
+        setup(props, context) {
+            // 为了解决在reactive中使用toRefs不能使用默认值，可以用toRef代替
+            // 但是一般不推荐这样做
+            // const { reactive, toRef } = Vue
+            // const data = reactive({
+            //     name: 'dell'
+            // })
+            // const age = toRef(data, 'age')
+            // setTimeout(() => {
+            //     age.value = 'lee'
+            // }, 2000);
+            // return { age }
+
+
+        }
+    })
+
+    app.component('child', {
+        template: `
+            <div @click='handleClick'>123213</div>
+        `,
+        // 父组件传递给子组件要调用slots
+        // 之前获取得使用以下方式
+        // mounted() {
+        //     console.log(this.$slots);
+        // },
+
+        // 之前子组件要传递给父组件的时候需要
+        // 父组件需要加一个事件进行监听(@click='xxxx')
+        // mounted() {
+        //     this.$emit('change')
+        // },
+
+        // slots
+        // setup(props, context) {
+        //     const {
+        //         h
+        //     } = Vue
+
+        //     const {
+        //         attrs,
+        //         slots,
+        //         emit
+        //     } = context
+
+        //     console.log(slots.default());
+        //     return () => h('div', {}, slots.default())
+        // }
+
+        setup(props, context) {
+            const {
+                attrs,
+                slots,
+                emit
+            } = context
+
+            function handleClick() {
+                emit('change')
+            }
+
+            return {
+                handleClick
+            }
+        }
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+
+<script>
+    const app = Vue.createApp({
+        template: `
+            <div>
+                <h2 @click='handleClick'>{{countObj.count}}</h2> -- {{countAddFive}}
+            </div>
+        `,
+        methods: {
+
+        },
+        setup(props, context) {
+            const {
+                ref,
+                computed,
+                reactive
+            } = Vue
+
+            const count = ref(0)
+
+            const countObj = reactive({
+                count: 0
+            })
+
+            const handleClick = () => {
+                countObj.count += 1
+            }
+
+            // const countAddFive = computed(() => {
+            //     return count.value + 5
+            // })
+            // 注意这里的count,如果是一个对象，就不用写count.value
+            // 如果是一个ref，就需要写count.value
+            const countAddFive = computed({
+                get: () => {
+                    return countObj.count + 5
+                },
+                set: (param) => {
+                    countObj.count = param - 5
+                }
+            })
+
+            // 最后显示的是95，因为computed中set是 传入值 - 5
+            setTimeout(() => {
+                countAddFive.value = 100
+            }, 2000);
+
+            return {
+                count,
+                handleClick,
+                countAddFive,
+                countObj
+            }
+        }
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

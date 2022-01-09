@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                name: 'dell',
+                age: 23
+            }
+        },
+        rules: {
+            age: {
+                validate: age => age > 25,
+                message: 'too young to simple'
+            },
+            name: {
+                validate: name => name.length >= 4,
+                message: 'name too short'
+            }
+        },
+        template: `
+           <div>name: {{name}}, age: {{age}}</div>
+        `
+    })
+
+    app.mixin({
+        created() {
+            for (const key in this.$options.rules) {
+                const item = this.$options.rules[key]
+                // console.log(this);
+                // this.$watch(key, () => {
+                //     // console.log(key + ' changed');
+                //     const result = item.validate(key)
+                //     if (!result) console.log(item.message);
+                // })
+                this.$watch(key, (value) => {
+                    // console.log(key + ' changed');
+                    const result = item.validate(value)
+                    if (!result) console.log(item.message);
+                })
+                console.log(key, item);
+            }
+        }
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

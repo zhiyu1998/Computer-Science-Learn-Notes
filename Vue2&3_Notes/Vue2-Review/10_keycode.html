@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    // 事件修饰符(@click)： stop, prevent, ccapture, self, once, passive
+    // 案件修饰符(@keydown)： enter, tab, delete, up, down, left, right
+    // 鼠标事件(@click)： left, right, midlle
+    // 精准修饰符： exact (例如：keydown.ctrl.exact 按住ctrl)
+    // v-model中的修饰符：lazy, number, trim
+    const app = Vue.createApp({
+        data() {
+            return {
+                
+            }
+        },
+        methods: {
+            handleKeyDown() {
+                console.log('keydown');
+            }
+        },
+        template: `
+            <div>
+                <input @keydown.enter='handleKeyDown' />
+            </div>
+        `
+    }).mount('#root')
+</script>
+</html>

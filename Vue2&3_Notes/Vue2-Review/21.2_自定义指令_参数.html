@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+    <style>
+        .header {
+            position: absolute;
+        }
+    </style>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                distance: 400
+            }
+        },
+        // template: `
+        //    <div>
+        //         <div v-pos='top' class='header'>
+        //             <input  />
+        //         </div >
+        //     </div>
+        // `
+        template: `
+           <div>
+                <div v-pos:right='distance' class='header'>
+                    <input  />
+                </div >
+            </div>
+        `
+    })
+
+    // 如果在指令的后面再传入一个 ":xxxx" 就可以通过binding.arg获取
+    app.directive('pos', (el, binding) => {
+        console.log('binding.arg', binding.arg);
+        el.style[binding.arg] = binding.value + 'px'
+    })
+
+    // 如果只有mounted和update，等价于这个语法
+    // app.directive('pos', (el, binding) => {
+    //     el.style.top = binding.value + 'px'
+    // })
+
+    // 自定义指令参数：binding 传入指令进来的参数
+    // app.directive('pos', {
+    //     mounted(el, binding) {
+    //         el.style.top = binding.value + 'px'
+    //     },
+    //     updated(el, binding) {
+    //         el.style.top = binding.value + 'px'
+    //     }
+    // })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

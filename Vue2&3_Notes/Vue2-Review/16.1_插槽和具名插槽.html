@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    // slot
+    const app = Vue.createApp({
+        data() {
+            return {
+
+            }
+        },
+        // methods: {
+        //     handleCountOneChange(count) {
+        //         this.count1 = count
+        //     }
+        // },
+        template: `
+            <myform>
+                <div>提交</div>
+            </myform>
+
+            <myform>
+                <button>提交</button>
+            </myform>
+
+            <myform></myform>
+        `
+    })
+
+    app.component('myform', {
+        methods: {
+            handleClick() {
+                alert(123)
+            }
+        },
+        template: `
+            <div>
+                <input />
+                <div @click='handleClick'>
+                    <slot>default value</slot>
+                </div>
+            </div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+</html>

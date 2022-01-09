@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                num: 1
+            }
+        },
+        methods: {
+            handleAddOne(count) {
+                this.num += count
+            }
+        },
+        template: `
+            <div>
+                <counter :count='num' @add='handleAddOne'/>
+            </div>
+        `
+    })
+
+    app.component('counter', {
+        props: ['count'],
+        emits: ['add'], // 可以在这里定义传递出去的事件名
+        // emits: {
+        //     add: (count) => {
+        //         if (count > 0)
+        //             return true
+        //         else return false
+        //     }
+        // },
+        data() {
+            return {
+
+            }
+        },
+        methods: {
+            // addOne() {
+            //     this.$emit('addOne')
+            // }
+            handleClick() {
+                // this.$emit('addOne') // 发送给父组件要传递的信息，父组件通过事件（@）接收这个名字（addOne）
+                this.$emit('add', this.count + 3)
+            }
+        },
+        template: `
+            <div>
+                {{count}}
+                <button  @click='handleClick'>+1</button>
+            </div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+</html>

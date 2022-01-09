@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+
+<!-- 大纲： reactive, readonly, toRefs  -->
+<script>
+    // ref reactive 响应式的引用
+    // 原理，通过proxy对数据进行封装，当数据变化时，触发模版等内容的更新
+    // ref 处理基础类型数据
+    const app = Vue.createApp({
+        template: `
+            <div>name: {{name}}</div>
+        `,
+        setup(props, context) {
+            // const {ref} = Vue
+            // // proxy封装，'dell' -> proxy({value: 'dell'}) 这样的响应式引用
+            // let name = ref('dell')
+            // setInterval(() => {
+            //     name.value = 'lee'
+            // }, 2000);
+            // return {
+            //     name
+            // }
+
+            // 对象形式reactive
+            // const {
+            //     reactive
+            // } = Vue
+            // const nameObj = reactive({
+            //     name: 'dell'
+            // })
+            // setInterval(() => {
+            //     nameObj.name = 'lee'
+            // }, 2000);
+            // return {
+            //     nameObj
+            // }
+
+            // 数组形式的 reactive
+            // const {
+            //     reactive
+            // } = Vue
+            // const nameObj = reactive([123])
+            // setInterval(() => {
+            //     nameObj[0] = 456
+            // }, 2000);
+            // return {
+            //     nameObj
+            // }
+
+            // 只读形式: 这里会持续警告，因为copyNameObj是readonly
+            // const {reactive, readonly} = Vue
+            // const nameObj = reactive([123])
+            // const copyNameObj = readonly(nameObj)
+            // setInterval(() => {
+            //     nameObj[0] = 456
+            //     copyNameObj[0] = 456
+            // }, 2000);
+            // return {
+            //     nameObj,
+            //     copyNameObj
+            // }
+
+            // const {reactive, readonly} = Vue
+            // const nameObj = reactive({name: 'dell'})
+            // setInterval(() => {
+            //     
+            // }, 2000);
+            // const {name} = nameObj
+            // return {
+            //     name,
+            // }
+
+            // ToRefs语法：把reactive返回的对象转换为ref
+            // toRefs proxy({ name:'dell' }) -> { name: proxy({ value: 'dell'}) }
+            const {reactive, readonly, toRefs} = Vue
+            const nameObj = reactive({name: 'dell'})
+            setInterval(() => {
+                nameObj.name = 'lee'
+            }, 2000);
+            const {name} = toRefs(nameObj)
+            return {
+                name,
+            }
+        }
+    }).mount('#root')
+</script>
+
+</html>

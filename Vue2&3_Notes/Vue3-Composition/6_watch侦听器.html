@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+
+<script>
+    const app = Vue.createApp({
+        template: `
+            <div>
+                Name: <input v-model='name' />
+                EnglishName: <input v-model='englishName' />
+            </div>
+        `,
+        setup(props, context) {
+            const {
+                ref,
+                computed,
+                reactive,
+                watch,
+                toRefs
+            } = Vue
+
+            // const name = ref('dell')
+
+            const nameObj = reactive({
+                name: 'dell',
+                englishName: 'lee'
+            })
+
+            // 特性
+            // 1. lazy
+            // 2. 可以拿到原始和当前值
+
+            // 如果使用reactive的对象，要使用箭头函数，而不是直接调用nameObj.name
+            // watch(
+            //     [() => nameObj.name, () => nameObj.englishName],
+            //     ([cuurentValue, preValue], [curEng, preEng]) => {
+            //         console.log(cuurentValue, preValue);
+            //         console.log(curEng, preEng);
+            //     })
+            
+            // 让watch变为非惰性的
+            watch(
+                [() => nameObj.name, () => nameObj.englishName],
+                ([cuurentValue, preValue], [curEng, preEng]) => {
+                    console.log(cuurentValue, preValue);
+                    console.log(curEng, preEng);
+                }, {
+                    immediate: true
+                })
+
+            const {
+                name,
+                englishName
+            } = toRefs(nameObj)
+
+
+            return {
+                name,
+                englishName
+            }
+        }
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

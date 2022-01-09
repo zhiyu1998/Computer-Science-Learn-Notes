@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                count: 1,
+                count1: 1
+            }
+        },
+        // methods: {
+        //     handleCountOneChange(count) {
+        //         this.count1 = count
+        //     }
+        // },
+        template: `
+            <div>
+                <counter v-model:count='count' v-model:count1='count1'/>
+            </div>
+        `
+    })
+
+    // 在双向绑定的时候可以使用 “:变量名” 进行传递给子组件，子组件修改的时候可以使用update
+    app.component('counter', {
+        props: ['count', 'count1'],
+        methods: {
+            handleClick() {
+                this.$emit('update:count', this.count + 3)
+            },
+            handleClick1() {
+                this.$emit('update:count1', this.count1 + 3)
+            }
+        },
+        template: `
+            <div>
+                count: {{count}}
+                count1: {{count1}}
+                <button  @click='handleClick'>+1</button>
+                <button  @click='handleClick1'>+1</button>
+            </div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+</html>

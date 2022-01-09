@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+
+<script>
+    // watcheffect 侦听器，更偏向effect
+    const app = Vue.createApp({
+        template: `
+            <div>
+                Name: <input v-model='name' />
+                EnglishName: <input v-model='englishName' />
+            </div>
+        `,
+        setup(props, context) {
+            const {
+                ref,
+                computed,
+                reactive,
+                watch,
+                watchEffect,
+                toRefs
+            } = Vue
+
+            // const name = ref('dell')
+
+            const nameObj = reactive({
+                name: 'dell',
+                englishName: 'lee'
+            })
+
+            // 与watch的不同点：
+            // 1. 立即执行没有惰性
+            // 2. 不需要传递你要侦听的内容，自动会感知代码依赖
+            // 3. 不能获取之前数据的值（pre）
+            // 不要传递很多参数，只要传递一个回调函数
+            // watchEffect(() => {
+            //     console.log('abc'); // 在代码中没有依赖，所以只做一次
+            //     console.log(nameObj.name); // 在代码中有依赖
+            //     console.log(nameObj.englishName); // 在代码中有依赖, 就会侦听
+            // })
+
+            // 定时停止监听
+            const stop = watchEffect(() => {
+                console.log('abc'); // 在代码中没有依赖，所以只做一次
+                console.log(nameObj.name); // 在代码中有依赖
+                console.log(nameObj.englishName); // 在代码中有依赖, 就会侦听
+                setTimeout(() => {
+                    stop()
+                }, 5000);
+            })
+
+            const {
+                name,
+                englishName
+            } = toRefs(nameObj)
+
+
+            return {
+                name,
+                englishName
+            }
+        }
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

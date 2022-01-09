@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    // 动态组件：根据数据的变换，结合component标签，来随时动态切换组价的显示
+    // <component :is='currentItem' />
+    const app = Vue.createApp({
+        data() {
+            return {
+                currentItem: 'input-item'
+            }
+        },
+        methods: {
+            handleClick() {
+                if (this.currentItem === 'input-item') {
+                    this.currentItem = 'common-item'
+                } else {
+                    this.currentItem = 'input-item'
+                }
+            }
+        },
+        // template: `
+        //    <input-item v-show='currentItem === "input-item"' />
+        //    <common-item v-show='currentItem === "common-item"' />
+        //    <button @click='handleClick'>切换</button>
+        // `
+        template: `
+           <keep-alive>
+            <component :is='currentItem' />
+           </keep-alive>
+           <button @click='handleClick'>切换</button>
+        `
+    })
+
+    app.component('input-item', {
+        template: `
+            <input />
+        `
+    })
+
+    app.component('common-item', {
+        template: `
+            <div>hello world</div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+</html>

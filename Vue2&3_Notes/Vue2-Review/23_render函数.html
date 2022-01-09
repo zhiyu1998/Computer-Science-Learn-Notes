@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                level: 1
+            }
+        },
+        template: `
+           <div>
+                <my-title :level='level'>
+                    Hello    
+                </my-title>
+            </div>
+        `
+    })
+
+    app.component('my-title', {
+        props: ['level'],
+        render() {
+            const { h } = Vue;
+            // 标签, 属性, 内容
+            return h('h' + this.level, {}, [
+                this.$slots.default(),
+                h('h4', {}, 'dell')
+            ])
+        }
+        // template: `
+        //     <h1 v-if='level === 1'><slot /></h1>
+        //     <h2 v-if='level === 2'><slot /></h2>
+        //     <h3 v-if='level === 3'><slot /></h3>
+        //     <h4 v-if='level === 4'><slot /></h4>
+        // `
+    })
+
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

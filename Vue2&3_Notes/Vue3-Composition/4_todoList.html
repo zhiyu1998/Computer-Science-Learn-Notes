@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+
+<script>
+    // 关于list相关的内容进行封装
+    const listReactiveEffect = () => {
+        const {
+            reactive
+        } = Vue
+        const list = reactive([])
+        const addItemToList = (item) => {
+            list.push(item)
+        }
+        return {
+            list,
+            addItemToList
+        }
+    }
+
+    const inputReactiveEffect = () => {
+        const {
+            ref
+        } = Vue
+        const inputValue = ref('123')
+        const handleInputValueChange = (e) => {
+            inputValue.value = e.target.value
+        }
+
+        return {
+            inputValue,
+            handleInputValueChange,
+        }
+    }
+
+    const app = Vue.createApp({
+        template: `
+            <div>
+                <div>
+                    <input :value='inputValue' @change='handleInputValueChange' />
+                    <button @click='addItemToList(inputValue)'>提交</button>
+                </div>
+                <ul>
+                    <li v-for='(item, index) in list' :key='index'>{{item}}</li>
+                </ul>
+            </div>
+        `,
+        methods: {
+
+        },
+        setup(props, context) {
+            // 流程调度中转
+            const {
+                list,
+                addItemToList
+            } = listReactiveEffect()
+
+            const {
+                inputValue,
+                handleInputValueChange
+            } = inputReactiveEffect()
+
+            // 不建议再封装一层
+            // const handleSubmit = () => {
+            //     addItemToList(inputValue)
+            // }
+
+            return {
+                list, addItemToList,
+                inputValue, handleInputValueChange
+            }
+        }
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+
+    /** 步骤简介
+     * 1. 传入修饰符，例如：v-model.uppercase
+     * 2. 子组件通过：’modelModifiers‘ 进行接收，使用default默认给一个空对象
+     * 3. 可以结合修饰符进行处理，本例中主要是在：handleClick中体现
+    */
+     const app = Vue.createApp({
+        data() {
+            return {
+                count: 1
+            }
+        },
+        template: `
+            <div>
+                <counter v-model.uppercase='count' />
+            </div>
+        `
+    })
+
+    app.component('counter', {
+        props: {
+            'modelValue': String,
+            'modelModifiers': {
+                default: () => ({})
+            }
+        },
+        // mounted() {
+        //     console.log(this.modelModifiers); // captalize: true
+        // },
+        methods: {
+            handleClick() {
+                let newValue = this.modelValue + 'b'
+                if (this.modelModifiers.uppercase) {
+                    newValue = newValue.toUpperCase()
+                }
+                this.$emit('update:modelValue', newValue)
+            }
+        },
+        template: `
+            <div>
+                {{modelValue}}
+                <button  @click='handleClick'>+b</button>
+            </div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+</html>

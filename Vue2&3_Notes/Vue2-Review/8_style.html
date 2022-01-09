@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .red {
+            color: red
+        }
+
+        .green {
+            color: green
+        }
+    </style>
+    <script src="./lib/vue.global.js"></script>
+</head>
+
+<body>
+
+    <div id="root"></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                classString: 'green',
+                classObject: {
+                    red: true,
+                    green: false
+                },
+                classArray: ['red', 'green', {
+                    brown: true
+                }],
+                styleString: 'color: yellow',
+                styleObject: {
+                    color: 'orange',
+                    backgroundColor: 'yellow'
+                }
+            }
+        },
+        template: `
+        <div :style='styleObject'>
+            Hello Wolrd
+            <demo class='green' />
+        </div>
+        `
+    })
+
+    app.component('demo', {
+        template: `
+            <div :class='$attrs.class'>one</div>
+            <div :class='$attrs.class'>two</div>
+        `
+    })
+
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

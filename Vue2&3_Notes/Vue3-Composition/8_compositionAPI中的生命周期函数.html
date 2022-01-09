@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+
+<body>
+    <div id='root'></div>
+</body>
+
+<script>
+    // watcheffect 侦听器，更偏向effect
+    const app = Vue.createApp({
+        template: `
+            <div @click='handleClick'>
+                Name: <input v-model='name' />
+            </div>
+        `,
+        // 在生命周期函数中是没有beforeCreate、created, 因为setup执行点就在之间
+        setup(props, context) {
+            const {
+                ref,
+                computed,
+                reactive,
+                toRefs,
+                onBeforeMount,
+                onMounted,
+                onBeforeUpdate,
+                onBeforeUnmount,
+                onRenderTracked,
+				onRenderTriggered
+            } = Vue
+
+            const name = ref('dell')
+
+            onBeforeMount(() => {
+                console.log('onBeforeMount');
+            })
+
+            onMounted(() => {
+                console.log('onMounted');
+            })
+
+            onBeforeUpdate(() => {
+                console.log('onBeforeUpdate');
+            })
+
+			// onRenderTracked 每次渲染收集依赖会执行的函数
+            onRenderTracked(() => {
+                console.log('onRenderTracked');
+            })
+			
+			// 每次触发页面重新渲染时自动执行
+			// 与update不同之处就在于，只有页面重新加载才会触发onRenderTriggered
+			onRenderTriggered(() => {
+				console.log('onRenderTriggered');
+			})
+
+            const handleClick = () => {
+                name.value = 'lee'
+            }
+
+            return {
+                name,
+                handleClick
+            }
+        }
+    })
+
+    const vm = app.mount('#root')
+</script>
+
+</html>

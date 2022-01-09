@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    const app = Vue.createApp({
+        template: `
+            <div @click='handleClick'>name: {{name}}</div>
+        `,
+        methods: {
+            test() {
+                console.log(this.$options.setup());
+            }
+        },
+        mounted() {
+            this.test()
+        },
+        // created 实例完全被初始化之前
+        // 在setup中就没有this这个语法
+        setup(props, context) {
+            // this.test() // 错误
+            return {
+                name: 'dell',
+                handleClick: () => {
+                    alert(123)
+                }
+            }
+        }
+    }).mount('#root')
+</script>
+</html>

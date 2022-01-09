@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./lib/vue.global.js"></script>
+</head>
+<body>
+    <div id='root'></div>
+</body>
+<script>
+    // [作用域插槽]
+    // 如果子组件的插槽数据想传递给父组件，需要使用v-bind的方式绑定一个变量名 = '传递的数据'
+    // 例如:index='item'，就是给父组件传递index
+    // 父组件通过v-slot='变量名' 定义一个接收变量
+    // 然后通过接收变量.传递变量(slotProps.index) 获取到子组件的变量
+    const app = Vue.createApp({
+        // template: `
+        //     <list v-slot='slotProps'>
+        //         <span>{{slotProps.index}}</span>
+        //     </list>
+        // `
+        // 使用对象解构的方式: {}
+        template: `
+            <list v-slot='{index}'>
+                <div>{{index}}</div>
+            </list>
+        `
+    })
+
+    app.component('list', {
+        data() {
+            return {
+                list: [1, 2, 3]
+            }
+        },
+        template: `
+            <div>
+                <slot v-for='item in list' :index='item'></slot>
+            </div>
+        `
+    })
+
+    const vm = app.mount('#root')
+</script>
+</html>
