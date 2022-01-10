@@ -28,12 +28,14 @@
 - CSPNet [https://arxiv.org/abs/1911.11929](https://arxiv.org/abs/1911.11929)
 - RegNet [https://arxiv.org/abs/2003.13678](https://arxiv.org/abs/2003.13678)
 - NFNets(High-Performance Large-Scale Image Recognition Without Normalization) [https://arxiv.org/abs/2102.06171](https://arxiv.org/abs/2102.06171)
+- Attention Is All You Need [https://arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762)
 - Vision Transformer [https://arxiv.org/abs/2010.11929](https://arxiv.org/abs/2010.11929)
 - DeiT(Training data-efficient image transformers ) [https://arxiv.org/abs/2012.12877](https://arxiv.org/abs/2012.12877)
 - Swin Transformer [https://arxiv.org/abs/2103.14030](https://arxiv.org/abs/2103.14030)
 - Swin Transformer V2: Scaling Up Capacity and Resolution [https://arxiv.org/abs/2111.09883](https://arxiv.org/abs/2111.09883)
 - BEiT: BERT Pre-Training of Image Transformers [https://arxiv.org/abs/2106.08254](https://arxiv.org/abs/2106.08254)
 - MAE(Masked Autoencoders Are Scalable Vision Learners) [https://arxiv.org/abs/2111.06377](https://arxiv.org/abs/2111.06377)
+- CoAtNet [https://arxiv.org/pdf/2106.04803v2.pdf](https://arxiv.org/pdf/2106.04803v2.pdf)
 ------
 
 ## 目标检测(Object Detection)
@@ -52,6 +54,7 @@
 - YOLOv4 [https://arxiv.org/abs/2004.10934](https://arxiv.org/abs/2004.10934)
 - PP-YOLO [https://arxiv.org/abs/2007.12099](https://arxiv.org/abs/2007.12099)
 - PP-YOLOv2 [https://arxiv.org/abs/2104.10419](https://arxiv.org/abs/2104.10419)
+- YOLOX [http://arxiv.org/abs/2107.08430](http://arxiv.org/abs/2107.08430)
 - CornerNet [https://arxiv.org/abs/1808.01244](https://arxiv.org/abs/1808.01244)
 - FCOS [https://arxiv.org/abs/1904.01355](https://arxiv.org/abs/1904.01355)
 - CenterNet [https://arxiv.org/abs/1904.07850](https://arxiv.org/abs/1904.07850)
@@ -67,8 +70,13 @@
 - Mask R-CNN [https://arxiv.org/abs/1703.06870](https://arxiv.org/abs/1703.06870)
 
 
-## 自然语言处理
-- Attention Is All You Need [https://arxiv.org/abs/1706.03762](https://arxiv.org/abs/1706.03762)
+## 异常检测（Anomaly Detection）
+- Anomaly Transformer [http://arxiv.org/abs/2110.02642](http://arxiv.org/abs/2110.02642)
+- DL-Traff [http://arxiv.org/abs/2108.09091](http://arxiv.org/abs/2108.09091)
+- Generative adversarial networks in time series: A survey and taxonomy [http://arxiv.org/abs/2107.11098](http://arxiv.org/abs/2107.11098)
+- Learning Graph Neural Networks for Multivariate Time Series Anomaly Detection [http://arxiv.org/abs/2111.08082](http://arxiv.org/abs/2111.08082)
+- Long-Range Transformers [http://arxiv.org/abs/2109.12218](http://arxiv.org/abs/2109.12218)
+- Sig-Wasserstein GANs [http://arxiv.org/abs/2111.01207](http://arxiv.org/abs/2111.01207)
 
 ## Others
 - Microsoft COCO: Common Objects in Context [https://arxiv.org/abs/1405.0312](https://arxiv.org/abs/1405.0312)
