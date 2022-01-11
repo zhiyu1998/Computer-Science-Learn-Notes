@@ -2,7 +2,6 @@
 我的研究生期间深度学习读书/学习笔记，包含
 * 图形分类
 * 图像分割（弃坑）
-* 对抗神经网络（弃坑）
 * 目标识别
 * 异常检测
 
@@ -14,7 +13,7 @@
        ├── ..........(图像分类)
        ├── 21 KnowledgeDistillation     知识蒸馏
        ├── Datasets                     数据集下载和划分
-       ├── Gan Zoo                      对抗神经网络
+       ├── Object Detection             目标识别
        ├── Segmentation                 图像分割
        ├── .gitignore       
        ├── LICENSE      
