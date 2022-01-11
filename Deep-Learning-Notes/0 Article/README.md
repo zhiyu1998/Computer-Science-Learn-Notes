@@ -52,6 +52,7 @@
 - YOLOv2 [https://arxiv.org/abs/1612.08242](https://arxiv.org/abs/1612.08242)
 - YOLOv3 [https://arxiv.org/abs/1804.02767](https://arxiv.org/abs/1804.02767)
 - YOLOv4 [https://arxiv.org/abs/2004.10934](https://arxiv.org/abs/2004.10934)
+- Scaled-YOLOv4 [https://arxiv.org/abs/2011.08036](https://arxiv.org/abs/2011.08036)
 - PP-YOLO [https://arxiv.org/abs/2007.12099](https://arxiv.org/abs/2007.12099)
 - PP-YOLOv2 [https://arxiv.org/abs/2104.10419](https://arxiv.org/abs/2104.10419)
 - YOLOX [http://arxiv.org/abs/2107.08430](http://arxiv.org/abs/2107.08430)
