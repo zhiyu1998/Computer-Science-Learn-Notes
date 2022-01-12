@@ -35,4 +35,4 @@
 
 ## DataStruct
 
-* [DataStruct-Xmind-Note](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/DataStruct-Xmind-Note)  C语言数据结构思维导图
+* [DataStruct-BrainMind](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/DataStruct-BrainMind)  C语言数据结构思维导图
