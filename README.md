@@ -13,6 +13,7 @@
 ## Java
 
 * [Java-Basic-BrainMind ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Java-Basic-BrainMind)  Java基础思维导图
+* [SSM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/SSM-Notes)  Spring-SpringMVC-MyBatis笔记
 * [Spring-Boot-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Boot-Notes) Spring-Boot笔记
 * [Spring-Cloud-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Cloud-Notes)  Spring-Cloud笔记
 * [Spring-Security-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Security-Notes)  Spring-Security笔记
