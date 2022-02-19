@@ -3,6 +3,7 @@
 我的CS生涯学习笔记
 
 * [Foundation](#foundation)
+* [Algorithm](#algorithm)
 * [Java](#java)
 * [Frontend](#Frontend)
 * [Golang](#golang)
@@ -16,6 +17,13 @@
 
 
 
+## Algorithm
+
+* [LeetCode-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/LeetCode-Notes) 力扣刷题笔记（Java）
+  * 二叉树
+
+
+
 ## Java
 
 * [Java-Basic-BrainMind ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Java-Basic-BrainMind)  Java基础思维导图
@@ -24,6 +32,7 @@
 * [Spring-Cloud-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Cloud-Notes)  Spring-Cloud笔记
 * [Spring-Security-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Security-Notes)  Spring-Security笔记
 * [Spring-Data-Jpa-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Data-Jpa-Notes)  Spring-Data-Jpa笔记
+* [JVM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JVM-Notes) JVM笔记
 
 ## Frontend
 * [Vue2&3](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/Vue2%263_Notes) Vue2&Vue3笔记
