@@ -1,8 +1,12 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Test {
 
     public static void main(String[] args) {
         int i = new Test().numTrees(9);
         System.out.println(i);
+        List<Integer> list = new ArrayList<>();
     }
 
     public int numTrees(int n) {
