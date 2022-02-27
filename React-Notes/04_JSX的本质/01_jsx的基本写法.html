@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app"></div>
+
+    <!-- React开发依赖 -->
+    <script src="../lib/react.development.js"></script>
+    <script src="../lib/react-dom.development.js"></script>
+    <!-- 生产环境中不建议使用 -->
+    <script src="../lib/babel.min.js"></script>
+
+    <script type="text/babel">
+        // JSX仅仅是React.createElement(component, props, ...children)的语法糖
+        const message1 = <h2>Hello React</h2>
+        // 参数：标签（type）， 参数(config)， 内容(children)
+        // 如果使用这样的写法，那么不需要babel转换（type="text/babel"）
+        const message2 = React.createElement("h2", null, "Hello React2")
+
+        ReactDOM.render(message2, document.getElementById('app'))
+    </script>
+</body>
+</html>

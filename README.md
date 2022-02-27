@@ -35,7 +35,8 @@
 * [JVM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JVM-Notes) JVM笔记
 
 ## Frontend
-* [Vue2&3](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/Vue2%263_Notes) Vue2&Vue3笔记
+* [Vue2&3](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/Vue2%263-Notes) Vue2&Vue3笔记
+* [React](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/React-Notes) React笔记
 
 ## Golang
 

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <!-- React开发依赖 -->
+    <script src="../lib/react.development.js"></script>
+    <script src="../lib/react-dom.development.js"></script>
+    <!-- 生产环境中不建议使用 -->
+    <script src="../lib/babel.min.js"></script>
+
+    <script type="text/babel">
+      class Index extends React.Component {
+        constructor() {
+          super()
+
+          this.state = {
+            movies: ['大话西游', '海王', '流浪地球', '盗梦空间']
+          }
+        }
+
+        render() {
+          return (
+            <div>
+              <button onClick={ (e)=>{ this.btnClick(e) } }>按钮</button>
+              <ul>
+                {
+                  this.state.movies.map((movie, index, arr)=> {
+                    return <li onClick={(e) => {this.liClick(movie, index, e)}}>{movie}</li>
+                  })
+                }
+              </ul>
+            </div>
+          )
+        }
+
+        btnClick(event) {
+          console.log(event);
+        }
+
+        liClick(movie, index, e) {
+          console.log(movie + ': ' + index);
+          console.log(e);
+        }
+
+      }
+
+      ReactDOM.render(<App />, document.getElementById('app'))
+    </script>
+  </body>
+</html>

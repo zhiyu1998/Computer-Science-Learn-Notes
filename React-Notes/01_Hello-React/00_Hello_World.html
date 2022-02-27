@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <h2 class="title"></h2>
+  <button class="btn">改变文本</button>
+
+  <script>
+    // 原生开发 -- 命令式编程
+   let message =  "Hello World"
+   const titleEL = document.getElementsByClassName("title")[0]
+   titleEL.innerHTML = message
+
+   const btnEL = document.getElementsByClassName("btn")[0]
+   btnEL.addEventListener("click", e => {
+     console.log("按钮发送了点击")
+     message = 'Hello React'
+     titleEL.innerHTML = message
+   })
+
+   // React -- 声明式编程
+  </script>
+</body>
+</html>

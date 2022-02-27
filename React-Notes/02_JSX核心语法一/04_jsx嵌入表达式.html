@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<div id="app"></div>
+
+<!-- React开发依赖 -->
+<script src="../lib/react.development.js"></script>
+<script src="../lib/react-dom.development.js"></script>
+<!-- 生产环境中不建议使用 -->
+<script src="../lib/babel.min.js"></script>
+<script type="text/babel">
+    class Index extends React.Component{
+        constructor() {
+            super();
+            this.state = {
+                firstname: 'kobe',
+                lastname: 'bryant',
+                isLogin: true,
+            }
+        }
+
+        render() {
+            const {firstname, lastname, isLogin} = this.state;
+
+            return (
+                <div>
+                    {/*运算符表达式*/}
+                    <h2>{ firstname + " " + lastname }</h2>
+                    <h2>{20 * 50}</h2>
+
+                    <h2>{isLogin ? "欢迎回来" : "请先登录"}</h2>
+
+                    <h2>{this.getFullName()}</h2>
+                </div>
+            )
+        }
+        
+        // 调用函数：这里注意是使用this而不是使用this.state 和 bind
+        // 因为要调用事件如：button 的 onClick，需要使用bind或者箭头函数
+        // <button onClick={() => {this.getFullName()}}>点击获取全称</button>
+        getFullName() {
+            console.log(this.state.firstname + " " + this.state.lastname)
+            return this.state.firstname + " " + this.state.lastname
+        }
+    }
+    ReactDOM.render(<App/>, document.getElementById('app'))
+</script>
+</body>
+</html>

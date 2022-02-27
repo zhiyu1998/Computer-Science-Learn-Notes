@@ -1,0 +1,10 @@
+a.active {
+  color: red;
+  font-size: 30px;
+}
+
+a.link-active {
+  color: orange;
+  font-size: 20px;
+  text-decoration: line-through;
+}

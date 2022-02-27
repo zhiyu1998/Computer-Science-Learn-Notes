@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+
+    <div id="app"></div>
+
+    <!-- React开发依赖 -->
+    <script src="../lib/react.development.js"></script>
+    <script src="../lib/react-dom.development.js"></script>
+    <!-- 生产环境中不建议使用 -->
+    <script src="../lib/babel.min.js"></script>
+    <script type="text/babel">
+        class Index extends React.Component {
+            constructor() {
+                super();
+                this.state = {
+                    counter: 0
+                }
+            }
+
+            render() {
+                return (
+                    <div>
+                        <h2>当前计数：{this.state.counter}</h2>
+                        <button onClick={this.increment.bind(this)}>+1</button>
+                        <button onClick={this.decrement.bind(this)}>-1</button>
+                    </div>
+                )
+            }
+
+            increment() {
+                console.log('+1');
+                this.setState({
+                    counter: this.state.counter + 1
+                })
+            }
+
+            decrement() {
+                console.log('-1');
+                this.setState({
+                    counter: this.state.counter - 1
+                })
+            }
+        }
+        ReactDOM.render(<App />, document.getElementById('app'))
+    </script>
+</body>
+
+</html>

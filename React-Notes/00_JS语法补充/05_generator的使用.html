@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script>
+    // function foo(){
+    //     console.log("foo 被执行")
+    // }
+    // foo()
+
+    // generator 生成器函数
+
+    /*function* foo() {
+        console.log(111)
+        yield "Hello";
+        console.log(222)
+        yield "World";
+        console.log(333) // 如果只迭代两次 这里是不会打印的
+        yield "coderwhy"
+        console.log(444)
+    }*/
+
+    // iterator 迭代器
+    /*const result = foo()
+    console.log(result)
+
+    // 使用迭代器
+    const res1 = result.next()
+    console.log(res1)
+    const res2 = result.next()
+    console.log(res2)
+    const res3 = result.next()
+    console.log(res3)
+    // 当全部已经耗尽。done就会返回ture
+    const res4 = result.next()
+    console.log(res4)*/
+
+    // 练习：生成器生成1-10的数字
+    /*function* generateNumber() {
+        for (let i = 1; i <= 10; i++) {
+            yield i
+        }
+    }
+
+    const numIt = generateNumber()
+    console.log(numIt.next().value)*/
+
+    // generator和promise一起使用
+    function* bar() {
+        console.log(111)
+        const result = yield new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve("Hello Generator")
+            }, 3000)
+        })
+        console.log(result)
+    }
+
+    const it = bar()
+    it.next().value.then(res => {
+        it.next(res)
+    })
+
+</script>
+</body>
+</html>
