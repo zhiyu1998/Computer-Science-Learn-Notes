@@ -4,12 +4,18 @@ import java.util.List;
 public class Test {
 
     public static void main(String[] args) {
-        int i = new Test().numTrees(9);
-        System.out.println(i);
+//        int i = new Test().numTrees(9);
+//        System.out.println(i);
+//        List<Integer> list = new ArrayList<>();
+
         List<Integer> list = new ArrayList<>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        System.out.println(list.get(0));
     }
 
-    public int numTrees(int n) {
+/*    public int numTrees(int n) {
         int[] dp = new int[n + 1];
         dp[0] = 1;
         dp[1] = 1;
@@ -20,5 +26,5 @@ public class Test {
             }
         }
         return dp[n];
-    }
+    }*/
 }

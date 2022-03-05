@@ -1,4 +1,0 @@
-[flake8]
-ignore = E203,F401,W503
-max-line-length = 120
-exclude = tests/*
