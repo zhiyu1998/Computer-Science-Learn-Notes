@@ -4,6 +4,7 @@
 
 * [Foundation](#foundation)
 * [Algorithm](#algorithm)
+* [Interview](#Interview)
 * [Java](#java)
 * [Frontend](#Frontend)
 * [Golang](#golang)
@@ -24,6 +25,12 @@
 
 
 
+## :tiger: Interview
+
+* [Eight-Part-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Eight-Part-Notes) 八股文碎片整理
+
+
+
 ## :coffee: Java
 
 * [Java-Basic-BrainMind ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Java-Basic-BrainMind)  Java基础思维导图
@@ -39,12 +46,6 @@
 * [JVM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JVM-Notes) JVM笔记
 * [JUC-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JUC-Notes) JUC笔记
 * [Kubernetes-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kubernetes-Notes) k8s笔记
-
-
-
-## :tiger: Interview
-
-* [Eight-Part-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Eight-Part-Notes) 八股文碎片整理
 
 
 
