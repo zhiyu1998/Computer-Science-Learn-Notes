@@ -1,6 +1,6 @@
 # Computer-Science-Learn-Notes
 
-我的CS生涯学习笔记
+:bird:目录概览
 
 * [Foundation](#foundation)
 * [Algorithm](#algorithm)
