@@ -33,7 +33,14 @@
 * [Spring-Security-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Security-Notes)  Spring-Security笔记
 * [Spring-Data-Jpa-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Data-Jpa-Notes)  Spring-Data-Jpa笔记
 * [JVM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JVM-Notes) JVM笔记
+* [JUC-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JUC-Notes) JUC笔记
 * [Kubernetes-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kubernetes-Notes) k8s笔记
+
+
+
+## Interview
+
+[Eight-Part-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Eight-Part-Notes) 八股文碎片整理
 
 
 
@@ -51,8 +58,8 @@
 
 
 ## Python
-* [ Python-Basis-Notes](https://github.com/zhiyu1998/Python-Basis-Notes) 我的另外一个项目：关于数据科学的python基础（python + numpy + pandas）
-* [Deep-Learning-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Deep-Learning-Notes)  深度学习笔记（图像分类、~~图像分割~~、~~目标识别~~、异常检测）
+* [ Python-Basis-Notes](https://github.com/zhiyu1998/Python-Basis-Notes) 另一个项目：关于数据科学的python基础（python + numpy + pandas）
+* [Deep-Learning-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Deep-Learning-Notes)  深度学习笔记（图像分类、目标识别、异常检测）
 
 
 
