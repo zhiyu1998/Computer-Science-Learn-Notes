@@ -25,9 +25,11 @@
 
 
 
-## :tiger: Interview
+## :tiger: Interview (updating...)
 
-* [Eight-Part-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Eight-Part-Notes) 八股文碎片整理
+* [Eight-Part-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Eight-Part-Notes) Java后端大厂面试八股文碎片知识整理（目前收录：字节、美团、拼多多）
+
+> 注：收录的网站来自 力扣、牛客的热门讨论
 
 
 
