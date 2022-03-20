@@ -1,19 +1,85 @@
-
+- [八股文学习技巧](#八股文学习技巧)
+- [Java基础](#java基础)
+- [框架](#框架)
+  - [Spring](#spring)
+- [微服务](#微服务)
+- [JVM](#jvm)
+- [JUC](#juc)
+- [数据库](#数据库)
+  - [RabbitMQ](#rabbitmq)
+  - [MySql](#mysql)
+- [数据结构和算法](#数据结构和算法)
+- [操作系统](#操作系统)
+- [计算机网络](#计算机网络)
+- [设计模式](#设计模式)
+- [安全](#安全)
+- [杂项](#杂项)
+  - [最新技术](#最新技术)
+  - [RBAC](#rbac)
 
 # 八股文学习技巧
 
 * [八股文学习路线及攻略](https://leetcode-cn.com/circle/discuss/2Ypo9Z/) 
 * [论如何4个月高效刷满 500 题并形成长期记忆](https://leetcode-cn.com/circle/discuss/jq9Zke/ ) 
 
-
-
 # Java基础
 
 > 讲讲hashmap，底层原理是什么？ 
 
+**JDK1.8 之前**
+
+<font color='#e67e22'>JDK1.8 之前 HashMap 底层是 **数组和链表** 结合在一起使用也就是 链表散列</font>。HashMap 通过 key 的 hashCode 经过扰动函数处理过后得到 hash 值，然后通过 (n - 1) & hash 判断当前元素存放的位置（这里的 n 指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素的 hash 值以及 key 是否相同，如果相同的话，直接覆盖，<u>不相同就通过拉链法解决冲突</u>。
+
+所谓扰动函数指的就是 HashMap 的 hash 方法。使用 hash 方法也就是扰动函数是为了防止一些实现比较差的 hashCode() 方法 换句话说使用扰动函数之后可以减少碰撞。
+
+JDK 1.8 HashMap 的 hash 方法源码:
+
+JDK 1.8 的 hash 方法 相比于 JDK 1.7 hash 方法更加简化，但是原理不变。
+
+```java
+    static final int hash(Object key) {
+      int h;
+      // key.hashCode()：返回散列值也就是hashcode
+      // ^ ：按位异或
+      // >>>:无符号右移，忽略符号位，空位都以0补齐
+      return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+  }
+```
+
+对比一下 JDK1.7 的 HashMap 的 hash 方法源码.
+
+```java
+static int hash(int h) {
+    // This function ensures that hashCodes that differ only by
+    // constant multiples at each bit position have a bounded
+    // number of collisions (approximately 8 at default load factor).
+
+    h ^= (h >>> 20) ^ (h >>> 12);
+    return h ^ (h >>> 7) ^ (h >>> 4);
+}
+```
+
+相比于 JDK1.8 的 hash 方法 ，JDK 1.7 的 hash 方法的性能会稍差一点点，因为毕竟扰动了 4 次。
+
+所谓 **“拉链法”** 就是：将链表和数组相结合。也就是说创建一个链表数组，数组中每一格就是一个链表。若遇到哈希冲突，则将冲突的值加到链表中即可。
+
+<img src="images/jdk1.8%E4%B9%8B%E5%89%8D%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84-HashMap.png" alt="jdk1.8之前的内部结构-HashMap" style="zoom: 67%;" />
+
+**JDK1.8 之后**
+
+相比于之前的版本， JDK1.8 之后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为 8）（将链表转换成红黑树前会判断，如果当前数组的长度小于 64，那么会选择先进行数组扩容，而不是转换为红黑树）时，<font color='#fdcb6e'>将链表转化为红黑树，以减少搜索时间</font>。
+
+![jdk1.8之后的内部结构-HashMap](images/jdk1.8%E4%B9%8B%E5%90%8E%E7%9A%84%E5%86%85%E9%83%A8%E7%BB%93%E6%9E%84-HashMap.png)
+
+TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。红黑树就是为了解决二叉查找树的缺陷，因为二叉查找树在某些情况下会退化成一个线性结构。
 
 
-> stringbuilder有用过吗？stringbuilder和stringbuffer什么区别？stringbuilder为什么线程不安全？底层原理是什么？
+
+> stringbuilder有用过吗？
+>
+> stringbuilder和stringbuffer什么区别？
+>
+> stringbuilder为什么线程不安全？底层原理是什么？
 
 
 
@@ -41,7 +107,7 @@
 
 
 
-# 框架
+# 常用框架
 
 ## Spring
 
@@ -67,7 +133,7 @@
 
 
 
-# 微服务
+# 微服务、分布式
 
 > 讲讲微服务
 
@@ -416,3 +482,9 @@
 > RBAC是什么？怎么实现的？
 
 
+
+# 问题解答选取的github仓库
+
+如果不是在github上查找到的答案会给予标注
+
+1. https://github.com/Snailclimb/JavaGuide 「Java学习+面试指南」一份涵盖大部分 Java 程序员所需要掌握的核心知识。准备 Java 面试，首选 JavaGuide！ 
