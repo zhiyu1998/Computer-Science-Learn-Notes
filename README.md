@@ -55,6 +55,7 @@
 
 * [Vue2&3](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/Vue2%263-Notes) Vue2&Vue3笔记
 * [React](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/React-Notes) React笔记
+* [TypeScript](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/TypeScript-Notes) TypeScript笔记
 
 
 
