@@ -41,7 +41,7 @@
 
 ### 使用说明
 
-文件名称：Foundation
+文件名称：Advanced
 
 初始化mod
 
@@ -53,7 +53,7 @@
 
 ### 使用说明
 
-文件名称：Foundation
+文件名称：GinTest
 
 官方网站：[Gin Web Framework (gin-gonic.com)](https://gin-gonic.com/zh-cn/)
 
@@ -71,7 +71,7 @@
 
 ### 使用说明
 
-文件名称：Foundation
+文件名称：BeegoTest
 
 官方网站：[首页 - beego: 简约 & 强大并存的 Go 应用框架](https://beego.vip/)
 
@@ -89,7 +89,7 @@
 
 ### 使用说明
 
-文件名称：Foundation
+文件名称：GORMTest
 
 官方网站：[Gin Web Framework (gin-gonic.com)](https://gin-gonic.com/zh-cn/)
 

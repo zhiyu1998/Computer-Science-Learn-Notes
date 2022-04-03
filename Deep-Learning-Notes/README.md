@@ -8,13 +8,15 @@
 ## 文件架构
 ```
 ├── Deep-Learning-Notes
-       ├── 0 Article                    论文
-       ├── 1 Machine Learning           机器学习基础
+       ├── 0 Article                    论文集合
+       ├── 1 Machine Learning           机器学习基础（先行知识）
        ├── ..........(图像分类)
        ├── 21 KnowledgeDistillation     知识蒸馏
+       ├── 22 CoAtNet                   2021年末比较厉害的分类网络
+       ├── 23 MobileViT                 手机端的transformer
        ├── Datasets                     数据集下载和划分
        ├── Object Detection             目标识别
-       ├── Segmentation                 图像分割
+       ├── Traffic Forecasting          交通流量预测
        ├── .gitignore       
        ├── LICENSE      
        ├── README.md                    学前必读
