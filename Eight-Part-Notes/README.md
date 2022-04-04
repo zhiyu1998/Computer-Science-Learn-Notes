@@ -79,19 +79,212 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 >
 > stringbuilder和stringbuffer什么区别？
 >
+
+可变性
+
+`String` 是不可变的（后面会详细分析原因）。
+
+`StringBuilder` 与 `StringBuffer` 都继承自 `AbstractStringBuilder` 类，在 `AbstractStringBuilder` 中也是使用字符数组保存字符串，不过没有使用 `final` 和 `private` 关键字修饰，最关键的是这个 `AbstractStringBuilder` 类还提供了很多修改字符串的方法比如 `append` 方法。
+
+```java
+abstract class AbstractStringBuilder implements Appendable, CharSequence {
+    char[] value;
+    public AbstractStringBuilder append(String str) {
+        if (str == null)
+            return appendNull();
+        int len = str.length();
+        ensureCapacityInternal(count + len);
+        str.getChars(0, len, value, count);
+        count += len;
+        return this;
+    }
+      //...
+}
+```
+
+**【重要】线程安全性**
+
+`String` 中的对象是不可变的，也就可以理解为常量，线程安全。`AbstractStringBuilder` 是 `StringBuilder` 与 `StringBuffer` 的公共父类，定义了一些字符串的基本操作，如 `expandCapacity`、`append`、`insert`、`indexOf` 等公共方法。`StringBuffer` 对方法加了同步锁或者对调用的方法加了同步锁，所以是线程安全的。`StringBuilder` 并没有对方法进行加同步锁，所以是非线程安全的。
+
+小结：
+
+- String 不可变，因此是线程安全的
+- StringBuilder 不是线程安全的
+- StringBuffer 是线程安全的，内部使用 synchronized 进行同步
+
+**性能**
+
+每次对 `String` 类型进行改变的时候，都会生成一个新的 `String` 对象，然后将指针指向新的 `String` 对象。`StringBuffer` 每次都会对 `StringBuffer` 对象本身进行操作，而不是生成新的对象并改变对象引用。相同情况下使用 `StringBuilder` 相比使用 `StringBuffer` 仅能获得 10%~15% 左右的性能提升，但却要冒多线程不安全的风险。
+
+**对于三者使用的总结：**
+
+1. 操作少量的数据: 适用 `String`
+2. 单线程操作字符串缓冲区下操作大量数据: 适用 `StringBuilder`
+3. 多线程操作字符串缓冲区下操作大量数据: 适用 `StringBuffer`
+
+
+
 > stringbuilder为什么线程不安全？底层原理是什么？
+
+
 
 
 
 > 深拷贝和浅拷贝区别，工作原理
 
+1. 浅拷贝：对引用数据类型进行引用传递般的拷贝，此为浅拷贝。
+2. 深拷贝：对基本数据类型进行值传递，对引用数据类型，创建一个新的对象，并复制其内容，此为深拷贝。
 
+深拷贝的另一种方式，使用序列化和反序列化，获取一个新对象。
+
+浅拷贝的示例代码如下，我们这里实现了 `Cloneable` 接口，并重写了 `clone()` 方法。
+
+`clone()` 方法的实现很简单，直接调用的是父类 `Object` 的 `clone()` 方法。
+
+```java
+public class Address implements Cloneable{
+    private String name;
+    // 省略构造函数、Getter&Setter方法
+    @Override
+    public Address clone() {
+        try {
+            return (Address) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+}
+
+public class Person implements Cloneable {
+    private Address address;
+    // 省略构造函数、Getter&Setter方法
+    @Override
+    public Person clone() {
+        try {
+            Person person = (Person) super.clone();
+            return person;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+}
+```
+
+
+
+**深拷贝**
+
+这里我们简单对 `Person` 类的 `clone()` 方法进行修改，连带着要把 `Person` 对象内部的 `Address` 对象一起复制。
+
+```java
+@Override
+public Person clone() {
+    try {
+        Person person = (Person) super.clone();
+        person.setAddress(person.getAddress().clone());
+        return person;
+    } catch (CloneNotSupportedException e) {
+        throw new AssertionError();
+    }
+}
+
+```
+
+
+
+![image-20220404155517228](images/image-20220404155517228.png)
 
 > 序列化和反序列化的概念，方式，例子
+
+如果我们需要持久化 Java 对象比如将 Java 对象保存在文件中，或者在网络传输 Java 对象，这些场景都需要用到序列化。
+
+简单来说：
+
+- **序列化**： 将数据结构或对象转换成二进制字节流的过程
+- **反序列化**：将在序列化过程中所生成的二进制字节流转换成数据结构或者对象的过程
+
+对于 Java 这种面向对象编程语言来说，我们序列化的都是对象（Object）也就是实例化后的类(Class)，但是在 C++这种半面向对象的语言中，struct(结构体)定义的是数据结构类型，而 class 对应的是对象类型。
+
+维基百科是如是介绍序列化的：
+
+> **序列化**（serialization）在计算机科学的数据处理中，是指将数据结构或对象状态转换成可取用格式（例如存成文件，存于缓冲，或经由网络中发送），以留待后续在相同或另一台计算机环境中，能恢复原先状态的过程。依照序列化格式重新获取字节的结果时，可以利用它来产生与原始对象相同语义的副本。对于许多对象，像是使用大量引用的复杂对象，这种序列化重建的过程并不容易。面向对象中的对象序列化，并不概括之前原始对象所关系的函数。这种过程也称为对象编组（marshalling）。从一系列字节提取数据结构的反向操作，是反序列化（也称为解编组、deserialization、unmarshalling）。
+
+综上：**序列化的主要目的是通过网络传输对象或者说是将对象存储到文件系统、数据库、内存中。**
+
+![image-20220404155706856](images/image-20220404155706856.png)
+
+例子：
+
+```java
+/*
+     * 使用序列化和反序列化创建对象，这种方式其实是根据既有的对象进行复制，这个需要事先将可序列化的对象线存到文件里
+     */  
+@SuppressWarnings("resource")  
+public static Worker createWorker4(String objectPath) {  
+    ObjectInput input = null;  
+    Worker worker = null;  
+    try {  
+        input = new ObjectInputStream(new FileInputStream(objectPath));  
+        worker = (Worker) input.readObject();  
+    } catch (FileNotFoundException e) {  
+        e.printStackTrace();  
+    } catch (IOException e) {  
+        e.printStackTrace();  
+    } catch (ClassNotFoundException e) {  
+        e.printStackTrace();  
+    }  
+    return worker;  
+}  
+
+/*
+     * 将创建的对象存入到文件内
+     */  
+public static void storeObject2File(String objectPath) {  
+    Worker worker = new Worker();  
+    ObjectOutputStream objectOutputStream;  
+    try {  
+        objectOutputStream = new ObjectOutputStream(new FileOutputStream(  
+            objectPath));  
+        objectOutputStream.writeObject(worker);  
+    } catch (FileNotFoundException e) {  
+        // TODO Auto-generated catch block  
+        e.printStackTrace();  
+    } catch (IOException e) {  
+        // TODO Auto-generated catch block  
+        e.printStackTrace();  
+    }  
+}  
+```
+
+
 
 
 
 > 异常分类，Exception分类，受检异常和非受检异常区别，自定义异常优点
+
+Java异常类层次结构图：
+
+![image-20220404154959514](images/image-20220404154959514.png)
+
+
+
+程序本身可以捕获并且可以处理的异常。Exception 这种异常又分为两类：运行时异常和编译时异常。
+
+- **运行时异常**
+
+都是RuntimeException类及其子类异常，如NullPointerException(空指针异常)、IndexOutOfBoundsException(下标越界异常)等，这些异常是不检查异常，程序中可以选择捕获处理，也可以不处理。这些异常一般是由程序逻辑错误引起的，程序应该从逻辑角度尽可能避免这类异常的发生。
+
+运行时异常的特点是Java编译器不会检查它，也就是说，当程序中可能出现这类异常，即使没有用try-catch语句捕获它，也没有用throws子句声明抛出它，也会编译通过。
+
+- **非运行时异常** （编译异常）
+
+是RuntimeException以外的异常，类型上都属于Exception类及其子类。从程序语法角度讲是必须进行处理的异常，如果不处理，程序就不能编译通过。如IOException、SQLException等以及用户自定义的Exception异常，一般情况下不自定义检查异常。
+
+
+
+受检异常 ：需要用 try...catch... 语句捕获并进行处理，并且可以从异常中恢复；
+
+非受检异常 ：是程序运行时错误，例如除 0 会引发 Arithmetic Exception，此时程序崩溃并且无法恢复
 
 
 
@@ -99,11 +292,22 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 
 
 
+
+
 > 类的生命周期，什么时候回收
 
+其中类加载的过程包括了`加载`、`验证`、`准备`、`解析`、`初始化`五个阶段。在这五个阶段中，`加载`、`验证`、`准备`和`初始化`这四个阶段发生的顺序是确定的，*而`解析`阶段则不一定，它在某些情况下可以在初始化阶段之后开始，这是为了支持Java语言的运行时绑定(也成为动态绑定或晚期绑定)*。另外注意这里的几个阶段是按顺序开始，而不是按顺序进行或完成，因为这些阶段通常都是互相交叉地混合进行的，通常在一个阶段执行的过程中调用或激活另一个阶段。
+
+![image-20220404155241287](images/image-20220404155241287.png)
 
 
-> JDBC PreparedStatement和Statement区别
+
+**Java虚拟机将结束生命周期的几种情况**
+
+- 执行了System.exit()方法
+- 程序正常执行结束
+- 程序在执行过程中遇到了异常或错误而异常终止
+- 由于操作系统出现错误而导致Java虚拟机进程终止
 
 
 
@@ -137,7 +341,7 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 
 > 讲讲微服务
 
-
+以前所有的代码都放在同一个工程中、部署在同一个服务器、同一项目的不同模块不同功能互相抢占资源，微服务就是将工程根据不同的业务规则拆分成微服务，部署在不同的服务器上，服务之间相互调用，java中有的微服务有dubbo(只能用来做微服务)、springcloud( 提供了服务的发现、断路器等)。
 
 
 
@@ -145,11 +349,17 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 
 
 
+
+
 > 两台机器如何用HTTP怎么找到对方？
 
 
 
+
+
 > 微服务都有什么部分呢
+
+
 
 
 
@@ -177,11 +387,9 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 
 
 
+
+
 # JUC
-
-> 怎么保证多线程下面单例模式安全？
-
-
 
 > 怎么保证多线程下面单例模式安全
 
@@ -191,9 +399,59 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 
 > concurrentMap和hashmap有什么区别
 
+`ConcurrentHashMap` 和 `Hashtable` 的区别主要体现在实现线程安全的方式上不同。
+
+- **底层数据结构：** JDK1.7 的 `ConcurrentHashMap` 底层采用 **分段的数组+链表** 实现，JDK1.8 采用的数据结构跟 `HashMap1.8` 的结构一样，数组+链表/红黑二叉树。`Hashtable` 和 JDK1.8 之前的 `HashMap` 的底层数据结构类似都是采用 **数组+链表** 的形式，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的；
+- **实现线程安全的方式（重要）：** ① **在 JDK1.7 的时候，`ConcurrentHashMap`（分段锁）** 对整个桶数组进行了分割分段(`Segment`)，每一把锁只锁容器其中一部分数据，多线程访问容器里不同数据段的数据，就不会存在锁竞争，提高并发访问率。 **到了 JDK1.8 的时候已经摒弃了 `Segment` 的概念，而是直接用 `Node` 数组+链表+红黑树的数据结构来实现，并发控制使用 `synchronized` 和 CAS 来操作。（JDK1.6 以后 对 `synchronized` 锁做了很多优化）** 整个看起来就像是优化过且线程安全的 `HashMap`，虽然在 JDK1.8 中还能看到 `Segment` 的数据结构，但是已经简化了属性，只是为了兼容旧版本；② **`Hashtable`(同一把锁)** :使用 `synchronized` 来保证线程安全，效率非常低下。当一个线程访问同步方法时，其他线程也访问同步方法，可能会进入阻塞或轮询状态，如使用 put 添加元素，另一个线程不能使用 put 添加元素，也不能使用 get，竞争会越来越激烈效率越低。
+
+**两者的对比图：**
+
+**Hashtable:**
+
+![image-20220404155942489](images/image-20220404155942489.png)
+
+**JDK1.7 的 ConcurrentHashMap：**
+
+![image-20220404155949898](images/image-20220404155949898.png)
+
+**JDK1.8 的 ConcurrentHashMap：**
+
+![image-20220404155956076](images/image-20220404155956076.png)
+
+JDK1.8 的 `ConcurrentHashMap` 不再是 **Segment 数组 + HashEntry 数组 + 链表**，而是 **Node 数组 + 链表 / 红黑树**。不过，Node 只能用于链表的情况，红黑树的情况需要使用 **`TreeNode`**。当冲突链表达到一定长度时，链表会转换成红黑树。
+
+
+
+> ConcurrentHashMap 线程安全的具体实现方式/底层具体实现
+
+JDK1.7（上面有示意图）
+
+首先将数据分为一段一段的存储，然后给每一段数据配一把锁，当一个线程占用锁访问其中一个段数据时，其他段的数据也能被其他线程访问。
+
+**`ConcurrentHashMap` 是由 `Segment` 数组结构和 `HashEntry` 数组结构组成**。
+
+Segment 实现了 `ReentrantLock`,所以 `Segment` 是一种可重入锁，扮演锁的角色。`HashEntry` 用于存储键值对数据。
+
+```java
+static class Segment<K,V> extends ReentrantLock implements Serializable {
+}
+```
+
+一个 `ConcurrentHashMap` 里包含一个 `Segment` 数组。`Segment` 的结构和 `HashMap` 类似，是一种数组和链表结构，一个 `Segment` 包含一个 `HashEntry` 数组，每个 `HashEntry` 是一个链表结构的元素，每个 `Segment` 守护着一个 `HashEntry` 数组里的元素，当对 `HashEntry` 数组的数据进行修改时，必须首先获得对应的 `Segment` 的锁。
+
+JDK1.8 （上面有示意图）
+
+`ConcurrentHashMap` 取消了 `Segment` 分段锁，采用 CAS 和 `synchronized` 来保证并发安全。数据结构跟 HashMap1.8 的结构类似，数组+链表/红黑二叉树。Java 8 在链表长度超过一定阈值（8）时将链表（寻址时间复杂度为 O(N)）转换为红黑树（寻址时间复杂度为 O(log(N))）
+
+`synchronized` 只锁定当前链表或红黑二叉树的首节点，这样只要 hash 不冲突，就不会产生并发，效率又提升 N 倍。
+
 
 
 > 线程安全是什么概念
+
+一个类在可以被多个线程安全调用时就是线程安全的。
+
+线程安全不是一个非真即假的命题，可以将共享数据按照安全程度的强弱顺序分成以下五类: 不可变、绝对线程安全、相对线程安全、线程兼容和线程对立
 
 
 
@@ -201,11 +459,21 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 
 
 
+
+
 > 怎么保证线程安全
 
 
 
+
+
 > volatile和synchronize有什么区别？
+
+`synchronized` 关键字和 `volatile` 关键字是两个互补的存在，而不是对立的存在！
+
+- **`volatile` 关键字**是线程同步的**轻量级实现**，所以 **`volatile `性能肯定比`synchronized`关键字要好** 。但是 **`volatile` 关键字只能用于变量而 `synchronized` 关键字可以修饰方法以及代码块** 。
+- **`volatile` 关键字能保证数据的可见性，但不能保证数据的原子性。`synchronized` 关键字两者都能保证。**
+- **`volatile`关键字主要用于解决变量在多个线程之间的可见性，而 `synchronized` 关键字解决的是多个线程之间访问资源的同步性**
 
 
 
@@ -233,15 +501,9 @@ TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。
 
 
 
-> CAS是什么？
-
-
-
 > JMM是什么？
 
 
-
-> HashMap说一下
 
 
 
@@ -436,8 +698,6 @@ select col1,col2 into #t from t where 1=0
 ```sql
 create table #t(…)
 ```
-
-著作权归https://pdai.tech所有。 链接：https://www.pdai.tech/md/interview/x-interview.html
 
 13.Update 语句，如果只更改1、2个字段，不要Update全部字段，否则频繁调用会引起明显的性能消耗，同时带来大量日志。
 
