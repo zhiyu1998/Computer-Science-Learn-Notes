@@ -224,6 +224,72 @@ public class Timeout {
 
 
 
+#### 用法1：取消任务的珍惜
+
 1. 如果这个任务**还没有开始执行**,那么这种情况最简单,任务会被正常的取消,未来也不会被执行,方法返回true。
 2. 如果任务**已完成**,或者**已取消**:那么cancel(方法会执行失败，方法返回false。
 3. 如果这个**任务已经开始执行了**,那么这个取消方法将不会直接取消该任务,而是会根据我们填的参数mayInterruptIfRunning做判断:
+
+
+
+Future.cancel(false) 仅用于避免启动尚未启动的任务，适用于：
+
+1. 文鞥处理interrupt的任务
+2. 不清楚任务是否支持取消
+3. 需要等待已经开始的任务执行完成
+
+
+
+#### 用法2：用FutureTask来创建Future
+
+它既可以作为Runnable被线程执行，又可以作为Future得到Callable的返回值
+
+<img src="../../images/20220403113723.png" alt="20220403113723.png" style="zoom: 50%;" />
+
+> 代码演示
+
+```java
+public class FutureTaskDemo {
+
+    public static void main(String[] args) {
+        Task1 task = new Task1();
+        FutureTask<Integer> futureTask = new FutureTask<>(task);
+//        new Thread(futureTask).start();
+        ExecutorService service = Executors.newCachedThreadPool();
+        service.submit(futureTask);
+
+
+        try {
+            System.out.println("task运行结果：" + futureTask.get());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static class Task1 implements Callable<Integer> {
+
+        @Override
+        public Integer call() throws Exception {
+            System.out.println("子线程正在计算");
+            Thread.sleep(3000);
+            int sum = 0;
+            for (int i = 0; i < 100; i++) {
+                sum += i;
+            }
+            return sum;
+        }
+    }
+}
+```
+
+
+
+### 注意点
+
+* 当for循环批量获取future得结果时，容易发生一部分线程很慢的情况，get方法调用时应使用timeout限制
+* Future的生命周期是不能后退的
+
+
+
