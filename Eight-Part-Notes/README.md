@@ -416,6 +416,26 @@ public class Music {
 
 
 
+> NIO的buffer区是双向的吗？
+
+是双向的
+
+数据缓存区: 在JAVA NIO 框架中，为了保证每个通道的数据读写速度JAVA NIO 框架为每一种需要支持数据读写的通道集成了Buffer的支持。
+
+这句话怎么理解呢? 例如ServerSocketChannel通道它只支持对OP_ACCEPT事件的监听，所以它是不能直接进行网络数据内容的读写的。所以ServerSocketChannel是没有集成Buffer的。
+
+Buffer有两种工作模式: 写模式和读模式。在读模式下，应用程序只能从Buffer中读取数据，不能进行写操作。但是在写模式下，应用程序是可以进行读操作的，这就表示可能会出现脏读的情况。所以一旦您决定要从Buffer中读取数据，一定要将Buffer的状态改为读模式。
+
+如下图:
+
+![image-20220411184115018](images/image-20220411184115018.png)
+
+- position: 缓存区目前这在操作的数据块位置
+- limit: 缓存区最大可以进行操作的位置。缓存区的读写状态正式由这个属性控制的。
+- capacity: 缓存区的最大容量。这个容量是在缓存区创建时进行指定的。由于高并发时通道数量往往会很庞大，所以每一个缓存区的容量最好不要过大。
+
+在下文JAVA NIO框架的代码实例中，我们将进行Buffer缓存区操作的演示
+
 
 
 # 常用框架
@@ -426,7 +446,11 @@ public class Music {
 
 
 
+
+
 > springboot是怎么加载redis的，为什么比不用springboot更方便呢?
+
+
 
 
 
@@ -440,7 +464,64 @@ public class Music {
 
 
 
+
+
 > Spring bean启动流程和生命周期
+
+
+
+生命周期
+
+---
+
+**Bean的完整生命周期经历了各种方法调用，这些方法可以划分为以下几类**：
+
+- **Bean自身的方法**： 这个包括了Bean本身调用的方法和通过配置文件中`<bean>`的init-method和destroy-method指定的方法
+- **Bean级生命周期接口方法**： 这个包括了BeanNameAware、BeanFactoryAware、ApplicationContextAware；当然也包括InitializingBean和DiposableBean这些接口的方法（可以被@PostConstruct和@PreDestroy注解替代)
+- **容器级生命周期接口方法**： 这个包括了InstantiationAwareBeanPostProcessor 和 BeanPostProcessor 这两个接口实现，一般称它们的实现类为“后处理器”。
+- **工厂后处理器接口方法**： 这个包括了AspectJWeavingEnabler, ConfigurationClassPostProcessor, CustomAutowireConfigurer等等非常有用的工厂后处理器　　接口的方法。工厂后处理器也是容器级的。在应用上下文装配配置文件之后立即调用。
+
+![image-20220411184529080](images/image-20220411184529080.png)
+
+**具体而言，流程如下**
+
+- 如果 BeanFactoryPostProcessor 和 Bean 关联, 则调用postProcessBeanFactory方法.(即首**先尝试从Bean工厂中获取Bean**)
+
+- 如果 InstantiationBeanPostProcessor 和 Bean 关联，则调用postProcessBeforeInitialzation方法
+
+- 根据配置情况调用 Bean 构造方法**实例化 Bean**。
+
+- 利用依赖注入完成 Bean 中所有**属性值的配置注入**。
+
+- 如果 InstantiationBeanPostProcessor 和 Bean 关联，则调用postProcessAfterInitialization方法和postProcessProperties
+
+- 调用xxxAware接口
+
+   (上图只是给了几个例子)
+
+  - 第一类Aware接口
+    - 如果 Bean 实现了 BeanNameAware 接口，则 Spring 调用 Bean 的 setBeanName() 方法传入当前 Bean 的 id 值。
+    - 如果 Bean 实现了 BeanClassLoaderAware 接口，则 Spring 调用 setBeanClassLoader() 方法传入classLoader的引用。
+    - 如果 Bean 实现了 BeanFactoryAware 接口，则 Spring 调用 setBeanFactory() 方法传入当前工厂实例的引用。
+  - 第二类Aware接口
+    - 如果 Bean 实现了 EnvironmentAware 接口，则 Spring 调用 setEnvironment() 方法传入当前 Environment 实例的引用。
+    - 如果 Bean 实现了 EmbeddedValueResolverAware 接口，则 Spring 调用 setEmbeddedValueResolver() 方法传入当前 StringValueResolver 实例的引用。
+    - 如果 Bean 实现了 ApplicationContextAware 接口，则 Spring 调用 setApplicationContext() 方法传入当前 ApplicationContext 实例的引用。
+    - ...
+
+- 如果 BeanPostProcessor 和 Bean 关联，则 Spring 将调用该接口的预初始化方法 postProcessBeforeInitialzation() 对 Bean 进行加工操作，此处非常重要，Spring 的 AOP 就是利用它实现的。
+
+- 如果 Bean 实现了 InitializingBean 接口，则 Spring 将调用 afterPropertiesSet() 方法。(或者有执行@PostConstruct注解的方法)
+
+- 如果在配置文件中通过 **init-method** 属性指定了初始化方法，则调用该初始化方法。
+
+- 如果 BeanPostProcessor 和 Bean 关联，则 Spring 将调用该接口的初始化方法 postProcessAfterInitialization()。此时，Bean 已经可以被应用系统使用了。
+
+- 如果在 `<bean>` 中指定了该 Bean 的作用范围为 scope="singleton"，则将该 Bean 放入 Spring IoC 的缓存池中，将触发 Spring 对该 Bean 的生命周期管理；如果在 `<bean>` 中指定了该 Bean 的作用范围为 scope="prototype"，则将该 Bean 交给调用者，调用者管理该 Bean 的生命周期，Spring 不再管理该 Bean。
+
+- 如果 Bean 实现了 DisposableBean 接口，则 Spring 会调用 destory() 方法将 Spring 中的 Bean 销毁；(或者有执行@PreDestroy注解的方法)
+
+- 如果在配置文件中通过 **destory-method** 属性指定了 Bean 的销毁方法，则 Spring 将调用该方法对 Bean 进行销毁。
 
 
 
@@ -2198,6 +2279,91 @@ Binding(绑定) 示意图：
 
 
 
+> 进程调度有哪些算法？
+
+👨‍💻**面试官** ：**你知道操作系统中进程的调度算法有哪些吗?**
+
+🙋 **我** ：嗯嗯！这个我们大学的时候学过，是一个很重要的知识点！
+
+为了确定首先执行哪个进程以及最后执行哪个进程以实现最大 CPU 利用率，计算机科学家已经定义了一些算法，它们是：
+
+- **先到先服务(FCFS)调度算法** : 从就绪队列中选择一个最先进入该队列的进程为之分配资源，使它立即执行并一直执行到完成或发生某事件而被阻塞放弃占用 CPU 时再重新调度。
+- **短作业优先(SJF)的调度算法** : 从就绪队列中选出一个估计运行时间最短的进程为之分配资源，使它立即执行并一直执行到完成或发生某事件而被阻塞放弃占用 CPU 时再重新调度。
+- **时间片轮转调度算法** : 时间片轮转调度是一种最古老，最简单，最公平且使用最广的算法，又称 RR(Round robin)调度。每个进程被分配一个时间段，称作它的时间片，即该进程允许运行的时间。
+- **多级反馈队列调度算法** ：前面介绍的几种进程调度的算法都有一定的局限性。如**短进程优先的调度算法，仅照顾了短进程而忽略了长进程** 。多级反馈队列调度算法既能使高优先级的作业得到响应又能使短作业（进程）迅速完成。，因而它是目前**被公认的一种较好的进程调度算法**，UNIX 操作系统采取的便是这种调度算法。
+- **优先级调度** ： 为每个流程分配优先级，首先执行具有最高优先级的进程，依此类推。具有相同优先级的进程以 FCFS 方式执行。可以根据内存要求，时间要求或任何其他资源要求来确定优先级。
+
+
+
+细分
+
+---
+
+**批处理系统**
+
+<details open="">
+<summary>先来先服务 first-come first-serverd（FCFS）</summary>
+<p dir="auto">按照请求的顺序进行调度。非抢占式，开销小，无饥饿问题，响应时间不确定（可能很慢）；</p>
+<p dir="auto">对短进程不利，对IO密集型进程不利。</p>
+</details>
+
+<details open="">
+<summary>最短作业优先 shortest job first（SJF）</summary>
+<p dir="auto">按估计运行时间最短的顺序进行调度。非抢占式，吞吐量高，开销可能较大，可能导致饥饿问题；</p>
+<p dir="auto">对短进程提供好的响应时间，对长进程不利。</p>
+</details>
+
+<details open="">
+<summary>最短剩余时间优先 shortest remaining time next（SRTN）</summary>
+<p dir="auto">按剩余运行时间的顺序进行调度。(最短作业优先的抢占式版本)。吞吐量高，开销可能较大，提供好的响应时间；</p>
+<p dir="auto">可能导致饥饿问题，对长进程不利。</p>
+</details>
+
+<details open="">
+<summary>最高响应比优先 Highest Response Ratio Next（HRRN）</summary>
+<p dir="auto">响应比 = 1+ 等待时间/处理时间。同时考虑了等待时间的长短和估计需要的执行时间长短，很好的平衡了长短进程。非抢占，吞吐量高，开销可能较大，提供好的响应时间，无饥饿问题。</p>
+</details>
+
+
+
+**交互式系统**
+ 交互式系统有大量的用户交互操作，在该系统中调度算法的目标是快速地进行响应。
+
+<details open="">
+<summary>时间片轮转 Round Robin</summary>
+<p dir="auto">将所有就绪进程按 FCFS 的原则排成一个队列，用完时间片的进程排到队列最后。抢占式（时间片用完时），开销小，无饥饿问题，为短进程提供好的响应时间；</p>
+<p dir="auto">若时间片小，进程切换频繁，吞吐量低；若时间片太长，实时性得不到保证。</p>
+</details>
+
+<details open="">
+<summary>优先级调度算法</summary>
+<p dir="auto">为每个进程分配一个优先级，按优先级进行调度。为了防止低优先级的进程永远等不到调度，可以随着时间的推移增加等待进程的优先级。</p>
+</details>
+
+<details open="">
+<summary>多级反馈队列调度算法 Multilevel Feedback Queue</summary>
+<p dir="auto">设置多个就绪队列1、2、3...，优先级递减，时间片递增。只有等到优先级更高的队列为空时才会调度当前队列中的进程。如果进程用完了当前队列的时间片还未执行完，则会被移到下一队列。</p>
+<p dir="auto">抢占式（时间片用完时），开销可能较大，对IO型进程有利，可能会出现饥饿问题。</p>
+</details>
+
+
+
+> Linux里进程通信有几种方式？
+
+分为消息传递模型和共享内存模型
+
+
+
+> 进程同步有几种方式？
+
+👨‍💻**面试官** ：**那线程间的同步的方式有哪些呢?**
+
+🙋 **我** ：线程同步是两个或多个共享关键资源的线程的并发执行。应该同步线程以避免关键的资源使用冲突。操作系统一般有下面三种线程同步的方式：
+
+1. **互斥量(Mutex)**：采用互斥对象机制，只有拥有互斥对象的线程才有访问公共资源的权限。因为互斥对象只有一个，所以可以保证公共资源不会被多个线程同时访问。比如 Java 中的 synchronized 关键词和各种 Lock 都是这种机制。
+2. **信号量(Semaphore)** ：它允许同一时刻多个线程访问同一资源，但是需要控制同一时刻访问此资源的最大线程数量。
+3. **事件(Event)** :Wait/Notify：通过通知操作的方式来保持多线程同步，还可以方便的实现多线程优先级的比较操作。
+
 
 
 # 计算机网络
@@ -2417,6 +2583,12 @@ TCP 的拥塞控制采用了四种算法，即 **慢开始** 、 **拥塞避免*
 
 
 
+> TCP的accept()函数发生在第几次握手（腾讯）
+
+发生在三次握手之后
+
+
+
 > 讲一下http：结构，和tcp关系等，状态码有什么
 
 结构？？？
@@ -2525,6 +2697,22 @@ HTTPs 采用混合的加密机制，使用非对称密钥加密用于传输对�
 简化版本
 
 ![image-20220405202121578](images/image-20220405202121578.png)
+
+
+
+> https数字证书交换的过程详细说一下？
+
+数字证书认证机构(CA，Certificate Authority)是客户端与服务器双方都可信赖的第三方机构。
+
+服务器的运营人员向 CA 提出公开密钥的申请，CA 在判明提出申请者的身份之后，会对已申请的公开密钥做数字签名，然后分配这个已签名的公开密钥，并将该公开密钥放入公开密钥证书后绑定在一起。
+
+进行 HTTPs 通信时，服务器会把证书发送给客户端。客户端取得其中的公开密钥之后，先使用数字签名进行验证，如果验证通过，就可以开始通信了。
+
+通信开始时，客户端需要使用服务器的公开密钥将自己的私有密钥传输给服务器，之后再进行对称密钥加密。
+
+![image-20220411180808761](images/image-20220411180808761.png)
+
+
 
 
 

@@ -1,0 +1,99 @@
+# 二叉树的层序遍历 II
+
+
+
+## 问题描述
+
+给你二叉树的根节点 `root` ，返回其节点值 **自底向上的层序遍历** 。 （即按从叶子节点所在层到根节点所在的层，逐层从左向右遍历）
+
+
+
+## 第一想法：BFS
+
+思路同lc. 102
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        if (root == null) {
+            return new LinkedList<>();
+        }
+
+        if (root.left == null && root.right == null) {
+            return new LinkedList<List<Integer>>(Collections.singleton(new LinkedList<Integer>(Collections.singleton(1))));
+        }
+
+        LinkedList<List<Integer>> ans = new LinkedList<>();
+
+        LinkedList<TreeNode> queue = new LinkedList<>();
+
+        LinkedList<Integer> stack = new LinkedList<>();
+        stack.add(root.val);
+
+        int container = 0;
+
+        if (root.left != null) {
+            queue.addLast(root.left);
+            container++;
+        }
+        if (root.right != null) {
+            queue.addLast(root.right);
+            container++;
+        }
+        
+        while (queue.size() > 0) {
+            ans.addFirst(stack);
+            stack = new LinkedList<Integer>();
+
+            int nextLength = 0;
+
+            for(int i = 0; i < container; i++) {
+                TreeNode ele = queue.removeFirst();
+
+                stack.addLast(ele.val);
+
+                if (ele.left != null) {
+                    queue.addLast(ele.left);
+                    nextLength++;
+                }
+                if (ele.right != null) {
+                    queue.addLast(ele.right);
+                    nextLength++;
+                }
+            }
+
+            container = nextLength;
+        }
+
+        ans.addFirst(stack);
+
+        return ans;
+    }
+}
+```
+
+
+
+> 执行结果：
+>
+> 执行用时：1 ms, 在所有 Java 提交中击败了93.24% 的用户
+>
+> 内存消耗：41.5 MB, 在所有 Java 提交中击败了38.20% 的用户
+>
+> 通过测试用例：34 / 34
+
