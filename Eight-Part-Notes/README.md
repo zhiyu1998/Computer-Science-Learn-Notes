@@ -575,19 +575,270 @@ Buffer有两种工作模式: 写模式和读模式。在读模式下，应用程
 
 
 
+> GC的几种算法（2022-04-11 携程）
 
+标记-清除算法
+
+---
+
+该算法分为“标记”和“清除”阶段：首先标记出所有不需要回收的对象，在标记完成后统一回收掉所有没有被标记的对象。它是最基础的收集算法，后续的算法都是对其不足进行改进得到。这种垃圾收集算法会带来两个明显的问题：
+
+1. **效率问题**
+2. **空间问题（标记清除后会产生大量不连续的碎片）**
+
+![image-20220413200722639](images/image-20220413200722639.png)
+
+
+
+标记-复制算法
+
+---
+
+为了解决效率问题，“标记-复制”收集算法出现了。它可以将内存分为大小相同的两块，每次使用其中的一块。当这一块的内存使用完后，就将还存活的对象复制到另一块去，然后再把使用的空间一次清理掉。这样就使每次的内存回收都是对内存区间的一半进行回收。
+
+![image-20220413200736328](images/image-20220413200736328.png)
+
+标记-整理算法
+
+---
+
+根据老年代的特点提出的一种标记算法，标记过程仍然与“标记-清除”算法一样，但后续步骤不是直接对可回收对象回收，而是让所有存活的对象向一端移动，然后直接清理掉端边界以外的内存。
+
+![image-20220413200753503](images/image-20220413200753503.png)
+
+
+
+分代收集算法
+
+---
+
+当前虚拟机的垃圾收集都采用分代收集算法，这种算法没有什么新的思想，只是根据对象存活周期的不同将内存分为几块。一般将 java 堆分为新生代和老年代，这样我们就可以根据各个年代的特点选择合适的垃圾收集算法。
+
+比如在新生代中，每次收集都会有大量对象死去，所以可以选择”标记-复制“算法，只需要付出少量对象的复制成本就可以完成每次垃圾收集。而老年代的对象存活几率是比较高的，而且没有额外的空间对它进行分配担保，所以我们必须选择“标记-清除”或“标记-整理”算法进行垃圾收集。
+
+延伸面试问题： HotSpot 为什么要分为新生代和老年代？
+
+根据上面的对分代收集算法的介绍回答。
+
+
+
+> 谈谈你了解的几种垃圾回收器（2022-04-11 携程）
+
+Serial 收集器
+
+---
+
+Serial（串行）收集器是最基本、历史最悠久的垃圾收集器了。大家看名字就知道这个收集器是一个单线程收集器了。它的 **“单线程”** 的意义不仅仅意味着它只会使用一条垃圾收集线程去完成垃圾收集工作，更重要的是它在进行垃圾收集工作的时候必须暂停其他所有的工作线程（ **"Stop The World"** ），直到它收集结束。
+
+**新生代采用标记-复制算法，老年代采用标记-整理算法。**
+
+![image-20220413200828028](images/image-20220413200828028.png)
+
+虚拟机的设计者们当然知道 Stop The World 带来的不良用户体验，所以在后续的垃圾收集器设计中停顿时间在不断缩短（仍然还有停顿，寻找最优秀的垃圾收集器的过程仍然在继续）。
+
+但是 Serial 收集器有没有优于其他垃圾收集器的地方呢？当然有，它**简单而高效（与其他收集器的单线程相比）**。Serial 收集器由于没有线程交互的开销，自然可以获得很高的单线程收集效率。Serial 收集器对于运行在 Client 模式下的虚拟机来说是个不错的选择。
+
+
+
+ParNew 收集器
+
+---
+
+**ParNew 收集器其实就是 Serial 收集器的多线程版本，除了使用多线程进行垃圾收集外，其余行为（控制参数、收集算法、回收策略等等）和 Serial 收集器完全一样。**
+
+**新生代采用标记-复制算法，老年代采用标记-整理算法。**
+
+![image-20220413200847394](images/image-20220413200847394.png)
+
+它是许多运行在 Server 模式下的虚拟机的首要选择，除了 Serial 收集器外，只有它能与 CMS 收集器（真正意义上的并发收集器，后面会介绍到）配合工作。
+
+**并行和并发概念补充：**
+
+- **并行（Parallel）** ：指多条垃圾收集线程并行工作，但此时用户线程仍然处于等待状态。
+- **并发（Concurrent）**：指用户线程与垃圾收集线程同时执行（但不一定是并行，可能会交替执行），用户程序在继续运行，而垃圾收集器运行在另一个 CPU 上。
+
+
+
+Parallel Scavenge 收集器
+
+---
+
+Parallel Scavenge 收集器也是使用标记-复制算法的多线程收集器，它看上去几乎和 ParNew 都一样。 **那么它有什么特别之处呢？**
+
+```java
+-XX:+UseParallelGC
+
+    使用 Parallel 收集器+ 老年代串行
+
+-XX:+UseParallelOldGC
+
+    使用 Parallel 收集器+ 老年代并行
+
+```
+
+**Parallel Scavenge 收集器关注点是吞吐量（高效率的利用 CPU）。CMS 等垃圾收集器的关注点更多的是用户线程的停顿时间（提高用户体验）。所谓吞吐量就是 CPU 中用于运行用户代码的时间与 CPU 总消耗时间的比值。** Parallel Scavenge  收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量，如果对于收集器运作不太了解，手工优化存在困难的时候，使用 Parallel  Scavenge 收集器配合自适应调节策略，把内存管理优化交给虚拟机去完成也是一个不错的选择。
+
+**新生代采用标记-复制算法，老年代采用标记-整理算法。**
+
+![image-20220413200923423](images/image-20220413200923423.png)
+
+**这是 JDK1.8 默认收集器**
+
+使用 java -XX:+PrintCommandLineFlags -version 命令查看
+
+```text
+-XX:InitialHeapSize=262921408 -XX:MaxHeapSize=4206742528 -XX:+PrintCommandLineFlags -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseParallelGC
+java version "1.8.0_211"
+Java(TM) SE Runtime Environment (build 1.8.0_211-b12)
+Java HotSpot(TM) 64-Bit Server VM (build 25.211-b12, mixed mode)
+```
+
+JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX:+UseParallelGC  参数，则默认指定了-XX:+UseParallelOldGC，可以使用-XX:-UseParallelOldGC 来禁用该功能
+
+
+
+Serial Old 收集器
+
+---
+
+**Serial 收集器的老年代版本**，它同样是一个单线程收集器。它主要有两大用途：一种用途是在 JDK1.5 以及以前的版本中与 Parallel Scavenge 收集器搭配使用，另一种用途是作为 CMS 收集器的后备方案。
+
+
+
+Parallel Old 收集器
+
+---
+
+**Parallel Scavenge 收集器的老年代版本**。使用多线程和“标记-整理”算法。在注重吞吐量以及 CPU 资源的场合，都可以优先考虑 Parallel Scavenge 收集器和 Parallel Old 收集器。
+
+
+
+CMS 收集器
+
+---
+
+**CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。它非常符合在注重用户体验的应用上使用。**
+
+**CMS（Concurrent Mark Sweep）收集器是 HotSpot 虚拟机第一款真正意义上的并发收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作。**
+
+从名字中的**Mark Sweep**这两个词可以看出，CMS 收集器是一种 **“标记-清除”算法**实现的，它的运作过程相比于前面几种垃圾收集器来说更加复杂一些。整个过程分为四个步骤：
+
+- **初始标记：** 暂停所有的其他线程，并记录下直接与 root 相连的对象，速度很快 ；
+- **并发标记：** 同时开启 GC 和用户线程，用一个闭包结构去记录可达对象。但在这个阶段结束，这个闭包结构并不能保证包含当前所有的可达对象。因为用户线程可能会不断的更新引用域，所以 GC 线程无法保证可达性分析的实时性。所以这个算法里会跟踪记录这些发生引用更新的地方。
+- **重新标记：** 重新标记阶段就是为了修正并发标记期间因为用户程序继续运行而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间一般会比初始标记阶段的时间稍长，远远比并发标记阶段时间短
+- **并发清除：** 开启用户线程，同时 GC 线程开始对未标记的区域做清扫。
+
+![image-20220413201027769](images/image-20220413201027769.png)
+
+从它的名字就可以看出它是一款优秀的垃圾收集器，主要优点：**并发收集、低停顿**。但是它有下面三个明显的缺点：
+
+- **对 CPU 资源敏感；**
+- **无法处理浮动垃圾；**
+- **它使用的回收算法-“标记-清除”算法会导致收集结束时会有大量空间碎片产生。**
+
+
+
+G1 收集器
+
+---
+
+**G1 (Garbage-First) 是一款面向服务器的垃圾收集器,主要针对配备多颗处理器及大容量内存的机器. 以极高概率满足 GC 停顿时间要求的同时,还具备高吞吐量性能特征.**
+
+被视为 JDK1.7 中 HotSpot 虚拟机的一个重要进化特征。它具备以下特点：
+
+- **并行与并发**：G1 能充分利用 CPU、多核环境下的硬件优势，使用多个 CPU（CPU 或者 CPU 核心）来缩短 Stop-The-World  停顿时间。部分其他收集器原本需要停顿 Java 线程执行的 GC 动作，G1 收集器仍然可以通过并发的方式让 java 程序继续执行。
+- **分代收集**：虽然 G1 可以不需要其他收集器配合就能独立管理整个 GC 堆，但是还是保留了分代的概念。
+- **空间整合**：与 CMS 的“标记-清理”算法不同，G1 从整体来看是基于“标记-整理”算法实现的收集器；从局部上来看是基于“标记-复制”算法实现的。
+- **可预测的停顿**：这是 G1 相对于 CMS 的另一个大优势，降低停顿时间是 G1 和 CMS 共同的关注点，但 G1 除了追求低停顿外，还能建立可预测的停顿时间模型，能让使用者明确指定在一个长度为 M 毫秒的时间片段内。
+
+G1 收集器的运作大致分为以下几个步骤：
+
+- **初始标记**
+- **并发标记**
+- **最终标记**
+- **筛选回收**
+
+**G1 收集器在后台维护了一个优先列表，每次根据允许的收集时间，优先选择回收价值最大的 Region(这也就是它的名字 Garbage-First 的由来)** 。这种使用 Region 划分内存空间以及有优先级的区域回收方式，保证了 G1 收集器在有限时间内可以尽可能高的收集效率（把内存化整为零）
+
+
+
+ZGC 收集器
+
+---
+
+与 CMS 中的 ParNew 和 G1 类似，ZGC 也采用标记-复制算法，不过 ZGC 对该算法做了重大改进。
+
+在 ZGC 中出现 Stop The World 的情况会更少！
+
+详情可以看 ： [《新一代垃圾回收器 ZGC 的探索与实践》](https://tech.meituan.com/2020/08/06/new-zgc-practice-in-meituan.html)
+
+
+
+> 想要在指定时间结束垃圾回收，选用哪种垃圾回收器（2022-04-11 携程）
+
+G1
 
 # JUC
 
 > 线程能不能start两次，线程池中的线程为什么能循环利用
 
+首先demo眼见为实：
+
+```java
+/**
+ * 描述：      对比start和run两种启动线程的方式
+ */
+public class StartAndRunMethod {
+
+    public static void main(String[] args) {
+        Runnable runnable = () -> {
+            System.out.println(Thread.currentThread().getName());
+        };
+
+        runnable.run();
+
+        new Thread(runnable).start();
+    }
+}
+```
+
+运行结果：
+
+![image-20220413202257122](images/image-20220413202257122.png)
+
+通过运行结果，我们可以总结出，run()方法只是一个普通的方法，start()是一个真正的启动线程的方法
+一个线程调用两次start()会发生什么？
+
+我们还是先demo：
+
+```java
+/**
+ * 描述：      演示不能两次调用start方法，否则会报错
+ */
+public class CantStartTwice {
+    public static void main(String[] args) {
+        Thread thread = new Thread();
+        thread.start();
+        thread.start();
+    }
+}
+```
+
+运行结果：报非法的线程状态
+
+![image-20220413202322292](images/image-20220413202322292.png)
+
+原因分析：
+
+![image-20220413202333112](images/image-20220413202333112.png)
 
 
 
+问题2：线程重用的核心是，线程池对 Thread 做了包装，不重复调用 thread.star，而是自己有一个  Runnable. Run0, run 方法里面循环在跑，跑的过程中不断检査我们是否有新加入的子 Runnable 对象有新的 Runnable 进来的话就调一下我们的 run0, 其实就一个大 run0 把其它小 run#1, run0#2, 给串联起来了。同一个 Thread 可以执行不同的 Runnable，主要原因是线程池把线程和 Runnablei 通过  Blockingqueue 给解耦了，线程可以从 Blockingqueuer 中不断获取新的任务
 
-> 利用多线程时最大的难点是什么，怎么解决多线程安全问题
 
 
+> 利用多线程时最大的难点是什么，怎么解决多线程安全问题（自由发挥）
 
 
 
@@ -657,23 +908,186 @@ JDK1.8 （上面有示意图）
 
 > hashmap为什么多线程不安全，能举出例子来吗
 
+主要原因在于并发下的 Rehash 会造成元素之间会形成一个循环链表。不过，jdk 1.8 后解决了这个问题，但是还是不建议在多线程下使用  HashMap,因为多线程下使用 HashMap 还是会存在其他问题比如数据丢失。并发环境下推荐使用 ConcurrentHashMap 。
 
+详情请查看：https://coolshell.cn/articles/9606.html
 
 
 
 > 怎么保证线程安全
 
+1. 互斥同步
+
+著作权归https://pdai.tech所有。 链接：https://www.pdai.tech/md/java/thread/java-thread-x-theorty.html
+
+synchronized 和 ReentrantLock。
+
+初步了解你可以看：
+
+- [Java 并发 - 线程基础：线程互斥同步]()
+
+详细分析请看：
+
+- [关键字: Synchronized详解]()
+- [JUC锁: ReentrantLock详解]()
 
 
 
+2. 非阻塞同步
 
-> volatile和synchronize有什么区别？
+互斥同步最主要的问题就是线程阻塞和唤醒所带来的性能问题，因此这种同步也称为阻塞同步。
+
+互斥同步属于一种悲观的并发策略，总是认为只要不去做正确的同步措施，那就肯定会出现问题。无论共享数据是否真的会出现竞争，它都要进行加锁(这里讨论的是概念模型，实际上虚拟机会优化掉很大一部分不必要的加锁)、用户态核心态转换、维护锁计数器和检查是否有被阻塞的线程需要唤醒等操作。
+
+**(一)CAS**
+
+随着硬件指令集的发展，我们可以使用基于冲突检测的乐观并发策略: 先进行操作，如果没有其它线程争用共享数据，那操作就成功了，否则采取补偿措施(不断地重试，直到成功为止)。这种乐观的并发策略的许多实现都不需要将线程阻塞，因此这种同步操作称为非阻塞同步。
+
+乐观锁需要操作和冲突检测这两个步骤具备原子性，这里就不能再使用互斥同步来保证了，只能靠硬件来完成。硬件支持的原子性操作最典型的是: 比较并交换(Compare-and-Swap，CAS)。CAS 指令需要有 3 个操作数，分别是内存地址 V、旧的预期值 A 和新值 B。当执行操作时，只有当 V 的值等于 A，才将 V 的值更新为 B。
+
+**(二)AtomicInteger**
+
+J.U.C 包里面的整数原子类 AtomicInteger，其中的 compareAndSet() 和 getAndIncrement() 等方法都使用了 Unsafe 类的 CAS 操作。
+
+以下代码使用了 AtomicInteger 执行了自增的操作。
+
+```java
+private AtomicInteger cnt = new AtomicInteger();
+
+public void add() {
+    cnt.incrementAndGet();
+}
+```
+
+
+
+3. 无同步方案
+
+要保证线程安全，并不是一定就要进行同步。如果一个方法本来就不涉及共享数据，那它自然就无须任何同步措施去保证正确性。
+
+(一)栈封闭
+
+多个线程访问同一个方法的局部变量时，不会出现线程安全问题，因为局部变量存储在虚拟机栈中，属于线程私有的。
+
+
+
+> volatile和synchronize有什么区别？ /  volatile和synchronized
 
 `synchronized` 关键字和 `volatile` 关键字是两个互补的存在，而不是对立的存在！
 
 - **`volatile` 关键字**是线程同步的**轻量级实现**，所以 **`volatile `性能肯定比`synchronized`关键字要好** 。但是 **`volatile` 关键字只能用于变量而 `synchronized` 关键字可以修饰方法以及代码块** 。
 - **`volatile` 关键字能保证数据的可见性，但不能保证数据的原子性。`synchronized` 关键字两者都能保证。**
 - **`volatile`关键字主要用于解决变量在多个线程之间的可见性，而 `synchronized` 关键字解决的是多个线程之间访问资源的同步性**
+
+(二)线程本地存储(Thread Local Storage)
+
+如果一段代码中所需要的数据必须与其他代码共享，那就看看这些共享数据的代码是否能保证在同一个线程中执行。如果能保证，我们就可以把共享数据的可见范围限制在同一个线程之内，这样，无须同步也能保证线程之间不出现数据争用的问题。
+
+符合这种特点的应用并不少见，大部分使用消费队列的架构模式(如“生产者-消费者”模式)都会将产品的消费过程尽量在一个线程中消费完。其中最重要的一个应用实例就是经典 Web 交互模型中的“一个请求对应一个服务器线程”(Thread-per-Request)的处理方式，这种处理方式的广泛应用使得很多 Web 服务端应用都可以使用线程本地存储来解决线程安全问题。
+
+可以使用 java.lang.ThreadLocal 类来实现线程本地存储功能。
+
+对于以下代码，thread1 中设置 threadLocal 为 1，而 thread2 设置 threadLocal 为 2。过了一段时间之后，thread1 读取 threadLocal 依然是 1，不受 thread2 的影响。
+
+```java
+public class ThreadLocalExample {
+    public static void main(String[] args) {
+        ThreadLocal threadLocal = new ThreadLocal();
+        Thread thread1 = new Thread(() -> {
+            threadLocal.set(1);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(threadLocal.get());
+            threadLocal.remove();
+        });
+        Thread thread2 = new Thread(() -> {
+            threadLocal.set(2);
+            threadLocal.remove();
+        });
+        thread1.start();
+        thread2.start();
+    }
+}
+```
+
+为了理解 ThreadLocal，先看以下代码:
+
+```java
+public class ThreadLocalExample1 {
+    public static void main(String[] args) {
+        ThreadLocal threadLocal1 = new ThreadLocal();
+        ThreadLocal threadLocal2 = new ThreadLocal();
+        Thread thread1 = new Thread(() -> {
+            threadLocal1.set(1);
+            threadLocal2.set(1);
+        });
+        Thread thread2 = new Thread(() -> {
+            threadLocal1.set(2);
+            threadLocal2.set(2);
+        });
+        thread1.start();
+        thread2.start();
+    }
+}
+```
+
+它所对应的底层结构图为:
+
+![image-20220413201943773](images/image-20220413201943773.png)
+
+每个 Thread 都有一个 ThreadLocal.ThreadLocalMap 对象，Thread 类中就定义了 ThreadLocal.ThreadLocalMap 成员。
+
+```java
+/* ThreadLocal values pertaining to this thread. This map is maintained
+ * by the ThreadLocal class. */
+ThreadLocal.ThreadLocalMap threadLocals = null;
+```
+
+当调用一个 ThreadLocal 的 set(T value) 方法时，先得到当前线程的 ThreadLocalMap 对象，然后将 ThreadLocal->value 键值对插入到该 Map 中。
+
+```java
+public void set(T value) {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null)
+        map.set(this, value);
+    else
+        createMap(t, value);
+}
+```
+
+get() 方法类似。
+
+```java
+public T get() {
+    Thread t = Thread.currentThread();
+    ThreadLocalMap map = getMap(t);
+    if (map != null) {
+        ThreadLocalMap.Entry e = map.getEntry(this);
+        if (e != null) {
+            @SuppressWarnings("unchecked")
+            T result = (T)e.value;
+            return result;
+        }
+    }
+    return setInitialValue();
+}
+```
+
+ThreadLocal 从理论上讲并不是用来解决多线程并发问题的，因为根本不存在多线程竞争。
+
+在一些场景 (尤其是使用线程池) 下，由于 ThreadLocal.ThreadLocalMap 的底层数据结构导致 ThreadLocal 有内存泄漏的情况，应该尽可能在每次使用 ThreadLocal 后手动调用 remove()，以避免出现 ThreadLocal 经典的内存泄漏甚至是造成自身业务混乱的风险。
+
+更详细的分析看：[Java 并发 - ThreadLocal详解]()
+
+**(三)可重入代码(Reentrant Code)**
+
+这种代码也叫做纯代码(Pure Code)，可以在代码执行的任何时刻中断它，转而去执行另外一段代码(包括递归调用它本身)，而在控制权返回后，原来的程序不会出现任何错误。
+
+可重入代码有一些共同的特征，例如不依赖存储在堆上的数据和公用的系统资源、用到的状态量都由参数中传入、不调用非可重入的方法等。
 
 
 
@@ -906,7 +1320,7 @@ i++；j++；
 
 
 
-> JMM是什么？
+> JMM是什么？ / JMM内存模型？
 
 Java 内存模型抽象了线程和主内存之间的关系，就比如说线程之间的共享变量必须存储在主内存中。Java 内存模型主要目的是为了屏蔽系统和硬件的差异，避免一套代码在不同的平台下产生的效果不一致。
 
@@ -936,6 +1350,10 @@ Java 内存模型抽象了线程和主内存之间的关系，就比如说线程
 - 混合型: CPU密集型的任务与IO密集型任务的执行时间差别较小，拆分为两个线程池；否则没有必要拆分。
 
 
+
+> 介绍一下Java不同层面的锁（2022-04-11 携程）
+
+JVM层面与JDK层面，就是synchronized+Lock，优缺点、对比、AQS
 
 # 数据库
 
@@ -1552,6 +1970,12 @@ Memcached 是分布式缓存最开始兴起的那会，比较常用的。后来�
 
 ## MySql
 
+> sqlserver和MySQL区别
+
+
+
+
+
 > 有用mysql做过什么东西吗（开放话题）| 此处写的是如何优化MySQL
 
 1.对查询进行优化，要尽量避免全表扫描，首先应考虑在 where 及 order by 涉及的列上建立索引。
@@ -1799,6 +2223,12 @@ create table #t(…)
 
 
 
+> redo，undo，binlog
+
+
+
+
+
 > redolog和binlog的区别
 
 `redo log` 它是物理日志，记录内容是“在某个数据页上做了什么修改”，属于 `InnoDB` 存储引擎。
@@ -1853,7 +2283,7 @@ SELECT * FROM tb1 WHERE id < 500;
 
 
 
-> 什么是MVCC？
+> 【高频问题】什么是MVCC？
 
 MVCC，全称Multi-Version Concurrency Control，即多版本并发控制。MVCC是一种并发控制的方法，一般在数据库管理系统中，实现对数据库的并发访问，在编程语言中实现事务内存。
 
@@ -2102,6 +2532,10 @@ B+ Tree 是基于 B Tree 和叶子节点顺序访问指针进行实现，它具�
 - 为了减少磁盘读取次数，决定了树的高度不能高，所以必须是先B-Tree；
 - 以页为单位读取使得一次 I/O 就能完全载入一个节点，且相邻的节点也能够被预先载入；所以数据放在叶子节点，本质上是一个Page页；
 - 为了支持范围查询以及关联关系， 页中数据需要有序，且页的尾部节点指向下个页的头部；
+
+
+
+> 什么时候是表锁
 
 
 
@@ -2579,8 +3013,6 @@ TCP 的拥塞控制采用了四种算法，即 **慢开始** 、 **拥塞避免*
 * TCP 管理数据流，而 HTTP 描述流中的数据包含什么。
 * TCP 作为三向通信协议运行，而 HTTP 是单向协议。
 
-注 答案来自：https://www.goanywhere.com/blog/http-vs-tcp-whats-the-difference
-
 
 
 > TCP的accept()函数发生在第几次握手（腾讯）
@@ -2740,7 +3172,63 @@ HTTPs 采用混合的加密机制，使用非对称密钥加密用于传输对�
 
 
 
+> 7层网络，4层网络，5层网络，各层有哪些协议
+
+OSI7层：应用层（Application）、表示层（Presentation）、会话层（Session）、传输层（Transport）、网络层（Network）、数据链路层（Data Link）、物理层（Physical）
+
+4层是指TCP/IP四层模型，主要包括：应用层、运输层、网际层和网络接口层。
+
+5层（五层协议只是OSI和TCP/IP的综合，实际应用还是TCP/IP的四层结构）：应用层、运输层、网络层、数据链路层和物理层。
+
+协议参考图：
+
+![image-20220404172044696](images/image-20220404172044696.png)
+
+> 已经封装好的消息，不考虑DNS等，怎么寻址
+
+
+
+> 局域网内怎么寻址，网关怎么找到
+
+
+
+> 网际路由协议，怎么确定最短路由
+
+
+
+> DNS（开扯，DNS过程，DNS负载均衡） 
+
+开址？
+
+解析过程（参照上面问题：DNS解析过程，给个URL一层一层具体分析）
+
+**DNS负载均衡**
+
+最早的负载均衡技术，利用域名解析实现负载均衡，在DNS服务器，配置多个A记录，这些A记录对应的服务器构成集群。大型网站总是部分使用DNS解析，作为第一级负载均衡。如下图：
+
+![image-20220413195638289](images/image-20220413195638289.png)
+
+**实践建议**
+
+将DNS作为第一级负载均衡，A记录对应着内部负载均衡的IP地址，通过内部负载均衡将请求分发到真实的Web服务器上。一般用于互联网公司，复杂的业务系统不合适使用。如下图：
+
+![image-20220413195646340](images/image-20220413195646340.png)
+
+
+
+> 第三次握手失败会发生什么
+
+
+
 # 系统设计
+
+## 场景题
+
+> 很多短任务线程，选择synchronized还是lock（2022-04-11 携程）
+
+
+
+
 
 ## 安全
 
