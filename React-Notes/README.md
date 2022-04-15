@@ -18,3 +18,8 @@ npm init <initializer> is available in npm 6+
 > yarn create react-app my-app  
 
 yarn create is available in Yarn 0.25+
+
+
+
+![image-20220414083224689](images/image-20220414083224689.png)
+

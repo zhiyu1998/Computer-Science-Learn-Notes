@@ -1,3 +1,5 @@
+【思维导图来自：https://github.com/jCodeLife/mind-map】
+
 # TypeScript
 
 ## 基本类型
