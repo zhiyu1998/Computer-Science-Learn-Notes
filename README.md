@@ -18,7 +18,7 @@
 * [Golang](#golang)
 * [Python](#python)
 
-<img align="right" alt="GIF" src="https://github.com/abhisheknaiidu/abhisheknaiidu/blob/master/code.gif?raw=true" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;&nbsp;&nbsp;&nbsp;
+<img align="right" alt="GIF" src="./images/code.gif?raw=true" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;&nbsp;&nbsp;&nbsp;
 
 ## :baby_chick: Foundation
 
@@ -30,9 +30,17 @@
 
 * [LeetCode-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/LeetCode-Notes) 力扣刷题笔记（Java）⏳ 
   * 二叉树 ⏳
-  * 回溯 🚫
+  * 链表 ⏳
+  * 字符串 ⏳
+  * 贪心 🚫
   * 动态规划 🚫
+  * 回溯 🚫
+  * 滑动窗口
+  * 分支 🚫
   * 分治 🚫
+  * 专题
+    * 剑指offer ⏳
+    * 热门100题 ⏳
 
 
 
@@ -59,7 +67,7 @@
 * [JVM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JVM-Notes) JVM笔记 ✅ 
 * [JUC-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JUC-Notes) JUC笔记 ✅ 
 * [Kubernetes-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kubernetes-Notes) k8s笔记 🚫
-* [Kotlin-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kotlin-Notes) ⏳
+* [Kotlin-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kotlin-Notes) Kotlin笔记⏳
 
 
 
