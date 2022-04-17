@@ -67,7 +67,7 @@
 * [JVM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JVM-Notes) JVM笔记 ✅ 
 * [JUC-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JUC-Notes) JUC笔记 ✅ 
 * [Kubernetes-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kubernetes-Notes) k8s笔记 🚫
-* [Kotlin-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kotlin-Notes) Kotlin笔记⏳
+* [Kotlin-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kotlin-Notes) Kotlin笔记 🚫
 
 
 
