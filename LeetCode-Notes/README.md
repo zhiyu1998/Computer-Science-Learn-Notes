@@ -53,19 +53,19 @@
 3.  反转系列
 4. KMP
 
-- [x] #### [反转字符串](https://leetcode-cn.com/problems/reverse-string/)
+- [x] [反转字符串](https://leetcode-cn.com/problems/reverse-string/)
 
-- [ ] #### [反转字符串 II](https://leetcode-cn.com/problems/reverse-string-ii/)
+- [ ] [反转字符串 II](https://leetcode-cn.com/problems/reverse-string-ii/)
 
-- [ ] #### [剑指 Offer 05. 替换空格](https://leetcode-cn.com/problems/ti-huan-kong-ge-lcof/)
+- [ ] [剑指 Offer 05. 替换空格](https://leetcode-cn.com/problems/ti-huan-kong-ge-lcof/)
 
-- [ ] #### [颠倒字符串中的单词](https://leetcode-cn.com/problems/reverse-words-in-a-string/)
+- [ ] [颠倒字符串中的单词](https://leetcode-cn.com/problems/reverse-words-in-a-string/)
 
-- [ ] #### [剑指 Offer 58 - II. 左旋转字符串](https://leetcode-cn.com/problems/zuo-xuan-zhuan-zi-fu-chuan-lcof/)
+- [ ] [剑指 Offer 58 - II. 左旋转字符串](https://leetcode-cn.com/problems/zuo-xuan-zhuan-zi-fu-chuan-lcof/)
 
-- [ ] #### [实现 strStr()](https://leetcode-cn.com/problems/implement-strstr/)
+- [ ] [实现 strStr()](https://leetcode-cn.com/problems/implement-strstr/)
 
-- [ ] #### [重复的子字符串](https://leetcode-cn.com/problems/repeated-substring-pattern/)
+- [ ] [重复的子字符串](https://leetcode-cn.com/problems/repeated-substring-pattern/)
 
 
 
