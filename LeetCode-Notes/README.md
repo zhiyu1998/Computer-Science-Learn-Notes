@@ -29,10 +29,10 @@
 * 合并两个链表
 * 找到链表的中间节点
 
-- [ ] [删除排序链表中的重复元素](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/)
-- [ ] [删除排序链表中的重复元素 II](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list-ii/)
-- [ ] [反转链表](https://leetcode-cn.com/problems/reverse-linked-list/)
-- [ ] [反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
+- [x] [删除排序链表中的重复元素](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/)
+- [x] [删除排序链表中的重复元素 II](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list-ii/)
+- [x] [反转链表](https://leetcode-cn.com/problems/reverse-linked-list/)
+- [x] [反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
 - [ ] [合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
 - [ ] [分隔链表](https://leetcode-cn.com/problems/partition-list/)
 - [ ] [排序链表](https://leetcode-cn.com/problems/sort-list/)
@@ -63,9 +63,9 @@
 
 - [x] [剑指 Offer 58 - II. 左旋转字符串](https://leetcode-cn.com/problems/zuo-xuan-zhuan-zi-fu-chuan-lcof/)
 
-- [ ] [实现 strStr()](https://leetcode-cn.com/problems/implement-strstr/)
+- [x] [实现 strStr()](https://leetcode-cn.com/problems/implement-strstr/)
 
-- [ ] [重复的子字符串](https://leetcode-cn.com/problems/repeated-substring-pattern/)
+- [x] [重复的子字符串](https://leetcode-cn.com/problems/repeated-substring-pattern/)
 
 
 
@@ -93,13 +93,9 @@
 
 
 
-## :hocho: 剑指offer  :heavy_plus_sign: :fire:热门 100 ⏳
 
 
-
-
-
-## 参考顺序
+## 参考刷题顺序的仓库
 
 算法模板：https://greyireland.gitbook.io/algorithm-pattern/shu-ju-jie-gou-pian/binary_tree
 
