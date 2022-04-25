@@ -29,9 +29,9 @@
 ## :penguin: Algorithm
 
 * [LeetCode-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/LeetCode-Notes) 力扣刷题笔记（Java）⏳ 
-  * 二叉树 ⏳
+  * 二叉树  ✅
   * 链表 ⏳
-  * 字符串 ⏳
+  * 字符串  ✅
   * 贪心 🚫
   * 动态规划 🚫
   * 回溯 🚫
