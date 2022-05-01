@@ -33,9 +33,9 @@
 - [x] [删除排序链表中的重复元素 II](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list-ii/)
 - [x] [反转链表](https://leetcode-cn.com/problems/reverse-linked-list/)
 - [x] [反转链表 II](https://leetcode-cn.com/problems/reverse-linked-list-ii/)
-- [ ] [合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
-- [ ] [分隔链表](https://leetcode-cn.com/problems/partition-list/)
-- [ ] [排序链表](https://leetcode-cn.com/problems/sort-list/)
+- [x] [合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+- [x] [分隔链表](https://leetcode-cn.com/problems/partition-list/)
+- [x] [排序链表](https://leetcode-cn.com/problems/sort-list/)
 - [ ] [重排链表](https://leetcode-cn.com/problems/reorder-list/)
 - [ ] [环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
 - [ ] [环形链表 II](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
@@ -69,11 +69,36 @@
 
 
 
-## 贪心算法 🚫
-
-
-
 ## 动态规划 🚫
+
+矩阵DP
+
+- [ ] [三角形最小路径和](https://leetcode-cn.com/problems/triangle/)
+- [ ] [最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
+- [ ] [不同路径](https://leetcode-cn.com/problems/unique-paths/)
+- [ ] [不同路径 II](https://leetcode-cn.com/problems/unique-paths-ii/)
+
+序列
+
+- [ ] [爬楼梯](https://leetcode-cn.com/problems/climbing-stairs/)
+- [ ] [跳跃游戏](https://leetcode-cn.com/problems/jump-game/)
+- [ ] [跳跃游戏 II](https://leetcode-cn.com/problems/jump-game-ii/)
+- [ ] [分割回文串 II](https://leetcode-cn.com/problems/palindrome-partitioning-ii/)
+- [ ] [最长递增子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
+- [ ] [单词拆分](https://leetcode-cn.com/problems/word-break/)
+
+两个序列的DP
+
+- [ ] [最长公共子序列](https://leetcode-cn.com/problems/longest-common-subsequence/)
+- [ ] [编辑距离](https://leetcode-cn.com/problems/edit-distance/)
+
+
+
+背包 & 零钱兑换
+
+- [ ] [零钱兑换](https://leetcode-cn.com/problems/coin-change/)
+- [ ] [背包问题](https://www.lintcode.com/problem/92/)
+- [ ] [背包问题（二）](https://www.lintcode.com/problem/125/)
 
 
 
@@ -81,7 +106,11 @@
 
 
 
+
+
 ## 滑动窗口 🚫
+
+
 
 
 
@@ -89,7 +118,15 @@
 
 
 
+
+
 ## 分治 🚫
+
+
+
+
+
+## 贪心算法 🚫
 
 
 
