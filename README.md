@@ -4,7 +4,7 @@
 
 * 🚫 待办
 * ⏳ 正在更新
-* ✅ 已办项（已整理过的）
+* ✅ 已办项
 
 
 
@@ -30,14 +30,14 @@
 
 * [LeetCode-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/LeetCode-Notes) 力扣刷题笔记（Java）⏳ 
   * 二叉树  ✅
-  * 链表 ⏳
+  * 链表 ✅
   * 字符串  ✅
-  * 贪心 🚫
-  * 动态规划 🚫
+  * 动态规划 ⏳
   * 回溯 🚫
   * 滑动窗口
   * 分支 🚫
   * 分治 🚫
+  * 贪心 🚫
   * 专题
     * 剑指offer ⏳
     * 热门100题 ⏳
@@ -56,9 +56,9 @@
 
 * [Java-Basic-BrainMind ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Java-Basic-BrainMind)  Java基础思维导图 ✅ 
 * [SSM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/SSM-Notes)  Spring-SpringMVC-MyBatis笔记 ✅ 
-  * [Spring](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/SSM-Notes/Spring)
-  * [SpringMVC](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/SSM-Notes/SpringMVC)
-  * [MyBatis](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/SSM-Notes/MyBatis)
+  * [Spring ](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/SSM-Notes/Spring) ✅
+  * [SpringMVC](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/SSM-Notes/SpringMVC) ✅
+  * [MyBatis](https://github.com/zhiyu1998/Computer-Science-Learn-Notes/tree/master/SSM-Notes/MyBatis) ✅
 
 * [Spring-Boot-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Boot-Notes) Spring-Boot笔记 ✅ 
 * [Spring-Cloud-Notes ](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Spring-Cloud-Notes)  Spring-Cloud笔记 ✅ 

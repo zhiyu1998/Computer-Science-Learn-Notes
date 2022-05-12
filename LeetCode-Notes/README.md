@@ -1,6 +1,6 @@
 # 我的刷题顺序
 
-## 二叉树 ⏳
+## 二叉树 ✅
 
 * 掌握二叉树递归与非递归遍历
 * 理解 DFS 前序遍历与分治法
@@ -18,7 +18,7 @@
 - [x] [验证二叉搜索树](https://leetcode-cn.com/problems/validate-binary-search-tree/)
 - [ ] [二叉搜索树中的插入操作](https://leetcode-cn.com/problems/insert-into-a-binary-search-tree/)
 
-## 链表 ⏳
+## 链表 ✅
 
 * null/nil异常处理
 * dummy node哑巴节点
@@ -36,15 +36,15 @@
 - [x] [合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
 - [x] [分隔链表](https://leetcode-cn.com/problems/partition-list/)
 - [x] [排序链表](https://leetcode-cn.com/problems/sort-list/)
-- [ ] [重排链表](https://leetcode-cn.com/problems/reorder-list/)
-- [ ] [环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
-- [ ] [环形链表 II](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
-- [ ] [回文链表](https://leetcode-cn.com/problems/palindrome-linked-list/)
+- [x] [重排链表](https://leetcode-cn.com/problems/reorder-list/)
+- [x] [环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
+- [x] [环形链表 II](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
+- [x] [回文链表](https://leetcode-cn.com/problems/palindrome-linked-list/)
 - [ ] [复制带随机指针的链表](https://leetcode-cn.com/problems/copy-list-with-random-pointer/)
 
 
 
-## 字符串 ⏳
+## 字符串 ✅
 
 需要考虑的问题：
 
