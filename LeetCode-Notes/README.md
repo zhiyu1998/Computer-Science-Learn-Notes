@@ -40,7 +40,7 @@
 - [x] [环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
 - [x] [环形链表 II](https://leetcode-cn.com/problems/linked-list-cycle-ii/)
 - [x] [回文链表](https://leetcode-cn.com/problems/palindrome-linked-list/)
-- [ ] [复制带随机指针的链表](https://leetcode-cn.com/problems/copy-list-with-random-pointer/)
+- [x] [复制带随机指针的链表](https://leetcode-cn.com/problems/copy-list-with-random-pointer/)
 
 
 

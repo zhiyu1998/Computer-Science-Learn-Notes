@@ -115,3 +115,112 @@ public void test_flatMap() {
 }
 ```
 
+
+
+## 使用parallelStream并行计算
+
+小知识点：
+
+* boxed 装箱
+
+```java
+@Test
+public void test_parallel() {
+
+    var r = new Random();
+    var list = IntStream.range(0, 1_000_000)
+        .map(x -> r.nextInt(10_000_000))
+        // int --> integer 打包
+        .boxed()
+        .collect(Collectors.toList());
+    var t0 = System.currentTimeMillis();
+    System.out.println(list.stream().max((a, b) -> a -b));
+    System.out.println("time:" + (System.currentTimeMillis() - t0));
+
+    // 并行
+    var t1 = System.currentTimeMillis();
+    list.parallelStream().max((a, b) -> a-b);
+    list.stream().parallel().max((a, b) -> a - b);
+
+    System.out.println(Runtime.getRuntime().availableProcessors());
+    System.out.println("time: " + (System.currentTimeMillis() - t1));
+}
+```
+
+![image-20220513144656160](images/image-20220513144656160.png)
+
+
+
+## 函数式编程总结
+
+* int String -----> toString
+* (int) --> int[] -----> int[]::new    【Java11】
+* 高阶函数：int -> int -> int  ----->  Integer::max
+* 类型类
+
+
+
+## 构造流计算的基石：Monad
+
+定义：构造流计算(管道运算)
+
+* 泛型计算
+* 不改变泛型
+* 类型不变（option就是option，Stream就是Stream）
+
+
+
+### 自涵子（EndFunctor)
+
+描述A->B的函数
+
+```java
+public class Event<T> {
+
+    T data;
+    public Event(T data){
+        this.data = data;
+    }
+
+    static class EventData {
+        Integer id;
+        String msg;
+
+        public EventData(Integer id, String msg) {
+            this.id = id;
+            this.msg = msg;
+        }
+
+        @Override
+        public String toString() {
+            return super.toString();
+        }
+    }
+
+    static class Transforms {
+
+        static EventData transforms(Integer id) {
+            switch (id){
+                case 0:
+                    return new EventData(id, "Start");
+                case 1:
+                    return new EventData(id, "Running");
+                case 2:
+                    return new EventData(id, "Done");
+                case 3:
+                    return new EventData(id, "Fail");
+                default:
+                    return new EventData(id, "Error");
+            }
+        }
+    }
+
+
+    @FunctionalInterface
+    interface FN<A, B> {
+        B apply(A a);
+    }
+
+}
+```
+
