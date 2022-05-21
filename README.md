@@ -81,7 +81,7 @@
 
 ## :mouse: Golang
 
-* [Golang-Basic-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Golang-Basic-Notes)   GO语言、进阶、Web框架 ✅ 
+* [Golang-Learn-In-Problem](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Golang-Learn-In-Problem)   从问题中学习到Go的精髓（因原先笔记难以阅读，所以重构笔记） ⏳
 
 
 

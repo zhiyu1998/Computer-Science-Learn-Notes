@@ -29,6 +29,150 @@
 
 # Java 基础
 
+> 动态代理了解吗？说一下原理？
+
+1. 什么是代理？
+
+代理模式是一种比较好理解的设计模式。简单来说就是 **我们使用代理对象来代替对真实对象(real object)的访问，这样就可以在不修改原目标对象的前提下，提供额外的功能操作，扩展目标对象的功能。**
+
+**代理模式的主要作用是扩展目标对象的功能，比如说在目标对象的某个方法执行前后你可以增加一些自定义的操作。**
+
+举个例子：你找了小红来帮你问话，小红就可以看作是代理你的代理对象，代理的行为（方法）是问话。
+
+![image-20220517204202792](images/image-20220517204202792.png)
+
+2. 静态代理
+
+**静态代理中，我们对目标对象的每个方法的增强都是手动完成的，非常不灵活（\*比如接口一旦新增加方法，目标对象和代理对象都要进行修改\*）且麻烦(\*需要对每个目标类都单独写一个代理类\*)。** 实际应用场景非常非常少，日常开发几乎看不到使用静态代理的场景。
+
+上面我们是从实现和应用角度来说的静态代理，从 JVM 层面来说， **静态代理在编译时就将接口、实现类、代理类这些都变成了一个个实际的 class 文件。**
+
+静态代理实现步骤:
+
+1. 定义一个接口及其实现类；
+2. 创建一个代理类同样实现这个接口
+3. 将目标对象注入进代理类，然后在代理类的对应方法调用目标类中的对应方法。这样的话，我们就可以通过代理类屏蔽对目标对象的访问，并且可以在目标方法执行前后做一些自己想做的事情。
+
+3. 动态代理
+
+相比于静态代理来说，动态代理更加灵活。我们不需要针对每个目标类都单独创建一个代理类，并且也不需要我们必须实现接口，我们可以直接代理实现类( *CGLIB 动态代理机制*)。
+
+**从 JVM 角度来说，动态代理是在运行时动态生成类字节码，并加载到 JVM 中的。**
+
+说到动态代理，Spring AOP、RPC 框架应该是两个不得不提的，它们的实现都依赖了动态代理。
+
+**动态代理在我们日常开发中使用的相对较少，但是在框架中的几乎是必用的一门技术。学会了动态代理之后，对于我们理解和学习各种框架的原理也非常有帮助。**
+
+就 Java 来说，动态代理的实现方式有很多种，比如 **JDK 动态代理**、**CGLIB 动态代理**等等。
+
+![image-20220517210109888](images/image-20220517210109888.png)
+
+3.1 机制介绍
+
+**在 Java 动态代理机制中 `InvocationHandler` 接口和 `Proxy` 类是核心。**
+
+`Proxy` 类中使用频率最高的方法是：`newProxyInstance()` ，这个方法主要用来生成一个代理对象。
+
+```java
+    public static Object newProxyInstance(ClassLoader loader,
+                                          Class<?>[] interfaces,
+                                          InvocationHandler h)
+        throws IllegalArgumentException
+    {
+        ......
+    }
+```
+
+这个方法一共有 3 个参数：
+
+1. **loader** :类加载器，用于加载代理对象。
+2. **interfaces** : 被代理类实现的一些接口；
+3. **h** : 实现了 `InvocationHandler` 接口的对象；
+
+要实现动态代理的话，还必须需要实现`InvocationHandler` 来自定义处理逻辑。 当我们的动态代理对象调用一个方法时，这个方法的调用就会被转发到实现`InvocationHandler` 接口类的 `invoke` 方法来调用。
+
+```java
+public interface InvocationHandler {
+
+    /**
+     * 当你使用代理对象调用方法的时候实际会调用到这个方法
+     */
+    public Object invoke(Object proxy, Method method, Object[] args)
+        throws Throwable;
+}
+```
+
+`invoke()` 方法有下面三个参数：
+
+1. **proxy** :动态生成的代理类
+2. **method** : 与代理类对象调用的方法相对应
+3. **args** : 当前 method 方法的参数
+
+也就是说：**你通过`Proxy` 类的 `newProxyInstance()` 创建的代理对象在调用方法的时候，实际会调用到实现`InvocationHandler` 接口的类的 `invoke()`方法。** 你可以在 `invoke()` 方法中自定义处理逻辑，比如在方法执行前后做什么事情
+
+3.2 动态代理使用步骤
+
+1. 定义一个接口及其实现类；
+
+2. 自定义 `InvocationHandler` 并重写`invoke`方法，在 `invoke` 方法中我们会调用原生方法（被代理类的方法）并自定义一些处理逻辑；
+3. 通过 `Proxy.newProxyInstance(ClassLoader loader,Class<?>[] interfaces,InvocationHandler h)` 方法创建代理对象
+
+**1.定义发送短信的接口**
+
+```java
+public interface SmsService {
+    String send(String message);
+}
+```
+
+**2.实现发送短信的接口**
+
+```java
+public class SmsServiceImpl implements SmsService {
+    public String send(String message) {
+        System.out.println("send message:" + message);
+        return message;
+    }
+}
+```
+
+**3.定义一个 JDK 动态代理类**
+
+```java
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+/**
+ * @author shuang.kou
+ * @createTime 2020年05月11日 11:23:00
+ */
+public class DebugInvocationHandler implements InvocationHandler {
+    /**
+     * 代理类中的真实对象
+     */
+    private final Object target;
+
+    public DebugInvocationHandler(Object target) {
+        this.target = target;
+    }
+
+
+    public Object invoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
+        //调用方法之前，我们可以添加自己的操作
+        System.out.println("before method " + method.getName());
+        Object result = method.invoke(target, args);
+        //调用方法之后，我们同样可以添加自己的操作
+        System.out.println("after method " + method.getName());
+        return result;
+    }
+}
+```
+
+`invoke()` 方法: 当我们的动态代理对象调用原生方法的时候，最终实际上调用到的是 `invoke()` 方法，然后 `invoke()` 方法代替我们去调用了被代理对象的原生方法。
+
+
+
 > 讲讲 hashmap，底层原理是什么？
 
 **JDK1.8 之前**
@@ -124,7 +268,122 @@ abstract class AbstractStringBuilder implements Appendable, CharSequence {
 2. 单线程操作字符串缓冲区下操作大量数据: 适用 `StringBuilder`
 3. 多线程操作字符串缓冲区下操作大量数据: 适用 `StringBuffer`
 
+
+
 > stringbuilder 为什么线程不安全？底层原理是什么？
+
+`StringBuilder` 并没有对方法进行加同步锁
+
+以StringBuffer为例，可以看到底层加入了同步锁
+
+```java
+@Override
+    public synchronized int length() {
+        return count;
+    }
+
+    @Override
+    public synchronized int capacity() {
+        return value.length;
+    }
+```
+
+而StringBuilder则没有：
+
+```java
+    /**
+     * Returns the length (character count).
+     *
+     * @return  the length of the sequence of characters currently
+     *          represented by this object
+     */
+    @Override
+    public int length() {
+        return count;
+    }
+
+    /**
+     * Returns the current capacity. The capacity is the amount of storage
+     * available for newly inserted characters, beyond which an allocation
+     * will occur.
+     *
+     * @return  the current capacity
+     */
+    public int capacity() {
+        return value.length;
+    }
+
+```
+
+
+
+底层原理：
+
+StringBuilder无参构造方法默认在堆中创建16个长度的char[ ]数组，调用的是父类AbstractStringBuilder的构造方法，StringBuilder的有参构造方法在堆中创建参数的长度+16的char[ ]数组，添加的字符串依次从char[]数组前面为空的位置存入。当再次添加的字符串长度超过创建的char[ ]数组长度,就会进行扩容
+
+```java
+    /**
+     * Constructs a string builder with no characters in it and an
+     * initial capacity of 16 characters.
+     */
+    public StringBuilder() {
+        super(16);
+    }
+
+    /**
+     * Constructs a string builder with no characters in it and an
+     * initial capacity specified by the {@code capacity} argument.
+     *
+     * @param      capacity  the initial capacity.
+     * @throws     NegativeArraySizeException  if the {@code capacity}
+     *               argument is less than {@code 0}.
+     */
+    public StringBuilder(int capacity) {
+        super(capacity);
+    }
+
+    /**
+     * Constructs a string builder initialized to the contents of the
+     * specified string. The initial capacity of the string builder is
+     * {@code 16} plus the length of the string argument.
+     *
+     * @param   str   the initial contents of the buffer.
+     */
+    public StringBuilder(String str) {
+        super(str.length() + 16);
+        append(str);
+    }
+```
+
+扩容机制：
+
+当要添加的字符串大于 > 当前字符数组的长度的时候扩容，扩容是： 原来长度*2+2 的方式扩容
+
+```java
+    /**
+     * Returns a capacity at least as large as the given minimum capacity.
+     * Returns the current capacity increased by the same amount + 2 if
+     * that suffices.
+     * Will not return a capacity greater than {@code MAX_ARRAY_SIZE}
+     * unless the given minimum capacity is greater than that.
+     *
+     * @param  minCapacity the desired minimum capacity
+     * @throws OutOfMemoryError if minCapacity is less than zero or
+     *         greater than Integer.MAX_VALUE
+     */
+    private int newCapacity(int minCapacity) {
+        // overflow-conscious code
+        int newCapacity = (value.length << 1) + 2;
+        if (newCapacity - minCapacity < 0) {
+            newCapacity = minCapacity;
+        }
+        return (newCapacity <= 0 || MAX_ARRAY_SIZE - newCapacity < 0)
+            ? hugeCapacity(minCapacity)
+            : newCapacity;
+    }
+```
+
+
 
 > 深拷贝和浅拷贝区别，工作原理
 
@@ -2562,11 +2821,111 @@ Binding(绑定) 示意图：
 
 生产者将消息发送给交换器时，需要一个 RoutingKey,当 BindingKey 和 RoutingKey 相匹配时，消息会被路由到对应的队列中。在绑定多个队列到同一个交换器的时候，这些绑定允许使用相同的 BindingKey。BindingKey 并不是在所有的情况下都生效，它依赖于交换器类型，比如 fanout 类型的交换器就会无视，而是将消息路由到所有绑定到该交换器的队列中。
 
+
+
+> kafka怎么保证消息可靠性的？
+
+1. 消费顺序的保证：
+
+我们在使用消息队列的过程中经常有业务场景需要严格保证消息的消费顺序，比如我们同时发了 2 个消息，这 2 个消息对应的操作分别对应的数据库操作是：
+
+1. 更改用户会员等级。
+2. 根据会员等级计算订单价格。
+
+假如这两条消息的消费顺序不一样造成的最终结果就会截然不同。
+
+我们知道 Kafka 中 Partition(分区)是真正保存消息的地方，我们发送的消息都被放在了这里。而我们的 Partition(分区) 又存在于 Topic(主题) 这个概念中，并且我们可以给特定 Topic 指定多个 Partition。
+
+![image-20220517212038925](images/image-20220517212038925.png)
+
+每次添加消息到 Partition(分区) 的时候都会采用尾加法，如上图所示。 **Kafka 只能为我们保证 Partition(分区) 中的消息有序。**
+
+> 消息在被追加到 Partition(分区)的时候都会分配一个特定的偏移量（offset）。Kafka 通过偏移量（offset）来保证消息在分区内的顺序性。
+
+所以，我们就有一种很简单的保证消息消费顺序的方法：**1 个 Topic 只对应一个 Partition**。这样当然可以解决问题，但是破坏了 Kafka 的设计初衷。
+
+Kafka 中发送 1 条消息的时候，可以指定 topic, partition, key,data（数据） 4 个参数。如果你发送消息的时候指定了  Partition 的话，所有消息都会被发送到指定的 Partition。并且，同一个 key 的消息可以保证只发送到同一个  partition，这个我们可以采用表/对象的 id 来作为 key 。
+
+总结一下，对于如何保证 Kafka 中消息消费的顺序，有了下面两种方法：
+
+1. 1 个 Topic 只对应一个 Partition。
+2. （推荐）发送消息的时候指定 key/Partition。
+
+当然不仅仅只有上面两种方法，上面两种方法是我觉得比较好理解的
+
+
+
+2. 保证消息不丢失
+
+生产者丢失消息的情况：
+
+生产者(Producer) 调用`send`方法发送消息之后，消息可能因为网络问题并没有发送过去。
+
+所以，我们不能默认在调用`send`方法发送消息之后消息发送成功了。为了确定消息是发送成功，我们要判断消息发送的结果。但是要注意的是 Kafka 生产者(Producer) 使用 `send` 方法发送消息实际上是异步的操作，我们可以通过 `get()`方法获取调用结果，但是这样也让它变为了同步操作，示例代码如下：
+
+> **详细代码见我的这篇文章：[Kafka系列第三篇！10 分钟学会如何在 Spring Boot 程序中使用 Kafka 作为消息队列?](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247486269&idx=2&sn=ec00417ad641dd8c3d145d74cafa09ce&chksm=cea244f6f9d5cde0c8eb233fcc4cf82e11acd06446719a7af55230649863a3ddd95f78d111de&token=1633957262&lang=zh_CN#rd)**
+
+```java
+SendResult<String, Object> sendResult = kafkaTemplate.send(topic, o).get();
+if (sendResult.getRecordMetadata() != null) {
+  logger.info("生产者成功发送消息到" + sendResult.getProducerRecord().topic() + "-> " + sendRe
+              sult.getProducerRecord().value().toString());
+}
+```
+
+但是一般不推荐这么做！可以采用为其添加回调函数的形式，示例代码如下：
+
+```java
+        ListenableFuture<SendResult<String, Object>> future = kafkaTemplate.send(topic, o);
+        future.addCallback(result -> logger.info("生产者成功发送消息到topic:{} partition:{}的消息", result.getRecordMetadata().topic(), result.getRecordMetadata().partition()),
+                ex -> logger.error("生产者发送消失败，原因：{}", ex.getMessage()));
+```
+
+如果消息发送失败的话，我们检查失败的原因之后重新发送即可！
+
+**另外这里推荐为 Producer 的`retries `（重试次数）设置一个比较合理的值，一般是 3  ，但是为了保证消息不丢失的话一般会设置比较大一点。设置完成之后，当出现网络问题之后能够自动重试消息发送，避免消息丢失。另外，建议还要设置重试间隔，因为间隔太小的话重试的效果就不明显了，网络波动一次你3次一下子就重试完了**
+
+消费者丢失消息的情况：
+
+我们知道消息在被追加到 Partition(分区)的时候都会分配一个特定的偏移量（offset）。偏移量（offset)表示 Consumer  当前消费到的 Partition(分区)的所在的位置。Kafka 通过偏移量（offset）可以保证消息在分区内的顺序性。
+
+![image-20220517212306882](images/image-20220517212306882.png)
+
+当消费者拉取到了分区的某个消息之后，消费者会自动提交了 offset。自动提交的话会有一个问题，试想一下，当消费者刚拿到这个消息准备进行真正消费的时候，突然挂掉了，消息实际上并没有被消费，但是 offset 却被自动提交了。
+
+**解决办法也比较粗暴，我们手动关闭自动提交 offset，每次在真正消费完消息之后再自己手动提交 offset 。** 但是，细心的朋友一定会发现，这样会带来消息被重新消费的问题。比如你刚刚消费完消息之后，还没提交 offset，结果自己挂掉了，那么这个消息理论上就会被消费两次。
+
+
+
+3. 保证消息不重复
+
+**kafka出现消息重复消费的原因：**
+
+- 服务端侧已经消费的数据没有成功提交 offset（根本原因）。
+- Kafka 侧 由于服务端处理业务时间长或者网络链接等等原因让 Kafka 认为服务假死，触发了分区 rebalance。
+
+**解决方案：**
+
+- 消费消息服务做幂等校验，比如 Redis 的set、MySQL 的主键等天然的幂等功能。这种方法最有效。
+
+- 将 
+
+  `enable.auto.commit`
+
+   参数设置为 false，关闭自动提交，开发者在代码中手动提交 offset。那么这里会有个问题：
+
+  什么时候提交offset合适？
+
+  - 处理完消息再提交：依旧有消息重复消费的风险，和自动提交一样
+  - 拉取到消息即提交：会有消息丢失的风险。允许消息延时的场景，一般会采用这种方式。然后，通过定时任务在业务不繁忙（比如凌晨）的时候做数据兜底。
+
 # 数据结构和算法
 
-> LRU 介绍，底层数据结构，高并发情况下如何设计 LRU
+> LRU 介绍，底层数据结构，高并发情况下如何设计 LRU or  LRU缓存原理？手写，要支持泛型
 
 [146. LRU 缓存](https://leetcode-cn.com/problems/lru-cache/)
+
+
 
 # 操作系统
 

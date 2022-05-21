@@ -164,7 +164,7 @@ public void test_parallel() {
 
 定义：构造流计算(管道运算)
 
-* 泛型计算
+* 泛型的构造函数。如：Optional<T>
 * 不改变泛型
 * 类型不变（option就是option，Stream就是Stream）
 
@@ -173,6 +173,14 @@ public void test_parallel() {
 ### 自涵子（EndFunctor)
 
 描述A->B的函数
+
+(A -> B) -> (M<A> -> M<B>)
+
+```java
+Optional.of(100).map(a -> a.toString());
+```
+
+> 代码举例
 
 ```java
 public class Event<T> {
@@ -193,7 +201,10 @@ public class Event<T> {
 
         @Override
         public String toString() {
-            return super.toString();
+            return "EventData{" +
+                    "id=" + id +
+                    ", msg='" + msg + '\'' +
+                    '}';
         }
     }
 
@@ -221,6 +232,44 @@ public class Event<T> {
         B apply(A a);
     }
 
+    <B> Event<?> map(FN<T, B> f) {
+        return new Event<B>(f.apply(this.data));
+    }
+
+    public static void main(String[] args) {
+        Stream<Event<Integer>> s = Stream.of(
+                new Event(1),
+                new Event(2),
+                new Event(0),
+                new Event(10)
+        );
+
+        s.map(event -> event.map(Transforms::transforms))
+                .forEach(e -> {
+                    System.out.println(e.data);
+                });
+    }
+}
+```
+
+逐个解析：
+
+```java
+<B> Event<?> map(FN<T, B> f) {
+    return new Event<B>(f.apply(this.data));
+}
+```
+
+`返回类型`为
+
+`传入参数`是任意类型转向B类型的接口
+
+在上面已经定义了FN这个函数，@FunctionalInterface声明了是个函数式接口
+
+```java
+@FunctionalInterface
+interface FN<A, B> {
+    B apply(A a);
 }
 ```
 
