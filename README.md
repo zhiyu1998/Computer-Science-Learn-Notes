@@ -18,7 +18,7 @@
 * [Golang](#golang)
 * [Python](#python)
 
-<img align="right" alt="GIF" src="./images/code.gif?raw=true" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;&nbsp;&nbsp;&nbsp;
+<img align="right" alt="GIF" src="images/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
 
 ## :baby_chick: Foundation
 
@@ -67,7 +67,7 @@
 * [JVM-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JVM-Notes) JVM笔记 ✅ 
 * [JUC-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/JUC-Notes) JUC笔记 ✅ 
 * [Kubernetes-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kubernetes-Notes) k8s笔记 🚫
-* [Kotlin-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kotlin-Notes) Kotlin笔记 🚫
+* [Kotlin-Learn-In-Project](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Kotlin-Learn-In-Project) 项目驱动式学习Kotlin 🚫
 
 
 
@@ -86,6 +86,7 @@
 
 
 ## :snake: Python
+
 * [ Python-Basis-Notes](https://github.com/zhiyu1998/Python-Basis-Notes) 另一个项目：关于数据科学的python基础（python + numpy + pandas） ✅ 
 * [Deep-Learning-Notes](https://github.com/zhiyu1998/My-Learn-Notes/tree/master/Deep-Learning-Notes)  深度学习笔记（图像分类、目标识别、异常检测）⏳ 
 

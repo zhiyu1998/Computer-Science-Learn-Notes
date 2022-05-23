@@ -71,6 +71,110 @@ https://pkg.go.dev/std
 
 
 
+> 【比较学习，举一反三】Go在声明上和Java有什么区别？
+
+Java声明函数举例：
+
+```java
+public void main(String[] args) {}
+```
+
+Go函数声明：
+```go
+func main() string {}
+```
+
+
+
+Java声明变量：
+
+```java
+String a = "123";
+```
+
+Go声明变量：
+
+```go
+var a string = "123"
+or
+a := "123"
+```
+
+
+
+Java声明数组：
+
+```java
+int[] a = {1,2,3,4}
+```
+
+Go的切片：
+
+```
+a := []int{1, 2, 3, 4}
+```
+
+其中的不同就是Go的切片可以相当于Java使用ArrayList
+
+```go
+a = append(a, 5)
+```
+
+
+
+Java的for循环
+
+```java
+for (int i = 0; i < a.length(); i++) {}
+or
+for (int ac in a) {}
+or (if a is a List)
+a.stream().forEach(e -> xxx)
+```
+
+Go的for循环
+
+```go
+for i, num := range a {}
+```
+
+Python的for循环
+
+```python
+for i,num in range(a):
+    xxxx
+```
+
+
+
+
+
+Go的自定义类型：
+
+```go
+type num []int
+```
+
+甚至可以为这个自定义类型声明一个成员函数
+
+```go
+type num []int
+
+func (n num) print() {
+	for i, nu := range n {
+		fmt.Println(i, nu)
+	}
+}
+```
+
+![image-20220523105431566](images/image-20220523105431566.png)
+
+上述中的 func (n num)中的`(n num)`实际上是接收器参数，每一个num类型的变量都可以调用此函数，老师的意思是实际上这是一个引用！
+
+
+
+
+
 
 
 ## 项目实践：单例爬虫、协程并发爬虫
