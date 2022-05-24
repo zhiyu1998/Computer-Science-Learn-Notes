@@ -1,8 +1,7 @@
 ![](docs/images/logo.png)
 
-<h2 style="text-align:center"> 『Computer Science Learn Notes』</h2>
-
-
+<h1 align="center"> 『Computer Science Learn Notes』 </h1>
+<p align="center">
 
 ## :milky_way:标志说明
 
