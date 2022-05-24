@@ -1,11 +1,4 @@
-* 基础语言
-  - [C语言数据结构](DataStruct-BrainMind/README.md)
-* 算法&力扣
-  - [力扣刷题笔记（Java）](LeetCode-Notes/README.md)
-
-* 面试八股文
-  - [Java后端大厂面试八股文碎片知识整理](Eight-Part-Notes/README.md)
-
+* [首页](/)
 * Java
   - [Java基础](Java-Basic-BrainMind/README.md)
   - [Spring ](SSM-Notes/Spring/README.md)
@@ -17,14 +10,18 @@
   - [Spring-Data-Jpa](Spring-Data-Jpa-Notes/README.md)
   - [JVM](JVM-Notes/README.md)
   - [JUC](JUC-Notes/README.md)
+  - [Java后端大厂面试八股文碎片知识整理](Eight-Part-Notes/README.md)
+  - [力扣刷题笔记（Java）](LeetCode-Notes/README.md)
   - [k8s](Kubernetes-Notes/README.md)
   - [项目驱动式学习Kotlin](Kotlin-Learn-In-Project/README.md)
 * 前端
   - [Vue2&Vue3](Vue2%263-Notes/README.md)
   - [React](React-Notes/README.md)
   - [TypeScript](TypeScript-Notes/README.md)
-* Golang
+* Go
   - [从问题中学习到Go](Golang-Learn-In-Problem/README.md)
 * Python
   - [python基础（python + numpy + pandas）](https://github.com/zhiyu1998/Python-Basis-Notes/blob/master/README.md)
   - [深度学习（图像分类、目标识别、异常检测）](Deep-Learning-Notes/README.md)
+* C
+  * [C语言数据结构](DataStruct-BrainMind/README.md)
