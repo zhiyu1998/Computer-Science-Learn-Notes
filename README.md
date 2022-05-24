@@ -5,9 +5,11 @@
     <h1 > 『Computer Science Learn Notes』 </h1>
 	<p>
 </div>
+:rocket: CS（Computer Science）生涯学习/读书笔记，集成Java知识体系！
 
+在线阅读：https://zhiyu1998.github.io/Computer-Science-Learn-Notes/
 
-
+国内在线阅读：待添加
 
 ## :milky_way:标志说明
 
