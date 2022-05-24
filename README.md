@@ -1,7 +1,13 @@
-![](docs/images/logo.png)
 
-<h1 align="center"> 『Computer Science Learn Notes』 </h1>
-<p align="center">
+
+<div align="center">
+	<img width="180px" src="https://github.com/zhiyu1998/Computer-Science-Learn-Notes/blob/master/docs/images/logo.png">
+    <h1 > 『Computer Science Learn Notes』 </h1>
+	<p>
+</div>
+
+
+
 
 ## :milky_way:标志说明
 
