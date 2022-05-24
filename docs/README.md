@@ -16,7 +16,7 @@
 * [Golang](#golang)
 * [Python](#python)
 
-<img align="right" alt="GIF" src="docs/images/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
+<img align="right" alt="GIF" src="images/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
 
 ## :baby_chick: Foundation
 
