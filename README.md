@@ -1,3 +1,9 @@
+![](docs/images/logo.png)
+
+<h2 style="text-align:center"> 『Computer Science Learn Notes』</h2>
+
+
+
 ## :milky_way:标志说明
 
 * 🚫 待办
