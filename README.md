@@ -8,7 +8,7 @@
 
 :rocket: CS（Computer Science）生涯学习/读书笔记，集成Java知识体系！
 
-在线阅读（V2）：https://zhiyu1998.github.io/
+在线阅读（V2）：https://zhiyu1998.github.io/Computer-Science-Learn-Notes/
 
 国内在线阅读：Gitee审核两次都没通过，所以放弃国内在线阅读！
 

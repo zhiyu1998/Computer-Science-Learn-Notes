@@ -8,8 +8,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula');
 const config = {
   title: 'Computer Science Learn Notes',
   tagline: ' CS（Computer Science）生涯学习/读书笔记，集成Java知识体系！',
-  url: 'https://zhiyu1998.github.io/Computer-Science-Learn-Notes',
-  baseUrl: '/',
+  url: 'https://zhiyu1998.github.io',
+  baseUrl: '/Computer-Science-Learn-Notes/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
