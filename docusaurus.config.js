@@ -35,6 +35,7 @@ const config = {
         docs: {
           editUrl:
             'https://zhiyu1998.github.io/Computer-Science-Learn-Notes/tree/main/packages/create-docusaurus/templates/shared/',
+          // sidebarPath: require.resolve('./sidebars.js'),
         },
         blog: false,
         theme: {
@@ -119,6 +120,12 @@ const config = {
         indexName: 'Computer-Science-Learn-Notes',
         contextualSearch: false,
       },
+      docs: {
+        sidebar: {
+          hideable: true,
+          autoCollapseCategories: true,
+        },
+      }
     }),
 };
 

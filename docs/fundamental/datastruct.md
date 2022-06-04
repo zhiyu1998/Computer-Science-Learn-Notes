@@ -7,7 +7,7 @@ This is the Data Structure mind map written down for the post-graduate examinati
 
 ```
 版本：1.4.3
-作者：kyrzy0416
+作者：zhiyu1998
 ```
 
 特点：适用于考研、期末考大部分题型

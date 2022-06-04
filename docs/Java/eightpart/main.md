@@ -3,36 +3,14 @@ sidebar_position: 1
 title: 八股文整理
 ---
 
-- [八股文学习技巧](#八股文学习技巧)
-- [Java 基础](#java-基础)
-- [常用框架](#常用框架)
-  - [Spring](#spring)
-- [微服务、分布式](#微服务分布式)
-    - [Spring Cloud Gateway](#spring-cloud-gateway)
-    - [Kong](#kong)
-    - [APISIX](#apisix)
-- [JVM](#jvm)
-- [JUC](#juc)
-- [数据库](#数据库)
-  - [Redis](#redis)
-  - [MySql](#mysql)
-- [中间件](#中间件)
-  - [消息队列](#消息队列)
-- [数据结构和算法](#数据结构和算法)
-- [操作系统](#操作系统)
-- [计算机网络](#计算机网络)
-- [系统设计](#系统设计)
-  - [场景题](#场景题)
-  - [安全](#安全)
-  - [设计模式](#设计模式)
-- [问题解答选取的 github 仓库](#问题解答选取的-github-仓库)
+[TOC]
 
-# 八股文学习技巧
+## 八股文学习技巧
 
 - [八股文学习路线及攻略](https://leetcode-cn.com/circle/discuss/2Ypo9Z/)
 - [论如何 4 个月高效刷满 500 题并形成长期记忆](https://leetcode-cn.com/circle/discuss/jq9Zke/)
 
-# Java 基础
+## Java 基础
 
 > 动态代理了解吗？说一下原理？
 
@@ -687,9 +665,9 @@ http://softlab.sdut.edu.cn/blog/subaochen/2017/01/generics-type-erasure/
 
 
 
-# 常用框架
+## 常用框架
 
-## Spring
+### Spring
 
 > 对 spring 和 springboot 的理解（开放问题）
 
@@ -758,7 +736,7 @@ http://softlab.sdut.edu.cn/blog/subaochen/2017/01/generics-type-erasure/
 
 - 如果在配置文件中通过 **destory-method** 属性指定了 Bean 的销毁方法，则 Spring 将调用该方法对 Bean 进行销毁。
 
-# 微服务、分布式
+## 微服务、分布式
 
 > 分布式事务了解吗？
 
@@ -1089,7 +1067,7 @@ Shenyu 通过插件扩展功能，插件是 ShenYu 的灵魂，并且插件也�
 
 > 分布式系统相关概念，序列化在分布式系统中的应用，讲一下 thrift
 
-# JVM
+## JVM
 
 > Java static 关键字，生命周期，static 变量存在 JVM 哪个区域和生命周期
 
@@ -1389,7 +1367,7 @@ protected void finalize() throws Throwable { }
 
 
 
-# JUC
+## JUC
 
 > 线程能不能 start 两次，线程池中的线程为什么能循环利用
 
@@ -1958,9 +1936,9 @@ ReentrantLock 比 synchronized 增加了一些高级功能
 
 
 
-# 数据库
+## 数据库
 
-## Redis
+### Redis
 
 > 简单介绍一下 Redis
 
@@ -2536,7 +2514,7 @@ Memcached 是分布式缓存最开始兴起的那会，比较常用的。后来�
 
 分布式缓存主要解决的是单机缓存的容量受服务器限制并且无法保存通用信息的问题。因为，本地缓存只在当前服务里有效，比如如果你部署了两个相同的服务，他们两者之间的缓存数据是无法共同的
 
-## MySql
+### MySql
 
 > sqlserver 和 MySQL 区别
 
@@ -2933,9 +2911,9 @@ SERIALIZABLE 隔离级别，是通过锁来实现的。除了 SERIALIZABLE 隔�
 
 
 
-# 中间件
+## 中间件
 
-## 消息队列
+### 消息队列
 
 > 什么是消息队列
 
@@ -3117,7 +3095,7 @@ if (sendResult.getRecordMetadata() != null) {
   - 处理完消息再提交：依旧有消息重复消费的风险，和自动提交一样
   - 拉取到消息即提交：会有消息丢失的风险。允许消息延时的场景，一般会采用这种方式。然后，通过定时任务在业务不繁忙（比如凌晨）的时候做数据兜底。
 
-# 数据结构和算法
+## 数据结构和算法
 
 > LRU 介绍，底层数据结构，高并发情况下如何设计 LRU or  LRU缓存原理？手写，要支持泛型
 
@@ -3125,7 +3103,7 @@ if (sendResult.getRecordMetadata() != null) {
 
 
 
-# 操作系统
+## 操作系统
 
 > 进程和线程的区别
 
@@ -3254,7 +3232,7 @@ if (sendResult.getRecordMetadata() != null) {
 2. **信号量(Semaphore)** ：它允许同一时刻多个线程访问同一资源，但是需要控制同一时刻访问此资源的最大线程数量。
 3. **事件(Event)** :Wait/Notify：通过通知操作的方式来保持多线程同步，还可以方便的实现多线程优先级的比较操作。
 
-# 计算机网络
+## 计算机网络
 
 > 计算机网络输入 URL 到看到网页
 
@@ -3598,9 +3576,9 @@ OSI7 层：应用层（Application）、表示层（Presentation）、会话层�
 
 > 第三次握手失败会发生什么
 
-# 系统设计
+## 系统设计
 
-## 场景题
+### 场景题
 
 > 很多短任务线程，选择 synchronized 还是 lock（2022-04-11 携程）
 
@@ -3722,7 +3700,7 @@ RBAC 模型中的权限是由模块和行为合并在一起而产生的，在 My
 
 > 会什么设计模式，讲一下模板方法设计模式，应用
 
-# 问题解答选取的 github 仓库
+## 问题解答选取的 github 仓库
 
 如果不是在 github 上查找到的答案会给予标注
 
