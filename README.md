@@ -1,15 +1,16 @@
 
 
 <div align="center">
-	<img width="180px" src="https://github.com/zhiyu1998/Computer-Science-Learn-Notes/blob/master/docs/images/logo.png">
+	<img width="180px" src="static/img/logo.png">
     <h1 > 『Computer Science Learn Notes』 </h1>
 	<p>
 </div>
+
 :rocket: CS（Computer Science）生涯学习/读书笔记，集成Java知识体系！
 
-在线阅读：https://zhiyu1998.github.io/Computer-Science-Learn-Notes/
+在线阅读（V2）：https://zhiyu1998.github.io/
 
-国内在线阅读：待添加
+国内在线阅读：Gitee审核两次都没通过，所以放弃国内在线阅读！
 
 ## :milky_way:标志说明
 
@@ -29,7 +30,7 @@
 * [Golang](#golang)
 * [Python](#python)
 
-<img align="right" alt="GIF" src="docs/images/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
+<img align="right" alt="GIF" src="static/img/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
 
 ## :baby_chick: Foundation
 
