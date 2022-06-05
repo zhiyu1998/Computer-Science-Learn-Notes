@@ -81,7 +81,7 @@ class Solution {
 
 及像遇到A为什么要转移到状态3？遇到B为什么能转移到状态0？
 
-<img src="https://labuladong.github.io/algo/images/kmp/forward.jpg" style="zoom: 50%;" />
+![](https://labuladong.github.io/algo/images/kmp/forward.jpg)
 
 然后实现它
 
