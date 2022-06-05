@@ -23,6 +23,12 @@ title: 从问题中学习到Go的精髓
 
 ## Start!
 
+下面的问题有些是自己思考问自己的，解答来自视频和思考。
+
+还有部分问题来自极客兔兔，回答是官方FAQ（https://go.dev/doc/faq）
+
+
+
 ### Golang为什么要有一个main的包？
 
 这个问题我在第一次学习Go的时候没有深究（因为使用的是Goland进行编写）
@@ -499,6 +505,359 @@ Stream.of(
 
 
 而这个map的删除元素的函数也是有所不同，使用`delete`进行删除
+
+
+
+### `=` 和 `:=` 的区别？
+
+=是赋值变量，:=是定义变量。
+
+
+
+### 指针的作用
+
+ 一个指针可以指向任意变量的地址，它所指向的地址在32位或64位机器上分别**固定**占4或8个字节。指针的作用有：
+
+- 获取变量的值
+
+```go
+ import fmt
+ 
+ func main(){
+  a := 1
+  p := &a//取址&
+  fmt.Printf("%d\n", *p);//取值*
+ }
+```
+
+- 改变变量的值
+
+```go
+ // 交换函数
+ func swap(a, b *int) {
+     *a, *b = *b, *a
+ }
+```
+
+- 用指针替代值传入函数，比如类的接收器就是这样的。
+
+```go
+ type A struct{}
+ 
+ func (a *A) fun(){}
+```
+
+
+
+### Go 允许多个返回值吗？
+
+可以。通常函数除了一般返回值还会返回一个error。
+
+
+
+### Go 有异常类型吗？
+
+ 有。Go用error类型代替try...catch语句，这样可以节省资源。同时增加代码可读性：
+
+```go
+ _,err := errorDemo()
+  if err!=nil{
+   fmt.Println(err)
+   return
+  }
+```
+
+也可以用errors.New()来定义自己的异常。errors.Error()会返回异常的字符串表示。只要实现error接口就可以定义自己的异常，
+
+```go
+ type errorString struct {
+  s string
+ }
+ 
+ func (e *errorString) Error() string {
+  return e.s
+ }
+ 
+ // 多一个函数当作构造函数
+ func New(text string) error {
+  return &errorString{text}
+ }
+```
+
+
+
+### 什么是协程（Goroutine）
+
+协程是**用户态轻量级线程**，它是**线程调度的基本单位**。通常在函数前加上go关键字就能实现并发。一个Goroutine会以一个很小的栈启动2KB或4KB，当遇到栈空间不足时，栈会**自动伸缩**， 因此可以轻易实现成千上万个goroutine同时启动。
+
+
+
+### 如何高效地拼接字符串
+
+ 拼接字符串的方式有："+",  fmt.Sprintf,  strings.Builder, bytes.Buffer, strings.Join
+
+1. "+"
+
+使用`+`操作符进行拼接时，会对字符串进行遍历，计算并开辟一个新的空间来存储原来的两个字符串。
+
+2. fmt.Sprintf
+
+由于采用了接口参数，必须要用反射获取值，因此有性能损耗。
+
+3. strings.Builder：
+
+用WriteString()进行拼接，内部实现是指针+切片，同时String()返回拼接后的字符串，它是直接把[]byte转换为string，从而避免变量拷贝。
+
+`strings.builder`的实现原理很简单，结构如下：
+
+```go
+ type Builder struct {
+     addr *Builder // of receiver, to detect copies by value
+     buf  []byte // 1
+ }
+```
+
+`addr`字段主要是做`copycheck`，`buf`字段是一个`byte`类型的切片，这个就是用来存放字符串内容的，提供的`writeString()`方法就是像切片`buf`中追加数据：
+
+```go
+ func (b *Builder) WriteString(s string) (int, error) {
+     b.copyCheck()
+     b.buf = append(b.buf, s...)
+     return len(s), nil
+ }
+```
+
+提供的`String`方法就是将`[]byte`转换为`string`类型，这里为了避免内存拷贝的问题，使用了强制转换来避免内存拷贝：
+
+```go
+ func (b *Builder) String() string {
+     return *(*string)(unsafe.Pointer(&b.buf))
+ }
+```
+
+4. bytes.Buffer
+
+`bytes.Buffer`是一个一个缓冲`byte`类型的缓冲器，这个缓冲器里存放着都是`byte`。使用方式如下：
+
+`bytes.buffer`底层也是一个`[]byte`切片，结构体如下：
+
+```text
+type Buffer struct {
+    buf      []byte // contents are the bytes buf[off : len(buf)]
+    off      int    // read at &buf[off], write at &buf[len(buf)]
+    lastRead readOp // last read operation, so that Unread* can work correctly.
+}
+```
+
+因为`bytes.Buffer`可以持续向`Buffer`尾部写入数据，从`Buffer`头部读取数据，所以`off`字段用来记录读取位置，再利用切片的`cap`特性来知道写入位置，这个不是本次的重点，重点看一下`WriteString`方法是如何拼接字符串的：
+
+```go
+func (b *Buffer) WriteString(s string) (n int, err error) {
+    b.lastRead = opInvalid
+    m, ok := b.tryGrowByReslice(len(s))
+    if !ok {
+        m = b.grow(len(s))
+    }
+    return copy(b.buf[m:], s), nil
+}
+```
+
+切片在创建时并不会申请内存块，只有在往里写数据时才会申请，首次申请的大小即为写入数据的大小。如果写入的数据小于64字节，则按64字节申请。采用动态扩展`slice`的机制，字符串追加采用`copy`的方式将追加的部分拷贝到尾部，`copy`是内置的拷贝函数，可以减少内存分配。
+
+但是在将`[]byte`转换为`string`类型依旧使用了标准类型，所以会发生内存分配：
+
+```go
+func (b *Buffer) String() string {
+    if b == nil {
+        // Special case, useful in debugging.
+        return "<nil>"
+    }
+    return string(b.buf[b.off:])
+}
+```
+
+5. strings.join
+
+`strings.join`也是基于`strings.builder`来实现的,并且可以自定义分隔符，代码如下：
+
+```go
+func Join(elems []string, sep string) string {
+    switch len(elems) {
+    case 0:
+        return ""
+    case 1:
+        return elems[0]
+    }
+    n := len(sep) * (len(elems) - 1)
+    for i := 0; i < len(elems); i++ {
+        n += len(elems[i])
+    }
+
+    var b Builder
+    b.Grow(n)
+    b.WriteString(elems[0])
+    for _, s := range elems[1:] {
+        b.WriteString(sep)
+        b.WriteString(s)
+    }
+    return b.String()
+}
+```
+
+唯一不同在于在`join`方法内调用了`b.Grow(n)`方法，这个是进行初步的容量分配，而前面计算的n的长度就是我们要拼接的slice的长度，因为我们传入切片长度固定，所以提前进行容量分配可以减少内存分配，很高效。
+
+```go
+func main(){
+	a := []string{"a", "b", "c"}
+	//方式1：
+	ret := a[0] + a[1] + a[2]
+	//方式2：
+	ret := fmt.Sprintf(a[0],a[1],a[2])
+	//方式3：
+	var sb strings.Builder
+	sb.WriteString(a[0])
+	sb.WriteString(a[1])
+	sb.WriteString(a[2])
+	ret := sb.String()
+	//方式4：
+	buf := new(bytes.Buffer)
+	buf.Write(a[0])
+	buf.Write(a[1])
+	buf.Write(a[2])
+	ret := buf.String()
+	//方式5：
+	ret := strings.Join(a,"")
+}
+```
+
+总结：
+
+strings.Join ≈ strings.Builder > bytes.Buffer >  "+" > fmt.Sprintf
+
+> 参考资料：[字符串拼接性能及原理 | Go 语言高性能编程 | 极客兔兔](https://geektutu.com/post/hpg-string-concat.html)
+
+
+
+### 什么是 rune 类型
+
+ rune是int32的别名，用来区分字符值和整数值。比如utf-8汉字占3个字节，按照一般方法遍历汉字字符串得到的是乱码，这个时候要将字符串转换为rune:
+
+```go
+	sample := "我爱GO"
+	runeSamp := []rune(sample)
+	runeSamp[0] = '你'
+	fmt.Println(string(runeSamp))
+```
+
+
+
+###  如何判断 map 中是否包含某个 key ？
+
+```go
+var sample map[int]int
+if _, ok := sample[10];ok{
+
+}else{
+
+}
+```
+
+
+
+### Go 支持默认参数或可选参数吗？
+
+不支持。但是可以利用结构体参数，或者...传入参数切片。
+
+
+
+### defer 的执行顺序
+
+defer执行顺序和调用顺序相反，类似于栈先进后出。
+
+
+
+### 如何交换 2 个变量的值？
+
+对于变量而言`a,b = b,a`； 对于指针而言`*a,*b = *b, *a`
+
+
+
+### Go 语言 tag 的用处？
+
+ tag可以为结构体成员提供属性。常见的：
+
+1. json序列化或反序列化时字段的名称
+2. db: sqlx模块中对应的数据库字段名
+3. form: gin框架中对应的前端的数据字段名
+4. binding: 搭配 form 使用, 默认如果没查找到结构体中的某个字段则不报错值为空, binding为 required 代表没找到返回错误给前端
+
+
+
+
+
+### 如何判断 2 个字符串切片（slice) 是相等的？
+
+ 利用反射：
+
+```go
+type Author struct {
+	Name         int      `json:Name`
+	Publications []string `json:Publication,omitempty`
+}
+
+func main() {
+	t := reflect.TypeOf(Author{})
+	for i := 0; i < t.NumField(); i++ {
+		name := t.Field(i).Name
+		s, _ := t.FieldByName(name)
+		fmt.Println(s.Tag)
+	}
+}
+```
+
+
+
+### 字符串打印时，`%v` 和 `%+v` 的区别
+
+`%v`输出结构体各成员的值；
+
+`%+v`输出结构体各成员的名称和值；
+
+`%#v`输出结构体名称和结构体各成员的名称和值
+
+
+
+### Go 语言中如何表示枚举值(enums)？
+
+ 在常量中用iota可以表示枚举。iota从0开始。
+
+```go
+const (
+	B = 1 << (10 * iota)
+	KiB 
+	MiB
+	GiB
+	TiB
+	PiB
+	EiB
+)
+```
+
+
+
+### 空 struct{} 的用途
+
+1. 用map模拟一个set，那么就要把值置为struct{}，struct{}本身不占任何空间，可以避免任何多余的内存分配。
+2. 有时候给通道发送一个空结构体,channel<-struct{}{}，也是节省了空间。
+3. 仅有方法的结构体
+
+
+
+### go里面的int和int32是同一个概念吗？
+
+不是一个概念！千万不能混淆。go语言中的int的大小是和操作系统位数相关的，如果是32位操作系统，int类型的大小就是4字节。如果是64位操作系统，int类型的大小就是8个字节。除此之外uint也与操作系统有关。
+
+int8占1个字节，int16占2个字节，int32占4个字节，int64占8个字节。
 
 
 
