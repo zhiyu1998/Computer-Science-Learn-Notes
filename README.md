@@ -108,6 +108,4 @@
 
 ## :chart_with_upwards_trend: Trend
 
-## Star History
-
-[![Star History Chart](images/Computer-Science-Learn-Notes&type=Date-16545778528646.svg+xml)](https://star-history.com/#zhiyu1998/Computer-Science-Learn-Notes&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=zhiyu1998/Computer-Science-Learn-Notes&type=Date)](https://star-history.com/#zhiyu1998/Computer-Science-Learn-Notes&Date)
