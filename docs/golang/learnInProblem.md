@@ -861,7 +861,684 @@ int8占1个字节，int16占2个字节，int32占4个字节，int64占8个字节
 
 
 
-## 项目实践：单例爬虫、协程并发爬虫
+## Java过渡Go的第一个项目：TodoList
+
+这个章节主要是学习Gin的项目架构搭建，如果以后要搭建web项目直接起一个脚手架项目很快就能搭建起来，如果项目架构都不熟悉，那么怎么使用脚手架呢？
+
+### 前言
+
+感谢以下仓库对我学习的帮助：
+
+* [Automatically generate RESTful API documentation with Swagger 2.0 for Go.    ](https://github.com/swaggo/swag)
+* [Gin+Gorm+Redis+Swagger 基于 RESTful API 规范搭建备忘录](https://github.com/CocaineCong/TodoList)
+* [Gin+Gorm开发Golang API快速开发脚手架 ](https://github.com/gourouting/singo)
+
+> 注：备忘录的架构是在Singo的基础上搭建的。
+
+
+
+### 搭建外设
+
+首先搭建脚手架，按照Singo的结构先学习Golang在Gin上的基本架构：
+
+![image-20220609131536632](images/image-20220609131536632.png)
+
+把文件搭建起来后可以开始先给`main.go`，可以看到TodoList仓库中主要分三步走：
+
+```go
+func main() { // http://localhost:3000/swagger/index.html
+	//从配置文件读入配置
+	conf.Init()
+	//转载路由 swag init -g common.go
+	r := routes.NewRouter()
+	_ = r.Run(conf.HttpPort)
+}
+```
+
+那么首先把init先写上，说明我们第一步要做的就是初始化配置（本次教程放弃了读取ini，改用yaml文件）：
+
+1. 创建YAML配置文件（放弃redis，根本用不到）
+
+```yaml
+service:
+  mode: debug
+  port: :8080
+
+#redis:
+#  addr: 127.0.0.1:6379
+
+mysql:
+  host: 用户名:密码@tcp(地址:端口号)/数据库?charset=utf8&parseTime=True&loc=Local
+```
+
+2. 然后再conf文件下创建一个`init.go`，读取yaml，然后分别丢给数据库（mysql），Gin（service）
+
+```go
+import (
+	"TodoList/model"
+	"TodoList/util"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
+)
+
+type Config struct {
+	Service *Service `yaml:"service"`
+	DB      *DB      `yaml:"mysql"`
+}
+type Service struct {
+	AppMode  string `yaml:"mode"`
+	HttpPort string `yaml:"port"`
+	//RedisAddr string `yaml:"redis.addr"`
+}
+type DB struct {
+	DbHost string `yaml:"host"`
+}
+
+var Port string
+
+// Init 初始化配置项
+func Init() {
+
+	var ginProperties Config
+
+	file, err := ioutil.ReadFile("./conf.yaml")
+
+	if err != nil {
+		util.Log().Error("配置文件读取错误，请检查文件路径:", err)
+	}
+	if err := LoadLocales("conf/locales/zh-cn.yaml"); err != nil {
+		util.Log().Error("i18n配置文件读取错误，请检查文件路径:", err) //日志内容
+	}
+	if err = yaml.Unmarshal(file, &ginProperties); err != nil {
+		util.Log().Error("YAML文件解析失败") //日志内容
+	}
+
+	model.Database(ginProperties.DB.DbHost)
+	Port = ginProperties.Service.HttpPort
+}
+```
+
+3. 然后把Singo的日志文件给复制过来，放到util文件夹下（忽略jwt，这是后面才会用到）：
+
+![image-20220609132254221](images/image-20220609132254221.png)
+
+4. 还可以复制的有conf下的i18n文件，locales和i18n.go都可以复制到conf文件下：
+
+![image-20220609133024879](images/image-20220609133024879.png)
+
+### 建立数据库
+
+1. 在搭建外设的章节可以顺着思路下来，已经把配置文件的sql连接地址转交给了gorm（model/init.go），这里singo也把连接数据库封装好了，直接拿过来用：
+
+```go
+// DB 数据库链接单例
+var DB *gorm.DB
+
+// Database 在中间件中初始化mysql链接
+func Database(connString string) {
+
+	// 初始化GORM日志配置
+	newLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  logger.Info, // Log level(这里记得根据需求改一下)
+			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+			Colorful:                  false,       // Disable color
+		},
+	)
+
+	db, err := gorm.Open(mysql.Open(connString), &gorm.Config{
+		Logger: newLogger,
+	})
+	// Error
+	if connString == "" || err != nil {
+		util.Log().Error("mysql lost: %v", err)
+		panic(err)
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		util.Log().Error("mysql lost: %v", err)
+		panic(err)
+	}
+
+	//设置连接池
+	//空闲
+	sqlDB.SetMaxIdleConns(10)
+	//打开
+	sqlDB.SetMaxOpenConns(20)
+	DB = db
+
+	migration()
+}
+```
+
+2. 但是此时的运行不起来的，要完成migration，这属于GORM的范畴了，具体学习可以到：https://gorm.io/zh_CN/docs/migration.html
+
+> 这边目前只起搭建项目目的，所以只建了一个user，后续的顺序是：创建一个user.go -》 migration.go 运行
+
+user.go
+
+```go
+type User struct {
+	gorm.Model
+	UserName       string `gorm:"unique"`
+	PasswordDigest string
+}
+
+const (
+	// PassWordCost 密码加密难度
+	PassWordCost = 12
+)
+
+func (user *User) SetPassword(password string) error {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), PassWordCost)
+	if err != nil {
+		return err
+	}
+	user.PasswordDigest = string(bytes)
+	return nil
+}
+
+func (user *User) CheckPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordDigest), []byte(password))
+	return err == nil
+}
+```
+
+migration.go
+
+```go
+//执行数据迁移
+func migration() {
+	// 自动迁移模式
+	_ = DB.AutoMigrate(&User{})
+}
+```
+
+此时运行main函数就可以看到底层数据库已经创建了user的数据表
+
+![image-20220609133451231](images/image-20220609133451231.png)
+
+此时的`user.go`也就是Java中的`DO`对象
+
+
+
+### 搭建VO对象
+
+这时我们只要创建两个文件即可：
+
+* common.go 专门返回给前端的response二次封装
+* user.go 这里是返回给前端哪些需要的用户数据
+
+common.go，直接复制脚手架的文件，然后再加点自己的状态码，返回类型就有以下内容：
+
+下面的内容主要都是包含状态码和返回内容（Java中对json的二次封装，比如返回要返回状态码200还是500，返回什么内容）
+
+```go
+// Response 基础序列化器
+type Response struct {
+	Code  int         `json:"code"`
+	Data  interface{} `json:"data,omitempty"`
+	Msg   string      `json:"msg"`
+	Error string      `json:"error,omitempty"`
+}
+
+// TrackedErrorResponse 有追踪信息的错误响应
+type TrackedErrorResponse struct {
+	Response
+	TrackID string `json:"track_id"`
+}
+
+//TokenData 带有token的Data结构
+type TokenData struct {
+	User  interface{} `json:"user"`
+	Token string      `json:"token"`
+}
+
+type ResponseUser struct {
+	Status int    `json:"status" example:"200"`
+	Data   User   `json:"data"`
+	Msg    string `json:"msg" example:"ok"`
+	Error  string `json:"error" example:""`
+}
+
+// 三位数错误编码为复用http原本含义
+// 五位数错误编码为应用自定义错误
+// 五开头的五位数错误编码为服务器端错误，比如数据库操作失败
+// 四开头的五位数错误编码为客户端错误，有时候是客户端代码写错了，有时候是用户操作错误
+const (
+	// CodeCheckLogin 未登录
+	CodeCheckLogin = 401
+	// CodeNoRightErr 未授权访问
+	CodeNoRightErr = 403
+	// CodeDBError 数据库操作失败
+	CodeDBError = 50001
+	// CodeEncryptError 加密失败
+	CodeEncryptError = 50002
+	//CodeParamErr 各种奇奇怪怪的参数错误
+	CodeParamErr               = 40001
+	ErrorExistUser             = 10002 //成员错误
+	ErrorNotExistUser          = 10003
+	ErrorFailEncryption        = 10006
+	ErrorNotCompare            = 10007
+	ErrorAuthCheckTokenFail    = 30001 //token 错误
+	ErrorAuthCheckTokenTimeout = 30002 //token 过期
+	ErrorAuthToken             = 30003
+	ErrorAuth                  = 30004
+	ErrorDatabase              = 40001
+)
+
+// CheckLogin 检查登录
+func CheckLogin() Response {
+	return Response{
+		Code: CodeCheckLogin,
+		Msg:  "未登录",
+	}
+}
+
+// Err 通用错误处理
+func Err(errCode int, msg string, err error) Response {
+	res := Response{
+		Code: errCode,
+		Msg:  msg,
+	}
+	// 生产环境隐藏底层报错
+	if err != nil && gin.Mode() != gin.ReleaseMode {
+		res.Error = err.Error()
+	}
+	return res
+}
+
+// DBErr 数据库操作失败
+func DBErr(msg string, err error) Response {
+	if msg == "" {
+		msg = "数据库操作失败"
+	}
+	return Err(CodeDBError, msg, err)
+}
+
+// ParamErr 各种参数错误
+func ParamErr(msg string, err error) Response {
+	if msg == "" {
+		msg = "参数错误"
+	}
+	return Err(CodeParamErr, msg, err)
+}
+```
+
+user.go
+
+主要是封装返回给前端的字段，一开始看也很懵，为什么这个字段感觉和model里的User一样还要写一遍？而且下面的BuildUser是个什么鬼？
+
+* 这里解答：BuildUser是在等下的service层会用到，是用来给jwt的
+
+```go
+type User struct {
+	ID       uint   `json:"id" form:"id" example:"1"`                    // 用户ID
+	UserName string `json:"user_name" form:"user_name" example:"FanOne"` // 用户名
+	CreateAt int64  `json:"create_at" form:"create_at"`                  // 创建
+}
+
+func BuildUser(user model.User) User {
+	return User{
+		ID:       user.ID,
+		UserName: user.UserName,
+		CreateAt: user.CreatedAt.Unix(),
+	}
+}
+```
+
+
+
+### 搭建Service层
+
+有了上述的基础，就可以搭建service层了，在TodoList项目中的日志框架用了第三方的框架，本次教程则采用原生在util文件下封装的框架作为日志框架。
+
+下面的这段代码实在理解不了可以直接照着抄一下：
+
+```go
+type UserService struct {
+	UserName string `form:"user_name" json:"user_name" binding:"required,min=3,max=15" example:"FanOne"`
+	Password string `form:"password" json:"password" binding:"required,min=5,max=16" example:"FanOne666"`
+}
+
+func (service *UserService) Register() *serializer.Response {
+	var user model.User
+	var count int64
+	model.DB.Model(&model.User{}).Where("user_name=?", service.UserName).First(&user).Count(&count)
+	if count == 1 {
+		code := serializer.ErrorExistUser
+		return &serializer.Response{
+			Code: code,
+			Msg:  "成员错误",
+		}
+	}
+	user.UserName = service.UserName
+	//加密密码
+	if err := user.SetPassword(service.Password); err != nil {
+		util.Log().Error(err.Error())
+		code := serializer.ErrorFailEncryption
+		return &serializer.Response{
+			Code: code,
+			Msg:  "加密失败",
+		}
+	}
+	//创建用户
+	if err := model.DB.Create(&user).Error; err != nil {
+		util.Log().Error(err.Error())
+		code := serializer.ErrorDatabase
+		return &serializer.Response{
+			Code: code,
+			Msg:  "创建用户失败",
+		}
+	}
+	return &serializer.Response{
+		Code: http.StatusOK,
+		Msg:  "成功创建",
+	}
+}
+
+func (service *UserService) Login() serializer.Response {
+	var user model.User
+	code := http.StatusOK
+
+	if err := model.DB.Where("user_name=?", service.UserName).First(&user).Error; err != nil {
+		// 查询不到，返回错误
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			util.Log().Error(err.Error())
+			code = serializer.ErrorExistUser
+			return serializer.Response{
+				Code: code,
+				Msg:  "用户不存在！",
+			}
+		}
+		util.Log().Info(err.Error())
+		return serializer.DBErr("", err)
+	}
+
+	if user.CheckPassword(service.Password) == false {
+		code := serializer.ErrorNotCompare
+		return serializer.Response{
+			Code: code,
+			Msg:  "密码错误",
+		}
+	}
+
+	token, err := util.GenerateToken(user.ID, service.UserName, 0)
+	if err != nil {
+		util.Log().Error(err.Error())
+		code = serializer.ErrorAuthToken
+		return serializer.Response{
+			Code: code,
+			Msg:  "Token授权失败",
+		}
+	}
+
+	return serializer.Response{
+		Code: code,
+		Data: serializer.TokenData{User: serializer.BuildUser(user), Token: token},
+		Msg:  "登录成功！",
+	}
+}
+
+```
+
+
+
+唯一要注意的就是，在登录用户的模块中，需要使用到JWT框架，如下所示：
+
+```go
+token, err := util.GenerateToken(user.ID, service.UserName, 0)
+	if err != nil {
+		util.Log().Error(err.Error())
+		code = serializer.ErrorAuthToken
+		return serializer.Response{
+			Code: code,
+			Msg:  "Token授权失败",
+		}
+	}
+```
+
+go-jwt好像换维护者了，地址：https://github.com/golang-jwt/jwt，用法也稍有不同。
+
+> ```
+> go get -u github.com/golang-jwt/jwt/v4
+> ```
+
+下面这段代码是对TodoList util 中的`jwt.go`进行一些修改：
+
+```go
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
+
+type Claims struct {
+	Id        uint   `json:"id"`
+	Username  string `json:"username"`
+	Authority int    `json:"authority"`
+	jwt.RegisteredClaims
+}
+
+//GenerateToken 签发用户Token
+func GenerateToken(id uint, username string, authority int) (string, error) {
+	nowTime := time.Now()
+	expireTime := nowTime.Add(24 * time.Hour)
+	claims := Claims{
+		Id:        id,
+		Username:  username,
+		Authority: authority,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expireTime),
+			Issuer:    "to-do-list",
+		},
+	}
+	tokenClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	token, err := tokenClaims.SignedString(jwtSecret)
+	return token, err
+}
+
+//ParseToken 验证用户token
+func ParseToken(token string) (*Claims, error) {
+	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+	if tokenClaims != nil {
+		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
+			return claims, nil
+		}
+	}
+	return nil, err
+}
+```
+
+封装了之后，在登录用户模块就可以使用JWT了。
+
+
+
+登录模块的最后可以看到：
+
+```go
+return serializer.Response{
+		Code: code,
+		Data: serializer.TokenData{User: serializer.BuildUser(user), Token: token},
+		Msg:  "登录成功！",
+	}
+```
+
+里面就用到：
+
+> serializer.BuildUser(user)
+
+这就是刚刚在封装的BuildUser
+
+
+
+### Controller层
+
+最后，你可以直接复制Todo List项目中的api下的user.go，因为你已经从实体类层一直搭建到这里，肯定知道里面的原理，当然，你也可以直接复制下面我写的代码：
+
+```go
+var userRegisterService service.UserService
+
+func UserRegister(c *gin.Context) {
+	if err := c.ShouldBind(&userRegisterService); err == nil {
+		res := userRegisterService.Register()
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		util.Log().Error(err.Error())
+	}
+}
+
+func UserLogin(c *gin.Context) {
+	var userLoginService service.UserService
+	if err := c.ShouldBind(&userLoginService); err == nil {
+		res := userLoginService.Login()
+		c.JSON(200, res)
+	} else {
+		c.JSON(400, ErrorResponse(err))
+		util.Log().Error(err.Error())
+	}
+}
+```
+
+> 注：如果你是复制TodoList项目中的代码话，请忽略注释里面的内容，因为那个是swagger必须要写的
+
+
+
+同时，api/common还有一个文件是`common.go`，这个在本次项目中是封装返回错误信息的controller，直接复制也可以
+
+```go
+//返回错误信息 ErrorResponse
+func ErrorResponse(err error) serializer.Response {
+	if ve, ok := err.(validator.ValidationErrors); ok {
+		for _, e := range ve {
+			field := conf.T(fmt.Sprintf("Field.%s", e.Field))
+			tag := conf.T(fmt.Sprintf("Tag.Valid.%s", e.Tag))
+			return serializer.Response{
+				Code:  40001,
+				Msg:   fmt.Sprintf("%s%s", field, tag),
+				Error: fmt.Sprint(err),
+			}
+		}
+	}
+	if _, ok := err.(*json.UnmarshalTypeError); ok {
+		return serializer.Response{
+			Code:  40001,
+			Msg:   "JSON类型不匹配",
+			Error: fmt.Sprint(err),
+		}
+	}
+	return serializer.Response{
+		Code:  40001,
+		Msg:   "参数错误",
+		Error: fmt.Sprint(err),
+	}
+}
+
+```
+
+
+
+### 搭建路由
+
+当你搭建完上述的项目，肯定还启动不起来，gin不知道你访问的地址是个什么东西，所以用gin.engine搭建路由：
+
+这里先把swagger的写上去，等下要用到
+
+```go
+func NewRouter() *gin.Engine {
+	r := gin.Default()
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler)) // 开启swag
+
+	// 路由
+	v1 := r.Group("/api/v1")
+	{
+		v1.GET("ping", func(c *gin.Context) {
+			c.JSON(200, "success")
+		})
+		// 用户操作
+		v1.POST("user/register", api.UserRegister)
+		v1.POST("user/login", api.UserLogin)
+	}
+	return r
+}
+```
+
+
+
+### 临时测试
+
+当搭建好路由以后，就可以在main函数上告诉gin你的url，你就可以访问到地址了
+
+```go
+func main() {
+	conf.Init()
+	r := routes.NewRouter()
+	_ = r.Run(conf.Port)
+}
+```
+
+
+
+### 搭建swagger进行测试
+
+完全可以按照：https://github.com/swaggo/swag/blob/master/README_zh-CN.md，进行操作。
+
+当然有几个坑要注意：
+
+1. 在main函数中你可能会写到：
+
+```go
+// programatically set swagger info
+docs.SwaggerInfo.Title = "Todo List"
+docs.SwaggerInfo.Description = "This is a simple ToDoList App."
+docs.SwaggerInfo.Version = "1.0"
+docs.SwaggerInfo.Host = "localhost:8080"
+docs.SwaggerInfo.BasePath = "/api/v1"
+docs.SwaggerInfo.Schemes = []string{"http", "https"}
+```
+
+请组合以把导入的docs改一下，比如我初始化go项目的时候是：go mod init TodoList，那么我这里导入的docs
+
+> ```go
+> import (
+>    "TodoList/conf"
+>    "TodoList/docs"
+>    "TodoList/routes"
+> )
+> ```
+
+2. 在controller层写go doc的时候是函数的名字！
+
+```go
+// UserRegister godoc
+// @Summary      用户注册
+// @Description  用户注册
+// @Tags         USER
+// @Accept       json
+// @Produce      json
+// @Param        data  body      service.UserService      true  "用户名, 密码"
+// @Success      200  {object}  serializer.ResponseUser  "{"status":200,"data":{},"msg":"ok"}"
+// @Failure      500  {object}  serializer.ResponseUser  "{"status":500,"data":{},"Msg":{},"Error":"error"}"
+// @Router       /user/register [post]
+func UserRegister(c *gin.Context) {
+    ....
+}
+```
+
+然后后续测试就可以看到成功的标志，也可以继续学习完TodoList这个项目了：
+
+![image-20220609140443914](images/image-20220609140443914.png)
+
+
+
+### 后记
+
+一开始做这个项目的时候十分艰难，Java架构思想根深蒂固（一开始看到那个logger整个人都不好，又不会用依赖注入，又想用zap替代，最后搞来搞去还是回归到了原生logger），看到Gin这个架构满身的细胞都在抗拒，后面又做了几天又感觉自己又行了，整个过程像在做过山车一样！
+
+
+
+## 外传：项目实践：单例爬虫、协程并发爬虫
 
 ### 使用说明
 

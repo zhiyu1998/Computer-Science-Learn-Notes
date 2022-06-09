@@ -547,6 +547,45 @@ JDK1.6 对锁的实现引入了大量的优化，如偏向锁、轻量级锁、�
 
 
 
+### ThreadLocal 原理
+
+简化版：
+
+**如果想实现每一个线程都有自己的专属本地变量该如何解决呢？** JDK 中提供的`ThreadLocal`类正是为了解决这样的问题。 **`ThreadLocal`类主要解决的就是让每个线程绑定自己的值，可以将`ThreadLocal`类形象的比喻成存放数据的盒子，盒子中可以存储每个线程的私有数据。**
+
+下面是ThreadLocal的源码：
+
+```java
+public class Thread implements Runnable {
+    //......
+    //与此线程有关的ThreadLocal值。由ThreadLocal类维护
+    ThreadLocal.ThreadLocalMap threadLocals = null;
+
+    //与此线程有关的InheritableThreadLocal值。由InheritableThreadLocal类维护
+    ThreadLocal.ThreadLocalMap inheritableThreadLocals = null;
+    //......
+}
+
+```
+
+可以看出 **最终的变量是放在了当前线程的 `ThreadLocalMap` 中，并不是存在 `ThreadLocal` 上，`ThreadLocal` 可以理解为只是`ThreadLocalMap`的封装，传递了变量值。** `ThrealLocal` 类中可以通过`Thread.currentThread()`获取到当前线程对象后，直接通过`getMap(Thread t)`可以访问到该线程的`ThreadLocalMap`对象。
+
+**每个`Thread`中都具备一个`ThreadLocalMap`，而`ThreadLocalMap`可以存储以`ThreadLocal`为 key ，Object 对象为 value 的键值对。**
+
+![image-20220608223419067](images/image-20220608223419067.png)
+
+> 注：`ThreadLocalMap`是`ThreadLocal`的静态内部类。
+
+
+
+【扩展】 ThreadLocal的内存泄露（简化版）：
+
+具体详细看Guide：[ThreadLocal的内存泄露](https://javaguide.cn/java/concurrent/java-concurrent-questions-02.html#threadlocal-%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2%E9%97%AE%E9%A2%98)
+
+`ThreadLocalMap` 中使用的 key 为 `ThreadLocal` 的弱引用,而 value 是强引用。所以，如果 `ThreadLocal` 没有被外部强引用的情况下，在垃圾回收的时候，key 会被清理掉，而 value 不会被清理掉。
+
+
+
 ## MYSQL
 
 ### ⭐MySQL 和 Redis 怎么保持数据一致?
