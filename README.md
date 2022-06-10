@@ -23,13 +23,9 @@
 
 ## :bird:目录概览
 
-* [Foundation](#foundation)
-* [Algorithm](#algorithm)
-* [Interview](#Interview)
-* [Java](#java)
-* [Frontend](#Frontend)
-* [Golang](#golang)
-* [Python](#python)
+|          算法           |          基础学科           |       面试&nbsp;       |         前端         | &nbsp;Golang&nbsp;  | &nbsp;Java&nbsp;&nbsp; |       Python        |
+| :---------------------: | :-------------------------: | :--------------------: | :------------------: | :-----------------: | :--------------------: | :-----------------: |
+| [:penguin:](#Algorithm) | [:baby_chick:](#Foundation) | [:tiger: ](#Interview) | [:ocean:](#Frontend) | [:mouse: ](#golang) |   [:coffee:](#java)    | [:snake: ](#python) |
 
 <img align="right" alt="GIF" src="static/img/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
 

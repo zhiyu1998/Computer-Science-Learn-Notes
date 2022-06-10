@@ -10,6 +10,7 @@ title: 个人定制八股文
 
 1. 吴师兄的1000道Java 程序员必备面试题-V1版
 2. JavaGuide突击版
+3. 面试鸭
 
 选取理由：本着查缺补漏的木桶原理，只选取高频和不会的，方便面试突袭
 
@@ -350,6 +351,30 @@ public static int f(int value) {
 
 
 
+### ⭐Java集合类框架的基本接口有哪些？
+
+Java中的集合分为value（Conllection），key-value(Map)两种存储结构
+
+> 存储value有分为List 、Set、Queue
+
+List：有序，可存储重复元素
+
+Set：无序，元素不可重复。根据equals和hashcode判断（如果一个对象要存储在Set中，必须重写equals和hashCode方法）
+
+Queue：队列
+
+> 存储key-value的为map
+
+![image-20220609215207876](images/image-20220609215207876.png)
+
+![image-20220609215218381](images/image-20220609215218381.png)
+
+![image-20220609215224938](images/image-20220609215224938.png)
+
+
+
+
+
 ### ⭐ Arraylist 与 LinkedList 区别
 
 1. **是否保证线程安全**： ArrayList 和 LinkedList 都是不同步的，也就是不保证线程安全；
@@ -547,7 +572,7 @@ JDK1.6 对锁的实现引入了大量的优化，如偏向锁、轻量级锁、�
 
 
 
-### ThreadLocal 原理
+### ⭐ThreadLocal 原理
 
 简化版：
 
@@ -586,11 +611,266 @@ public class Thread implements Runnable {
 
 
 
+### 实现 Runnable 接口和 Callable 接口的区别
+
+`Runnable`自 Java 1.0 以来一直存在，但`Callable`仅在 Java 1.5 中引入,目的就是为了来处理`Runnable`不支持的用例。**`Runnable` 接口** 不会返回结果或抛出检查异常，但是 **`Callable` 接口** 可以。所以，如果任务不需要返回结果或抛出异常推荐使用 **`Runnable` 接口** ，这样代码看起来会更加简洁。
+
+
+
+### 执行 execute()方法和 submit()方法的区别是什么呢？
+
+1. **`execute()`方法用于提交不需要返回值的任务，所以无法判断任务是否被线程池执行成功与否；**
+2. **`submit()`方法用于提交需要返回值的任务。线程池会返回一个 `Future` 类型的对象，通过这个 `Future` 对象可以判断任务是否执行成功**，并且可以通过 `Future` 的 `get()`方法来获取返回值，`get()`方法会阻塞当前线程直到任务完成，而使用 `get(long timeout，TimeUnit unit)`方法则会阻塞当前线程一段时间后立即返回，这时候有可能任务没有执行完。
+
+Execute()源码
+
+```java
+public void execute(Runnable command) {
+  ...
+}
+```
+
+submit大致源码
+
+```java
+public Future<?> submit(Runnable task) {
+    if (task == null) throw new NullPointerException();
+    RunnableFuture<Void> ftask = newTaskFor(task, null);
+    execute(ftask);
+    return ftask;
+}
+
+protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
+    return new FutureTask<T>(runnable, value);
+}
+
+```
+
+`newTaskFor` 方法返回了一个 `FutureTask` 对象。
+
+
+
+扩展：
+
+`execute()` VS `submit()`
+
+- `execute()`方法用于提交不需要返回值的任务，所以无法判断任务是否被线程池执行成功与否；
+- `submit()`方法用于提交需要返回值的任务。线程池会返回一个 Future 类型的对象，通过这个 Future 对象可以判断任务是否执行成功，
+
+`shutdown()` VS `shutdownNow()`
+
+- `shutdown()`: 关闭线程池，线程池的状态变为 SHUTDOWN。线程池不再接受新任务了，但是队列里的任务得执行完毕。
+- `shutdownNow()`: 关闭线程池，线程的状态变为 STOP。线程池会终止当前正在运行的任务，并停止处理排队的任务并返回正在等待执行的 List。
+
+`isTerminated()` VS `isShutdown()`
+
+- `isShutDown` 当调用 `shutdown()` 方法后返回为 true。
+- `isTerminated` 当调用 `shutdown()` 方法后，并且所有提交的任务完成后返回为 true
+
+
+
+### ⭐如何创建线程池
+
+《阿里巴巴 Java 开发手册》中强制线程池不允许使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样的处理方式让写的同学更加明确线程池的运行规则，规避资源耗尽的风险
+
+> Executors 返回线程池对象的弊端如下：
+>
+> - **FixedThreadPool 和 SingleThreadExecutor** ： 允许请求的队列长度为 Integer.MAX_VALUE ，可能堆积大量的请求，从而导致 OOM。
+> - **CachedThreadPool 和 ScheduledThreadPool** ： 允许创建的线程数量为 Integer.MAX_VALUE ，可能会创建大量线程，从而导致 OOM。
+
+
+
+![image-20220609154049166](images/image-20220609154049166.png)
+
+源码：
+
+```java
+/**
+ * 用给定的初始参数创建一个新的ThreadPoolExecutor。
+ */
+public ThreadPoolExecutor(int corePoolSize, //线程池的核心线程数量
+                      int maximumPoolSize, //线程池的最大线程数
+                      long keepAliveTime, //当线程数大于核心线程数时，多余的空闲线程存活的最长时间
+                      TimeUnit unit, //时间单位
+                      BlockingQueue<Runnable> workQueue, //任务队列，用来储存等待执行任务的队列
+                      ThreadFactory threadFactory, //线程工厂，用来创建线程，一般默认即可
+                      RejectedExecutionHandler handler //拒绝策略，当提交的任务过多而不能及时处理时，我们可以定制策略来处理任务
+                         ) {
+    if (corePoolSize < 0 ||
+        maximumPoolSize <= 0 ||
+        maximumPoolSize < corePoolSize ||
+        keepAliveTime < 0)
+            throw new IllegalArgumentException();
+    if (workQueue == null || threadFactory == null || handler == null)
+        throw new NullPointerException();
+    this.corePoolSize = corePoolSize;
+    this.maximumPoolSize = maximumPoolSize;
+    this.workQueue = workQueue;
+    this.keepAliveTime = unit.toNanos(keepAliveTime);
+    this.threadFactory = threadFactory;
+    this.handler = handler;
+}
+
+```
+
+****
+
+<details>
+    <summary>ThreadPoolExecutor 3 个最重要的参数：</summary>
+<p>
+    corePoolSize : 核心线程数定义了最小可以同时运行的线程数量。
+    </p>
+<p>
+    maximumPoolSize : 当队列中存放的任务达到队列容量的时候，当前可以同时运行的线程数量变为最大线程数。
+    </p>
+<p>
+    workQueue: 当新任务来的时候会先判断当前运行的线程数量是否达到核心线程数，如果达到的话，新任务就会被存放在队列中。
+    </p>
+</details>
+
+
+
+`ThreadPoolExecutor`其他常见参数:
+
+1. **`keepAliveTime`**:当线程池中的线程数量大于 `corePoolSize` 的时候，如果这时没有新的任务提交，核心线程外的线程不会立即销毁，而是会等待，直到等待的时间超过了 `keepAliveTime`才会被回收销毁；
+2. **`unit`** : `keepAliveTime` 参数的时间单位。
+3. **`threadFactory`** :executor 创建新线程的时候会用到。
+4. **`handler`** :拒绝策略
+   1. `ThreadPoolExecutor.AbortPolicy`: 抛出 RejectedExecutionException来拒绝新任务的处理。
+   2. `ThreadPoolExecutor.CallerRunsPolicy`: 提交任务的线程自己去执行该任务
+   3. `ThreadPoolExecutor.DiscardPolicy`:  不处理新任务，直接丢弃掉。
+   4. `ThreadPoolExecutor.DiscardOldestPolicy`:  此策略将丢弃最早的未处理的任务请求。
+
+
+
+### JUC 包中的原子类是哪 4 类?
+
+**基本类型**
+
+使用原子的方式更新基本类型
+
+- `AtomicInteger`：整型原子类
+- `AtomicLong`：长整型原子类
+- `AtomicBoolean`：布尔型原子类
+
+**数组类型**
+
+使用原子的方式更新数组里的某个元素
+
+- `AtomicIntegerArray`：整型数组原子类
+- `AtomicLongArray`：长整型数组原子类
+- `AtomicReferenceArray`：引用类型数组原子类
+
+**引用类型**
+
+- `AtomicReference`：引用类型原子类
+- `AtomicStampedReference`：原子更新带有版本号的引用类型。该类将整数值与引用关联起来，可用于解决原子的更新数据和数据的版本号，可以解决使用 CAS 进行原子更新时可能出现的 ABA 问题。
+- `AtomicMarkableReference` ：原子更新带有标记位的引用类型
+
+**对象的属性修改类型**
+
+- `AtomicIntegerFieldUpdater`：原子更新整型字段的更新器
+- `AtomicLongFieldUpdater`：原子更新长整型字段的更新器
+- `AtomicReferenceFieldUpdater`：原子更新引用类型字段的更新器
+
+
+
+### 能不能给我简单介绍一下 AtomicInteger 类
+
+常用类
+
+```java
+public final int get() //获取当前的值
+public final int getAndSet(int newValue)//获取当前的值，并设置新的值
+public final int getAndIncrement()//获取当前的值，并自增
+public final int getAndDecrement() //获取当前的值，并自减
+public final int getAndAdd(int delta) //获取当前的值，并加上预期的值
+boolean compareAndSet(int expect, int update) //如果输入的数值等于预期值，则以原子方式将该值设置为输入值（update）
+public final void lazySet(int newValue)//最终设置为newValue,使用 lazySet 设置之后可能导致其他线程在之后的一小段时间内还是可以读到旧的值。
+```
+
+AtomicInteger 类主要利用 CAS (compare and swap) + volatile 和 native 方法来保证原子操作，从而避免 synchronized 的高开销，执行效率大为提升。
+
+CAS 的原理是拿期望的值和原本的一个值作比较，如果相同则更新成新的值。UnSafe 类的 objectFieldOffset()  方法是一个本地方法，这个方法是用来拿到“原来的值”的内存地址，返回值是 valueOffset。另外 value 是一个 volatile  变量，在内存中可见，因此 JVM 可以保证任何时刻任何线程总能拿到该变量的最新值。
+
+
+
+> 拓展：什么是CAS?
+>
+> CAS的全称为Compare-And-Swap，直译就是对比交换。是一条CPU的原子指令，其作用是让CPU先进行比较两个值是否相等，然后原子地更新某个位置的值，经过调查发现，其实现方式是基于硬件平台的汇编指令，就是说CAS是靠硬件实现的，JVM只是封装了汇编调用，那些AtomicInteger类便是使用了这些封装后的接口。  `简单解释：CAS操作需要输入两个数值，一个旧值(期望操作前的值)和一个新值，在操作期间先比较下在旧值有没有发生变化，如果没有发生变化，才交换成新值，发生了变化则不交换。`
+>
+> CAS操作是原子性的，所以多线程并发使用CAS更新数据时，可以不使用锁。JDK中大量使用了CAS来更新数据而防止加锁(synchronized 重量级锁)来保持原子更新。
+>
+> 相信sql大家都熟悉，类似sql中的条件更新一样：update set id=3 from table where id=2。因为单条sql执行具有原子性，如果有多个线程同时执行此sql语句，只有一条能更新成功。
+
+
+
+### :fire: 请你说一下自己对于 AQS 原理的理解
+
+整理：
+
+![image-20220610112253907](images/image-20220610112253907.png)
+
+一般从以下问题出发：
+
+* 什么是AQS? 为什么它是核心?
+* AQS的核心思想是什么? 它是怎么实现的? 底层数据结构等
+* AQS有哪些核心的方法?
+* AQS定义什么样的资源获取方式?
+
+大纲：
+
+![image-20220610112512520](images/image-20220610112512520.png)
+
+文字版：
+
+**AQS  核心思想是，如果被请求的共享资源空闲，则将当前请求资源的线程设置为有效的工作线程，并且将共享资源设置为锁定状态。如果被请求的共享资源被占用，那么就需要一套线程阻塞等待以及被唤醒时锁分配的机制，这个机制 AQS 是用 CLH 队列锁实现的，即将暂时获取不到锁的线程加入到队列中。**
+
+> CLH(Craig,Landin and Hagersten)队列是一个虚拟的双向队列（虚拟的双向队列即不存在队列实例，仅存在结点之间的关联关系）。AQS 是将每条请求共享资源的线程封装成一个 CLH 锁队列的一个结点（Node）来实现锁的分配。
+
+看个 AQS(AbstractQueuedSynchronizer)原理图：
+
+![image-20220609222247265](images/image-20220609222247265.png)
+
+AQS 使用一个 int 成员变量来表示同步状态，通过内置的 FIFO 队列来完成获取资源线程的排队工作。AQS 使用 CAS 对该同步状态进行原子操作实现对其值的修改。
+
+```java
+private volatile int state;//共享变量，使用volatile修饰保证线程可见性
+```
+
+状态信息通过 protected 类型的 getState，setState，compareAndSetState 进行操作
+
+```java
+//返回同步状态的当前值
+protected final int getState() {
+    return state;
+}
+//设置同步状态的值
+protected final void setState(int newState) {
+    state = newState;
+}
+//原子地（CAS操作）将同步状态值设置为给定值update如果当前同步状态的值等于expect（期望值）
+protected final boolean compareAndSetState(int expect, int update) {
+    return unsafe.compareAndSwapInt(this, stateOffset, expect, update);
+}
+```
+
+
+
+AQS定义两种资源共享方式
+
+- Exclusive(独占)：只有一个线程能执行，如ReentrantLock。又可分为公平锁和非公平锁：
+  - 公平锁：按照线程在队列中的排队顺序，先到者先拿到锁
+  - 非公平锁：当线程要获取锁时，无视队列顺序直接去抢锁，谁抢到就是谁的
+- Share(共享)：多个线程可同时执行，如Semaphore/CountDownLatch。Semaphore、CountDownLatCh、 CyclicBarrier、ReadWriteLock 我们都会在后面讲到。
+
+
+
 ## MYSQL
 
 ### ⭐MySQL 和 Redis 怎么保持数据一致?
 
-]	个人觉得引入缓存之后，如果为了短时间的不一致性问题，选择让系统设计变得更加复杂的话，完全没必要。
+个人觉得引入缓存之后，如果为了短时间的不一致性问题，选择让系统设计变得更加复杂的话，完全没必要。
 下面单独对 Cache Aside Pattern（旁路缓存模式） 来聊聊。
 Cache Aside Pattern 中遇到写请求是这样的：更新 DB，然后直接删除 cache 。
 如果更新数据库成功，而删除缓存这一步失败的情况的话，简单说两个解决方案：
@@ -662,3 +942,38 @@ Cache Aside Pattern 中遇到写请求是这样的：更新 DB，然后直接删
 - 写 N 个内存 queue，具有相同 key 的数据都到同一个内存 queue；然后对于 N 个线程，每个线程分别消费一个内存 queue 即可，这样就能保证顺序性。
 
 ![image-20220606105944951](images/image-20220606105944951.png)
+
+
+
+## 分布式
+
+### 了解RPC吗？
+
+一言蔽之：**RPC 的出现就是为了让你调用远程方法像调用本地方法一样简单。**
+
+为了能够帮助小伙伴们理解 RPC 原理，我们可以将整个 RPC的 核心功能看作是下面👇 6 个部分实现的：
+
+1. **客户端（服务消费端）** ：调用远程方法的一端。
+2. **客户端 Stub（桩）** ： 这其实就是一代理类。代理类主要做的事情很简单，就是把你调用方法、类、方法参数等信息传递到服务端。
+3. **网络传输** ： 网络传输就是你要把你调用的方法的信息比如说参数啊这些东西传输到服务端，然后服务端执行完之后再把返回结果通过网络传输给你传输回来。网络传输的实现方式有很多种比如最近基本的 Socket或者性能以及封装更加优秀的 Netty（推荐）。
+4. **服务端 Stub（桩）** ：这个桩就不是代理类了。我觉得理解为桩实际不太好，大家注意一下就好。这里的服务端 Stub 实际指的就是接收到客户端执行方法的请求后，去指定对应的方法然后返回结果给客户端的类。
+5. **服务端（服务提供端）** ：提供远程方法的一端。
+
+具体原理图如下，后面我会串起来将整个RPC的过程给大家说一下。
+
+![image-20220609151233412](images/image-20220609151233412.png)
+
+1. 服务消费端（client）以本地调用的方式调用远程服务；
+2. 客户端 Stub（client stub） 接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体（序列化）：`RpcRequest`；
+3. 客户端 Stub（client stub） 找到远程服务的地址，并将消息发送到服务提供端；
+4. 服务端 Stub（桩）收到消息将消息反序列化为Java对象: `RpcRequest`；
+5. 服务端 Stub（桩）根据`RpcRequest`中的类、方法、方法参数等信息调用本地的方法；
+6. 服务端 Stub（桩）得到方法执行结果并将组装成能够进行网络传输的消息体：`RpcResponse`（序列化）发送至消费方；
+7. 客户端 Stub（client stub）接收到消息并将消息反序列化为Java对象:`RpcResponse` ，这样也就得到了最终结果。over!
+
+相信小伙伴们看完上面的讲解之后，已经了解了 RPC 的原理。
+
+虽然篇幅不多，但是基本把 RPC 框架的核心原理讲清楚了！另外，对于上面的技术细节，我会在后面的章节介绍到。
+
+**最后，对于 RPC 的原理，希望小伙伴不单单要理解，还要能够自己画出来并且能够给别人讲出来。因为，在面试中这个问题在面试官问到 RPC 相关内容的时候基本都会碰到。**
+

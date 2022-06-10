@@ -428,7 +428,7 @@ public Person clone() {
 
 ![image-20220404155517228](images/image-20220404155517228.png)
 
-> 序列化和反序列化的概念，方式，例子
+> 序列化和反序列化的概念，方式，例子（美团）
 
 如果我们需要持久化 Java 对象比如将 Java 对象保存在文件中，或者在网络传输 Java 对象，这些场景都需要用到序列化。
 
@@ -706,6 +706,24 @@ http://softlab.sdut.edu.cn/blog/subaochen/2017/01/generics-type-erasure/
 10、最后，如果这个Bean的Spring配置中配置了destroy-method属性，会自动调用其配置的销毁方法。
 
 
+
+> Spring设计模式（美团）
+
+具体可以参考：[面试官:“谈谈Spring中都用到了那些设计模式?”](https://mp.weixin.qq.com/s?__biz=Mzg2OTA0Njk0OA==&mid=2247485303&idx=1&sn=9e4626a1e3f001f9b0d84a6fa0cff04a&chksm=cea248bcf9d5c1aaf48b67cc52bac74eb29d6037848d6cf213b0e5466f2d1fda970db700ba41&token=255050878&lang=zh_CN#rd)
+
+**工厂设计模式** : Spring 使用工厂模式通过 `BeanFactory`、`ApplicationContext` 创建 bean 对象。
+
+**代理设计模式** : Spring AOP 功能的实现。
+
+**单例设计模式** : Spring 中的 Bean 默认都是单例的。
+
+**模板方法模式** : Spring 中 `jdbcTemplate`、`hibernateTemplate` 等以 Template 结尾的对数据库操作的类，它们就使用到了模板模式。
+
+**包装器设计模式** : 我们的项目需要连接多个数据库，而且不同的客户在每次访问中根据需要会去访问不同的数据库。这种模式让我们可以根据客户的需求能够动态切换不同的数据源。
+
+**观察者模式:** Spring 事件驱动模型就是观察者模式很经典的一个应用。
+
+**适配器模式** : Spring AOP 的增强或通知(Advice)使用到了适配器模式、spring MVC 中也是用到了适配器模式适配`Controller`。****
 
 
 
@@ -1032,15 +1050,70 @@ Shenyu 通过插件扩展功能，插件是 ShenYu 的灵魂，并且插件也�
 
 
 
+> redisson分布式锁，watch机制？
+
+这里Redis的客户端（Jedis, Redisson, Lettuce等）都是基于上述两类形式来实现分布式锁的，只是两类形式的封装以及一些优化（比如Redisson的watch dog)。
+
+以基于Redisson实现分布式锁为例（支持了 单实例、Redis哨兵、redis cluster、redis master-slave等各种部署架构）：
+
+**特色**？
+
+1. redisson所有指令都通过lua脚本执行，保证了操作的原子性
+2. redisson设置了watchdog看门狗，“看门狗”的逻辑保证了没有死锁发生
+3. redisson支持Redlock的实现方式。
+
+**过程**？
+
+1. 线程去获取锁，获取成功: 执行lua脚本，保存数据到redis数据库。
+2. 线程去获取锁，获取失败: 订阅了解锁消息，然后再尝试获取锁，获取成功后，执行lua脚本，保存数据到redis数据库。
+
+**互斥**？
+
+如果这个时候客户端B来尝试加锁，执行了同样的一段lua脚本。第一个if判断会执行“exists myLock”，发现myLock这个锁key已经存在。接着第二个if判断，判断myLock锁key的hash数据结构中，是否包含客户端B的ID，但明显没有，那么客户端B会获取到pttl myLock返回的一个数字，代表myLock这个锁key的剩余生存时间。此时客户端B会进入一个while循环，不听的尝试加锁。
+
+**watch dog自动延时机制**？
+
+客户端A加锁的锁key默认生存时间只有30秒，如果超过了30秒，客户端A还想一直持有这把锁，怎么办？其实只要客户端A一旦加锁成功，就会启动一个watch dog看门狗，它是一个后台线程，会每隔10秒检查一下，如果客户端A还持有锁key，那么就会不断的延长锁key的生存时间。
+
+**可重入**？
+
+每次lock会调用incrby，每次unlock会减一。
 
 
-> 分布式登录怎么保持状态吗
 
-> 分布式系统中，本地缓存和 Redis 中的数据是否是每台服务器上都备份同样的数据
+> 分布式登录怎么保持状态 （简而言之：单点登录怎么实现？）
+
+什么是单点登录：https://zhuanlan.zhihu.com/p/66037342
+
+怎么实现单点登录：https://mp.weixin.qq.com/s?__biz=MzI4MTY5NTk4Ng==&mid=2247489168&idx=1&sn=194ade3bfe3ae19436fd80853c135f54&source=41#wechat_redirect
+
+
+
+> 分布式系统中，本地缓存和 Redis 中的数据是否是每台服务器上都备份同样的数据（暂时理解为分布式缓存一致性）
+
+分布式缓存的话，使用的比较多的主要是 **Memcached** 和 **Redis**。不过，现在基本没有看过还有项目使用 **Memcached** 来做缓存，都是直接用 **Redis**。
+
+Memcached 是分布式缓存最开始兴起的那会，比较常用的。后来，随着 Redis 的发展，大家慢慢都转而使用更加强大的 Redis 了。
+
+分布式缓存主要解决的是单机缓存的容量受服务器限制并且无法保存通用信息的问题。因为，本地缓存只在当前服务里有效，比如如果你部署了两个相同的服务，他们两者之间的缓存数据是无法共同的。
+
+具体方案：
+
+https://blog.csdn.net/alionsss/article/details/107451485
+
+
 
 > 分布式系统相关概念，序列化在分布式系统中的应用，讲一下 thrift
 
+https://thrift.apache.org/
+
 ## JVM
+
+> 什么时候会OOM，服务OOM怎么办，如何排查（2022 美团）
+
+[系统稳定性——OutOfMemoryError 常见原因及解决方法](https://github.com/StabilityMan/StabilityGuide/blob/master/docs/diagnosis/jvm/exception/%E7%B3%BB%E7%BB%9F%E7%A8%B3%E5%AE%9A%E6%80%A7%E2%80%94%E2%80%94OutOfMemoryError%E5%B8%B8%E8%A7%81%E5%8E%9F%E5%9B%A0%E5%8F%8A%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95.md)
+
+
 
 > Java static 关键字，生命周期，static 变量存在 JVM 哪个区域和生命周期
 
@@ -1881,7 +1954,7 @@ JVM 层面与 JDK 层面，就是 synchronized+Lock，优缺点、对比、AQS
 
 
 
-> synchronized 有了为什么还要 ReentranLock ，有啥不一样？
+> synchronized 有了为什么还要 ReentranLock ，有啥不一样？（shopline）
 
 两者都是可重入锁
 
@@ -1906,6 +1979,47 @@ ReentrantLock 比 synchronized 增加了一些高级功能
 > `Condition`是 JDK1.5 之后才有的，它具有很好的灵活性，比如可以实现多路通知功能也就是在一个`Lock`对象中可以创建多个`Condition`实例（即对象监视器），**线程对象可以注册在指定的`Condition`中，从而可以有选择性的进行线程通知，在调度线程上更加灵活。 在使用`notify()/notifyAll()`方法进行通知时，被通知的线程是由 JVM 选择的，用`ReentrantLock`类结合`Condition`实例可以实现“选择性通知”** ，这个功能非常重要，而且是 Condition 接口默认提供的。而`synchronized`关键字就相当于整个 Lock 对象中只有一个`Condition`实例，所有的线程都注册在它一个身上。如果执行`notifyAll()`方法的话就会通知所有处于等待状态的线程这样会造成很大的效率问题，而`Condition`实例的`signalAll()`方法 只会唤醒注册在该`Condition`实例中的所有等待线程。
 
 **如果你想使用上述功能，那么选择 ReentrantLock 是一个不错的选择。性能已不是选择标准**
+
+
+
+> synchronized实现等待唤醒机制(shopline)
+
+https://blog.csdn.net/it_lihongmin/article/details/109230696
+
+​	等待唤醒机制使用场景比较多，`一个完整的等待唤醒机制过程：线程首先获取互斥锁，当线程要求的条件不满足时释放互斥锁，进入等待状态；当要求的条件满足时，通知等待的线程，重新获取互斥锁`。直接在并发编程模式 - Guarded Suspension设计模式中使用ReentrantLock+Condition实现了一个版本，并且也分析了 Dubbo的异步请求Api的异步转同步的过程。`Object的 wait、notify、notifyAll`方法需要配合synchronized使用，即在其内部使用，并且写法基本固定。如果在synchronized外部调用 wait方法等，则会报 java.lang.IllegalMonitorStateException。
+
+![image-20220610095635066](images/image-20220610095635066.png)
+
+![image-20220610095709053](images/image-20220610095709053.png)
+
+```java
+class Allocator {
+  private List<Object> als;
+  // 一次性申请所有资源
+  synchronized void apply(
+    Object from, Object to){
+    // 经典写法
+    while(als.contains(from) ||
+         als.contains(to)){
+      try{
+        wait();
+      }catch(Exception e){
+      }   
+    } 
+    als.add(from);
+    als.add(to);  
+  }
+  // 归还资源
+  synchronized void free(
+    Object from, Object to){
+    als.remove(from);
+    als.remove(to);
+    notifyAll();
+  }
+}
+```
+
+
 
 
 
@@ -2317,13 +2431,41 @@ T2 读取一个数据，T1 对该数据做了修改。如果 T2 再次读取这�
 
 > redis 高并发
 
+一般像 MySQL 这类的数据库的 QPS 大概都在 1w 左右（4 核 8g） ，但是使用 Redis 缓存之后很容易达到 10w+，甚至最高能达到 30w+（就单机 redis 的情况，redis 集群的话会更高）。
+
+[^QPS（Query Per Second]: 服务器每秒可以执行的查询次数；
+
+由此可见，直接操作缓存能够承受的数据库请求数量是远远大于直接访问数据库的，所以我们可以考虑把数据库中的部分数据转移到缓存中去，这样用户的一部分请求会直接到缓存这里而不用经过数据库。进而，我们也就提高了系统整体的并发。
+
+
+
 > redis 高可用
 
 [高可用：主从复制详解](https://www.pdai.tech/md/db/nosql-redis/db-redis-x-copy.html)
 
 [高可用：哨兵机制（Redis Sentinel）详解](https://www.pdai.tech/md/db/nosql-redis/db-redis-x-sentinel.html)
 
-> redis 主从是怎么做的
+> redis 主从是怎么做的（高可用范畴）
+
+主从复制，是指将一台Redis服务器的数据，复制到其他的Redis服务器。前者称为主节点(master)，后者称为从节点(slave)；数据的复制是单向的，只能由主节点到从节点。
+
+**主从复制的作用**主要包括：
+
+- **数据冗余**：主从复制实现了数据的热备份，是持久化之外的一种数据冗余方式。
+- **故障恢复**：当主节点出现问题时，可以由从节点提供服务，实现快速的故障恢复；实际上是一种服务的冗余。
+- **负载均衡**：在主从复制的基础上，配合读写分离，可以由主节点提供写服务，由从节点提供读服务（即写Redis数据时应用连接主节点，读Redis数据时应用连接从节点），分担服务器负载；尤其是在写少读多的场景下，通过多个从节点分担读负载，可以大大提高Redis服务器的并发量。
+- **高可用基石**：除了上述作用以外，主从复制还是哨兵和集群能够实施的基础，因此说主从复制是Redis高可用的基础。
+
+主从库之间采用的是**读写分离**的方式。
+
+- 读操作：主库、从库都可以接收；
+- 写操作：首先到主库执行，然后，主库将写操作同步给从库。
+
+![image-20220610203922954](images/image-20220610203922954.png)
+
+具体可以看：https://www.pdai.tech/md/db/nosql-redis/db-redis-x-copy.html#redis%E8%BF%9B%E9%98%B6---%E9%AB%98%E5%8F%AF%E7%94%A8%EF%BC%9A%E4%B8%BB%E4%BB%8E%E5%A4%8D%E5%88%B6%E8%AF%A6%E8%A7%A3
+
+
 
 > 主从复制，是指将一台 Redis 服务器的数据，复制到其他的 Redis 服务器。前者称为主节点(master)，后者称为从节点(slave)；数据的复制是单向的，只能由主节点到从节点。
 
@@ -2486,6 +2628,22 @@ replicaof 172.16.19.3 6379
 Memcached 是分布式缓存最开始兴起的那会，比较常用的。后来，随着 Redis 的发展，大家慢慢都转而使用更加强大的 Redis 了。
 
 分布式缓存主要解决的是单机缓存的容量受服务器限制并且无法保存通用信息的问题。因为，本地缓存只在当前服务里有效，比如如果你部署了两个相同的服务，他们两者之间的缓存数据是无法共同的
+
+> Redis应用场景有哪些（字节实习）
+
+- redis 客户端有哪些
+
+Redisson、Jedis、lettuce等等，官方推荐使用Redisson。
+
+Redisson是一个高级的分布式协调Redis客服端，能帮助用户在分布式环境中轻松实现一些Java的对象 (Bloom filter, BitSet, Set, SetMultimap, ScoredSortedSet, SortedSet, Map, ConcurrentMap, List, ListMultimap, Queue, BlockingQueue, Deque, BlockingDeque, Semaphore, Lock, ReadWriteLock, AtomicLong, CountDownLatch, Publish / Subscribe, HyperLogLog)。
+
+- Redis如何做大量数据插入？ Redis2.6开始redis-cli支持一种新的被称之为pipe mode的新模式用于执行大量数据插入工作。
+- redis实现分布式锁实现? 什么是 RedLock?
+- redis缓存有哪些问题，如何解决
+- redis和其它数据库一致性问题如何解决
+- redis性能问题有哪些，如何分析定位解决
+
+
 
 ### MySql
 
@@ -2889,6 +3047,12 @@ SERIALIZABLE 隔离级别，是通过锁来实现的。除了 SERIALIZABLE 隔�
 不过， SERIALIZABLE 之外的其他隔离级别可能也需要用到锁机制，就比如 REPEATABLE-READ 在当前读情况下需要使用加锁读来保证不会出现幻读。
 
 
+
+> 说下myisam 和 innodb的区别
+
+myisam引擎是5.1版本之前的默认引擎，支持全文检索、压缩、空间函数等，但是不支持事务和行级锁，所以一般用于有大量查询少量插入的场景来使用，而且myisam不支持外键，并且索引和数据是分开存储的。
+
+ innodb是基于B+Tree索引建立的，和myisam相反它支持事务、外键，并且通过MVCC来支持高并发，索引和数据存储在一起。
 
 ## 中间件
 
@@ -3963,6 +4127,18 @@ https://www.iamshuaidi.com/675.html
 
 > 多个人给一个主播打赏怎么设计？我说是一个高并发写的操作，对一个记录频繁写，分批操作，比如 10 个记录 操作一次。他说这个方案可以 但是有 100 个记录 怎么去做一个一个操作呢？我说如果在一个进程可以 分多个线程分批。他说还是不够快 我们是用的 MQ 多个消费者 一个打赏就发一个消息 （2022-6-3   58同城）
 
+
+
+> 怎么实现一个点赞功能？
+
+项目是是 SpringCloud + Dubbo的结构这是Controller层代码
+
+主要的流程解释下：先查询数据库改用户是否进行点赞，如果已经点赞则抛出异常，如果没有则new一个对象来一个一个Set，然后将已点赞的信息存入redis中，相反，取消点赞的操作就是删除redis中的数据即可，然后通过Dubbo调用API来完成保存操作，因为我这里是还要获取点赞数和评论数啥的，所以会对动态表进行更新操作。
+
+
+
+
+
 ## 安全
 
 > 讲讲 JWT
@@ -4071,13 +4247,437 @@ RBAC 模型中的权限是由模块和行为合并在一起而产生的，在 My
 
 > 为什么设计模式更好，你能说说用和不用的区别吗
 
-
-
-> 设计模式？哪些框架有设计模式？每个模式是什么样的？
+开放问题，不做解答。
 
 
 
-> 会什么设计模式，讲一下模板方法设计模式，应用
+> 会什么设计模式，讲一下模板方法设计模式，应用 | 对于模版模式的理解，应用场景，你在项目中是怎么使用的（美团）
+
+什么是模板模式？
+
+---
+
+**模板模式（Template Pattern）** 又叫模板方法模式，其定义了操作的流程，并将流程中的某些步骤延迟到子类中进行实现，使得子类在不改变操作流程的前提下，即可重新定义该操作的某些特定步骤。例如做菜，操作流程一般为  “准备菜”->“放油”->“炒菜”->“调味”->“装盘”，但可能对于不同的菜要放不同类型的油，不同的菜调味方式也可能不一样。
+
+何时使用模板模式？
+
+---
+
+当一个操作的流程较为复杂，可分为多个步骤，且对于不同的操作实现类，流程步骤相同，只有部分特定步骤才需要自定义，此时可以考虑使用模板模式。如果一个操作不复杂（即只有一个步骤），或者不存在相同的流程，那么应该使用策略模式。从这也可看出模板模式和策略模式的区别：策略模式关注的是多种策略（广度），而模板模式只关注同种策略（相同流程），但是具备多个步骤，且特定步骤可自定义（深度）。
+
+
+
+背景
+
+---
+
+我们平台的动态表单在配置表单项的过程中，每新增一个表单项，都要根据表单项的组件类型（例如 单行文本框、下拉选择框）和当前输入的各种配置来转换好对应的 Schema 并保存在 DB 中。一开始，转换的代码逻辑大概是这样的：
+
+```java
+public class FormItemConverter {
+
+    /**
+     * 将输入的配置转变为表单项
+     *
+     * @param config 前端输入的配置
+     * @return 表单项
+     */
+    public FormItem convert(FormItemConfig config) {
+        FormItem formItem = new FormItem();
+
+        // 公共的表单项属性
+        formItem.setTitle(config.getTitle());
+        formItem.setCode(config.getCode());
+        formItem.setComponent(config.getComponent());
+
+        // 创建表单组件的属性
+        FormComponentProps props = new FormComponentProps();
+        formItem.setComponentProps(props);
+        
+        // 公共的组件属性
+        if (config.isReadOnly()) {
+            props.setReadOnly(true);
+        }
+
+        FormItemTypeEnum type = config.getType();
+
+        // 下拉选择框的特殊属性处理
+        if (type == ComponentTypeEnum.DROPDOWN_SELECT) {
+            props.setAutoWidth(false);
+
+            if (config.isMultiple()) {
+                props.setMode("multiple");
+            }
+        }
+
+        // 模糊搜索框的特殊属性处理
+        if (type == ComponentTypeEnum.FUZZY_SEARCH) {
+            formItem.setFuzzySearch(true);
+            props.setAutoWidth(false);
+        }
+
+        // ...  其他组件的特殊处理
+
+        // 创建约束规则
+        List<FormItemRule> rules = new ArrayList<>(2);
+        formItem.setRules(rules);
+
+        // 每个表单项都可有的约束规则
+        if (config.isRequired()) {
+            FormItemRule requiredRule = new FormItemRule();
+            requiredRule.setRequired(true);
+            requiredRule.setMessage("请输入" + config.getTitle());
+
+            rules.add(requiredRule);
+        }
+
+        // 文本输入框才有的规则
+        if (type == ComponentTypeEnum.TEXT_INPUT || type == ComponentTypeEnum.TEXT_AREA) {
+            Integer minLength = config.getMinLength();
+
+            if (minLength != null && minLength > 0) {
+                FormItemRule minRule = new FormItemRule();
+                minRule.setMin(minLength);
+                minRule.setMessage("请至少输入 " + minLength + " 个字");
+
+                rules.add(minRule);
+            }
+
+            Integer maxLength = config.getMaxLength();
+
+            if (maxLength != null && maxLength > 0) {
+                FormItemRule maxRule = new FormItemRule();
+                maxRule.setMax(maxLength);
+                maxRule.setMessage("请最多输入 " + maxLength + " 个字");
+
+                rules.add(maxRule);
+            }
+        }
+
+        // ... 其他约束规则
+
+        return formItem;
+    }
+}
+```
+
+很明显，这份代码违反了 开闭原则（对扩展开放，对修改关闭）：如果此时需要添加一种新的表单项（包含特殊的组件属性），那么不可避免的要修改 convert 方法来进行新表单项的特殊处理。观察上面的代码，将配置转变为表单项 这个操作，满足以下流程：
+
+1. 创建表单项，并设置通用的表单项属性，然后再对不同表单项的特殊属性进行处理
+2. 创建组件属性，处理通用的组件属性，然后再对不同组件的特殊属性进行处理
+3. 创建约束规则，处理通用的约束规则，然后再对不同表单项的特性约束规则进行处理
+
+这不正是符合模板模式的使用场景（操作流程固定，特殊步骤可自定义处理）吗？基于上面这个场景，下面我就分享一下我目前基于 Spring 实现模板模式的 “最佳套路”（如果你有更好的套路，欢迎赐教和讨论哦）~
+
+
+
+方案
+
+---
+
+- **定义出模板**
+
+即首先定义出表单项转换的操作流程，即如下的 convert 方法（使用 final 修饰，确保子类不可修改操作流程）：
+
+```java
+public abstract class FormItemConverter {
+
+    /**
+     * 子类可处理的表单项类型
+     */
+    public abstract FormItemTypeEnum getType();
+
+    /**
+     * 将输入的配置转变为表单项的操作流程
+     *
+     * @param config 前端输入的配置
+     * @return 表单项
+     */
+    public final FormItem convert(FormItemConfig config) {
+        FormItem item = createItem(config);
+        // 表单项创建完成之后，子类如果需要特殊处理，可覆写该方法
+        afterItemCreate(item, config);
+
+        FormComponentProps props = createComponentProps(config);
+        item.setComponentProps(props);
+        // 组件属性创建完成之后，子类如果需要特殊处理，可覆写该方法
+        afterPropsCreate(props, config);
+
+        List<FormItemRule> rules = createRules(config);
+        item.setRules(rules);
+        // 约束规则创建完成之后，子类如果需要特殊处理，可覆写该方法
+        afterRulesCreate(rules, config);
+
+        return item;
+    }
+
+    /**
+     * 共用逻辑：创建表单项、设置通用的表单项属性
+     */
+    private FormItem createItem(FormItemConfig config) {
+        FormItem formItem = new FormItem();
+
+        formItem.setCode(config.getCode());
+        formItem.setTitle(config.getTitle());
+        formItem.setComponent(config.getComponent());
+
+        return formItem;
+    }
+
+    /**
+     * 表单项创建完成之后，子类如果需要特殊处理，可覆写该方法
+     */
+    protected void afterItemCreate(FormItem item, FormItemConfig config) { }
+
+    /**
+     * 共用逻辑：创建组件属性、设置通用的组件属性
+     */
+    private FormComponentProps createComponentProps(FormItemConfig config) {
+        FormComponentProps props = new FormComponentProps();
+
+        if (config.isReadOnly()) {
+            props.setReadOnly(true);
+        }
+
+        if (StringUtils.isNotBlank(config.getPlaceholder())) {
+            props.setPlaceholder(config.getPlaceholder());
+        }
+
+        return props;
+    }
+
+    /**
+     * 组件属性创建完成之后，子类如果需要特殊处理，可覆写该方法
+     */
+    protected void afterPropsCreate(FormComponentProps props, FormItemConfig config) { }
+
+    /**
+     * 共用逻辑：创建约束规则、设置通用的约束规则
+     */
+    private List<FormItemRule> createRules(FormItemConfig config) {
+        List<FormItemRule> rules = new ArrayList<>(4);
+
+        if (config.isRequired()) {
+            FormItemRule requiredRule = new FormItemRule();
+            requiredRule.setRequired(true);
+            requiredRule.setMessage("请输入" + config.getTitle());
+
+            rules.add(requiredRule);
+        }
+
+        return rules;
+    }
+
+    /**
+     * 约束规则创建完成之后，子类如果需要特殊处理，可覆写该方法
+     */
+    protected void afterRulesCreate(List<FormItemRule> rules, FormItemConfig config) { }
+}
+
+    模板的实现
+
+针对不同的表单项，对特殊步骤进行自定义处理：
+
+/**
+ * 下拉选择框的转换器
+ */
+@Component
+public class DropdownSelectConverter extends FormItemConverter {
+
+    @Override
+    public FormItemTypeEnum getType() {
+        return FormItemTypeEnum.DROPDOWN_SELECT;
+    }
+
+    @Override
+    protected void afterPropsCreate(FormComponentProps props, FormItemConfig config) {
+        props.setAutoWidth(false);
+
+        if (config.isMultiple()) {
+            props.setMode("multiple");
+        }
+    }
+}
+
+/**
+ * 模糊搜索框的转换器
+ */
+@Component
+public class FuzzySearchConverter extends FormItemConverter {
+
+    @Override
+    public FormItemTypeEnum getType() {
+        return FormItemTypeEnum.FUZZY_SEARCH;
+    }
+
+    @Override
+    protected void afterItemCreate(FormItem item, FormItemConfig config) {
+        item.setFuzzySearch(true);
+    }
+
+    @Override
+    protected void afterPropsCreate(FormComponentProps props, FormItemConfig config) {
+        props.setAutoWidth(false);
+    }
+}
+
+/**
+ * 通用文本类转换器
+ */
+public abstract class CommonTextConverter extends FormItemConverter {
+
+    @Override
+    protected void afterRulesCreate(List<FormItemRule> rules, FormItemConfig config) {
+        Integer minLength = config.getMinLength();
+
+        if (minLength != null && minLength > 0) {
+            FormItemRule minRule = new FormItemRule();
+            minRule.setMin(minLength);
+            minRule.setMessage("请至少输入 " + minLength + " 个字");
+
+            rules.add(minRule);
+        }
+
+        Integer maxLength = config.getMaxLength();
+
+        if (maxLength != null && maxLength > 0) {
+            FormItemRule maxRule = new FormItemRule();
+            maxRule.setMax(maxLength);
+            maxRule.setMessage("请最多输入 " + maxLength + " 个字");
+
+            rules.add(maxRule);
+        }
+    }
+}
+
+/**
+ * 单行文本框的转换器
+ */
+@Component
+public class TextInputConverter extends CommonTextConverter {
+
+    @Override
+    public FormItemTypeEnum getType() {
+        return FormItemTypeEnum.TEXT_INPUT;
+    }
+}
+
+/**
+ * 多行文本框的转换器
+ */
+@Component
+public class TextAreaConvertor extends FormItemConverter {
+
+    @Override
+    public FormItemTypeEnum getType() {
+        return FormItemTypeEnum.TEXT_AREA;
+    }
+}
+```
+
+* **制作简单工厂**
+
+```java
+@Component
+public class FormItemConverterFactory {
+
+    private static final 
+    EnumMap<FormItemTypeEnum, FormItemConverter> CONVERTER_MAP = new EnumMap<>(FormItemTypeEnum.class);
+
+    /**
+     * 根据表单项类型获得对应的转换器
+     *
+     * @param type 表单项类型
+     * @return 表单项转换器
+     */
+    public FormItemConverter getConverter(FormItemTypeEnum type) {
+        return CONVERTER_MAP.get(type);
+    }
+
+    @Autowired
+    public void setConverters(List<FormItemConverter> converters) {
+        for (final FormItemConverter converter : converters) {
+            CONVERTER_MAP.put(converter.getType(), converter);
+        }
+    }
+}
+```
+
+-  **投入使用**
+
+```java
+@Component
+public class FormItemManagerImpl implements FormItemManager {
+
+    @Autowired
+    private FormItemConverterFactory converterFactory;
+
+    @Override
+    public List<FormItem> convertFormItems(JSONArray inputConfigs) {
+        return IntStream.range(0, inputConfigs.size())
+                        .mapToObj(inputConfigs::getJSONObject)
+                        .map(this::convertFormItem)
+                        .collect(Collectors.toList());
+    }
+
+    private FormItem convertFormItem(JSONObject inputConfig) {
+        FormItemConfig itemConfig = inputConfig.toJavaObject(FormItemConfig.class);
+        FormItemConverter converter = converterFactory.getConverter(itemConfig.getType());
+
+        if (converter == null) {
+            throw new IllegalArgumentException("不存在转换器：" + itemConfig.getType());
+        }
+
+        return converter.convert(itemConfig);
+    }
+}
+```
+
+**Factory 只负责获取 Converter，每个 Converter 只负责对应表单项的转换功能，Manager 只负责逻辑编排，从而达到功能上的 “低耦合高内聚”。**
+
+- **设想一次扩展**
+
+此时要加入一种新的表单项 —— 数字选择器（NUMBER_PICKER），它有着特殊的约束条件：最小值和最大值，输入到 FormItemConfig 时分别为 minNumer 和 maxNumber。
+
+```java
+@Component
+public class NumberPickerConverter extends FormItemConverter {
+
+    @Override
+    public FormItemTypeEnum getType() {
+        return FormItemTypeEnum.NUMBER_PICKER;
+    }
+
+    @Override
+    protected void afterRulesCreate(List<FormItemRule> rules, FormItemConfig config) {
+        Integer minNumber = config.getMinNumber();
+        // 处理最小值
+        if (minNumber != null) {
+            FormItemRule minNumRule = new FormItemRule();
+
+            minNumRule.setMinimum(minNumber);
+            minNumRule.setMessage("输入数字不能小于 " + minNumber);
+
+            rules.add(minNumRule);
+        }
+
+        Integer maxNumber = config.getMaxNumber();
+        // 处理最大值
+        if (maxNumber != null) {
+            FormItemRule maxNumRule = new FormItemRule();
+
+            maxNumRule.setMaximum(maxNumber);
+            maxNumRule.setMessage("输入数字不能大于 " + maxNumber);
+
+            rules.add(maxNumRule);
+        }
+    }
+}
+```
+
+此时，我们只需要添加对应的枚举和实现对应的 FormItemConverter，并不需要修改任何逻辑代码，因为 Spring 启动时会自动帮我们处理好 NUMBER_PICKER 和  NumberPickerConverter 的关联关系 —— 完美符合 “开闭原则”。
+
+
 
 
 
@@ -4092,3 +4692,4 @@ RBAC 模型中的权限是由模块和行为合并在一起而产生的，在 My
 1. https://github.com/doocs/advanced-java 互联网 Java 工程师进阶知识完全扫盲
 1. https://www.iamshuaidi.com/ 帅地玩编程
 1. https://github.com/xiaolincoder/CS-Base 小林 x 图解计算机基础
+1. https://www.mianshiya.com/ 面试鸭
