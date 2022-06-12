@@ -669,15 +669,95 @@ http://softlab.sdut.edu.cn/blog/subaochen/2017/01/generics-type-erasure/
 
 ### Spring
 
-> 对 spring 和 springboot 的理解（开放问题）
+> 对 spring 和 springboot 的理解
 
-> springboot 是怎么加载 redis 的?
+spring
+
+---
+
+我们一般说 Spring 框架指的都是 Spring Framework，它是很多模块的集合，使用这些模块可以很方便地协助我们进行开发。
+
+比如说 Spring 自带 IoC（Inverse of Control:控制反转） 和 AOP(Aspect-Oriented  Programming:面向切面编程)、可以很方便地对数据库进行访问、可以很方便地集成第三方组件（电子邮件，任务，调度，缓存等等）、对单元测试支持比较好、支持 RESTful Java 应用程序的开发。
+
+Spring 最核心的思想就是不重新造轮子，开箱即用！
+
+Spring 提供的核心功能主要是 IoC 和 AOP。学习 Spring ，一定要把 IoC 和 AOP 的核心思想搞懂！
+
+
+
+springboot
+
+---
+
+Spring Boot 只是简化了配置，如果你需要构建 MVC 架构的 Web 程序，你还是需要使用 Spring MVC 作为 MVC 框架，只是说 Spring Boot 帮你简化了 Spring MVC 的很多配置，真正做到开箱即用！
+
+
+
+> springboot 是怎么加载 redis 的
+
+个人觉得这个问题应该从[starter出发](https://javaguide.cn/system-design/framework/spring/spring-boot-auto-assembly-principles.html#%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA-starter) -》 [自动装配原理](https://javaguide.cn/system-design/framework/spring/spring-boot-auto-assembly-principles.html#springboot-%E6%98%AF%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E8%87%AA%E5%8A%A8%E8%A3%85%E9%85%8D%E7%9A%84)
+
+
 
 > 加载的 redis 或者 bean 是单例还是多例
 
 默认单例
 
 > springboot 是怎么实现单例模式的呢？
+
+在我们的系统中，有一些对象其实我们只需要一个，比如说：线程池、缓存、对话框、注册表、日志对象、充当打印机、显卡等设备驱动程序的对象。事实上，这一类对象只能有一个实例，如果制造出多个实例就可能会导致一些问题的产生，比如：程序的行为异常、资源使用过量、或者不一致性的结果。
+
+**使用单例模式的好处:**
+
+- 对于频繁使用的对象，可以省略创建对象所花费的时间，这对于那些重量级对象而言，是非常可观的一笔系统开销；
+- 由于 new 操作的次数减少，因而对系统内存的使用频率也会降低，这将减轻 GC 压力，缩短 GC 停顿时间。
+
+**Spring 中 bean 的默认作用域就是 singleton(单例)的。** 除了 singleton 作用域，Spring 中 bean 还有下面几种作用域：
+
+- prototype : 每次请求都会创建一个新的 bean 实例。
+- request : 每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP request内有效。
+- session : 每一次HTTP请求都会产生一个新的 bean，该bean仅在当前 HTTP session 内有效。
+- global-session：  全局session作用域，仅仅在基于portlet的web应用中才有意义，Spring5已经没有了。Portlet是能够生成语义代码(例如：HTML)片段的小型Java Web插件。它们基于portlet容器，可以像servlet一样处理HTTP请求。但是，与 servlet 不同，每个 portlet  都有不同的会话
+
+**Spring 实现单例的方式：**
+
+- xml:`<bean id="userService" class="top.snailclimb.UserService" scope="singleton"/>`
+- 注解：`@Scope(value = "singleton")`
+
+Spring 通过 `ConcurrentHashMap` 实现单例注册表的特殊方式实现单例模式。Spring 实现单例的核心代码如下：
+
+```java
+// 通过 ConcurrentHashMap（线程安全） 实现单例注册表
+private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(64);
+
+public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
+        Assert.notNull(beanName, "'beanName' must not be null");
+        synchronized (this.singletonObjects) {
+            // 检查缓存中是否存在实例  
+            Object singletonObject = this.singletonObjects.get(beanName);
+            if (singletonObject == null) {
+                //...省略了很多代码
+                try {
+                    singletonObject = singletonFactory.getObject();
+                }
+                //...省略了很多代码
+                // 如果实例对象在不存在，我们注册到单例注册表中。
+                addSingleton(beanName, singletonObject);
+            }
+            return (singletonObject != NULL_OBJECT ? singletonObject : null);
+        }
+    }
+    //将对象添加到单例注册表
+    protected void addSingleton(String beanName, Object singletonObject) {
+            synchronized (this.singletonObjects) {
+                this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+
+            }
+        }
+}
+```
+
+
 
 > Spring bean 启动流程和生命周期
 
@@ -724,6 +804,22 @@ http://softlab.sdut.edu.cn/blog/subaochen/2017/01/generics-type-erasure/
 **观察者模式:** Spring 事件驱动模型就是观察者模式很经典的一个应用。
 
 **适配器模式** : Spring AOP 的增强或通知(Advice)使用到了适配器模式、spring MVC 中也是用到了适配器模式适配`Controller`。****
+
+
+
+> Spring常用注解
+
+@Value：属性赋值
+
+@Component:与业务层、dao层、控制层不相关的类需要在spring容器中创建使用
+
+@Repository:dao层对象的创建
+
+@Service:业务层层对象的创建
+
+@Controller:控制层对象的创建
+
+@Autowired:引用类型赋值,支持byName。默认是byType
 
 
 
@@ -2649,9 +2745,51 @@ Redisson是一个高级的分布式协调Redis客服端，能帮助用户在分�
 
 > sqlserver 和 MySQL 区别
 
-> 有用 mysql 做过什么东西吗（开放话题）| 如何优化 MySQL
+1. SQL适合使用“.NET”，而MySQL可以与几乎所有其他语言配对，如“PHP”
+2. sqlserver和mysql的语法不同
+3. SQL使用单个存储引擎，而不是为MySQL提供的多个引擎
+
+
 
 > Mysql sql 执行过程，用 JDBC 时 sql 执行流程
+
+MySql
+
+---
+
+下图是 MySQL 的一个简要架构图，从下图你可以很清晰的看到用户的 SQL 语句在 MySQL 内部是如何执行的。
+
+先简单介绍一下下图涉及的一些组件的基本作用帮助大家理解这幅图，在 1.2 节中会详细介绍到这些组件的作用。
+
+- **连接器：** 身份认证和权限相关(登录 MySQL 的时候)。
+- **查询缓存：** 执行查询语句的时候，会先查询缓存（MySQL 8.0 版本后移除，因为这个功能不太实用）。
+- **分析器：** 没有命中缓存的话，SQL 语句就会经过分析器，分析器说白了就是要先看你的 SQL 语句要干嘛，再检查你的 SQL 语句语法是否正确。
+- **优化器：** 按照 MySQL 认为最优的方案去执行。
+- **执行器：** 执行语句，然后从存储引擎返回数据。 
+
+![image-20220612134312190](images/image-20220612134312190.png)
+
+简单来说 MySQL 主要分为 Server 层和存储引擎层：
+
+- **Server 层**：主要包括连接器、查询缓存、分析器、优化器、执行器等，所有跨存储引擎的功能都在这一层实现，比如存储过程、触发器、视图，函数等，还有一个通用的日志模块 binlog 日志模块。
+- **存储引擎**： 主要负责数据的存储和读取，采用可以替换的插件式架构，支持 InnoDB、MyISAM、Memory 等多个存储引擎，其中 InnoDB 引擎有自有的日志模块 redolog 模块。**现在最常用的存储引擎是 InnoDB，它从 MySQL 5.5 版本开始就被当做默认存储引擎了。**
+
+
+
+JDBC
+
+---
+
+1. 注册驱动
+2. 获得连接
+3. 获取执行SQL语句的对象
+4. 执行SQL语句
+5. 处理结果
+6. 释放资源
+
+
+
+
 
 > Mysql 监听 binlog，binlog 是什么
 
@@ -2726,7 +2864,13 @@ Redisson是一个高级的分布式协调Redis客服端，能帮助用户在分�
 
 同样的，如果机器宕机，会丢失最近`N`个事务的`binlog`日志。
 
-> redo，undo，binlog
+> redo log，undo log，bin log
+
+* binlog 主要用于数据库还原，属于数据级别的数据恢复，主从复制是 binlog 最常见的一个应用场景。
+* redolog 主要用于保证事务的持久性，属于事务级别的数据恢复。
+* 如果想要保证事务的原子性，就需要在异常发生时，对已经执行的操作进行**回滚**，在 MySQL 中，恢复机制是通过 **回滚日志（undo log）** 实现的，所有事务进行的修改都会先记录到这个回滚日志中，然后再执行相关的操作。
+
+
 
 > redolog 和 binlog 的区别
 
@@ -2735,6 +2879,8 @@ Redisson是一个高级的分布式协调Redis客服端，能帮助用户在分�
 而 `binlog` 是逻辑日志，记录内容是语句的原始逻辑，类似于“给 ID=2 这一行的 c 字段加 1”，属于`MySQL Server` 层。
 
 不管用什么存储引擎，只要发生了表数据更新，都会产生 `binlog` 日志。
+
+
 
 > Mysql 里面为什么用 B+树？B+树和二叉树区别？那能不能用哈希呢？
 
@@ -2773,6 +2919,8 @@ SELECT * FROM tb1 WHERE id < 500;
 ```
 
 在这种范围查询中，优势非常大，直接遍历比 500 小的叶子节点就够了。而 Hash 索引是根据 hash 算法来定位的，难不成还要把 1 - 499 的数据，每个都进行一次 hash 计算来定位吗?这就是 Hash 最大的缺点了.
+
+
 
 > 【高频问题】什么是 MVCC？
 
@@ -2931,9 +3079,15 @@ InnoDB 引入新的锁，也就是间隙锁(Gap Lock)。在一行行扫描的过
 
 > sql 慢查询（优化），如果没有索引怎么办？加了索引也比较慢怎么办？
 
-加了索引页很慢，参考：https://mp.weixin.qq.com/s/pJQwnNOwRKw1MvcDTOrjqQ
+慢查询日志默认是关闭的，我们可以通过下面的命令将其开启：
 
-在mysql的启动配置文件或命令行参数中增加`--log-queries-not-using-indexes`参数就可以启用未使用索引查询语句
+```sh
+SET GLOBAL slow_query_log=ON
+```
+
+
+
+加了索引页很慢，参考：https://mp.weixin.qq.com/s/pJQwnNOwRKw1MvcDTOrjqQ
 
 
 
@@ -2970,6 +3124,8 @@ myisam 引擎是 5.1 版本之前的默认引擎，支持全文检索、压缩�
 
 innodb 是基于 B+Tree 索引建立的，和 myisam 相反它支持事务、外键，并且通过 MVCC 来支持高并发，索引和数据存储在一起。
 
+
+
 > 了解 mysql 的索引吗？为什么要用 b+树索引？树的高度是多少？
 
 首先，索引是在**存储引擎层实现**的，而不是在服务器层实现的，所以不同存储引擎具有不同的索引类型和实现。
@@ -3000,7 +3156,19 @@ B+ Tree 是基于 B Tree 和叶子节点顺序访问指针进行实现，它具�
 - 以页为单位读取使得一次 I/O 就能完全载入一个节点，且相邻的节点也能够被预先载入；所以数据放在叶子节点，本质上是一个 Page 页；
 - 为了支持范围查询以及关联关系， 页中数据需要有序，且页的尾部节点指向下个页的头部；
 
-> 什么时候是表锁
+> 什么是表锁（MyISAM）
+
+MySQL 5.5 之前，MyISAM 引擎是 MySQL 的默认存储引擎，可谓是风光一时。
+
+虽然，MyISAM 的性能还行，各种特性也还不错（比如全文索引、压缩、空间函数等）。但是，MyISAM 不支持事务和行级锁，而且最大的缺陷就是崩溃后无法安全恢复。
+
+MySQL 5.5.5 之前，MyISAM 是 MySQL 的默认存储引擎。5.5.5 版本之后，InnoDB 是 MySQL 的默认存储引擎。
+
+大多数时候我们使用的都是 InnoDB 存储引擎，在某些读密集的情况下，使用 MyISAM 也是合适的。不过，前提是你的项目不介意 MyISAM 不支持事务、崩溃恢复等缺点
+
+《MySQL 高性能》上面有一句话这样写到:
+
+`不要轻易相信“MyISAM 比 InnoDB 快”之类的经验之谈，这个结论往往不是绝对的。在很多我们已知场景中，InnoDB 的速度都可以让 MyISAM 望尘莫及，尤其是用到了聚簇索引，或者需要访问的数据都可以放入内存的应用。`
 
 
 
@@ -3053,6 +3221,16 @@ SERIALIZABLE 隔离级别，是通过锁来实现的。除了 SERIALIZABLE 隔�
 myisam引擎是5.1版本之前的默认引擎，支持全文检索、压缩、空间函数等，但是不支持事务和行级锁，所以一般用于有大量查询少量插入的场景来使用，而且myisam不支持外键，并且索引和数据是分开存储的。
 
  innodb是基于B+Tree索引建立的，和myisam相反它支持事务、外键，并且通过MVCC来支持高并发，索引和数据存储在一起。
+
+---
+
+**是否支持行级锁**  MyISAM 只有表级锁(table-level locking)，而 InnoDB 支持行级锁(row-level locking)和表级锁,默认为行级锁
+
+**是否支持事务**  MyISAM 不提供事务支持。InnoDB 提供事务支持
+
+**是否支持外键**  MyISAM 不支持，而 InnoDB 支持。
+
+
 
 ## 中间件
 
