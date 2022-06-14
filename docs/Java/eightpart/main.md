@@ -2396,15 +2396,145 @@ class Allocator {
 
 **Redis 提供了多种数据类型来支持不同的业务场景。Redis 还支持事务 、持久化、Lua 脚本、多种集群方案。**
 
+
+
+> Redis 基本的数据结构都有哪些？具体操作命令是什么？
+
+* String字符串
+
+| 命令   | 简述                   | 使用              |
+| ------ | ---------------------- | ----------------- |
+| GET    | 获取存储在给定键中的值 | GET name          |
+| SET    | 设置存储在给定键中的值 | SET name value    |
+| DEL    | 删除存储在给定键中的值 | DEL name          |
+| INCR   | 将键存储的值加1        | INCR key          |
+| DECR   | 将键存储的值减1        | DECR key          |
+| INCRBY | 将键存储的值加上整数   | INCRBY key amount |
+| DECRBY | 将键存储的值减去整数   | DECRBY key amount |
+
+
+
+* List列表
+
+| 命令   | 简述                                                         | 使用             |
+| ------ | ------------------------------------------------------------ | ---------------- |
+| RPUSH  | 将给定值推入到列表右端                                       | RPUSH key value  |
+| LPUSH  | 将给定值推入到列表左端                                       | LPUSH key value  |
+| RPOP   | 从列表的右端弹出一个值，并返回被弹出的值                     | RPOP key         |
+| LPOP   | 从列表的左端弹出一个值，并返回被弹出的值                     | LPOP key         |
+| LRANGE | 获取列表在给定范围上的所有值                                 | LRANGE key 0 -1  |
+| LINDEX | 通过索引获取列表中的元素。你也可以使用负数下标，以 -1 表示列表的最后一个元素， -2 表示列表的倒数第二个元素，以此类推。 | LINDEX key index |
+
+
+
+* Set集合
+
+| 命令      | 简述                                  | 使用                 |
+| --------- | ------------------------------------- | -------------------- |
+| SADD      | 向集合添加一个或多个成员              | SADD key value       |
+| SCARD     | 获取集合的成员数                      | SCARD key            |
+| SMEMBERS  | 返回集合中的所有成员                  | SMEMBERS key member  |
+| SISMEMBER | 判断 member 元素是否是集合 key 的成员 | SISMEMBER key member |
+
+
+
+* Hash散列
+
+| 命令    | 简述                                     | 使用                          |
+| ------- | ---------------------------------------- | ----------------------------- |
+| HSET    | 添加键值对                               | HSET hash-key sub-key1 value1 |
+| HGET    | 获取指定散列键的值                       | HGET hash-key key1            |
+| HGETALL | 获取散列中包含的所有键值对               | HGETALL hash-key              |
+| HDEL    | 如果给定键存在于散列中，那么就移除这个键 | HDEL hash-key sub-key1        |
+
+
+
+* Zset有序集合
+
+| 命令   | 简述                                                     | 使用                           |
+| ------ | -------------------------------------------------------- | ------------------------------ |
+| ZADD   | 将一个带有给定分值的成员添加到有序集合里面               | ZADD zset-key 178 member1      |
+| ZRANGE | 根据元素在有序集合中所处的位置，从有序集合中获取多个元素 | ZRANGE zset-key 0-1 withccores |
+| ZREM   | 如果给定元素成员存在于有序集合中，那么就移除这个元素     | ZREM zset-key member1          |
+
+> Redis 基本数据结构的底层实现原理有了解吗？
+
+![image-20220614142936584](images/image-20220614142936584.png)
+
+https://www.pdai.tech/md/db/nosql-redis/db-redis-x-redis-ds.html
+
+
+
+> Redis 为什么不直接使用 C 字符串，而要自己构建一种字符串抽象类型 SDS(simple dynamic string)？
+
+- **常数复杂度获取字符串长度**
+
+由于 len 属性的存在，我们获取 SDS 字符串的长度只需要读取 len 属性，时间复杂度为 O(1)。而对于 C 语言，获取字符串的长度通常是经过遍历计数来实现的，时间复杂度为 O(n)。通过 `strlen key` 命令可以获取 key 的字符串长度。
+
+- **杜绝缓冲区溢出**
+
+我们知道在 C 语言中使用 `strcat`  函数来进行两个字符串的拼接，一旦没有分配足够长度的内存空间，就会造成缓冲区溢出。而对于 SDS 数据类型，在进行字符修改的时候，**会首先根据记录的 len 属性检查内存空间是否满足需求**，如果不满足，会进行相应的空间扩展，然后在进行修改操作，所以不会出现缓冲区溢出。
+
+- **减少修改字符串的内存重新分配次数**
+
+C语言由于不记录字符串的长度，所以如果要修改字符串，必须要重新分配内存（先释放再申请），因为如果没有重新分配，字符串长度增大时会造成内存缓冲区溢出，字符串长度减小时会造成内存泄露。
+
+而对于SDS，由于`len`属性和`alloc`属性的存在，对于修改字符串SDS实现了**空间预分配**和**惰性空间释放**两种策略：
+
+1、`空间预分配`：对字符串进行空间扩展的时候，扩展的内存比实际需要的多，这样可以减少连续执行字符串增长操作所需的内存重分配次数。
+
+2、`惰性空间释放`：对字符串进行缩短操作时，程序不立即使用内存重新分配来回收缩短后多余的字节，而是使用 `alloc` 属性将这些字节的数量记录下来，等待后续使用。（当然SDS也提供了相应的API，当我们有需要时，也可以手动释放这些未使用的空间。）
+
+- **二进制安全**
+
+因为C字符串以空字符作为字符串结束的标识，而对于一些二进制文件（如图片等），内容可能包括空字符串，因此C字符串无法正确存取；而所有 SDS 的API 都是以处理二进制的方式来处理 `buf` 里面的元素，并且 SDS 不是以空字符串来判断是否结束，而是以 len 属性表示的长度来判断字符串是否结束。
+
+- **兼容部分 C 字符串函数**
+
+虽然 SDS 是二进制安全的，但是一样遵从每个字符串都是以空字符串结尾的惯例，这样可以重用 C 语言库`<string.h>` 中的一部分函数。
+
+
+
+`拓展:什么是SDS`
+
+**SDS的总体概览**如下图:
+
+![image-20220614143000054](images/image-20220614143000054.png)
+
+其中`sdshdr`是头部, `buf`是真实存储用户数据的地方. 另外注意, 从命名上能看出来, 这个数据结构除了能存储二进制数据, 显然是用于设计作为字符串使用的, 所以在buf中, 用户数据后总跟着一个\0. 即图中 `"数据" + "\0"`是为所谓的buf。
+
+- 如下是**6.0源码中sds相关的结构**：
+
+![image-20220614143012262](images/image-20220614143012262.png)
+
+通过上图我们可以看到，SDS有五种不同的头部. 其中sdshdr5实际并未使用到. 所以实际上有四种不同的头部, 分别如下:
+
+![image-20220614143018917](images/image-20220614143018917.png)
+
+其中：
+
+- `len` 保存了SDS保存字符串的长度
+- `buf[]` 数组用来保存字符串的每个元素
+- `alloc`分别以uint8, uint16, uint32, uint64表示整个SDS, 除过头部与末尾的\0, 剩余的字节数.
+- `flags` 始终为一字节, 以低三位标示着头部的类型, 高5位未使用.
+
+
+
+> Redis 的持久化方式有了解吗？能大概说一下吗？
+
+从严格意义上说，Redis服务提供四种持久化存储方案：RDB、AOF、虚拟内存（VM）和　DISKSTORE。虚拟内存（VM）方式，从Redis Version 2.4开始就被官方明确表示不再建议使用，Version 3.2版本中更找不到关于虚拟内存（VM）的任何配置范例，Redis的主要作者Salvatore Sanfilippo还专门写了一篇论文，来反思Redis对虚拟内存（VM）存储技术的支持问题。 至于DISKSTORE方式，是从Redis Version 2.8版本开始提出的一个存储设想，到目前为止Redis官方也没有在任何stable版本中明确建议使用这用方式。在Version 3.2版本中同样找不到对于这种存储方式的明确支持。从网络上能够收集到的各种资料来看，DISKSTORE方式和RDB方式还有着一些千丝万缕的联系，不过各位读者也知道，除了官方文档以外网络资料很多就是大抄。 最关键的是目前官方文档上能够看到的Redis对持久化存储的支持明确的就只有两种方案（https://redis.io/topics/persistence）：RDB和AOF。
+
+具体介绍见：https://www.pdai.tech/md/db/nosql-redis/db-redis-x-rdb-aof.html#redis%E6%8C%81%E4%B9%85%E5%8C%96%E7%AE%80%E4%BB%8B
+
+
+
 > Redis 怎么统计在线用户
 
 见下一个问题的`bitmap`的使用场景
 
+
+
 > Redis 的数据结构讲一讲 + 使用场景
-
-你可以自己本机安装 redis 或者通过 redis 官网提供的[在线 redis 环境](https://try.redis.io/)。
-
-![image-20220404203727426](images/image-20220404203727426.png)
 
 string
 
@@ -2414,60 +2544,7 @@ string
 2. **常用命令：** `set,get,strlen,exists,decr,incr,setex` 等等。
 3. **应用场景：** 一般常用在需要计数的场景，比如用户的访问次数、热点文章的点赞转发数量等等。
 
-下面我们简单看看它的使用！
 
-**普通字符串的基本操作：**
-
-```sh
-127.0.0.1:6379> set key value #设置 key-value 类型的值
-OK
-127.0.0.1:6379> get key # 根据 key 获得对应的 value
-"value"
-127.0.0.1:6379> exists key  # 判断某个 key 是否存在
-(integer) 1
-127.0.0.1:6379> strlen key # 返回 key 所储存的字符串值的长度。
-(integer) 5
-127.0.0.1:6379> del key # 删除某个 key 对应的值
-(integer) 1
-127.0.0.1:6379> get key
-(nil)
-```
-
-**批量设置** :
-
-```sh
-127.0.0.1:6379> mset key1 value1 key2 value2 # 批量设置 key-value 类型的值
-OK
-127.0.0.1:6379> mget key1 key2 # 批量获取多个 key 对应的 value
-1) "value1"
-2) "value2"
-```
-
-**计数器（字符串的内容为整数的时候可以使用）：**
-
-```sh
-127.0.0.1:6379> set number 1
-OK
-127.0.0.1:6379> incr number # 将 key 中储存的数字值增一
-(integer) 2
-127.0.0.1:6379> get number
-"2"
-127.0.0.1:6379> decr number # 将 key 中储存的数字值减一
-(integer) 1
-127.0.0.1:6379> get number
-"1"
-```
-
-**过期（默认为永不过期）**：
-
-```sh
-127.0.0.1:6379> expire key  60 # 数据在 60s 后过期
-(integer) 1
-127.0.0.1:6379> setex key 60 value # 数据在 60s 后过期 (setex:[set] + [ex]pire)
-OK
-127.0.0.1:6379> ttl key # 查看数据还有多久过期
-(integer) 56
-```
 
 list
 
@@ -2477,60 +2554,7 @@ list
 2. **常用命令:** `rpush,lpop,lpush,rpop,lrange,llen` 等。
 3. **应用场景:** 发布与订阅或者说消息队列、慢查询。
 
-下面我们简单看看它的使用！
 
-**通过 `rpush/lpop` 实现队列：**
-
-```sh
-127.0.0.1:6379> rpush myList value1 # 向 list 的头部（右边）添加元素
-(integer) 1
-127.0.0.1:6379> rpush myList value2 value3 # 向list的头部（最右边）添加多个元素
-(integer) 3
-127.0.0.1:6379> lpop myList # 将 list的尾部(最左边)元素取出
-"value1"
-127.0.0.1:6379> lrange myList 0 1 # 查看对应下标的list列表， 0 为 start,1为 end
-1) "value2"
-2) "value3"
-127.0.0.1:6379> lrange myList 0 -1 # 查看列表中的所有元素，-1表示倒数第一
-1) "value2"
-2) "value3"
-```
-
-**通过 `rpush/rpop` 实现栈：**
-
-```sh
-127.0.0.1:6379> rpush myList2 value1 value2 value3
-(integer) 3
-127.0.0.1:6379> rpop myList2 # 将 list的头部(最右边)元素取出
-"value3"
-```
-
-我专门画了一个图方便小伙伴们来理解：
-
-![image-20220404203914017](images/image-20220404203914017.png)
-
-**通过 `lrange` 查看对应下标范围的列表元素：**
-
-```sh
-127.0.0.1:6379> rpush myList value1 value2 value3
-(integer) 3
-127.0.0.1:6379> lrange myList 0 1 # 查看对应下标的list列表， 0 为 start,1为 end
-1) "value1"
-2) "value2"
-127.0.0.1:6379> lrange myList 0 -1 # 查看列表中的所有元素，-1表示倒数第一
-1) "value1"
-2) "value2"
-3) "value3"
-```
-
-通过 `lrange` 命令，你可以基于 list 实现分页查询，性能非常高！
-
-**通过 `llen` 查看链表长度：**
-
-```sh
-127.0.0.1:6379> llen myList
-(integer) 3
-```
 
 hash
 
@@ -2540,36 +2564,7 @@ hash
 2. **常用命令：** `hset,hmset,hexists,hget,hgetall,hkeys,hvals` 等。
 3. **应用场景:** 系统中对象数据的存储。
 
-下面我们简单看看它的使用！
 
-```sh
-127.0.0.1:6379> hmset userInfoKey name "guide" description "dev" age "24"
-OK
-127.0.0.1:6379> hexists userInfoKey name # 查看 key 对应的 value中指定的字段是否存在。
-(integer) 1
-127.0.0.1:6379> hget userInfoKey name # 获取存储在哈希表中指定字段的值。
-"guide"
-127.0.0.1:6379> hget userInfoKey age
-"24"
-127.0.0.1:6379> hgetall userInfoKey # 获取在哈希表中指定 key 的所有字段和值
-1) "name"
-2) "guide"
-3) "description"
-4) "dev"
-5) "age"
-6) "24"
-127.0.0.1:6379> hkeys userInfoKey # 获取 key 列表
-1) "name"
-2) "description"
-3) "age"
-127.0.0.1:6379> hvals userInfoKey # 获取 value 列表
-1) "guide"
-2) "dev"
-3) "24"
-127.0.0.1:6379> hset userInfoKey name "GuideGeGe" # 修改某个字段对应的值
-127.0.0.1:6379> hget userInfoKey name
-"GuideGeGe"
-```
 
 set
 
@@ -2579,27 +2574,7 @@ set
 2. **常用命令：** `sadd,spop,smembers,sismember,scard,sinterstore,sunion` 等。
 3. **应用场景:** 需要存放的数据不能重复以及需要获取多个数据源交集和并集等场景
 
-下面我们简单看看它的使用
 
-```sh
-127.0.0.1:6379> sadd mySet value1 value2 # 添加元素进去
-(integer) 2
-127.0.0.1:6379> sadd mySet value1 # 不允许有重复元素
-(integer) 0
-127.0.0.1:6379> smembers mySet # 查看 set 中所有的元素
-1) "value1"
-2) "value2"
-127.0.0.1:6379> scard mySet # 查看 set 的长度
-(integer) 2
-127.0.0.1:6379> sismember mySet value1 # 检查某个元素是否存在set 中，只能接收单个元素
-(integer) 1
-127.0.0.1:6379> sadd mySet2 value2 value3
-(integer) 2
-127.0.0.1:6379> sinterstore mySet3 mySet mySet2 # 获取 mySet 和 mySet2 的交集并存放在 mySet3 中
-(integer) 1
-127.0.0.1:6379> smembers mySet3
-1) "value2"
-```
 
 sorted set
 
@@ -2609,26 +2584,7 @@ sorted set
 2. **常用命令：** `zadd,zcard,zscore,zrange,zrevrange,zrem` 等。
 3. **应用场景：** 需要对数据根据某个权重进行排序的场景。比如在直播系统中，实时排行信息包含直播间在线用户列表，各种礼物排行榜，弹幕消息（可以理解为按消息维度的消息排行榜）等信息。
 
-```sh
-127.0.0.1:6379> zadd myZset 3.0 value1 # 添加元素到 sorted set 中 3.0 为权重
-(integer) 1
-127.0.0.1:6379> zadd myZset 2.0 value2 1.0 value3 # 一次添加多个元素
-(integer) 2
-127.0.0.1:6379> zcard myZset # 查看 sorted set 中的元素数量
-(integer) 3
-127.0.0.1:6379> zscore myZset value1 # 查看某个 value 的权重
-"3"
-127.0.0.1:6379> zrange  myZset 0 -1 # 顺序输出某个范围区间的元素，0 -1 表示输出所有元素
-1) "value3"
-2) "value2"
-3) "value1"
-127.0.0.1:6379> zrange  myZset 0 1 # 顺序输出某个范围区间的元素，0 为 start  1 为 stop
-1) "value3"
-2) "value2"
-127.0.0.1:6379> zrevrange  myZset 0 1 # 逆序输出某个范围区间的元素，0 为 start  1 为 stop
-1) "value1"
-2) "value2"
-```
+
 
 bitmap
 
@@ -2637,25 +2593,6 @@ bitmap
 1. **介绍：** bitmap 存储的是连续的二进制数字（0 和 1），通过 bitmap, 只需要一个 bit 位来表示某个元素对应的值或者状态，key 就是对应元素本身 。我们知道 8 个 bit 可以组成一个 byte，所以 bitmap 本身会极大的节省储存空间。
 2. **常用命令：** `setbit` 、`getbit` 、`bitcount`、`bitop`
 3. **应用场景：** 适合需要保存状态信息（比如是否签到、是否登录...）并需要进一步对这些信息进行分析的场景。比如用户签到情况、活跃用户情况、用户行为统计（比如是否点赞过某个视频）。
-
-```sh
-# SETBIT 会返回之前位的值（默认是 0）这里会生成 7 个位
-127.0.0.1:6379> setbit mykey 7 1
-(integer) 0
-127.0.0.1:6379> setbit mykey 7 0
-(integer) 1
-127.0.0.1:6379> getbit mykey 7
-(integer) 0
-127.0.0.1:6379> setbit mykey 6 1
-(integer) 0
-127.0.0.1:6379> setbit mykey 8 1
-(integer) 0
-# 通过 bitcount 统计被被设置为 1 的位的数量。
-127.0.0.1:6379> bitcount mykey
-(integer) 2
-```
-
-针对上面提到的一些场景，这里进行进一步说明。
 
 **使用场景一：用户行为分析** 很多网站为了分析你的喜好，需要研究你点赞过的内容。
 
@@ -2712,6 +2649,8 @@ BITOP operation destkey key [key ...]
 只需要一个 key，然后用户 ID 为 offset，如果在线就设置为 1，不在线就设置为 0。
 
 > Zset 里面跳表是什么
+
+**跳跃表（zSkiplist)**: 跳跃表的性能可以保证在查找，删除，添加等操作的时候在对数期望时间内完成，这个性能是可以和平衡树来相比较的，而且在实现方面比平衡树要优雅，这是采用跳跃表的主要原因。跳跃表的复杂度是O(log(n))。
 
 
 
