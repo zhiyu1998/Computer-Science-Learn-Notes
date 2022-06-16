@@ -1,9 +1,10 @@
-
 <div align="center">
  <img width="180px" src="static/img/logo.png">
-    <h1> 『Computer Science Learn Notes』 </h1>
- <p>
+    <p/>
+ <h1>『Computer Science Learn Notes』</h1>
 </div>
+
+
 
 :rocket: CS（Computer Science）生涯学习/读书笔记，集成Java知识体系！
 

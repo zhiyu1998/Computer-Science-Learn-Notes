@@ -4,7 +4,7 @@ title: 个人定制八股文
 ---
 [TOC]
 
-## :fallen_leaf: 个人定制八股文 :leaves:
+## :fallen_leaf: 个人定制八股文
 
 整理自
 
@@ -308,6 +308,139 @@ float f = 3.14222222222222222222222;
 
 
 
+### ⭐HashMap 的底层实现
+
+#### JDK1.8 之前
+
+JDK1.8 之前 `HashMap` 底层是 **数组和链表** 结合在一起使用也就是 **链表散列**。**HashMap 通过 key 的 hashCode 经过扰动函数处理过后得到 hash 值，然后通过 (n - 1) & hash  判断当前元素存放的位置（这里的 n 指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素的 hash 值以及 key  是否相同，如果相同的话，直接覆盖，不相同就通过拉链法解决冲突。**
+
+**所谓扰动函数指的就是 HashMap 的 hash 方法。使用 hash 方法也就是扰动函数是为了防止一些实现比较差的 hashCode() 方法 换句话说使用扰动函数之后可以减少碰撞。**
+
+**JDK 1.8 HashMap 的 hash 方法源码:**
+
+JDK 1.8 的 hash 方法 相比于 JDK 1.7 hash 方法更加简化，但是原理不变。
+
+```java
+    static final int hash(Object key) {
+      int h;
+      // key.hashCode()：返回散列值也就是hashcode
+      // ^ ：按位异或
+      // >>>:无符号右移，忽略符号位，空位都以0补齐
+      return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+  }
+```
+
+对比一下 JDK1.7 的 HashMap 的 hash 方法源码.
+
+```java
+static int hash(int h) {
+    // This function ensures that hashCodes that differ only by
+    // constant multiples at each bit position have a bounded
+    // number of collisions (approximately 8 at default load factor).
+
+    h ^= (h >>> 20) ^ (h >>> 12);
+    return h ^ (h >>> 7) ^ (h >>> 4);
+}
+```
+
+相比于 JDK1.8 的 hash 方法 ，JDK 1.7 的 hash 方法的性能会稍差一点点，因为毕竟扰动了 4 次。
+
+所谓 **“拉链法”** 就是：将链表和数组相结合。也就是说创建一个链表数组，数组中每一格就是一个链表。若遇到哈希冲突，则将冲突的值加到链表中即可。
+
+![image-20220616155615352](images/image-20220616155615352.png)
+
+#### JDK1.8 之后
+
+相比于之前的版本， JDK1.8 之后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为 8）（将链表转换成红黑树前会判断，如果当前数组的长度小于 64，那么会选择先进行数组扩容，而不是转换为红黑树）时，将链表转化为红黑树，以减少搜索时间。
+
+![image-20220616155623710](images/image-20220616155623710.png)
+
+> TreeMap、TreeSet 以及 JDK1.8 之后的 HashMap 底层都用到了红黑树。红黑树就是为了解决二叉查找树的缺陷，因为二叉查找树在某些情况下会退化成一个线性结构。
+
+
+
+### ⭐HashMap源码分析
+
+#### get()
+
+`get(Object key)`方法根据指定的`key`值返回对应的`value`，该方法调用了`getEntry(Object key)`得到相应的`entry`，然后返回`entry.getValue()`。因此`getEntry()`是算法的核心。 算法思想是首先通过`hash()`函数得到对应`bucket`的下标，然后依次遍历冲突链表，通过`key.equals(k)`方法来判断是否是要找的那个`entry`。
+
+![image-20220616161400630](images/image-20220616161400630.png)
+
+上图中`hash(k)&(table.length-1)`等价于`hash(k)%table.length`，原因是*HashMap*要求`table.length`必须是2的指数，因此`table.length-1`就是二进制低位全是1，跟`hash(k)`相与会将哈希值的高位全抹掉，剩下的就是余数了。
+
+```java
+//getEntry()方法
+final Entry<K,V> getEntry(Object key) {
+	......
+	int hash = (key == null) ? 0 : hash(key);
+    for (Entry<K,V> e = table[hash&(table.length-1)];//得到冲突链表
+         e != null; e = e.next) {//依次遍历冲突链表中的每个entry
+        Object k;
+        //依据equals()方法判断是否相等
+        if (e.hash == hash &&
+            ((k = e.key) == key || (key != null && key.equals(k))))
+            return e;
+    }
+    return null;
+}
+```
+
+#### put()
+
+`put(K key, V value)`方法是将指定的`key, value`对添加到`map`里。该方法首先会对`map`做一次查找，看是否包含该元组，如果已经包含则直接返回，查找过程类似于`getEntry()`方法；如果没有找到，则会通过`addEntry(int hash, K key, V value, int bucketIndex)`方法插入新的`entry`，插入方式为**头插法**。
+
+![image-20220616161439305](images/image-20220616161439305.png)
+
+```java
+//addEntry()
+void addEntry(int hash, K key, V value, int bucketIndex) {
+    if ((size >= threshold) && (null != table[bucketIndex])) {
+        resize(2 * table.length);//自动扩容，并重新哈希
+        hash = (null != key) ? hash(key) : 0;
+        bucketIndex = hash & (table.length-1);//hash%table.length
+    }
+    //在冲突链表头部插入新的entry
+    Entry<K,V> e = table[bucketIndex];
+    table[bucketIndex] = new Entry<>(hash, key, value, e);
+    size++;
+}
+
+
+```
+
+#### remove()
+
+`remove(Object key)`的作用是删除`key`值对应的`entry`，该方法的具体逻辑是在`removeEntryForKey(Object key)`里实现的。`removeEntryForKey()`方法会首先找到`key`值对应的`entry`，然后删除该`entry`(修改链表的相应引用)。查找过程跟`getEntry()`过程类似。
+
+![image-20220616161551183](images/image-20220616161551183.png)
+
+```java
+//removeEntryForKey()
+final Entry<K,V> removeEntryForKey(Object key) {
+	......
+	int hash = (key == null) ? 0 : hash(key);
+    int i = indexFor(hash, table.length);//hash&(table.length-1)
+    Entry<K,V> prev = table[i];//得到冲突链表
+    Entry<K,V> e = prev;
+    while (e != null) {//遍历冲突链表
+        Entry<K,V> next = e.next;
+        Object k;
+        if (e.hash == hash &&
+            ((k = e.key) == key || (key != null && key.equals(k)))) {//找到要删除的entry
+            modCount++; size--;
+            if (prev == e) table[i] = next;//删除的是冲突链表的第一个entry
+            else prev.next = next;
+            return e;
+        }
+        prev = e; e = next;
+    }
+    return e;
+}
+```
+
+
+
 ### 为什么Java只有值传递
 
 个人理解，不管在方法中如何调用都是只拷贝。例如（int a, int b）就是拷贝传入的值到另外一个地址；如果传入的是（int[] arr）或者（Integer a）则就是拷贝这个的地址到另外一个地址，实质上两个（原值和拷贝的地址）都指向同一个地址。
@@ -343,11 +476,64 @@ public static int f(int value) {
 
 
 
-### BIO,NIO,AIO 有什么区别
+### ⭐BIO,NIO,AIO 有什么区别
 
-* **BIO(BlockingI/O)**  同步阻塞I/O模式，数据的读取写入必须阻塞在一个线程内等待其完成。在活动连接数不是特别高（小于单机1000）的情况下，这种模型是比较不错的，可以让每一个连接专注于自己的I/O并且编程模型简单，也不用过多考虑系统的过载、限流等问题。线程池本身就是一个天然的漏斗，可以缓冲一些系统处理不了的连接或请求。但是，当面对十万甚至百万级连接的时候，传统的BIO模型是无能为力的。因此，我们需要一种更高效的I/O处理模型来应对更高的并发量。
-* **NIO(Non-blocking/NewI/O)**   NIO是一种同步非阻塞的I/O模型，在Java1.4中引入了NIO框架，对应java.nio包，提供了Channel,Selector，Buffer等抽象。NIO中的N可以理解为Non-blocking，不单纯是New。它支持面向缓冲的，基于通道的I/O操作方法。NIO提供了与传统BIO模型中的Socket和ServerSocket相对应的SocketChannel和ServerSocketChannel两种不同的套接字通道实现,两种通道都支持阻塞和非阻塞两种模式。阻塞模式使用就像传统中的支持一样，比较简单，但是性能和可靠性都不好；非阻塞模式正好与之相反。对于低负载、低并发的应用程序，可以使用同步阻塞I/O来提升开发速率和更好的维护性；对于高负载、高并发的（网络）应用，应使用NIO的非阻塞模式来开发
-* **AIO(AsynchronousI/O)**   AIO也就是NIO2。在Java7中引入了NIO的改进版NIO2,它是异步非阻塞的IO模型。异步IO是基于事件和回调机制实现的，也就是应用操作之后会直接返回，不会堵塞在那里，当后台处理完成，操作系统会通知相应的线程进行后续的操作。AIO是异步IO的缩写，虽然NIO在网络操作中，提供了非阻塞的方法，但是NIO的IO行为还是同步的。对于NIO来说，我们的业务线程是在IO操作准备好时，得到通知，接着就由这个线程自行进行IO操作，IO操作本身是同步的。查阅网上相关资料，我发现就目前来说AIO的应用还不是很广泛，Netty之前也尝试使用过AIO，不过又放弃了。
+![image-20220615203937591](images/image-20220615203937591.png)
+
+> Java BIO[Blocking I/O] | 同步阻塞I/O模式
+
+BIO 全称Block-IO 是一种同步且阻塞的通信模式。是一个比较传统的通信方式，模式简单，使用方便。但并发处理能力低，通信耗时，依赖网速。
+
+> Java NIO[New I/O] | 同步非阻塞模式
+
+Java 中的 NIO 于 Java 1.4 中引入，对应 `java.nio` 包，提供了 `Channel` , `Selector`，`Buffer` 等抽象。NIO 中的 N 可以理解为 Non-blocking，不单纯是 New。它是支持面向缓冲的，基于通道的 I/O 操作方法。 对于高负载、高并发的（网络）应用，应使用 NIO 。
+
+Java 中的 NIO 可以看作是 **I/O 多路复用模型**。也有很多人认为，Java 中的 NIO 属于同步非阻塞 IO 模型。
+
+![image-20220615204150338](images/image-20220615204150338.png)
+
+同步非阻塞 IO 模型中，应用程序会一直发起 read 调用，等待数据从内核空间拷贝到用户空间的这段时间里，线程依然是阻塞的，直到在内核把数据拷贝到用户空间。
+
+相比于同步阻塞 IO 模型，同步非阻塞 IO 模型确实有了很大改进。通过轮询操作，避免了一直阻塞。
+
+但是，这种 IO 模型同样存在问题：**应用程序不断进行 I/O 系统调用轮询数据是否已经准备好的过程是十分消耗 CPU 资源的。**
+
+这个时候，**I/O 多路复用模型** 就上场了。
+
+![image-20220615204200618](images/image-20220615204200618.png)
+
+IO 多路复用模型中，线程**首先发起 select 调用，询问内核数据是否准备就绪**，等内核把数据准备好了，用户线程再发起 read 调用。**read 调用的过程（数据从内核空间 -> 用户空间）还是阻塞的**。
+
+> 目前支持 IO 多路复用的系统调用，有 select，epoll 等等。select 系统调用，目前几乎在所有的操作系统上都有支持。
+>
+> - **select 调用** ：内核提供的系统调用，它支持一次查询多个系统调用的可用状态。几乎所有的操作系统都支持。
+> - **epoll 调用** ：linux 2.6 内核，属于 select 调用的增强版本，优化了 IO 的执行效率。
+
+**IO 多路复用模型，通过减少无效的系统调用，减少了对 CPU 资源的消耗。**
+
+Java 中的 NIO ，有一个非常重要的**选择器 ( Selector )** 的概念，也可以被称为 **多路复用器**。通过它，只需要一个线程便可以管理多个客户端连接。当客户端数据到了之后，才会为其服务。
+
+![image-20220615204212255](images/image-20220615204212255.png)
+
+
+
+
+
+> Java AIO[Asynchronous I/O] | 异步非阻塞I/O模型
+
+AIO 也就是 NIO 2。Java 7 中引入了 NIO 的改进版 NIO 2,它是异步 IO 模型。
+
+异步 IO 是基于事件和回调机制实现的，也就是应用操作之后会直接返回，不会堵塞在那里，当后台处理完成，操作系统会通知相应的线程进行后续的操作。
+
+![image-20220615205139466](images/image-20220615205139466.png)
+
+目前来说 AIO 的应用还不是很广泛。Netty 之前也尝试使用过 AIO，不过又放弃了。这是因为，Netty 使用了 AIO 之后，在 Linux 系统上的性能并没有多少提升。
+
+最后，来一张图，简单总结一下 Java 中的 BIO、NIO、AIO。
+
+![image-20220615205148242](images/image-20220615205148242.png)
+
+
 
 
 
@@ -1414,6 +1600,245 @@ Wilson 于 1994 年在理论上证明了，当且仅当以上两个条件同时�
 
 
 
+##  🍃 Spring系列
+
+### :star: spring中都有哪些设计模式？（2022热门问题）
+
+#### 工厂设计模式
+
+Spring使用工厂模式可以通过 `BeanFactory` 或 `ApplicationContext` 创建 bean 对象。
+
+**两者对比：**
+
+- `BeanFactory` ：延迟注入(使用到某个 bean 的时候才会注入),相比于`ApplicationContext` 来说会占用更少的内存，程序启动速度更快。
+- `ApplicationContext` ：容器启动的时候，不管你用没用到，一次性创建所有 bean 。`BeanFactory` 仅提供了最基本的依赖注入支持，` ApplicationContext` 扩展了 `BeanFactory` ,除了有`BeanFactory`的功能还有额外更多功能，所以一般开发人员使用` ApplicationContext`会更多。
+
+ApplicationContext的三个实现类：
+
+1. `ClassPathXmlApplication`：把上下文文件当成类路径资源。
+2. `FileSystemXmlApplication`：从文件系统中的 XML 文件载入上下文定义信息。
+3. `XmlWebApplicationContext`：从Web系统中的XML文件载入上下文定义信息。
+
+Example:
+
+```java
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
+ 
+public class App {
+	public static void main(String[] args) {
+		ApplicationContext context = new FileSystemXmlApplicationContext(
+				"C:/work/IOC Containers/springframework.applicationcontext/src/main/resources/bean-factory-config.xml");
+ 
+		HelloApplicationContext obj = (HelloApplicationContext) context.getBean("helloApplicationContext");
+		obj.getMsg();
+	}
+}
+```
+
+
+
+#### 单例设计模式
+
+在我们的系统中，有一些对象其实我们只需要一个，比如说：线程池、缓存、对话框、注册表、日志对象、充当打印机、显卡等设备驱动程序的对象。事实上，这一类对象只能有一个实例，如果制造出多个实例就可能会导致一些问题的产生，比如：程序的行为异常、资源使用过量、或者不一致性的结果。
+
+**使用单例模式的好处:**
+
+- 对于频繁使用的对象，可以省略创建对象所花费的时间，这对于那些重量级对象而言，是非常可观的一笔系统开销；
+- 由于 new 操作的次数减少，因而对系统内存的使用频率也会降低，这将减轻 GC 压力，缩短 GC 停顿时间。
+
+**Spring 中 bean 的默认作用域就是 singleton(单例)的。** 除了 singleton 作用域，Spring 中 bean 还有下面几种作用域：
+
+- prototype : 每次请求都会创建一个新的 bean 实例。
+- request : 每一次HTTP请求都会产生一个新的bean，该bean仅在当前HTTP request内有效。
+- session : 每一次HTTP请求都会产生一个新的 bean，该bean仅在当前 HTTP session 内有效。
+- global-session：  全局session作用域，仅仅在基于portlet的web应用中才有意义，Spring5已经没有了。Portlet是能够生成语义代码(例如：HTML)片段的小型Java Web插件。它们基于portlet容器，可以像servlet一样处理HTTP请求。但是，与 servlet 不同，每个 portlet  都有不同的会话
+
+**Spring 实现单例的方式：**
+
+- xml : `<bean id="userService" class="top.snailclimb.UserService" scope="singleton"/>`
+- 注解：`@Scope(value = "singleton")`
+
+**Spring 通过 `ConcurrentHashMap` 实现单例注册表的特殊方式实现单例模式。Spring 实现单例的核心代码如下**
+
+```java
+// 通过 ConcurrentHashMap（线程安全） 实现单例注册表
+private final Map<String, Object> singletonObjects = new ConcurrentHashMap<String, Object>(64);
+
+public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
+        Assert.notNull(beanName, "'beanName' must not be null");
+        synchronized (this.singletonObjects) {
+            // 检查缓存中是否存在实例  
+            Object singletonObject = this.singletonObjects.get(beanName);
+            if (singletonObject == null) {
+                //...省略了很多代码
+                try {
+                    singletonObject = singletonFactory.getObject();
+                }
+                //...省略了很多代码
+                // 如果实例对象在不存在，我们注册到单例注册表中。
+                addSingleton(beanName, singletonObject);
+            }
+            return (singletonObject != NULL_OBJECT ? singletonObject : null);
+        }
+    }
+    //将对象添加到单例注册表
+    protected void addSingleton(String beanName, Object singletonObject) {
+            synchronized (this.singletonObjects) {
+                this.singletonObjects.put(beanName, (singletonObject != null ? singletonObject : NULL_OBJECT));
+
+            }
+        }
+}
+```
+
+
+
+#### 代理设计模式
+
+##### 代理模式在 AOP 中的应用
+
+AOP(Aspect-Oriented Programming:面向切面编程)能够将那些与业务无关，**却为业务模块所共同调用的逻辑或责任（例如事务处理、日志管理、权限控制等）封装起来**，便于**减少系统的重复代码**，**降低模块间的耦合度**，并**有利于未来的可拓展性和可维护性**。
+
+**Spring AOP 就是基于动态代理的**，如果要代理的对象，实现了某个接口，那么Spring AOP会使用**JDK Proxy**，去创建代理对象，而对于没有实现接口的对象，就无法使用 JDK Proxy 去进行代理了，这时候Spring AOP会使用 **Cglib** 生成一个被代理对象的子类来作为代理，如下图所示：
+
+![image-20220616162330096](images/image-20220616162330096.png)
+
+当然你也可以使用 AspectJ ,Spring AOP 已经集成了AspectJ ，AspectJ 应该算的上是 Java 生态系统中最完整的 AOP 框架了。
+
+使用 AOP 之后我们可以把一些通用功能抽象出来，在需要用到的地方直接使用即可，这样大大简化了代码量。我们需要增加新功能时也方便，这样也提高了系统扩展性。日志功能、事务管理等等场景都用到了 AOP 。
+
+
+
+#### 模板方法
+
+模板方法模式是一种行为设计模式，它定义一个操作中的算法的骨架，而将一些步骤延迟到子类中。 模板方法使得子类可以不改变一个算法的结构即可重定义该算法的某些特定步骤的实现方式。
+
+```java
+public abstract class Template {
+    //这是我们的模板方法
+    public final void TemplateMethod(){
+        PrimitiveOperation1();  
+        PrimitiveOperation2();
+        PrimitiveOperation3();
+    }
+
+    protected void  PrimitiveOperation1(){
+        //当前类实现
+    }
+    
+    //被子类实现的方法
+    protected abstract void PrimitiveOperation2();
+    protected abstract void PrimitiveOperation3();
+
+}
+public class TemplateImpl extends Template {
+
+    @Override
+    public void PrimitiveOperation2() {
+        //当前类实现
+    }
+    
+    @Override
+    public void PrimitiveOperation3() {
+        //当前类实现
+    }
+}
+```
+
+Spring 中 `jdbcTemplate`、`hibernateTemplate` 等以 Template 结尾的对数据库操作的类，它们就使用到了模板模式。一般情况下，我们都是使用继承的方式来实现模板模式，但是 Spring 并没有使用这种方式，而是使用Callback 模式与模板方法模式配合，既达到了代码复用的效果，同时增加了灵活性。
+
+
+
+#### 观察者模式
+
+观察者模式是一种对象行为型模式。它表示的是一种对象与对象之间具有依赖关系，当一个对象发生改变的时候，这个对象所依赖的对象也会做出反应。Spring 事件驱动模型就是观察者模式很经典的一个应用。Spring  事件驱动模型非常有用，在很多场景都可以解耦我们的代码。比如我们每次添加商品的时候都需要重新更新商品索引，这个时候就可以利用观察者模式来解决这个问题。
+
+##### Spring 事件驱动模型中的三种角色
+
+###### 事件角色
+
+`ApplicationEvent` (`org.springframework.context`包下)充当事件的角色,这是一个抽象类，它继承了`java.util.EventObject`并实现了 `java.io.Serializable`接口。
+
+Spring 中默认存在以下事件，他们都是对 `ApplicationContextEvent` 的实现(继承自`ApplicationContextEvent`)：
+
+- `ContextStartedEvent`：`ApplicationContext` 启动后触发的事件;
+- `ContextStoppedEvent`：`ApplicationContext` 停止后触发的事件;
+- `ContextRefreshedEvent`：`ApplicationContext` 初始化或刷新完成后触发的事件;
+- `ContextClosedEvent`：`ApplicationContext` 关闭后触发的事件。
+
+![image-20220616162504520](images/image-20220616162504520.png)
+
+###### 事件监听者角色
+
+`ApplicationListener` 充当了事件监听者角色，它是一个接口，里面只定义了一个 `onApplicationEvent（）`方法来处理`ApplicationEvent`。`ApplicationListener`接口类源码如下，可以看出接口定义看出接口中的事件只要实现了 `ApplicationEvent`就可以了。所以，在 Spring中我们只要实现 `ApplicationListener` 接口的 `onApplicationEvent()` 方法即可完成监听事件
+
+```java
+package org.springframework.context;
+import java.util.EventListener;
+@FunctionalInterface
+public interface ApplicationListener<E extends ApplicationEvent> extends EventListener {
+    void onApplicationEvent(E var1);
+}
+```
+
+###### 事件发布者角色
+
+`ApplicationEventPublisher` 充当了事件的发布者，它也是一个接口。
+
+```java
+@FunctionalInterface
+public interface ApplicationEventPublisher {
+    default void publishEvent(ApplicationEvent event) {
+        this.publishEvent((Object)event);
+    }
+
+    void publishEvent(Object var1);
+}
+```
+
+`ApplicationEventPublisher` 接口的`publishEvent（）`这个方法在`AbstractApplicationContext`类中被实现，阅读这个方法的实现，你会发现实际上事件真正是通过`ApplicationEventMulticaster`来广播出去的。
+
+
+
+#### 适配器模式
+
+适配器模式(Adapter Pattern) 将一个接口转换成客户希望的另一个接口，适配器模式使接口不兼容的那些类可以一起工作，其别名为包装器(Wrapper)。
+
+##### spring AOP中的适配器模式
+
+我们知道 Spring AOP 的实现是基于代理模式，但是 Spring AOP 的增强或通知(Advice)使用到了适配器模式，与之相关的接口是`AdvisorAdapter ` 。Advice 常用的类型有：`BeforeAdvice`（目标方法调用前,前置通知）、`AfterAdvice`（目标方法调用后,后置通知）、`AfterReturningAdvice`(目标方法执行结束后，return之前)等等。每个类型Advice（通知）都有对应的拦截器:`MethodBeforeAdviceInterceptor`、`AfterReturningAdviceAdapter`、`AfterReturningAdviceInterceptor`。Spring预定义的通知要通过对应的适配器，适配成 `MethodInterceptor`接口(方法拦截器)类型的对象（如：`MethodBeforeAdviceInterceptor` 负责适配 `MethodBeforeAdvice`）。
+
+##### spring MVC中的适配器模式
+
+在Spring MVC中，`DispatcherServlet` 根据请求信息调用 `HandlerMapping`，解析请求对应的 `Handler`。解析到对应的 `Handler`（也就是我们平常说的 `Controller` 控制器）后，开始由`HandlerAdapter` 适配器处理。`HandlerAdapter` 作为期望接口，具体的适配器实现类用于对目标类进行适配，`Controller` 作为需要适配的类。
+
+**为什么要在 Spring MVC 中使用适配器模式？** Spring MVC 中的 `Controller` 种类众多，不同类型的 `Controller` 通过不同的方法来对请求进行处理。如果不利用适配器模式的话，`DispatcherServlet` 直接获取对应类型的 `Controller`，需要的自行来判断，像下面这段代码一样：
+
+```java
+if(mappedHandler.getHandler() instanceof MultiActionController){  
+   ((MultiActionController)mappedHandler.getHandler()).xxx  
+}else if(mappedHandler.getHandler() instanceof XXX){  
+    ...  
+}else if(...){  
+   ...  
+}  
+```
+
+假如我们再增加一个 `Controller`类型就要在上面代码中再加入一行 判断语句，这种形式就使得程序难以维护，也违反了设计模式中的开闭原则 – 对扩展开放，对修改关闭。
+
+
+
+#### 装饰者模式
+
+装饰者模式可以动态地给对象添加一些额外的属性或行为。相比于使用继承，装饰者模式更加灵活。简单点儿说就是当我们需要修改原有的功能，但我们又不愿直接去修改原有的代码时，设计一个Decorator套在原有代码外面。其实在 JDK 中就有很多地方用到了装饰者模式，比如 `InputStream`家族，`InputStream` 类下有 `FileInputStream` (读取文件)、`BufferedInputStream` (增加缓存,使读取文件速度大大提升)等子类都在不修改`InputStream` 代码的情况下扩展了它的功能。
+
+![image-20220616162704781](images/image-20220616162704781.png)
+
+Spring 中配置 DataSource 的时候，DataSource  可能是不同的数据库和数据源。我们能否根据客户的需求在少修改原有类的代码下动态切换不同的数据源？这个时候就要用到装饰者模式(这一点我自己还没太理解具体原理)。Spring 中用到的包装器模式在类名上含有 `Wrapper`或者 `Decorator`。这些类基本上都是动态地给一个对象添加一些额外的职责
+
+
+
 ## :dolphin: MYSQL
 
 ### MySql 基础架构 | 一条 SQL 查询语句是如何执行的
@@ -1595,7 +2020,7 @@ SELECT * FROM tb1 WHERE id < 500;
 
 
 
-### 为什么MySQL底层要用B+树？和二叉树有什么区别？
+### :star:为什么MySQL底层要用B+树？和二叉树有什么区别？
 
 图解B+树：https://zhuanlan.zhihu.com/p/54102723
 
@@ -1640,6 +2065,12 @@ MySQL InnoDB 引擎使用 **redo log(重做日志)** 保证事务的**持久性*
 
 
 
+### 图解MVCC
+
+![image-20220614154132040](images/image-20220614154132040.png)
+
+
+
 ### ⭐MySQL 和 Redis 怎么保持数据一致?
 
 个人觉得引入缓存之后，如果为了短时间的不一致性问题，选择让系统设计变得更加复杂的话，完全没必要。
@@ -1654,7 +2085,167 @@ Cache Aside Pattern 中遇到写请求是这样的：更新 DB，然后直接删
 
 ## :hotsprings: redis
 
+### 说一下redis
 
+简单来说 **Redis 就是一个使用 C 语言开发的数据库**，不过与传统数据库不同的是 **Redis 的数据是存在内存中的** ，也就是它是内存数据库，所以读写速度非常快，因此 Redis 被广泛应用于缓存方向。
+
+另外，**Redis 除了做缓存之外，也经常用来做分布式锁，甚至是消息队列。**
+
+**Redis 提供了多种数据类型来支持不同的业务场景。Redis 还支持事务 、持久化、Lua 脚本、多种集群方案。**
+
+
+
+### 为什么要用 Redis/为什么要用缓存？
+
+主要从两个方面讲：
+
+* 高并发
+  * QPS
+  * 每秒访问的次数更多
+* 高性能
+  * 下次访问更快
+
+
+
+### 基本数据类型、应用场景
+
+#### string
+
+1. **介绍** ：string 数据结构是简单的 key-value 类型。虽然 Redis 是用 C 语言写的，但是 Redis 并没有使用 C 的字符串表示，而是自己构建了一种 **简单动态字符串**（simple dynamic string，**SDS**）。相比于 C 的原生字符串，Redis 的 SDS 不光可以保存文本数据还可以保存二进制数据，并且获取字符串长度复杂度为 O(1)（C 字符串为 O(N)）,除此之外，Redis 的 SDS API 是安全的，不会造成缓冲区溢出。
+2. **常用命令：** `set,get,strlen,exists,decr,incr,setex` 等等。
+3. **应用场景：** 一般常用在需要计数的场景，比如用户的访问次数、热点文章的点赞转发数量等等。
+
+
+
+#### list
+
+1. **介绍** ：**list** 即是 **链表**。链表是一种非常常见的数据结构，特点是易于数据元素的插入和删除并且可以灵活调整链表长度，但是链表的随机访问困难。许多高级编程语言都内置了链表的实现比如 Java 中的 **LinkedList**，但是 C 语言并没有实现链表，所以 Redis 实现了自己的链表数据结构。Redis 的 list 的实现为一个 **双向链表**，即可以支持反向查找和遍历，更方便操作，不过带来了部分额外的内存开销。
+2. **常用命令:** `rpush,lpop,lpush,rpop,lrange,llen` 等。
+3. **应用场景:** 发布与订阅或者说消息队列、慢查询。
+
+
+
+####  hash
+
+1. **介绍** ：hash 类似于 JDK1.8 前的 HashMap，内部实现也差不多(数组 + 链表)。不过，Redis 的 hash 做了更多优化。另外，hash 是一个 string 类型的 field 和 value 的映射表，**特别适合用于存储对象**，后续操作的时候，你可以直接仅仅修改这个对象中的某个字段的值。 比如我们可以 hash 数据结构来存储用户信息，商品信息等等。
+2. **常用命令：** `hset,hmset,hexists,hget,hgetall,hkeys,hvals` 等。
+3. **应用场景:** 系统中对象数据的存储，**缓存**： 能直观，相比string更节省空间，的维护缓存信息，如用户信息，视频信息等。
+
+
+
+#### set
+
+1. **介绍 ：** set 类似于 Java 中的 `HashSet`  。Redis 中的 set 类型是一种无序集合，集合中的元素没有先后顺序。当你需要存储一个列表数据，又不希望出现重复数据时，set  是一个很好的选择，并且 set 提供了判断某个成员是否在一个 set 集合内的重要接口，这个也是 list 所不能提供的。可以基于 set  轻易实现交集、并集、差集的操作。比如：你可以将一个用户所有的关注人存在一个集合中，将其所有粉丝存在一个集合。Redis  可以非常方便的实现如共同关注、共同粉丝、共同喜好等功能。这个过程也就是求交集的过程。
+2. **常用命令：** `sadd,spop,smembers,sismember,scard,sinterstore,sunion` 等。
+3. **应用场景:** 需要存放的数据不能重复以及需要获取多个数据源交集和并集等场景；**标签**（tag）,给用户添加标签，或者用户给消息添加标签，这样有同一标签或者类似标签的可以给推荐关注的事或者关注的人；**点赞，或点踩，收藏等**，可以放到set中实现。
+
+
+
+#### 	Zset
+
+1. **介绍 ：** 和 set 相比，sorted set 增加了一个权重参数 score，使得集合中的元素能够按 score 进行有序排列，还可以通过 score 的范围来获取元素的列表。有点像是 Java 中 HashMap 和 TreeSet 的结合体。
+
+2. **常用命令：** `ZADD 将一个带有给定分值的成员添加到有序集合里面,ZRANGE 根据元素在有序集合中所处的位置，从有序集合中获取多个元素,ZREM 如果给定元素成员存在于有序集合中，那么就移除这个元素` 等。
+
+3. **应用场景:** **排行榜**   需要对数据根据某个权重进行排序的场景。例如小说视频等网站需要对用户上传的小说视频做排行榜，榜单可以按照用户关注数，更新时间，字数等打分，做排行；在直播系统中，实时排行信息包含直播间在线用户列表；各种礼物排行榜，弹幕消息（可以理解为按消息维度的消息排行榜）等信息。
+
+4. 有序集合是通过两种数据结构实现：
+
+   1. **压缩列表(ziplist)**: ziplist是为了提高存储效率而设计的一种特殊编码的双向链表。它可以存储字符串或者整数，存储整数时是采用整数的二进制而不是字符串形式存储。它能在O(1)的时间复杂度下完成list两端的push和pop操作。但是因为每次操作都需要重新分配ziplist的内存，所以实际复杂度和ziplist的内存使用量相关
+
+   1. **跳跃表（zSkiplist)**: 跳跃表的性能可以保证在查找，删除，添加等操作的时候在对数期望时间内完成，这个性能是可以和平衡树来相比较的，而且在实现方面比平衡树要优雅，这是采用跳跃表的主要原因。跳跃表的复杂度是O(log(n))。
+
+
+
+
+
+随着 Redis 版本的更新，后面又支持了四种数据类型：BitMap（2.2 版新增）、HyperLogLog（2.8 版新增）、GEO（3.2 版新增）、Stream（5.0 版新增）
+
+#### 特殊类型： bitmap
+
+1. **介绍：** bitmap 存储的是连续的二进制数字（0 和 1），通过 bitmap, 只需要一个 bit 位来表示某个元素对应的值或者状态，key 就是对应元素本身 。我们知道 8 个 bit 可以组成一个 byte，所以 bitmap 本身会极大的节省储存空间。
+2. **常用命令：** `setbit` 、`getbit` 、`bitcount`、`bitop`
+3. **应用场景：** 适合需要保存状态信息（比如是否签到、是否登录...）并需要进一步对这些信息进行分析的场景。比如用户签到情况、活跃用户情况、用户行为统计（比如是否点赞过某个视频）。
+
+
+
+### Redis 单线程模型了解吗？
+
+**Redis 基于 Reactor 模式来设计开发了自己的一套高效的事件处理模型** （Netty 的线程模型也基于 Reactor 模式，Reactor 模式不愧是高性能 IO 的基石），这套事件处理模型对应的是 Redis 中的文件事件处理器（file  event handler）。由于文件事件处理器（file event handler）是单线程方式运行的，所以我们一般都说 Redis  是单线程模型。
+
+**既然是单线程，那怎么监听大量的客户端连接呢？**
+
+Redis 通过**IO 多路复用程序** 来监听来自客户端的大量连接（或者说是监听多个 socket），它会将感兴趣的事件及类型（读、写）注册到内核中并监听每个事件是否发生。
+
+这样的好处非常明显： **I/O 多路复用技术的使用让 Redis 不需要额外创建多余的线程来监听客户端的大量连接，降低了资源的消耗**（和 NIO 中的 `Selector` 组件很像）。
+
+另外， Redis 服务器是一个事件驱动程序，服务器需要处理两类事件：1. 文件事件; 2. 时间事件。
+
+时间事件不需要多花时间了解，我们接触最多的还是 **文件事件**（客户端进行读取写入等操作，涉及一系列网络通信）。
+
+《Redis 设计与实现》有一段话是如是介绍文件事件的，我觉得写得挺不错。
+
+> Redis 基于 Reactor 模式开发了自己的网络事件处理器：这个处理器被称为文件事件处理器（file event  handler）。文件事件处理器使用 I/O  多路复用（multiplexing）程序来同时监听多个套接字，并根据套接字目前执行的任务来为套接字关联不同的事件处理器。
+>
+> 当被监听的套接字准备好执行连接应答（accept）、读取（read）、写入（write）、关 闭（close）等操作时，与操作相对应的文件事件就会产生，这时文件事件处理器就会调用套接字之前关联好的事件处理器来处理这些事件。
+>
+> **虽然文件事件处理器以单线程方式运行，但通过使用 I/O 多路复用程序来监听多个套接字**，文件事件处理器既实现了高性能的网络通信模型，又可以很好地与 Redis 服务器中其他同样以单线程方式运行的模块进行对接，这保持了 Redis 内部单线程设计的简单性。
+
+可以看出，文件事件处理器（file event handler）主要是包含 4 个部分：
+
+- 多个 socket（客户端连接）
+- IO 多路复用程序（支持多个客户端连接的关键）
+- 文件事件分派器（将 socket 关联到相应的事件处理器）
+- 事件处理器（连接应答处理器、命令请求处理器、命令回复处理器）
+
+![image-20220615224749038](images/image-20220615224749038.png)
+
+
+
+### Redis 是如何判断数据是否过期的呢？
+
+Redis 通过一个叫做过期字典（可以看作是 hash 表）来保存数据过期的时间。过期字典的键指向 Redis 数据库中的某个  key(键)，过期字典的值是一个 long long 类型的整数，这个整数保存了 key 所指向的数据库键的过期时间（毫秒精度的 UNIX  时间戳）。
+
+![image-20220616170038052](images/image-20220616170038052.png)
+
+过期字典是存储在 redisDb 这个结构里的：
+
+```c
+typedef struct redisDb {
+    ...
+
+    dict *dict;     //数据库键空间,保存着数据库中所有键值对
+    dict *expires   // 过期字典,保存着键的过期时间
+    ...
+} redisDb;
+```
+
+
+
+拓展：过期的数据的删除策略了解么？
+
+常用的过期数据的删除策略就两个（重要！自己造缓存轮子的时候需要格外考虑的东西）：
+
+1. **惰性删除** ：只会在取出 key 的时候才对数据进行过期检查。这样对 CPU 最友好，但是可能会造成太多过期 key 没有被删除。
+2. **定期删除** ： 每隔一段时间抽取一批 key 执行删除过期 key 操作。并且，Redis 底层会通过限制删除操作执行的时长和频率来减少删除操作对 CPU 时间的影响。
+
+
+
+### Redis 内存淘汰机制了解么？
+
+Redis 提供 6 种数据淘汰策略：
+
+1. **volatile-lru（least recently used）**：从已设置过期时间的数据集（server.db[i].expires）中挑选最近最少使用的数据淘汰
+2. **volatile-ttl**：从已设置过期时间的数据集（server.db[i].expires）中挑选将要过期的数据淘汰
+3. **volatile-random**：从已设置过期时间的数据集（server.db[i].expires）中任意选择数据淘汰
+4. **allkeys-lru（least recently used）**：当内存不足以容纳新写入数据时，在键空间中，移除最近最少使用的 key（这个是最常用的）
+5. **allkeys-random**：从数据集（server.db[i].dict）中任意选择数据淘汰
+6. **no-eviction**：禁止驱逐数据，也就是说当内存不足以容纳新写入数据时，新写入操作会报错。这个应该没人使用吧！
+
+4.0 版本后增加以下两种：
+
+1. **volatile-lfu（least frequently used）**：从已设置过期时间的数据集（server.db[i].expires）中挑选最不经常使用的数据淘汰
+2. **allkeys-lfu（least frequently used）**：当内存不足以容纳新写入数据时，在键空间中，移除最不经常使用的 key
 
 
 
@@ -1754,4 +2345,14 @@ Cache Aside Pattern 中遇到写请求是这样的：更新 DB，然后直接删
 虽然篇幅不多，但是基本把 RPC 框架的核心原理讲清楚了！另外，对于上面的技术细节，我会在后面的章节介绍到。
 
 **最后，对于 RPC 的原理，希望小伙伴不单单要理解，还要能够自己画出来并且能够给别人讲出来。因为，在面试中这个问题在面试官问到 RPC 相关内容的时候基本都会碰到。**
+
+
+
+## 🧑‍💻计算机基础
+
+
+
+
+
+### 🌐计算机网络（热门八股文）
 
