@@ -824,6 +824,62 @@ final Entry<K,V> removeEntryForKey(Object key) {
 
 
 
+> Unsafe类在硬件层面的实现？ 
+
+不妨再看看Unsafe的compareAndSwap*方法来实现CAS操作，它是一个本地方法，实现位于unsafe.cpp中。
+
+```c
+UNSAFE_ENTRY(jboolean, Unsafe_CompareAndSwapInt(JNIEnv *env, jobject unsafe, jobject obj, jlong offset, jint e, jint x))
+  UnsafeWrapper("Unsafe_CompareAndSwapInt");
+  oop p = JNIHandles::resolve(obj);
+  jint* addr = (jint *) index_oop_from_field_offset_long(p, offset);
+  return (jint)(Atomic::cmpxchg(x, addr, e)) == e;
+UNSAFE_END
+```
+
+可以看到它通过 `Atomic::cmpxchg` 来实现比较和替换操作。其中参数x是即将更新的值，参数e是原内存的值。
+
+如果是Linux的x86，`Atomic::cmpxchg`方法的实现如下：
+
+```c
+inline jint Atomic::cmpxchg (jint exchange_value, volatile jint* dest, jint compare_value) {
+  int mp = os::is_MP();
+  __asm__ volatile (LOCK_IF_MP(%4) "cmpxchgl %1,(%3)"
+                    : "=a" (exchange_value)
+                    : "r" (exchange_value), "a" (compare_value), "r" (dest), "r" (mp)
+                    : "cc", "memory");
+  return exchange_value;
+}
+```
+
+而windows的x86的实现如下：
+
+```c
+inline jint Atomic::cmpxchg (jint exchange_value, volatile jint* dest, jint compare_value) {
+    int mp = os::isMP(); //判断是否是多处理器
+    _asm {
+        mov edx, dest
+        mov ecx, exchange_value
+        mov eax, compare_value
+        LOCK_IF_MP(mp)
+        cmpxchg dword ptr [edx], ecx
+    }
+}
+
+// Adding a lock prefix to an instruction on MP machine
+// VC++ doesn't like the lock prefix to be on a single line
+// so we can't insert a label after the lock prefix.
+// By emitting a lock prefix, we can define a label after it.
+#define LOCK_IF_MP(mp) __asm cmp mp, 0  \
+                       __asm je L0      \
+                       __asm _emit 0xF0 \
+                       __asm L0:
+```
+
+如果是多处理器，为cmpxchg指令添加lock前缀。反之，就省略lock前缀(单处理器会不需要lock前缀提供的内存屏障效果)。这里的lock前缀就是使用了处理器的总线锁(最新的处理器都使用缓存锁代替总线锁来提高性能)。
+
+`cmpxchg(void* ptr, int old, int new)，如果ptr和old的值一样，则把new写到ptr内存，否则返回ptr的值，整个操作是原子的。在Intel平台下，会用lock cmpxchg来实现，使用lock触发缓存锁，这样另一个线程想访问ptr的内存，就会被block住。`
+
 
 
 ## 常用框架
@@ -2088,6 +2144,47 @@ protected void finalize() throws Throwable { }
 
 
 
+> 如何破坏双亲委派？ （字节实习）
+
+如果不想打破双亲委派模型，就重写ClassLoader类中的findClass()方法即可，无法被父类加载器加载的类最终会通过这个方法被加载。而如果想打破双亲委派模型则需要重写loadClass()方法
+
+典型的打破双亲委派模型的框架和中间件有tomcat与osgi
+
+```java
+//破坏双亲委派模型
+  @Override
+public Class<?> loadClass(String name)
+    throws ClassNotFoundException {
+      String myPath = "D:/" + name.replace(".","/") + ".class";
+      System.out.println(myPath);
+      byte[] classBytes = null;
+      FileInputStream in = null;
+
+      try {
+    File file = new File(myPath);
+    in = new FileInputStream(file);
+    classBytes = new byte[(int) file.length()];
+    in.read(classBytes);
+} catch (FileNotFoundException e) {
+    e.printStackTrace();
+} catch (IOException e) {
+    e.printStackTrace();
+}finally{
+    try {
+        in.close();
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
+
+      System.out.println();
+      Class<?> clazz = defineClass(name, classBytes, 0, classBytes.length);
+      return clazz;
+}
+```
+
+
+
 
 
 ## JUC
@@ -2761,6 +2858,12 @@ class Allocator {
 ```
 
 
+
+> Atomic类底层原理
+
+AtomicInteger 类主要利用 CAS (compare and swap) + volatile 和 native方法来保证原子操作，从而避免 synchronized 的高开销，执行效率大为提升。
+
+Atomic原子类底层用的不是传统意义的锁机制，而是无锁化的CAS机制，通过CAS机制保证多线程修改一个数值的安全性
 
 
 

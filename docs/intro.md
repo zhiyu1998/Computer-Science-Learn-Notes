@@ -84,10 +84,3 @@ title: 导读
 ## :mouse: Golang
 
 * [learnInProblem](golang\learnInProblem.md)   从问题中学习到Go的精髓（因原先笔记难以阅读，所以重构笔记） ⏳
-
-
-
-## :snake: Python
-
-* [ Python-Basis-Notes](https://github.com/zhiyu1998/Python-Basis-Notes) 另一个项目：关于数据科学的python基础（python + numpy + pandas） ✅ 
-*  [project](python\deeplearning\project.md)   深度学习笔记（图像分类、目标识别、异常检测）⏳ 

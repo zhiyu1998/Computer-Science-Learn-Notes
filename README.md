@@ -80,10 +80,7 @@
 
 * 从问题中学习到Go的精髓（因原先笔记难以阅读，所以重构笔记） ⏳
 
-## :snake: Python
 
-* 数据科学的python基础（python + numpy + pandas） ✅
-* 深度学习路径（图像分类、目标识别、异常检测）✅
 
 ## :chart_with_upwards_trend: Trend
 
