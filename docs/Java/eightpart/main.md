@@ -882,6 +882,10 @@ inline jint Atomic::cmpxchg (jint exchange_value, volatile jint* dest, jint comp
 
 
 
+
+
+
+
 ## 常用框架
 
 ### Spring
@@ -1602,48 +1606,128 @@ Shenyu 通过插件扩展功能，插件是 ShenYu 的灵魂，并且插件也�
 
 > 是怎么使用分布式锁的?
 
-什么是分布式锁
+分布式锁，是控制分布式系统不同进程共同访问共享资源的一种锁的实现。秒杀下单、抢红包等等业务场景，都需要用到分布式锁，我们项目中经常使用Redis作为分布式锁。
 
----
+选了Redis分布式锁的几种实现方法，大家来讨论下，看有没有啥问题哈。
 
-**线程锁**：主要用来给方法、代码块加锁。当某个方法或代码使用锁，在同一时刻仅有一个线程执行该方法或该代码段。线程锁只在同一JVM中有效果，因为线程锁的实现在根本上是依靠线程之间共享内存实现的，比如synchronized是共享对象头，显示锁Lock是共享某个变量（state）。
+- 命令setnx + expire分开写
+- setnx + value值是过期时间
+- set的扩展命令（set ex px nx）
+- set ex px nx + 校验唯一随机值,再删除
+- Redisson
 
-**进程锁**：为了控制同一操作系统中多个进程访问某个共享资源，因为进程具有独立性，各个进程无法访问其他进程的资源，因此无法通过synchronized等线程锁实现进程锁。
+**命令setnx + expire分开写**
 
-**分布式锁**：当多个进程不在同一个系统中(比如分布式系统中控制共享资源访问)，用分布式锁控制多个进程对资源的访问。
+```
+if（jedis.setnx(key,lock_value) == 1）{ //加锁
+    expire（key，100）; //设置过期时间
+    try {
+        do something  //业务请求
+    }catch(){
+  }
+  finally {
+       jedis.del(key); //释放锁
+    }
+}
+```
 
+如果执行完`setnx`加锁，正要执行`expire`设置过期时间时，进程crash掉或者要重启维护了，那这个锁就“长生不老”了，别的线程永远获取不到锁啦，所以分布式锁不能这么实现。
 
+**setnx + value值是过期时间**
 
-如何实现
+```
+long expires = System.currentTimeMillis() + expireTime; //系统时间+设置的过期时间
+String expiresStr = String.valueOf(expires);
 
----
+// 如果当前锁不存在，返回加锁成功
+if (jedis.setnx(key, expiresStr) == 1) {
+        return true;
+} 
+// 如果锁已经存在，获取锁的过期时间
+String currentValueStr = jedis.get(key);
 
-**基于数据库实现分布式锁**
+// 如果获取到的过期时间，小于系统当前时间，表示已经过期
+if (currentValueStr != null && Long.parseLong(currentValueStr) < System.currentTimeMillis()) {
 
-- 基于数据库表（锁表，很少使用）
-- 乐观锁(基于版本号)
-- 悲观锁(基于排它锁)
+     // 锁已过期，获取上一个锁的过期时间，并设置现在锁的过期时间（不了解redis的getSet命令的小伙伴，可以去官网看下哈）
+    String oldValueStr = jedis.getSet(key_resource_id, expiresStr);
+    
+    if (oldValueStr != null && oldValueStr.equals(currentValueStr)) {
+         // 考虑多线程并发的情况，只有一个线程的设置值和当前值相同，它才可以加锁
+         return true;
+    }
+}
+        
+//其他情况，均返回加锁失败
+return false;
+}
+```
 
-**基于 redis 实现分布式锁**:
+笔者看过有开发小伙伴就是这么实现分布式锁的，但是这种方案也有这些缺点：
 
-- 单个Redis实例：setnx(key,当前时间+过期时间) + Lua
-- Redis集群模式：Redlock
+- 过期时间是客户端自己生成的，分布式环境下，每个客户端的时间必须同步。
+- 没有保存持有者的唯一标识，可能被别的客户端释放/解锁。
+- 锁过期的时候，并发多个客户端同时请求过来，都执行了`jedis.getSet()`，最终只能有一个客户端加锁成功，但是该客户端锁的过期时间，可能被别的客户端覆盖。
 
-**基于 zookeeper实现分布式锁**
+**set的扩展命令（set ex px nx）（注意可能存在的问题）**
 
-- 临时有序节点来实现的分布式锁,Curator
+```
+if（jedis.set(key, lock_value, "NX", "EX", 100s) == 1）{ //加锁
+    try {
+        do something  //业务处理
+    }catch(){
+  }
+  finally {
+       jedis.del(key); //释放锁
+    }
+}
+```
 
-**基于 Consul 实现分布式锁**
+这个方案可能存在这样的问题：
 
+- 锁过期释放了，业务还没执行完。
+- 锁被别的线程误删。
 
+**set ex px nx + 校验唯一随机值,再删除**
 
-基于数据库如何实现分布式锁？
+```
+if（jedis.set(key, uni_request_id, "NX", "EX", 100s) == 1）{ //加锁
+    try {
+        do something  //业务处理
+    }catch(){
+  }
+  finally {
+       //判断是不是当前线程加的锁,是才释放
+       if (uni_request_id.equals(jedis.get(key))) {
+        jedis.del(key); //释放锁
+        }
+    }
+}
+```
 
-* 基于数据库表（锁表，很少使用）
-* 基于悲观锁
-* 基于乐观锁
+在这里，判断当前线程加的锁和释放锁是不是一个原子操作。如果调用jedis.del()释放锁的时候，可能这把锁已经不属于当前客户端，会解除他人加的锁。
 
+一般也是用lua脚本代替。lua脚本如下：
 
+```
+if redis.call('get',KEYS[1]) == ARGV[1] then 
+   return redis.call('del',KEYS[1]) 
+else
+   return 0
+end;
+```
+
+这种方式比较不错了，一般情况下，已经可以使用这种实现方式。但是存在锁过期释放了，业务还没执行完的问题（实际上，估算个业务处理的时间，一般没啥问题了）。
+
+**Redisson**
+
+分布式锁可能存在锁过期释放，业务没执行完的问题。有些小伙伴认为，稍微把锁过期时间设置长一些就可以啦。其实我们设想一下，是否可以给获得锁的线程，开启一个定时守护线程，每隔一段时间检查锁是否还存在，存在则对锁的过期时间延长，防止锁过期提前释放。
+
+当前开源框架Redisson就解决了这个分布式锁问题。我们一起来看下Redisson底层原理是怎样的吧：
+
+![image-20220618221951116](images/image-20220618221951116.png)
+
+只要线程一加锁成功，就会启动一个`watch dog`看门狗，它是一个后台线程，会每隔10秒检查一下，如果线程1还持有锁，那么就会不断的延长锁key的生存时间。因此，Redisson就是使用Redisson解决了锁过期释放，业务没执行完问题
 
 
 
@@ -1819,6 +1903,66 @@ https://thrift.apache.org/
 
 
 > 通过@Reference注解，dubbo是怎么得到服务提供者的实例化对象？中间的过程能否简单讲一下
+
+
+
+> hystrix 工作原理
+
+Hystrix 工作流程图如下:
+
+![image-20220618221301273](images/image-20220618221301273.png)
+
+**构建命令**
+
+> Hystrix 提供了两个命令对象：HystrixCommand和HystrixObservableCommand，它将代表你的一个依赖请求任务，向构造函数中传入请求依赖所需要的参数。
+
+**执行命令**
+
+有四种方式执行Hystrix命令。分别是：
+
+- R execute()：同步阻塞执行的，从依赖请求中接收到单个响应。
+- Future queue()：异步执行，返回一个包含单个响应的Future对象。
+- Observable observe()：创建Observable后会订阅Observable，从依赖请求中返回代表响应的Observable对象
+- Observable toObservable()：cold observable，返回一个Observable，只有订阅时才会执行Hystrix命令，可以返回多个结果
+
+**检查响应是否被缓存**
+
+如果启用了 Hystrix缓存，任务执行前将先判断是否有相同命令执行的缓存。如果有则直接返回包含缓存响应的Observable；如果没有缓存的结果，但启动了缓存，将缓存本次执行结果以供后续使用。
+
+* 检查回路器是否打开 回路器(circuit-breaker)和保险丝类似，保险丝在发生危险时将会烧断以保护电路，而回路器可以在达到我们设定的阀值时触发短路(比如请求失败率达到50%)，拒绝执行任何请求。
+
+如果回路器被打开，Hystrix将不会执行命令，直接进入Fallback处理逻辑。
+
+1. 检查线程池/信号量/队列情况 Hystrix 隔离方式有线程池隔离和信号量隔离。当使用Hystrix线程池时，Hystrix 默认为每个依赖服务分配10个线程，当10个线程都繁忙时，将拒绝执行命令,，而是立即跳到执行fallback逻辑。
+2. 执行具体的任务 通过HystrixObservableCommand.construct() 或者 HystrixCommand.run() 来运行用户真正的任务。
+3. 计算回路健康情况 每次开始执行command、结束执行command以及发生异常等情况时，都会记录执行情况，例如：成功、失败、拒绝和超时等指标情况，会定期处理这些数据，再根据设定的条件来判断是否开启回路器。
+4. 命令失败时执行Fallback逻辑 在命令失败时执行用户指定的 Fallback 逻辑。上图中的断路、线程池拒绝、信号量拒绝、执行执行、执行超时都会进入Fallback处理。
+5. 返回执行结果 原始对象结果将以Observable形式返回，在返回给用户之前，会根据调用方式的不同做一些处理。
+
+
+
+> 分布式id生成方案有哪些？什么是雪花算法？
+
+分布式id生成方案主要有：
+
+- UUID
+- 数据库自增ID
+- 基于雪花算法（Snowflake）实现
+- 百度 （Uidgenerator）
+- 美团（Leaf）
+
+什么是**雪花算法**？
+
+> 雪花算法是一种生成分布式全局唯一ID的算法，生成的ID称为Snowflake IDs。这种算法由Twitter创建，并用于推文的ID。
+
+一个Snowflake ID有64位。
+
+- 第1位：Java中long的最高位是符号位代表正负，正数是0，负数是1，一般生成ID都为正数，所以默认为0。
+- 接下来前41位是时间戳，表示了自选定的时期以来的毫秒数。
+- 接下来的10位代表计算机ID，防止冲突。
+- 其余12位代表每台机器上生成ID的序列号，这允许在同一毫秒内创建多个Snowflake ID。
+
+![image-20220618222305758](images/image-20220618222305758.png)
 
 
 
@@ -2729,7 +2873,7 @@ CAS 在 Java 语言中的应用：
 
 在 Java 编程中我们通常不会直接使用到 CAS，都是通过 JDK 封装好的并发工具类来间接使用的，这些并发工具类都在`java.util.concurrent`包中。
 
-> J.U.C 是`java.util.concurrent`的简称，也就是大家常说的 Java 并发编程工具包，面试常考，非常非常重要。
+`J.U.C 是`java.util.concurrent`的简称，也就是大家常说的 Java 并发编程工具包，面试常考，非常非常重要。`
 
 目前 CAS 在 JDK 中主要应用在 J.U.C 包下的 Atomic 相关类中。
 
@@ -2864,6 +3008,86 @@ class Allocator {
 AtomicInteger 类主要利用 CAS (compare and swap) + volatile 和 native方法来保证原子操作，从而避免 synchronized 的高开销，执行效率大为提升。
 
 Atomic原子类底层用的不是传统意义的锁机制，而是无锁化的CAS机制，通过CAS机制保证多线程修改一个数值的安全性
+
+
+
+> 讲讲**synchronized**
+
+synchronized是Java中的关键字，是一种同步锁。synchronized关键字可以作用于方法或者代码块。
+
+一般面试时。可以这么回答：
+
+- 反编译后，monitorenter、monitorexit、ACC_SYNCHRONIZED
+- monitor监视器
+- Java Monitor 的工作机理
+- 对象与monitor关联
+
+**monitorenter、monitorexit、ACC_SYNCHRONIZED**
+
+如果**synchronized**作用于**代码块**，反编译可以看到两个指令：`monitorenter、monitorexit`，JVM使用`monitorenter和monitorexit`两个指令实现同步；如果作用synchronized作用于**方法**,反编译可以看到`ACCSYNCHRONIZED标记`，JVM通过在方法访问标识符(flags)中加入`ACCSYNCHRONIZED`来实现同步功能。
+
+- 同步代码块是通过`monitorenter和monitorexit`来实现，当线程执行到monitorenter的时候要先获得monitor锁，才能执行后面的方法。当线程执行到monitorexit的时候则要释放锁。
+- 同步方法是通过中设置`ACCSYNCHRONIZED`标志来实现，当线程执行有ACCSYNCHRONIZED标志的方法，需要获得monitor锁。每个对象都与一个monitor相关联，线程可以占有或者释放monitor。
+
+
+
+**monitor监视器**
+
+monitor是什么呢？操作系统的管程（monitors）是概念原理，ObjectMonitor是它的原理实现。
+
+![image-20220618222546298](images/image-20220618222546298.png)
+
+在Java虚拟机（HotSpot）中，Monitor（管程）是由ObjectMonitor实现的，其主要数据结构如下：
+
+```
+ ObjectMonitor() {
+    _header       = NULL;
+    _count        = 0; // 记录个数
+    _waiters      = 0,
+    _recursions   = 0;
+    _object       = NULL;
+    _owner        = NULL;
+    _WaitSet      = NULL;  // 处于wait状态的线程，会被加入到_WaitSet
+    _WaitSetLock  = 0 ;
+    _Responsible  = NULL ;
+    _succ         = NULL ;
+    _cxq          = NULL ;
+    FreeNext      = NULL ;
+    _EntryList    = NULL ;  // 处于等待锁block状态的线程，会被加入到该列表
+    _SpinFreq     = 0 ;
+    _SpinClock    = 0 ;
+    OwnerIsThread = 0 ;
+  }
+```
+
+ObjectMonitor中几个关键字段的含义如图所示：
+
+![image-20220618222556764](images/image-20220618222556764.png)
+
+**Java Monitor 的工作机理**
+
+![image-20220618222606838](images/image-20220618222606838.png)
+
+- 想要获取monitor的线程,首先会进入_EntryList队列。
+- 当某个线程获取到对象的monitor后,进入Owner区域，设置为当前线程,同时计数器count加1。
+- 如果线程调用了wait()方法，则会进入WaitSet队列。它会释放monitor锁，即将owner赋值为null,count自减1,进入WaitSet队列阻塞等待。
+- 如果其他线程调用 notify() / notifyAll() ，会唤醒WaitSet中的某个线程，该线程再次尝试获取monitor锁，成功即进入Owner区域。
+- 同步方法执行完毕了，线程退出临界区，会将monitor的owner设为null，并释放监视锁。
+
+
+
+**对象与monitor关联**
+
+![image-20220618222642015](images/image-20220618222642015.png)
+
+- 在HotSpot虚拟机中,对象在内存中存储的布局可以分为3块区域：**对象头（Header），实例数据（Instance Data）和对象填充（Padding）**。
+- 对象头主要包括两部分数据：**Mark Word（标记字段）、Class Pointer（类型指针）**。
+
+Mark Word 是用于存储对象自身的运行时数据，如哈希码（HashCode）、GC分代年龄、锁状态标志、线程持有的锁、偏向线程 ID、偏向时间戳等。
+
+![image-20220618222700381](images/image-20220618222700381.png)
+
+**重量级锁，指向互斥量的指针。其实synchronized是重量级锁，也就是说Synchronized的对象锁，Mark Word锁标识位为10，其中指针指向的是Monitor对象的起始地址。**
 
 
 
@@ -4191,6 +4415,19 @@ myisam引擎是5.1版本之前的默认引擎，支持全文检索、压缩、�
 
 
 
+> 聊聊索引在哪些场景下会失效？
+
+- 查询条件包含or，可能导致索引失效
+- 如何字段类型是字符串，where时一定用引号括起来，否则索引失效
+- like通配符可能导致索引失效。
+- 联合索引，查询时的条件列不是联合索引中的第一个列，索引失效。
+- 在索引列上使用mysql的内置函数，索引失效。
+- 对索引列运算（如，+、-、*、/），索引失效。
+- 索引字段上使用（！= 或者 < >，not in）时，可能会导致索引失效。
+- 索引字段上使用is null， is not null，可能导致索引失效。
+- 左连接查询或者右连接查询查询关联的字段编码格式不一样，可能导致索引失效。
+- mysql估计使用全表扫描要比使用索引快,则不使用索引。
+
 
 
 ## 中间件
@@ -4486,6 +4723,113 @@ RocketMQ 篇
 
 ## 操作系统
 
+> 零拷贝
+
+零拷贝就是不需要将数据从一个存储区域复制到另一个存储区域。它是指在传统IO模型中，指CPU拷贝的次数为0。它是IO的优化方案
+
+- 传统IO流程
+- 零拷贝实现之mmap+write
+- 零拷贝实现之sendfile
+- 零拷贝实现之带有DMA收集拷贝功能的sendfile
+
+**传统IO流程**
+
+**流程图如下：**
+
+![image-20220618222110248](images/image-20220618222110248.png)
+
+- 用户应用进程调用read函数，向操作系统发起IO调用，**上下文从用户态转为内核态（切换1）**
+- DMA控制器把数据从磁盘中，读取到内核缓冲区。
+- CPU把内核缓冲区数据，拷贝到用户应用缓冲区，**上下文从内核态转为用户态（切换2）**，read函数返回
+- 用户应用进程通过write函数，发起IO调用，**上下文从用户态转为内核态（切换3）**
+- CPU将应用缓冲区中的数据，拷贝到socket缓冲区
+- DMA控制器把数据从socket缓冲区，拷贝到网卡设备，**上下文从内核态切换回用户态（切换4）**，write函数返回
+
+从流程图可以看出，传统IO的读写流程，包括了4次上下文切换（4次用户态和内核态的切换），4次数据拷贝（**两次CPU拷贝以及两次的DMA拷贝**)。
+
+**mmap+write实现的零拷贝**
+
+mmap 的函数原型如下：
+
+```
+void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+```
+
+- addr：指定映射的虚拟内存地址
+- length：映射的长度
+- prot：映射内存的保护模式
+- flags：指定映射的类型
+- fd:进行映射的文件句柄
+- offset:文件偏移量
+
+mmap使用了**虚拟内存**，可以把内核空间和用户空间的虚拟地址映射到同一个物理地址，从而减少数据拷贝次数！
+
+`mmap+write`实现的零拷贝流程如下：
+
+![image-20220618222136120](images/image-20220618222136120.png)
+
+- 用户进程通过`mmap方法`向操作系统内核发起IO调用，**上下文从用户态切换为内核态**。
+- CPU利用DMA控制器，把数据从硬盘中拷贝到内核缓冲区。
+- **上下文从内核态切换回用户态**，mmap方法返回。
+- 用户进程通过`write`方法向操作系统内核发起IO调用，**上下文从用户态切换为内核态**。
+- CPU将内核缓冲区的数据拷贝到的socket缓冲区。
+- CPU利用DMA控制器，把数据从socket缓冲区拷贝到网卡，**上下文从内核态切换回用户态**，write调用返回。
+
+可以发现，`mmap+write`实现的零拷贝，I/O发生了**4**次用户空间与内核空间的上下文切换，以及3次数据拷贝。其中3次数据拷贝中，包括了**2次DMA拷贝和1次CPU拷贝**。
+
+`mmap`是将读缓冲区的地址和用户缓冲区的地址进行映射，内核缓冲区和应用缓冲区共享，所以节省了一次CPU拷贝‘’并且用户进程内存是**虚拟的**，只是**映射**到内核的读缓冲区，可以节省一半的内存空间。
+
+
+
+**sendfile实现的零拷贝**
+
+`sendfile`是Linux2.1内核版本后引入的一个系统调用函数，API如下：
+
+```
+ssize_t sendfile(int out_fd, int in_fd, off_t *offset, size_t count);
+```
+
+- out_fd:为待写入内容的文件描述符，一个socket描述符。，
+- in_fd:为待读出内容的文件描述符，必须是真实的文件，不能是socket和管道。
+- offset：指定从读入文件的哪个位置开始读，如果为NULL，表示文件的默认起始位置。
+- count：指定在fdout和fdin之间传输的字节数。
+
+sendfile表示在两个文件描述符之间传输数据，它是在**操作系统内核**中操作的，**避免了数据从内核缓冲区和用户缓冲区之间的拷贝操作**，因此可以使用它来实现零拷贝。
+
+sendfile实现的零拷贝流程如下：
+
+![image-20220618222201604](images/image-20220618222201604.png)
+
+sendfile实现的零拷贝
+
+1. 用户进程发起sendfile系统调用，**上下文（切换1）从用户态转向内核态**
+2. DMA控制器，把数据从硬盘中拷贝到内核缓冲区。
+3. CPU将读缓冲区中数据拷贝到socket缓冲区
+4. DMA控制器，异步把数据从socket缓冲区拷贝到网卡，
+5. **上下文（切换2）从内核态切换回用户态**，sendfile调用返回。
+
+可以发现，`sendfile`实现的零拷贝，I/O发生了**2**次用户空间与内核空间的上下文切换，以及3次数据拷贝。其中3次数据拷贝中，包括了**2次DMA拷贝和1次CPU拷贝**。那能不能把CPU拷贝的次数减少到0次呢？有的，即`带有DMA收集拷贝功能的sendfile`！
+
+
+
+**sendfile+DMA scatter/gather实现的零拷贝**
+
+linux 2.4版本之后，对`sendfile`做了优化升级，引入SG-DMA技术，其实就是对DMA拷贝加入了`scatter/gather`操作，它可以直接从内核空间缓冲区中将数据读取到网卡。使用这个特点搞零拷贝，即还可以多省去**一次CPU拷贝**。
+
+sendfile+DMA scatter/gather实现的零拷贝流程如下：
+
+![image-20220618222223377](images/image-20220618222223377.png)
+
+1. 用户进程发起sendfile系统调用，**上下文（切换1）从用户态转向内核态**
+2. DMA控制器，把数据从硬盘中拷贝到内核缓冲区。
+3. CPU把内核缓冲区中的**文件描述符信息**（包括内核缓冲区的内存地址和偏移量）发送到socket缓冲区
+4. DMA控制器根据文件描述符信息，直接把数据从内核缓冲区拷贝到网卡
+5. **上下文（切换2）从内核态切换回用户态**，sendfile调用返回。
+
+可以发现，`sendfile+DMA scatter/gather`实现的零拷贝，I/O发生了**2**次用户空间与内核空间的上下文切换，以及2次数据拷贝。其中2次数据拷贝都是包**DMA拷贝**。这就是真正的 **零拷贝（Zero-copy)** 技术，全程都没有通过CPU来搬运数据，所有的数据都是通过DMA来进行传输的。
+
+
+
 > 进程和线程的区别
 
 👨‍💻**面试官**: 好的！我明白了！那你再说一下： **进程和线程的区别**。
@@ -4650,6 +4994,21 @@ RocketMQ 篇
 **孤儿进程**：一个父进程退出，而它的一个或多个子进程还在运行，那么那些子进程将成为孤儿进程。孤儿进程将被init进程(进程号为1)所收养，并由init进程对它们完成状态收集工作。
 
 **僵尸进程**：一个进程使用fork创建子进程，如果子进程退出，而父进程并没有调用wait或waitpid获取子进程的状态信息，那么子进程的进程描述符仍然保存在系统中。这种进程称之为僵死进程。
+
+
+
+> 什么是虚拟内存（虾皮）
+
+`虚拟内存，是虚拟出来的内存，它的核心思想就是确保每个程序拥有自己的地址空间，地址空间被分成多个块，每一块都有连续的地址空间。同时物理空间也分成多个块，块大小和虚拟地址空间的块大小一致，操作系统会自动将虚拟地址空间映射到物理地址空间，程序只需关注虚拟内存，请求的也是虚拟内存，真正使用却是物理内存。`
+
+现代操作系统使用**虚拟内存**，即虚拟地址取代物理地址，使用虚拟内存可以有2个好处：
+
+- 虚拟内存空间可以远远大于物理内存空间
+- 多个虚拟内存可以指向同一个物理地址
+
+零拷贝实现思想，就利用了**虚拟内存**这个点：多个虚拟内存可以指向同一个物理地址，可以把内核空间和用户空间的虚拟地址映射到同一个物理地址，这样的话，就可以减少IO的数据拷贝次数啦，示意图如下：
+
+![image-20220618221642375](images/image-20220618221642375.png)
 
 
 
@@ -5399,6 +5758,25 @@ https://www.iamshuaidi.com/675.html
 8. 如果MQ服务器长时间没有收到生产者的commit或者rollback，它会反查生产者，然后根据查询到的结果（回滚操作或者重新发送消息）执行最终状态。
 
 有些伙伴可能有疑惑，如果消费者消费失败怎么办呢？那数据是不是不一致啦？所以就需要消费者消费成功，执行业务逻辑成功，再反馈ack嘛。如果消费者消费失败，那就自动重试嘛，接口支持幂等即可。
+
+
+
+>  排行榜的实现，比如高考成绩排序（2022-6-18 虾皮）
+
+排行版的实现，一般使用redis的**zset**数据类型。
+
+- 使用格式如下：
+
+```
+zadd key score member [score member ...]，zrank key member
+```
+
+- 层内部编码：ziplist（压缩列表）、skiplist（跳跃表）
+- 使用场景如排行榜，社交需求（如用户点赞）
+
+实现demo如下：
+
+![image-20220618221719773](images/image-20220618221719773.png)
 
 
 
