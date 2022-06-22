@@ -91,4 +91,4 @@
 
 ## :tea: 请我喝杯奶茶
 
-<img src="images/image-20220612101512485.png" alt="image-20220612101512485" style="zoom:33%;" />
+<img src="static/img/image-20220612101512485.png" alt="image-20220612101512485" style="zoom:33%;" />

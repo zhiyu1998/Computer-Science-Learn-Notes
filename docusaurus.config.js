@@ -45,6 +45,17 @@ const config = {
     ],
   ],
 
+  themes: [
+    [
+      "@easyops-cn/docusaurus-search-local",
+      {
+        hashed: true,
+        highlightSearchTermsOnTargetPage: true,
+        explicitSearchResultPath: true,
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -113,12 +124,6 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
-      },
-      algolia: {
-        appId: 'GW1RCU8VVK',
-        apiKey: '9fad23eb48a43ae764bfcf43e2def94d',
-        indexName: 'Computer-Science-Learn-Notes',
-        contextualSearch: false,
       },
       docs: {
         sidebar: {
