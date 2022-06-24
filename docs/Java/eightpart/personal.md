@@ -1465,7 +1465,7 @@ Java 线程在运行的生命周期中的指定时刻只可能处于下面 6 种
 
 - 继承Thread类
 - 实现Runnable接口
-- ExecutorService和Callable<Class>实现有返回值的线程
+- ExecutorService和Callable`<Class>`实现有返回值的线程
 - Executor创建线程池
 
 实现Runnable接口这种方式更受欢迎，因为这不需要继承Thread类。在应用设计中已经继承了别的对象的情况下，这需要多继承（而Java不支持多继承），只能实现接口。同时，线程池也是非常高效的，很容易实现和使用。
