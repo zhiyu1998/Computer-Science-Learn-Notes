@@ -1165,83 +1165,63 @@ Netty 中的零拷贝体现在以下几个方面：
 
 1. 使用 Netty 提供的 `CompositeByteBuf` 类, 可以将多个`ByteBuf` 合并为一个逻辑上的 `ByteBuf`, 避免了各个 `ByteBuf` 之间的拷贝。
 2. `ByteBuf` 支持 slice 操作, 因此可以将 ByteBuf 分解为多个共享同一个存储区域的 `ByteBuf`, 避免了内存的拷贝。
-3. 通过 `FileRegion` 包装的`FileChannel.tranferTo` 实现文件传输, 可以直接将文件缓冲区的数据发送到目标 `Channel`, 避免了传统通过循环 write 方式导致的内存拷贝问题.
+3. 通过 `FileRegion` 包装的`FileChannel.tranferTo` 实现文件传输, 可以直接将文件缓冲区的数据发送到目标 `Channel`, 避免了传统通过循环 write 方式导致的内存拷贝问题。
+4. 在将一个byte数组转换为一个ByteBuf对象的场景下，Netty提供了一系列的包装类，避免了转换过程中的内存拷贝。
+5. 如果通道接收和发送ByteBuf都使用直接内存进行Socket读写，就不需要进行缓冲区的二次拷贝。如果使用JVM的堆内存进行Socket读写，那么JVM会先将堆内存Buffer拷贝一份到直接内存再写入Socket中，相比于使用直接内存，这种情况在发送过程中会多出一次缓冲区的内存拷贝。所以，在发送ByteBuffer到Socket时，尽量使用直接内存而不是JVM堆内存
 
 
 
 > 讲讲Reactor线程模型，netty是基于Reactor的哪种模式？ 
 
-Reactor 模式基于事件驱动，采用多路复用将事件分发给相应的 Handler 处理，非常适合处理海量 IO 的场景。
+Reactor是一种并发处理客户端请求响应的事件驱动模型。服务端在接收到客户端请求后采用多路复用策略，通过一个非阻塞的线程来异步接收所有的客户端请求，并将这些请求转发到相关的工作线程组上进行处理。Reactor模型常常基于异步线程的方式实现，常用的Reactor线程模型有3种：Reactor单线程模型、Reactor多线程模型和Reactor主从多线程模型
 
-在 Netty 主要靠 `NioEventLoopGroup` 线程池来实现具体的线程模型的 。
+Reactor模式由Reactor线程、Handlers处理器两大角色组成，两大角色的职责分别如下：
 
-我们实现服务端的时候，一般会初始化两个线程组：
+（1）Reactor线程的职责：负责响应IO事件，并且分发到Handlers处理器。
 
-1. **`bossGroup`** :接收连接。
-2. **`workerGroup`** ：负责具体的处理，交由对应的 Handler 处理。
-
-下面我们来详细看一下 Netty 中的线程模型吧！
+（2）Handlers处理器的职责：非阻塞的执行业务处理逻辑。
 
 1.**单线程模型** ：
 
-一个线程需要执行处理所有的 `accept`、`read`、`decode`、`process`、`encode`、`send` 事件。对于高负载、高并发，并且对性能要求比较高的场景不适用。
+总体来说，Reactor模式有点类似事件驱动模式。在事件驱动模式中，当有事件触发时，事件源会将事件分发到Handler（处理器），由Handler负责事件处理。Reactor模式中的反应器角色类似于事件驱动模式中的事件分发器（Dispatcher）角色。
 
-对应到 Netty 代码是下面这样的
+具体来说，在Reactor模式中有Reactor和Handler两个重要的组件：
 
+（1）Reactor：负责查询IO事件，当检测到一个IO事件时将其发送给相应的Handler处理器去处理。这里的IO事件就是NIO中选择器查询出来的通道IO事件。
 
+（2）Handler：与IO事件（或者选择键）绑定，负责IO事件的处理，完成真正的连接建立、通道的读取、处理业务逻辑、负责将结果写到通道等。
 
-使用 `NioEventLoopGroup` 类的无参构造函数设置线程数量的默认值就是 **CPU 核心数 \*2** 。
+什么是单线程版本的Reactor模式呢？简单地说，Reactor和Handlers处于一个线程中执行。这是最简单的Reactor模型（图片来自《offer来了》）
 
-```java
-  //1.eventGroup既用于处理客户端连接，又负责具体的处理。
-  EventLoopGroup eventGroup = new NioEventLoopGroup(1);
-  //2.创建服务端启动引导/辅助类：ServerBootstrap
-  ServerBootstrap b = new ServerBootstrap();
-            boobtstrap.group(eventGroup, eventGroup)
-            //......
-```
-
-
+![image-20220627102520442](images/image-20220627102520442.png)
 
 2.**多线程模型**
 
-一个 Acceptor 线程只负责监听客户端的连接，一个 NIO 线程池负责具体处理：`accept`、`read`、`decode`、`process`、`encode`、`send` 事件。满足绝大部分应用场景，并发连接量不大的时候没啥问题，但是遇到并发连接大的时候就可能会出现问题，成为性能瓶颈。
+Reactor和Handler挤在单个线程中会造成非常严重的性能缺陷，可以使用多线程来对基础的Reactor模式进行改造和演进
 
-对应到 Netty 代码是下面这样的：
+多线程Reactor的演进分为两个方面：
 
-```java
-// 1.bossGroup 用于接收连接，workerGroup 用于具体的处理
-EventLoopGroup bossGroup = new NioEventLoopGroup(1);
-EventLoopGroup workerGroup = new NioEventLoopGroup();
-try {
-  //2.创建服务端启动引导/辅助类：ServerBootstrap
-  ServerBootstrap b = new ServerBootstrap();
-  //3.给引导类配置两大线程组,确定了线程模型
-  b.group(bossGroup, workerGroup)
-    //......
-```
+（1）升级Handler。既要使用多线程，又要尽可能高效率，则可以考虑使用线程池。
 
-![image-20220614181817604](images/image-20220614181817604.png)
+（2）升级Reactor。可以考虑引入多个Selector（选择器），提升选择大量通道的能力。
+
+总体来说，多线程版本的Reactor模式大致如下：
+
+（1）将负责数据传输处理的IOHandler处理器的执行放入独立的线程池中。这样，业务处理线程与负责新连接监听的反应器线程就能相互隔离，避免服务器的连接监听受到阻塞。
+
+（2）如果服务器为多核的CPU，可以将反应器线程拆分为多个子反应器（SubReactor）线程；同时，引入多个选择器，并且为每一个SubReactor引入一个线程，一个线程负责一个选择器的事件轮询。这样充分释放了系统资源的能力，也大大提升了反应器管理大量连接或者监听大量传输通道的能力
+
+Reactor多线程模型与单线程模型最大的区别就是由一组线程（Thread Poll）处理客户端的I/O请求操作。Reactor多线程模型将Acceptor的操作封装在一组线程池中，采用线程池的方式监听服务端端口、接收客户端的TCP连接请求、处理网络I/O读写等操作。线程池一般使用标准的JDK线程池，在该线程池中包含一个任务队列和一系列NIO线程，这些NIO线程负责具体的消息读取、解码、编码和发送。Reactor多线程模型如图（图片来自《offer来了》）
+
+![image-20220627102705221](images/image-20220627102705221.png)
 
 
 
 **3.主从多线程模型** [netty使用的方式]
 
-从一个 主线程 NIO 线程池中选择一个线程作为 Acceptor  线程，绑定监听端口，接收客户端连接的连接，其他线程负责后续的接入认证等工作。连接建立完成后，Sub NIO 线程池负责具体处理 I/O  读写。如果多线程模型无法满足你的需求的时候，可以考虑使用主从多线程模型 。
+在Reactor主从多线程模型中，服务端用于接收客户端连接的不再是一个NIO线程，而是一个独立的NIO线程池。主线程Acceptor在接收到客户端的TCP连接请求并建立完成连接后（可能要经过鉴权、登录等过程），将新创建的SocketChannel注册到子I/O线程池（Sub Reactor Pool）的某个I/O线程上，由它负责具体的SocketChannel的读写和编解码工作。Reactor主从多线程模型中的Acceptor线程池（Acceptor Thread Pool）只用于客户端的鉴权、登录、握手和安全认证，一旦链路建立成功，就将链路注册到后端Sub Reactor线程池的I/O线程上，由I/O线程负责后续的I/O操作。这样就将客户端连接的建立和消息的响应都以异步线程的方式来实现，大大提高了系统的吞吐量。Reactor主从多线程模型如图（图片来自《offer来了》）
 
-```java
-// 1.bossGroup 用于接收连接，workerGroup 用于具体的处理
-EventLoopGroup bossGroup = new NioEventLoopGroup();
-EventLoopGroup workerGroup = new NioEventLoopGroup();
-try {
-  //2.创建服务端启动引导/辅助类：ServerBootstrap
-  ServerBootstrap b = new ServerBootstrap();
-  //3.给引导类配置两大线程组,确定了线程模型
-  b.group(bossGroup, workerGroup)
-    //......
-```
-
-![image-20220614181832802](images/image-20220614181832802.png)
+![image-20220627102814208](images/image-20220627102814208.png)
 
 
 
@@ -4918,10 +4898,53 @@ for (Map.Entry e : m.entrySet()) {
 
 零拷贝就是不需要将数据从一个存储区域复制到另一个存储区域。它是指在传统IO模型中，指CPU拷贝的次数为0。它是IO的优化方案
 
+- DMAji'shu
 - 传统IO流程
 - 零拷贝实现之mmap+write
 - 零拷贝实现之sendfile
 - 零拷贝实现之带有DMA收集拷贝功能的sendfile
+
+
+
+**DMA技术概述**
+
+在没有 DMA 技术前，I/O 的过程是这样的：
+
+- CPU 发出对应的指令给磁盘控制器，然后返回；
+- 磁盘控制器收到指令后，于是就开始准备数据，会把数据放入到磁盘控制器的内部缓冲区中，然后产生一个**中断**；
+- CPU 收到中断信号后，停下手头的工作，接着把磁盘控制器的缓冲区的数据一次一个字节地读进自己的寄存器，然后再把寄存器里的数据写入到内存，而在数据传输的期间 CPU 是无法执行其他任务的。
+
+为了方便你理解，我画了一副图：
+
+![image-20220627104731025](images/image-20220627104731025.png)
+
+可以看到，整个数据的传输过程，都要需要 CPU 亲自参与搬运数据的过程，而且这个过程，CPU 是不能做其他事情的。
+
+简单的搬运几个字符数据那没问题，但是如果我们用千兆网卡或者硬盘传输大量数据的时候，都用 CPU 来搬运的话，肯定忙不过来。
+
+计算机科学家们发现了事情的严重性后，于是就发明了 DMA 技术，也就是**直接内存访问（\*Direct Memory Access\*）** 技术。
+
+什么是 DMA 技术？简单理解就是，**在进行 I/O 设备和内存的数据传输的时候，数据搬运的工作全部交给 DMA 控制器，而 CPU 不再参与任何与数据搬运相关的事情，这样 CPU 就可以去处理别的事务**。
+
+那使用 DMA 控制器进行数据传输的过程究竟是什么样的呢？下面我们来具体看看。
+
+![image-20220627104743508](images/image-20220627104743508.png)
+
+具体过程：
+
+- 用户进程调用 read 方法，向操作系统发出 I/O 请求，请求读取数据到自己的内存缓冲区中，进程进入阻塞状态；
+- 操作系统收到请求后，进一步将 I/O 请求发送 DMA，然后让 CPU 执行其他任务；
+- DMA 进一步将 I/O 请求发送给磁盘；
+- 磁盘收到 DMA 的 I/O 请求，把数据从磁盘读取到磁盘控制器的缓冲区中，当磁盘控制器的缓冲区被读满后，向 DMA 发起中断信号，告知自己缓冲区已满；
+- **DMA 收到磁盘的信号，将磁盘控制器缓冲区中的数据拷贝到内核缓冲区中，此时不占用 CPU，CPU 可以执行其他任务**；
+- 当 DMA 读取了足够多的数据，就会发送中断信号给 CPU；
+- CPU 收到 DMA 的信号，知道数据已经准备好，于是将数据从内核拷贝到用户空间，系统调用返回；
+
+可以看到， 整个数据传输的过程，CPU 不再参与数据搬运的工作，而是全程由 DMA 完成，但是 CPU 在这个过程中也是必不可少的，因为传输什么数据，从哪里传输到哪里，都需要 CPU 来告诉 DMA 控制器。
+
+早期 DMA 只存在在主板上，如今由于 I/O 设备越来越多，数据传输的需求也不尽相同，所以每个 I/O 设备里面都有自己的 DMA 控制器。
+
+
 
 **传统IO流程**
 
