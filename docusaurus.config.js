@@ -132,6 +132,19 @@ const config = {
         },
       }
     }),
+    plugins: [
+    [
+      '@docusaurus/plugin-pwa',
+      {
+        debug: false,
+        offlineModeActivationStrategies: [
+          'appInstalled',
+          'standalone',
+          'queryString',
+        ],
+      },
+    ],
+  ],
 };
 
 module.exports = config;
