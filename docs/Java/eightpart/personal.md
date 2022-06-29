@@ -1157,7 +1157,7 @@ UNIX 系统下， IO 模型一共有 5 种： 同步阻塞 I/O、同步非阻塞
 
 应用进程被阻塞，直到数据复制到应用进程缓冲区中才返回。 应该注意到，在阻塞的过程中，其它程序还可以执行，因此阻塞不意味着整个操作系统都被阻塞。因为其他程序还可以执行，因此不消耗 CPU 时间，这种模型的执行效率会比较高。 下图中，recvfrom 用于接收 Socket 传来的数据，并复制到应用进程的缓冲区 buf 中。这里把 recvfrom() 当成系统调用。
 
-![image-20220626124207976](images/image-20220626124207976.png)
+![image-20220628221701308](images/image-20220628221701308.png)
 
 #### 非阻塞式 I/O
 
@@ -1165,19 +1165,19 @@ UNIX 系统下， IO 模型一共有 5 种： 同步阻塞 I/O、同步非阻塞
 
 由于 CPU 要处理更多的系统调用，因此这种模型是比较低效的。
 
-![image-20220626124237297](images/image-20220626124237297.png)
+![image-20220628221710263](images/image-20220628221710263.png)
 
 
 
 #### I/O 复用
 
-使用 select 或者 poll 等待数据，并且可以等待多个套接字中的任何一个变为可读，这一过程会被阻塞，当某一个套接字可读时返回。之后再使用 recvfrom 把数据从内核复制到进程中。
+**使用 select 或者 poll 等待数据**，并且可以等待多个套接字中的任何一个变为可读，这一过程会被阻塞，当某一个套接字可读时返回。之后再使用 recvfrom 把数据从内核复制到进程中。
 
 它可以让单个进程具有处理多个 I/O 事件的能力。又被称为 Event Driven I/O，即事件驱动 I/O。
 
 如果一个 Web 服务器没有 I/O 复用，那么每一个 Socket 连接都需要创建一个线程去处理。如果同时有几万个连接，那么就需要创建相同数量的线程。并且相比于多进程和多线程技术，I/O 复用不需要进程线程创建和切换的开销，系统开销更小。
 
-![image-20220626124256014](images/image-20220626124256014.png)
+![image-20220628221721484](images/image-20220628221721484.png)
 
 
 
@@ -1187,17 +1187,17 @@ UNIX 系统下， IO 模型一共有 5 种： 同步阻塞 I/O、同步非阻塞
 
 相比于非阻塞式 I/O 的轮询方式，信号驱动 I/O 的 CPU 利用率更高。
 
-![image-20220626124315277](images/image-20220626124315277.png)
+![image-20220628221734114](images/image-20220628221734114.png)
 
 
 
 #### 异步 I/O
 
-进行 aio_read 系统调用会立即返回，应用进程继续执行，不会被阻塞，内核会在所有操作完成之后向应用进程发送信号。
+进行 aio_read（asynchronous read） 系统调用会立即返回，应用进程继续执行，不会被阻塞，内核会在所有操作完成之后向应用进程发送信号。
 
 异步 I/O 与信号驱动 I/O 的区别在于，异步 I/O 的信号是通知应用进程 I/O 完成，而信号驱动 I/O 的信号是通知应用进程可以开始 I/O。
 
-![image-20220626124340657](images/image-20220626124340657.png)
+![image-20220628221741472](images/image-20220628221741472.png)
 
 
 
@@ -1224,13 +1224,13 @@ BIO 全称Block-IO 是一种同步且阻塞的通信模式。是一个比较传�
 
 可以看美团技术团队2016年写的文章：[Java NIO浅析](https://tech.meituan.com/2016/11/04/nio.html)
 
-Java 中的 NIO 于 Java 1.4 中引入，对应 `java.nio` 包，提供了 `Channel` , `Selector`，`Buffer` 等抽象。NIO 中的 N 可以理解为 Non-blocking，不单纯是 New。它是支持面向缓冲的，基于通道的 I/O 操作方法。 对于高负载、高并发的（网络）应用，应使用 NIO 。
+Java 中的 NIO 于 Java 1.4 中引入，对应 `java.nio` 包，提供了Java NIO的实现主要涉及三大核心内容： `Channel` , `Selector`，`Buffer` 等抽象。Selector用于监听多个Channel的事件，比如连接打开或数据到达，因此，一个线程可以实现对多个数据Channel的管理。传统I/O基于数据流进行I/O读写操作；而Java NIO基于Channel和Buffer进行I/O读写操作，并且数据总是被从Channel读取到Buffer中，或者从Buffer写入Channel中。
 
 Java 中的 NIO 可以看作是 **I/O 多路复用模型**。也有很多人认为，Java 中的 NIO 属于同步非阻塞 IO 模型。
 
 ![image-20220615204150338](images/image-20220615204150338.png)
 
-同步非阻塞 IO 模型中，应用程序会一直发起 read 调用，等待数据从内核空间拷贝到用户空间的这段时间里，线程依然是阻塞的，直到在内核把数据拷贝到用户空间。
+同步非阻塞 IO 模型中，应用程序会**一直发起 read 调用，等待数据从内核空间拷贝到用户空间的这段时间里，线程依然是阻塞的，直到在内核把数据拷贝到用户空间**。
 
 相比于同步阻塞 IO 模型，同步非阻塞 IO 模型确实有了很大改进。通过轮询操作，避免了一直阻塞。
 
@@ -2659,6 +2659,10 @@ Lock lock = new ReentrantLock(true);
 
 ## :recycle: JVM
 
+知识整理
+
+![image-20220629100638458](images/image-20220629100638458.png)
+
 回忆大纲图（放大看回忆的更加清楚噢）
 
 ![JVM简化版架构](images/JVM%E7%AE%80%E5%8C%96%E7%89%88%E6%9E%B6%E6%9E%84.png)
@@ -2667,7 +2671,9 @@ Lock lock = new ReentrantLock(true);
 
 ### 图解JVM结构
 
-建议默写
+#### 整体架构图：建议默写
+
+![image-20220629110459744](images/image-20220629110459744.png)
 
 
 
@@ -2694,6 +2700,14 @@ Lock lock = new ReentrantLock(true);
 ![image-20220628164028744](images/image-20220628164028744.png)
 
 
+
+#### 动态链接（虚拟机栈中）
+
+这里的局部变量表连接堆主要是对象
+
+动态链接的作用就是为了将符号引用转换为调用方法的直接引用
+
+![image-20220629095851661](images/image-20220629095851661.png)
 
 
 
@@ -2778,7 +2792,7 @@ GC Roots 并不包括堆中对象所引用的对象，这样就不会有循环�
 
 
 
-### 虚引用与软引用和弱引用的区别
+### :star:虚引用与软引用和弱引用的区别
 
 * **虚引用**：虚引用必须和引用队列（ReferenceQueue）联合使用。当垃圾回收器准备回收一个对象时，如果发现它还有虚引用，就会在回收对象的内存之前，把这个虚引用加入到与之关联的引用队列中。程序可以通过判断引用队列中是否已经加入了虚引用，来了解被引用的对象是否将要被垃圾回收。程序如果发现某个虚引用已经被加入到引用队列，那么就可以在所引用的对象的内存被回收之前采取必要的行动。
   * **虚引用主要用来跟踪对象被垃圾回收的活动**。
@@ -2837,6 +2851,8 @@ GC Roots 并不包括堆中对象所引用的对象，这样就不会有循环�
 - 执行效率不稳定：如果 Java 堆上包含大量需要回收的对象，则需要进行大量标记和清除动作；
 - 内存空间碎片化：标记清除后会产生大量不连续的空间，从而可能导致无法为大对象分配足够的连续内存。
 
+![image-20220629095233918](images/image-20220629095233918.png)
+
 
 
 #### 标记-复制算法，Mark-Copy
@@ -2850,6 +2866,8 @@ GC Roots 并不包括堆中对象所引用的对象，这样就不会有循环�
 
 基于新生代 “朝生夕灭” 的特点，大多数虚拟机都不会按照 1:1 的比例来进行内存划分，例如 HotSpot 虚拟机会将内存空间划分为一块较大的 `Eden` 和 两块较小的 `Survivor` 空间，它们之间的比例是 8:1:1 。 每次分配时只会使用 `Eden` 和其中的一块 `Survivor` ，发生垃圾回收时，只需要将存活的对象一次性复制到另外一块 `Survivor` 上，这样只有 10% 的内存空间会被浪费掉。当 `Survivor` 空间不足以容纳一次 `Minor GC` 时，此时由其他内存区域（通常是老年代）来进行分配担保。
 
+![image-20220629095353992](images/image-20220629095353992.png)
+
 
 
 #### 标记-整理算法，Mark-Compact
@@ -2857,6 +2875,8 @@ GC Roots 并不包括堆中对象所引用的对象，这样就不会有循环�
 标记-整理算法是在标记完成后，让所有存活对象都向内存的一端移动，然后直接清理掉边界以外的内存。其优点在于可以避免内存空间碎片化的问题，也可以充分利用内存空间；其缺点在于根据所使用的收集器的不同，在移动存活对象时可能要全程暂停用户程序：
 
 ![image-20220628153332879](images/image-20220628153332879.png)
+
+![image-20220629095251304](images/image-20220629095251304.png)
 
 
 
@@ -3574,6 +3594,82 @@ Spring 中配置 DataSource 的时候，DataSource  可能是不同的数据库�
 ### Bean生命周期
 
 ![image-20220627212008309](images/image-20220627212008309.png)
+
+
+
+### @Autowired 和 @Resource 的区别是什么？
+
+Spring 内置的 `@Autowired` 以及 JDK 内置的 `@Resource` 和 `@Inject` 都可以用于注入 Bean。
+
+| Annotaion    | Package                            | Source       |
+| :----------- | :--------------------------------- | :----------- |
+| `@Autowired` | `org.springframework.bean.factory` | Spring 2.5+  |
+| `@Resource`  | `javax.annotation`                 | Java JSR-250 |
+| `@Inject`    | `javax.inject`                     | Java JSR-330 |
+
+`@Autowired` 和`@Resource`使用的比较多一些。
+
+`Autowired` 属于 Spring 内置的注解，默认的注入方式为`byType`（根据类型进行匹配），也就是说会优先根据接口类型去匹配并注入 Bean （接口的实现类）。
+
+**这会有什么问题呢？** 当一个接口存在多个实现类的话，`byType`这种方式就无法正确注入对象了，因为这个时候 Spring 会同时找到多个满足条件的选择，默认情况下它自己不知道选择哪一个。
+
+这种情况下，注入方式会变为 `byName`（根据名称进行匹配），这个名称通常就是类名（首字母小写）。就比如说下面代码中的 `smsService` 就是我这里所说的名称，这样应该比较好理解了吧。
+
+```java
+// smsService 就是我们上面所说的名称
+@Autowired
+private SmsService smsService;
+```
+
+举个例子，`SmsService` 接口有两个实现类: `SmsServiceImpl1`和 `SmsServiceImpl2`，且它们都已经被 Spring 容器所管理。
+
+```java
+// 报错，byName 和 byType 都无法匹配到 bean
+@Autowired
+private SmsService smsService;
+// 正确注入 SmsServiceImpl1 对象对应的 bean
+@Autowired
+private SmsService smsServiceImpl1;
+// 正确注入  SmsServiceImpl1 对象对应的 bean
+// smsServiceImpl1 就是我们上面所说的名称
+@Autowired
+@Qualifier(value = "smsServiceImpl1")
+private SmsService smsService;
+```
+
+我们还是建议通过 `@Qualifier` 注解来显示指定名称而不是依赖变量的名称。
+
+`@Resource`属于 JDK 提供的注解，默认注入方式为 `byName`。如果无法通过名称匹配到对应的实现类的话，注入方式会变为`byType`。
+
+`@Resource` 有两个比较重要且日常开发常用的属性：`name`（名称）、`type`（类型）。
+
+```java
+public @interface Resource {
+    String name() default "";
+    Class<?> type() default Object.class;
+}
+```
+
+如果仅指定 `name` 属性则注入方式为`byName`，如果仅指定`type`属性则注入方式为`byType`，如果同时指定`name` 和`type`属性（不建议这么做）则注入方式为`byType`+`byName`。
+
+```java
+// 报错，byName 和 byType 都无法匹配到 bean
+@Resource
+private SmsService smsService;
+// 正确注入 SmsServiceImpl1 对象对应的 bean
+@Resource
+private SmsService smsServiceImpl1;
+// 正确注入 SmsServiceImpl1 对象对应的 bean（比较推荐这种方式）
+
+@Resource(name = "smsServiceImpl1")
+private SmsService smsService;
+```
+
+简单总结一下：
+
+- `@Autowired` 是 Spring 提供的注解，`@Resource` 是 JDK 提供的注解。
+- `Autowired` 默认的注入方式为`byType`（根据类型进行匹配），`@Resource`默认注入方式为 `byName`（根据名称进行匹配）。
+- 当一个接口存在多个实现类的情况下，`@Autowired` 和`@Resource`都需要通过名称才能正确匹配到对应的 Bean。`Autowired` 可以通过 `@Qualifier` 注解来显示指定名称，`@Resource`可以通过 `name` 属性来显示指定名称。
 
 
 

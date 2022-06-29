@@ -9,6 +9,7 @@ title: 八股文整理
 
 - [八股文学习路线及攻略](https://leetcode-cn.com/circle/discuss/2Ypo9Z/)
 - [论如何 4 个月高效刷满 500 题并形成长期记忆](https://leetcode-cn.com/circle/discuss/jq9Zke/)
+- [「刷题经验」1000 题留念，附带我的刷题攻略](https://leetcode.cn/circle/discuss/h1JhXf/)
 
 ## Java 基础
 
