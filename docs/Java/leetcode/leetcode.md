@@ -75,6 +75,8 @@ title: 力扣刷题顺序
 
 ## 动态规划 🚫
 
+最长递增子序列  :arrow_right: 单词拆分 :arrow_right:  编辑距离
+
 矩阵DP
 
 - [ ] [三角形最小路径和](https://leetcode-cn.com/problems/triangle/)
@@ -88,15 +90,13 @@ title: 力扣刷题顺序
 - [ ] [跳跃游戏](https://leetcode-cn.com/problems/jump-game/)
 - [ ] [跳跃游戏 II](https://leetcode-cn.com/problems/jump-game-ii/)
 - [ ] [分割回文串 II](https://leetcode-cn.com/problems/palindrome-partitioning-ii/)
-- [ ] [最长递增子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
+- [x] [最长递增子序列](https://leetcode-cn.com/problems/longest-increasing-subsequence/)
 - [ ] [单词拆分](https://leetcode-cn.com/problems/word-break/)
 
 两个序列的DP
 
 - [ ] [最长公共子序列](https://leetcode-cn.com/problems/longest-common-subsequence/)
 - [ ] [编辑距离](https://leetcode-cn.com/problems/edit-distance/)
-
-
 
 背包 & 零钱兑换
 
@@ -108,7 +108,14 @@ title: 力扣刷题顺序
 
 ## 回溯 🚫
 
-
+- [ ] [子集](https://leetcode.cn/problems/subsets/)
+- [ ] [子集 II](https://leetcode.cn/problems/subsets-ii/)
+- [ ] [全排列](https://leetcode.cn/problems/permutations/)
+- [ ] [全排列 II](https://leetcode.cn/problems/permutations-ii/)
+- [ ] [组合总和](https://leetcode.cn/problems/combination-sum/)
+- [ ] [电话号码的字母组合](https://leetcode.cn/problems/letter-combinations-of-a-phone-number/)
+- [ ] [分割回文串](https://leetcode.cn/problems/palindrome-partitioning/)
+- [ ] [复原 IP 地址](https://leetcode.cn/problems/restore-ip-addresses/)
 
 
 
