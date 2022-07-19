@@ -10,6 +10,7 @@ title: 八股文整理
 - [八股文学习路线及攻略](https://leetcode-cn.com/circle/discuss/2Ypo9Z/)
 - [论如何 4 个月高效刷满 500 题并形成长期记忆](https://leetcode-cn.com/circle/discuss/jq9Zke/)
 - [「刷题经验」1000 题留念，附带我的刷题攻略](https://leetcode.cn/circle/discuss/h1JhXf/)
+- [后端面经汇总](https://www.nowcoder.com/discuss/987725)
 
 ## 🐦Java 基础
 
@@ -6586,11 +6587,108 @@ zadd key score member [score member ...]，zrank key member
 
 ## 🐧Linux
 
+### Linux知道哪些命令?（2022美团）
+
+自由发挥
+
+
+
 ### 查看系统里CPU和内存使用情况，用哪些命令执行？ 
+
+#### top
+
+**top命令** 可以实时动态地查看系统的整体运行情况，是一个综合了多方信息监测系统性能和运行信息的实用工具。通过top命令所提供的互动式界面，用热键可以管理。
+
+**实例**
+
+```shell
+top - 09:44:56 up 16 days, 21:23,  1 user,  load average: 9.59, 4.75, 1.92
+Tasks: 145 total,   2 running, 143 sleeping,   0 stopped,   0 zombie
+Cpu(s): 99.8%us,  0.1%sy,  0.0%ni,  0.2%id,  0.0%wa,  0.0%hi,  0.0%si,  0.0%st
+Mem:   4147888k total,  2493092k used,  1654796k free,   158188k buffers
+Swap:  5144568k total,       56k used,  5144512k free,  2013180k cached
+```
+
+**解释：**
+
+- top - 09:44:56[当前系统时间],
+- 16 days[系统已经运行了16天],
+- 1 user[个用户当前登录],
+- load average: 9.59, 4.75, 1.92[系统负载，即任务队列的平均长度]
+- Tasks: 145 total[总进程数],
+- 2 running[正在运行的进程数],
+- 143 sleeping[睡眠的进程数],
+- 0 stopped[停止的进程数],
+- 0 zombie[冻结进程数],
+- Cpu(s): 99.8%us[用户空间占用CPU百分比],
+- 0.1%sy[内核空间占用CPU百分比],
+- 0.0%ni[用户进程空间内改变过优先级的进程占用CPU百分比],
+- 0.2%id[空闲CPU百分比], 0.0%wa[等待输入输出的CPU时间百分比],
+- 0.0%hi[],
+- 0.0%st[],
+- Mem: 4147888k total[物理内存总量],
+- 2493092k used[使用的物理内存总量],
+- 1654796k free[空闲内存总量],
+- 158188k buffers[用作内核缓存的内存量]
+- Swap: 5144568k total[交换区总量],
+- 56k used[使用的交换区总量],
+- 5144512k free[空闲交换区总量],
+- 2013180k cached[缓冲的交换区总量]
+
+
+
+#### ps
+
+**ps命令**  用于报告当前系统的进程状态。可以搭配kill指令随时中断、删除不必要的程序。ps命令是最基本同时也是非常强大的进程查看命令，使用该命令可以确定有哪些进程正在运行和运行的状态、进程是否结束、进程有没有僵死、哪些进程占用了过多的资源等等，总之大部分信息都是可以通过执行该命令得到的。
+
+```shell
+ps axo pid,comm,pcpu # 查看进程的PID、名称以及CPU 占用率
+ps aux | sort -rnk 4 # 按内存资源的使用量对进程进行排序
+ps aux | sort -nk 3  # 按 CPU 资源的使用量对进程进行排序
+ps -A # 显示所有进程信息
+ps -u root # 显示指定用户信息
+ps -efL # 查看线程数
+ps -e -o "%C : %p :%z : %a"|sort -k5 -nr # 查看进程并按内存使用大小排列
+ps -ef # 显示所有进程信息，连同命令行
+ps -ef | grep ssh # ps 与grep 常用组合用法，查找特定进程
+ps -C nginx # 通过名字或命令搜索进程
+ps aux --sort=-pcpu,+pmem # CPU或者内存进行排序,-降序，+升序
+ps -f --forest -C nginx # 用树的风格显示进程的层次关系
+ps -o pid,uname,comm -C nginx # 显示一个父进程的子进程
+ps -e -o pid,uname=USERNAME,pcpu=CPU_USAGE,pmem,comm # 重定义标签
+ps -e -o pid,comm,etime # 显示进程运行的时间
+ps -aux | grep named # 查看named进程详细信息
+ps -o command -p 91730 | sed -n 2p # 通过进程id获取服务名称
+```
+
+
+
+#### pmap
+
+报告进程的内存映射关系。**pmap命令** 用于报告进程的内存映射关系，是Linux调试及运维一个很好的工具。
+
+
+
+#### free
+
+显示内存的使用情况。**free命令** 可以显示当前系统未使用的和已使用的内存数目，还可以显示被内核使用的内存缓冲区。
+
+```sh
+free -t    # 以总和的形式显示内存的使用信息
+free -s 10 # 周期性的查询内存使用信息，每10s 执行一次命令
+```
 
 
 
 ### 如果想统计一个服务的请求文件，统计每个接口的QPS的话，用什么命令能实现？ 
+
+举个:chestnut:命令是`tail -f info.log | grep RecommendServiceImpl | cut -f1 -d'.' | uniq -c` 每个打的日志格式不一样，所以需要理解一下里面的意思
+
+* `grep RecommendServiceImpl`是过滤出要测的接口
+* `cut`是截取一下时间，其中`-d‘.’`表示字符串风格表示符号，单引号里面的就是分割符，例如因为我日志是有打毫秒值的，所以我根据`.`来分段，`-f1`表示我要取分段以后的第一段(从1开始数)，同理`-f2`就是第二段也就是`.`后面这部分，
+* `uniq`显示或者忽略重复的行，但是加上-c就可以累计相同行数，所以我们这边累加起来
+
+![image-20220718141022014](images/image-20220718141022014.png)
 
 
 
