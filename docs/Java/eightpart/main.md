@@ -7280,7 +7280,58 @@ public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
 }
 ```
 
+#### 饿汉式写法
 
+“饿汉模式”（eager initialization），即在初始阶段就主动进行实例化，并时刻保持一种渴求的状态，无论此单例是否有人使用
+
+以后羿射日为例：
+
+```java
+public class Sun {
+    // “private”关键字确保太阳实例的私有性、不可见性和不可访问性
+    // “static”关键字确保太阳的静态性，将太阳放入内存里的静态区，在类加载的时候就初始化了，它与类同在，也就是说它是与类同时期且早于内存堆中的对象实例化的，该实例在内存中永生，内存垃圾收集器也不会对其进行回收
+    // “final”关键字则确保这个太阳是常量、恒量，它是一颗终极的恒星，引用一旦被赋值就不能再修改
+    // “new”关键字初始化太阳类的静态实例，并赋予静态常量sun
+    private static final Sun sun = new Sun();
+
+    private Sun() {
+        // 构造方法私有化，实例化工作完全归属于内部事务，任何外部类都无权干预
+    }
+
+    public static Sun getInstance() {
+        return sun;
+    }
+}
+```
+
+#### 懒汉式写法
+
+如果始终没人获取日光，那岂不是白造了太阳，一块内存区域被白白地浪费了？
+
+```java
+public class Sun {
+    // volatile对静态变量的修饰则能保证变量值在各线程访问时的同步性、唯一性
+    private volatile static Sun sun;
+
+    private Sun() {
+        // 构造方法私有化
+    }
+
+    public static Sun getInstance() {
+        if (sun == null) {
+            // 以防止多个线程进入
+            synchronized(Sun.class) {
+                if (sun == null) {
+                    sun = new Sun();
+                }
+            }
+        }
+        return sun;
+    }
+}
+```
+
+这就是懒加载模式的“双检锁”：外层放宽入口，保证线程并发的高效性；内层加锁同步，保证实例化的单次运行。
 
 
 

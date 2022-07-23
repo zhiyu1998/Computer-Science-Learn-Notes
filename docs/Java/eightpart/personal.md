@@ -3579,6 +3579,16 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 - **无法处理浮动垃圾；**
 - **它使用的回收算法-“标记-清除”算法会导致收集结束时会有大量空间碎片产生。**
 
+> CMS通常有两个阶段会进行STW
+
+第一阶段和第三阶段
+
+* **初始标记（Initial-Mark）阶段**：在这个阶段中，程序中所有的工作线程 (用户线程) 都将会因为  “Stop-The-World” 机制而出现短暂的暂停，这个阶段的主要任务仅仅只是标记出 GC Roots  能直接关联到的对象。一旦标记完成之后就会恢复之前被暂停的所有应用线程。由于直接关联对象比较小，所以这里的速度非常快。
+
+* **重新标记（Remark）阶段**：由于在并发标记阶段中，程序的工作线程会和垃圾收集线程同时运行或者交叉运行，因此为了修正并发标记期间，因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间通常会比初始标记阶段稍长一些，但也远比并发标记阶段的时间短。
+
+
+
 #### G1 收集器
 
 Garbage First（简称 G1）是一款面向服务端的垃圾收集器，也是 JDK 9  服务端模式下默认的垃圾收集器，它的诞生具有里程碑式的意义。G1 虽然也遵循分代收集理论，但不再以固定大小和固定数量来划分分代区域，而是把连续的  Java 堆划分为多个大小相等的独立区域（Region）。每一个 Region 都可以根据不同的需求来扮演新生代的 `Eden` 空间、`Survivor` 空间或者老年代空间，收集器会根据其扮演角色的不同而采用不同的收集策略。
@@ -3826,6 +3836,50 @@ JVM为了实现我们不做赋值操作的对象也可以拿来直接使用在�
 
 > 本节内容摘自周志明老师的《深入理解Java虚拟机》内容
 
+#### OopMap
+
+由于目前主流Java虚拟机使用的都是准确式垃圾收集（这个概念在第1章介绍Exact VM相对于Classic VM的改进时介绍过），所以当用户线程停顿下来之后，其实并不需要一个不漏地检查完所有执行上下文和全局的引用位置，虚拟机应当是有办法直接得到哪些地方存放着对象引用的。在HotSpot的解决方案里，是使用一组称为OopMap（Oop是普通对象指针的意思：ordinary object pointer）的数据结构来达到这个目的。一旦类加载动作完成的时候，HotSpot就会把对象内什么偏移量上是什么类型的数据计算出来，在即时编译过程中，也会在特定的位置记录下栈里和寄存器里哪些位置是引用。这样收集器在扫描时就可以直接得知这些信息了，并不需要真正一个不漏地从方法区等GC Roots开始查找。因此，在 HotSpot 中采取了空间换时间的方法，使用 OopMap 来存储栈上的对象引用的信息。
+
+在 GC Roots 枚举时，只需要遍历每个栈桢的 OopMap，通过 OopMap 存储的信息，快捷地找到 GC Roots。
+
+OopMap 中存储了两种对象的引用：
+
+> ◉ 栈里和寄存器内的引用
+> 在即时编译中，在特定的位置记录下栈里和寄存器里哪些位置是引用
+>  
+> ◉ 对象内的引用
+> 类加载动作完成时，HotSpot 就会计算出对象内什么偏移量上是什么类型的数据
+> 注：把存储单元的实际地址与其所在段的段地址之间的距离称为段内偏移，也称为有效地址或偏移量，因此，实际地址=所在段的起始地址+偏移量
+
+在 JVM中，一个线程为一个栈，一个栈由多个栈桢组成，一个栈桢对应一个方法，一个栈帧可能有多个 OopMap。
+
+假设，这两个方法都只有一个 OopMap，并且是在方法返回之前：
+
+```java
+// 方法1存储在栈帧3
+public void testMethod1() {
+    // 栈里和寄存器内的引用
+    DemoD demoD = new DemoD();
+}
+
+// 方法2存储在栈帧8
+public void testMethod2() {
+    // 栈里和寄存器内的引用
+    DemoA demoA = new DemoA();
+    // 对象内的引用
+    demoA.setDemoC(new DemoC());
+    
+    // 栈里和寄存器内的引用
+    DemoA demoB = new DemoB();
+} 
+```
+
+那么 testMethod1() 和 testMethod2() 的 OopMap 如下图所示：
+
+![image-20220723173000230](images/image-20220723173000230.png)
+
+
+
 #### 安全点
 
 在 OopMap 的协助下，HotSpot 可以快速完成根节点枚举了，但一个很现实的问题随之而来：由于引用关系可能会发生变化，这就会导致  OopMap 内容变化的指令非常多，如果为每一条指令都生成对应的  OopMap，那将会需要大量的额外存储空间，这样垃圾收集伴随而来的空间成本就会变得无法忍受的高昂。
@@ -3861,7 +3915,12 @@ JVM为了实现我们不做赋值操作的对象也可以拿来直接使用在�
 
 可以简单地把安全区域看作**被拉长了的安全点**。
 
-当用户线程执行到安全区域里面的代码时，首先会标识自己已经进入了安全区域。那样当这段时间里虚拟机要发起 GC  时，就不必去管这些在安全区域内的线程了。当安全区域中的线程被唤醒并离开安全区域时，它需要检查下主动式中断策略的标志位是否为真（虚拟机是否处于  STW 状态），如果为真则继续挂起等待（防止根节点枚举过程中这些被唤醒线程的执行破坏了对象之间的引用关系），如果为假则标识还没开始 STW 或者 STW 刚刚结束，那么线程就可以被唤醒然后继续执行。
+**当用户线程执行到安全区域里面的代码时，首先会标识自己已经进入了安全区域。那样当这段时间里虚拟机要发起 GC  时，就不必去管这些在安全区域内的线程了。**
+
+当安全区域中的线程被唤醒并离开安全区域时，它需要检查下主动式中断策略的标志位是否为真（虚拟机是否处于  STW 状态
+
+* 如果为真则继续挂起等待（防止根节点枚举过程中这些被唤醒线程的执行破坏了对象之间的引用关系）
+* 如果为假则标识还没开始 STW 或者 STW 刚刚结束，那么线程就可以被唤醒然后继续执行。
 
 ### 什么是字节码？类文件结构的组成了解吗？
 
@@ -3871,7 +3930,192 @@ JVM为了实现我们不做赋值操作的对象也可以拿来直接使用在�
 
 
 
-类文件组成如下：![image-20220720160540361](./images/image-20220720160540361.png)
+#### Class 文件结构总结
+
+根据 Java 虚拟机规范，Class 文件通过 `ClassFile` 定义，有点类似 C 语言的结构体。
+
+`ClassFile` 的结构如下：
+
+```java
+ClassFile {
+    u4             magic; //Class 文件的标志
+    u2             minor_version;//Class 的小版本号
+    u2             major_version;//Class 的大版本号
+    u2             constant_pool_count;//常量池的数量
+    cp_info        constant_pool[constant_pool_count-1];//常量池
+    u2             access_flags;//Class 的访问标记
+    u2             this_class;//当前类
+    u2             super_class;//父类
+    u2             interfaces_count;//接口
+    u2             interfaces[interfaces_count];//一个类可以实现多个接口
+    u2             fields_count;//Class 文件的字段属性
+    field_info     fields[fields_count];//一个类可以有多个字段
+    u2             methods_count;//Class 文件的方法数量
+    method_info    methods[methods_count];//一个类可以有个多个方法
+    u2             attributes_count;//此类的属性表中的属性数
+    attribute_info attributes[attributes_count];//属性表集合
+}
+```
+
+通过分析 `ClassFile` 的内容，我们便可以知道 class 文件的组成。
+
+![image-20220723173831486](images/image-20220723173831486.png)
+
+下面这张图是通过 IDEA 插件 `jclasslib` 查看的，你可以更直观看到 Class 文件结构。
+
+![image-20220723173839688](images/image-20220723173839688.png)
+
+使用 `jclasslib` 不光可以直观地查看某个类对应的字节码文件，还可以查看类的基本信息、常量池、接口、属性、函数等信息。
+
+下面详细介绍一下 Class 文件结构涉及到的一些组件。
+
+#### 魔数（Magic Number）
+
+```java
+    u4             magic; //Class 文件的标志
+```
+
+每个 Class 文件的头 4 个字节称为魔数（Magic Number）,它的唯一作用是**确定这个文件是否为一个能被虚拟机接收的 Class 文件**。
+
+程序设计者很多时候都喜欢用一些特殊的数字表示固定的文件类型或者其它特殊的含义。
+
+#### Class 文件版本号（Minor&Major Version）
+
+```java
+    u2             minor_version;//Class 的小版本号
+    u2             major_version;//Class 的大版本号
+```
+
+紧接着魔数的四个字节存储的是 Class 文件的版本号：第 5 和第 6 位是**次版本号**，第 7 和第 8 位是**主版本号**。
+
+每当 Java 发布大版本（比如 Java 8，Java9）的时候，主版本号都会加 1。你可以使用 `javap -v` 命令来快速查看 Class 文件的版本号信息。
+
+高版本的 Java 虚拟机可以执行低版本编译器生成的 Class 文件，但是低版本的 Java 虚拟机不能执行高版本编译器生成的 Class 文件。所以，我们在实际开发的时候要确保开发的的 JDK 版本和生产环境的 JDK 版本保持一致。
+
+#### 常量池（Constant Pool）
+
+```java
+    u2             constant_pool_count;//常量池的数量
+    cp_info        constant_pool[constant_pool_count-1];//常量池
+```
+
+紧接着主次版本号之后的是常量池，常量池的数量是 `constant_pool_count-1`（**常量池计数器是从 1 开始计数的，将第 0 项常量空出来是有特殊考虑的，索引值为 0 代表“不引用任何一个常量池项”**）。
+
+常量池主要存放两大常量：字面量和符号引用。字面量比较接近于 Java 语言层面的的常量概念，如文本字符串、声明为 final 的常量值等。而符号引用则属于编译原理方面的概念。包括下面三类常量：
+
+- 类和接口的全限定名
+- 字段的名称和描述符
+- 方法的名称和描述符
+
+常量池中每一项常量都是一个表，这 14 种表有一个共同的特点：**开始的第一位是一个 u1 类型的标志位 -tag 来标识常量的类型，代表当前这个常量属于哪种常量类型．**
+
+|               类型               | 标志（tag） |          描述          |
+| :------------------------------: | :---------: | :--------------------: |
+|        CONSTANT_utf8_info        |      1      |   UTF-8 编码的字符串   |
+|      CONSTANT_Integer_info       |      3      |       整形字面量       |
+|       CONSTANT_Float_info        |      4      |      浮点型字面量      |
+|        CONSTANT_Long_info        |     ５      |      长整型字面量      |
+|       CONSTANT_Double_info       |     ６      |   双精度浮点型字面量   |
+|       CONSTANT_Class_info        |     ７      |   类或接口的符号引用   |
+|       CONSTANT_String_info       |     ８      |    字符串类型字面量    |
+|      CONSTANT_Fieldref_info      |     ９      |     字段的符号引用     |
+|     CONSTANT_Methodref_info      |     10      |   类中方法的符号引用   |
+| CONSTANT_InterfaceMethodref_info |     11      |  接口中方法的符号引用  |
+|    CONSTANT_NameAndType_info     |     12      |  字段或方法的符号引用  |
+|     CONSTANT_MothodType_info     |     16      |      标志方法类型      |
+|    CONSTANT_MethodHandle_info    |     15      |      表示方法句柄      |
+|   CONSTANT_InvokeDynamic_info    |     18      | 表示一个动态方法调用点 |
+
+`.class` 文件可以通过`javap -v class类名` 指令来看一下其常量池中的信息(`javap -v class类名-> temp.txt` ：将结果输出到 temp.txt 文件)。
+
+#### 访问标志(Access Flags)
+
+在常量池结束之后，紧接着的两个字节代表访问标志，这个标志用于识别一些类或者接口层次的访问信息，包括：这个 Class 是类还是接口，是否为 `public` 或者 `abstract` 类型，如果是类的话是否声明为 `final` 等等。
+
+类访问和属性修饰符:
+
+![image-20220723173943684](images/image-20220723173943684.png)
+
+我们定义了一个 Employee 类
+
+```java
+package top.snailclimb.bean;
+public class Employee {
+   ...
+}
+```
+
+通过`javap -v class类名` 指令来看一下类的访问标志。
+
+![image-20220723173952132](images/image-20220723173952132.png)
+
+#### 当前类（This Class）、父类（Super Class）、接口（Interfaces）索引集合
+
+```java
+    u2             this_class;//当前类
+    u2             super_class;//父类
+    u2             interfaces_count;//接口
+    u2             interfaces[interfaces_count];//一个类可以实现多个接口
+```
+
+类索引用于确定这个类的全限定名，父类索引用于确定这个类的父类的全限定名，由于 Java 语言的单继承，所以父类索引只有一个，除了 `java.lang.Object` 之外，所有的 java 类都有父类，因此除了 `java.lang.Object` 外，所有 Java 类的父类索引都不为 0。
+
+接口索引集合用来描述这个类实现了那些接口，这些被实现的接口将按 `implements` (如果这个类本身是接口的话则是`extends`) 后的接口顺序从左到右排列在接口索引集合中。
+
+#### 字段表集合（Fields）
+
+```java
+    u2             fields_count;//Class 文件的字段的个数
+    field_info     fields[fields_count];//一个类会可以有个字段
+```
+
+字段表（field info）用于描述接口或类中声明的变量。字段包括类级变量以及实例变量，但不包括在方法内部声明的局部变量。
+
+**field info(字段表) 的结构:**
+
+![image-20220723174020945](images/image-20220723174020945.png)
+
+- **access_flags:** 字段的作用域（`public` ,`private`,`protected`修饰符），是实例变量还是类变量（`static`修饰符）,可否被序列化（transient 修饰符）,可变性（final）,可见性（volatile 修饰符，是否强制从主内存读写）。
+- **name_index:** 对常量池的引用，表示的字段的名称；
+- **descriptor_index:** 对常量池的引用，表示字段和方法的描述符；
+- **attributes_count:** 一个字段还会拥有一些额外的属性，attributes_count 存放属性的个数；
+- **attributes[attributes_count]:** 存放具体属性具体内容。
+
+上述这些信息中，各个修饰符都是布尔值，要么有某个修饰符，要么没有，很适合使用标志位来表示。而字段叫什么名字、字段被定义为什么数据类型这些都是无法固定的，只能引用常量池中常量来描述。
+
+**字段的 access_flag 的取值:**
+
+![image-20220723174028527](images/image-20220723174028527.png)
+
+#### 方法表集合（Methods）
+
+```java
+    u2             methods_count;//Class 文件的方法的数量
+    method_info    methods[methods_count];//一个类可以有个多个方法
+```
+
+methods_count 表示方法的数量，而 method_info 表示方法表。
+
+Class 文件存储格式中对方法的描述与对字段的描述几乎采用了完全一致的方式。方法表的结构如同字段表一样，依次包括了访问标志、名称索引、描述符索引、属性表集合几项。
+
+**method_info(方法表的) 结构:**
+
+![image-20220723174041110](images/image-20220723174041110.png)
+
+方法表的 access_flag 取值：
+
+![image-20220723174047943](images/image-20220723174047943.png)
+
+注意：因为`volatile`修饰符和`transient`修饰符不可以修饰方法，所以方法表的访问标志中没有这两个对应的标志，但是增加了`synchronized`、`native`、`abstract`等关键字修饰方法，所以也就多了这些关键字对应的标志。
+
+#### 属性表集合（Attributes）
+
+```java
+   u2             attributes_count;//此类的属性表中的属性数
+   attribute_info attributes[attributes_count];//属性表集合
+```
+
+在  Class 文件，字段表，方法表中都可以携带自己的属性表集合，以用于描述某些场景专有的信息。与 Class  文件中其它的数据项目要求的顺序、长度和内容不同，属性表集合的限制稍微宽松一些，不再要求各个属性表具有严格的顺序，并且只要不与已有的属性名重复，任何人实现的编译器都可以向属性表中写 入自己定义的属性信息，Java 虚拟机运行时会忽略掉它不认识的属性。
 
 
 
@@ -4282,11 +4526,56 @@ private SmsService smsService;
 
 
 
+### Spring中构造方法注入和设值注入有什么区别
+
+构造器通过构造方法实现，构造方法有无参数都可以。在大部分情况下我们都是通过类的构造器来创建对象，Spring也可以采用反射机制通过构造器完成注入，这就是构造器注入的原理。
+
+```java
+public class Role {
+
+    private long id;
+    private String roleName;
+
+    public Role(long id,String roleName){
+        this.id=id;
+        this.roleName=roleName;
+
+    }
+    public void getCount(){
+        System.out.println("Role已被调用"+"\n"+"id:"+id+"\n"+"roleName:"+roleName);
+    }
+}
+```
+
+setter注入是Spring中最主流的注入方法（常用），好处就不用多说了。原理也是通过反射注入，直接上代码。（注意对应的实体类属性必须实现set，get方法。如果实体类没有属性也会被注入）。
+
+```java
+public class Role {
+
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
+    }
+    public String getRoleName() {
+        return roleName;
+    }
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+    private long id;
+    private String roleName;
+}
+```
+
+
+
 ### Spring怎么解决循环依赖的问题？
 
-构造器注入的循环依赖：Spring处理不了，直接抛出`BeanCurrentlylnCreationException`异常。
+**构造器注入的循环依赖：Spring处理不了**，直接抛出`BeanCurrentlylnCreationException`异常。
 
-单例模式下属性注入的循环依赖：通过三级缓存处理循环依赖。
+单例模式下属性注入的循环依赖：通过**三级缓存处理循环依赖**。
 
 非单例循环依赖：无法处理。
 
@@ -7656,6 +7945,98 @@ Kafka  从生产者到消费者消费消息这一整个过程其实都是可以�
 虽然篇幅不多，但是基本把 RPC 框架的核心原理讲清楚了！另外，对于上面的技术细节，我会在后面的章节介绍到。
 
 **最后，对于 RPC 的原理，希望小伙伴不单单要理解，还要能够自己画出来并且能够给别人讲出来。因为，在面试中这个问题在面试官问到 RPC 相关内容的时候基本都会碰到。**
+
+
+
+### 有哪些常见的 RPC 框架？
+
+我们这里说的 RPC 框架指的是可以让客户端直接调用服务端方法，就像调用本地方法一样简单的框架，比如我下面介绍的  Dubbo、Motan、gRPC这些。 如果需要和 HTTP 协议打交道，解析和封装 HTTP 请求和响应。这类框架并不能算是“RPC  框架”，比如Feign
+
+#### Dubbo
+
+![image-20220723235648648](images/image-20220723235648648.png)
+
+Apache Dubbo 是一款微服务框架，为大规模微服务实践提供高性能 RPC 通信、流量治理、可观测性等解决方案， 涵盖 Java、Golang 等多种语言 SDK 实现。
+
+Dubbo 提供了从服务定义、服务发现、服务通信到流量管控等几乎所有的服务治理能力，支持 Triple 协议（基于 HTTP/2 之上定义的下一代 RPC 通信协议）、应用级服务发现、Dubbo Mesh （Dubbo3 赋予了很多云原生友好的新特性）等特性。
+
+![image-20220723235657177](images/image-20220723235657177.png)
+
+Dubbo 是由阿里开源，后来加入了 Apache 。正式由于 Dubbo 的出现，才使得越来越多的公司开始使用以及接受分布式架构。
+
+Dubbo 算的是比较优秀的国产开源项目了，它的源码也是非常值得学习和阅读的！
+
+- Github ：https://github.com/apache/incubator-dubbo
+- 官网：https://dubbo.apache.org/zh/
+
+
+
+#### Motan
+
+Motan 是新浪微博开源的一款 RPC 框架，据说在新浪微博正支撑着千亿次调用。不过笔者倒是很少看到有公司使用，而且网上的资料也比较少。
+
+很多人喜欢拿 Motan 和 Dubbo 作比较，毕竟都是国内大公司开源的。笔者在查阅了很多资料，以及简单查看了其源码之后发现：**Motan 更像是一个精简版的 Dubbo，可能是借鉴了 Dubbo 的思想，Motan 的设计更加精简，功能更加纯粹。**
+
+不过，我不推荐你在实际项目中使用 Motan。如果你要是公司实际使用的话，还是推荐 Dubbo ，其社区活跃度以及生态都要好很多。
+
+- 从 Motan 看 RPC 框架设计：http://kriszhang.com/motan-rpc-impl/
+- Motan 中文文档：https://github.com/weibocom/motan/wiki/zh_overview
+
+
+
+#### gRPC
+
+![image-20220723235737977](images/image-20220723235737977.png)
+
+gRPC 是 Google 开源的一个高性能、通用的开源 RPC 框架。其由主要面向移动应用开发并基于 HTTP/2 协议标准而设计（支持双向流、消息头压缩等功能，更加节省带宽），基于 ProtoBuf 序列化协议开发，并且支持众多开发语言。
+
+**何谓 ProtoBuf？** [ProtoBuf（ Protocol Buffer）](https://github.com/protocolbuffers/protobuf)
+
+ 是一种更加灵活、高效的数据格式，可用于通讯协议、数据存储等领域，基本支持所有主流编程语言且与平台无关。不过，通过 ProtoBuf 定义接口和数据类型还挺繁琐的，这是一个小问题。
+
+![image-20220723235747598](images/image-20220723235747598.png)
+
+不得不说，gRPC 的通信层的设计还是非常优秀的，[Dubbo-go 3.0](https://dubbogo.github.io/)
+
+ 的通信层改进主要借鉴了 gRPC。
+
+不过，gRPC 的设计导致其几乎没有服务治理能力。如果你想要解决这个问题的话，就需要依赖其他组件比如腾讯的 PolarisMesh（北极星）了。
+
+- Github：https://github.com/grpc/grpc
+- 官网：https://grpc.io/
+
+
+
+#### Thrift
+
+Apache Thrift 是 Facebook 开源的跨语言的 RPC 通信框架，目前已经捐献给 Apache  基金会管理，由于其跨语言特性和出色的性能，在很多互联网公司得到应用，有能力的公司甚至会基于 thrift  研发一套分布式服务框架，增加诸如服务注册、服务发现等功能。
+
+`Thrift`支持多种不同的**编程语言**，包括`C++`、`Java`、`Python`、`PHP`、`Ruby`等（相比于 gRPC 支持的语言更多 ）。
+
+- 官网：https://thrift.apache.org/
+- Thrift 简单介绍：https://www.jianshu.com/p/8f25d057a5a9
+
+
+
+#### 总结
+
+gRPC 和 Thrift 虽然支持跨语言的 RPC 调用，但是它们只提供了最基本的 RPC 框架功能，缺乏一系列配套的服务化组件和服务治理功能的支撑。
+
+Dubbo 不论是从功能完善程度、生态系统还是社区活跃度来说都是最优秀的。而且，Dubbo在国内有很多成功的案例比如当当网、滴滴等等，是一款经得起生产考验的成熟稳定的 RPC 框架。最重要的是你还能找到非常多的 Dubbo 参考资料，学习成本相对也较低。
+
+下图展示了 Dubbo 的生态系统。
+
+![image-20220723235849004](images/image-20220723235849004.png)
+
+Dubbo 也是 Spring Cloud Alibaba 里面的一个组件。
+
+![image-20220723235856647](images/image-20220723235856647.png)
+
+但是，Dubbo 和 Motan 主要是给 Java 语言使用。虽然，Dubbo 和 Motan 目前也能兼容部分语言，但是不太推荐。如果需要跨多种语言调用的话，可以考虑使用 gRPC。
+
+综上，如果是 Java 后端技术栈，并且你在纠结选择哪一种 RPC 框架的话，我推荐你考虑一下 Dubbo
+
+
 
 ### 了解分布式事务吗？
 
