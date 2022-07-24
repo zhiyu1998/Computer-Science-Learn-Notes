@@ -1,22 +1,40 @@
-name: 🚀Deploy Github pages
+name: 🚀Deploy to GitHub Pages
+
 on:
   push:
     branches:
       - master
+    # 如果你想要进一步定义触发条件、路径等，可以查看文档
+    # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+
 jobs:
-  build-and-deploy:
+  deploy:
+    name: 🚀Deploy to GitHub Pages
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout 🛎️
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: yarn
 
-    - name: Install and Build 🔧
-      run: |
-        npm install
-        npm run build
+      - name: 🔧Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: 🔧Build website
+        run: yarn build
 
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@v4.3.3
-      with:
-        branch: gh-pages # The branch the action should deploy to.
-        folder: build # The folder the action should deploy.
+      # 部署到 GitHub Pages 的热门选择：
+      # 文档：https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
+      - name: 🚀Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # 要发布到 `gh-pages` 分支的构建输出：
+          publish_dir: ./build
+          # 下面两行会将此次部署 commit 的作者设置为官方的
+          # GH-Actions 机器人：
+          # https://github.com/actions/checkout/issues/13#issuecomment-724415212
+          # 如果不设置这两个字段，GH actions 机器人会被默认使用。
+          # 你可以用自己的用户信息替换它们。
+          # user_name: github-actions[bot]
+          # user_email: 41898282+github-actions[bot]@users.noreply.github.com

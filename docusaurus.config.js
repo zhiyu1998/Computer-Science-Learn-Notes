@@ -35,7 +35,7 @@ const config = {
         docs: {
           editUrl:
             'https://zhiyu1998.github.io/Computer-Science-Learn-Notes/tree/main/packages/create-docusaurus/templates/shared/',
-          // sidebarPath: require.resolve('./sidebars.js'),
+          sidebarPath: require.resolve('./sidebars.js'),
         },
         blog: false,
         theme: {
@@ -132,36 +132,6 @@ const config = {
         },
       }
     }),
-    plugins: [
-    [
-      '@docusaurus/plugin-pwa',
-      {
-        debug: false,
-        offlineModeActivationStrategies: [
-          'appInstalled',
-          'standalone',
-          'queryString',
-        ],
-        pwaHead: [
-          {
-            tagName: 'link',
-            rel: 'icon',
-            href: '/img/logo.png',
-          },
-          {
-            tagName: 'link',
-            rel: 'manifest',
-            href: '/manifest.json', // 你的 PWA Manifest
-          },
-          {
-            tagName: 'meta',
-            name: 'theme-color',
-            content: 'rgb(37, 194, 160)',
-          },
-        ],
-      },
-    ],
-  ],
 };
 
 module.exports = config;

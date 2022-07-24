@@ -1,5 +1,4 @@
 ---
-id: c-datastruct
 title: 数据结构思维导图
 ---
 # 数据结构思维导图
