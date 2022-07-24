@@ -34,7 +34,7 @@ const config = {
       ({
         docs: {
           editUrl:
-            'https://zhiyu1998.github.io/Computer-Science-Learn-Notes/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/zhiyu1998/Computer-Science-Learn-Notes/edit/master/',
           sidebarPath: require.resolve('./sidebars.js'),
         },
         blog: false,
