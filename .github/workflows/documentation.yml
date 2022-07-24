@@ -23,6 +23,17 @@ jobs:
       - name: 🔧Build website
         run: yarn build
 
+      # 缓存 node_modules
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: |
+            **/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
       # 部署到 GitHub Pages 的热门选择：
       # 文档：https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
       - name: 🚀Deploy to GitHub Pages
