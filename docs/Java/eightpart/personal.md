@@ -780,6 +780,54 @@ String类是final类，不可以被继承。
 
 ### 谈谈你对多态的理解？
 
+著作权归https://pdai.tech所有。 链接：https://www.pdai.tech/md/java/basic/java-basic-oop.html
+
+多态分为编译时多态和运行时多态:
+
+- 编译时多态主要指方法的重载
+- 运行时多态指程序中定义的对象引用所指向的具体类型在运行期间才确定
+
+运行时多态有三个条件:
+
+- 继承
+- 覆盖(重写)
+- 向上转型
+
+下面的代码中，乐器类(Instrument)有两个子类: Wind 和 Percussion，它们都覆盖了父类的 play() 方法，并且在 main() 方法中使用父类 Instrument 来引用 Wind 和 Percussion 对象。在 Instrument 引用调用 play() 方法时，会执行实际引用对象所在类的 play() 方法，而不是 Instrument 类的方法。
+
+```java
+public class Instrument {
+    public void play() {
+        System.out.println("Instrument is playing...");
+    }
+}
+
+public class Wind extends Instrument {
+    public void play() {
+        System.out.println("Wind is playing...");
+    }
+}
+
+public class Percussion extends Instrument {
+    public void play() {
+        System.out.println("Percussion is playing...");
+    }
+}
+
+public class Music {
+    public static void main(String[] args) {
+        List<Instrument> instruments = new ArrayList<>();
+        instruments.add(new Wind());
+        instruments.add(new Percussion());
+        for(Instrument instrument : instruments) {
+            instrument.play();
+        }
+    }
+}
+```
+
+> 详细
+
 多态的概念并不难，并且在实际编码中可以说是最最高频使用率。多态就是**使得同一个行为具有多个不同表现形式或形态的能力**。举个形象点的例子：对于 “打印” 这个行为，使用彩色打印机 “打印” 出来的效果就是彩色的，而使用黑白打印机 “打印” 出来的效果就是黑白的。我们就称 “打印” 这个行为是多态的，彩色打印效果和黑白打印效果就是 “打印” 这个行为的两个不同的表现形式。
 
 ![image-20220618172157050](./images/image-20220618172157050.png)
@@ -2224,6 +2272,13 @@ synchronized (this) { // 此处自动加锁
 >     Java语言提供了一种稍弱的同步机制，即volatile变量，用来确保将变量的更新操作通知到其他线程。当把变量声明为volatile类型后，编译器与运行时都会注意到这个变量是共享的，因此不会将该变量上的操作与其他内存操作一起重排序。volatile变量不会被缓存在寄存器或者对其他处理器不可见的地方，因此在读取volatile类型的变量时总会返回最新写入的值
 >
 >     volatile变量对可见性的影响比volatile变量本身更为重要。当线程A首先写入一个volatile变量并且线程B随后读取该变量时，在写入volatile变量之前对A可见的所有变量的值，在B读取了volatile变量后，对B也是可见的。因此，**从内存可见性的角度来看，写入volatile变量相当于退出同步代码块，而读取volatile变量就相当于进入同步代码块**。
+
+#### 实现原理
+
+* 字节码层面：`volatile`在字节码层面，就是使用访问标志：**ACC_VOLATILE**来表示，供后续操作此变量时判断访问标志是否为ACC_VOLATILE，来决定是否遵循volatile的语义处理。
+* 
+
+
 
 ### CAS 是什么？
 
@@ -4308,6 +4363,175 @@ Class 文件存储格式中对方法的描述与对字段的描述几乎采用�
 
 
 
+### OOM 常见原因及解决方法
+
+> 节选自：StabilityGuide 
+
+当 JVM 内存严重不足时，就会抛出 java.lang.OutOfMemoryError 错误。本文总结了常见的 OOM 原因及其解决方法，如下图所示。如有遗漏或错误，欢迎补充指正。
+
+![image-20220726150913148](images/image-20220726150913148.png)
+
+#### Java heap space
+
+当堆内存（Heap Space）没有足够空间存放新创建的对象时，就会抛出 `java.lang.OutOfMemoryError: Java heap space` 错误（根据实际生产经验，可以对程序日志中的 OutOfMemoryError 配置关键字告警，一经发现，立即处理）
+
+##### 原因分析
+
+`Java heap space` 错误产生的常见原因可以分为以下几类：
+
+- 请求创建一个超大对象，通常是一个大数组。
+- 超出预期的访问量/数据量，通常是上游系统请求流量飙升，常见于各类促销/秒杀活动，可以结合业务流量指标排查是否有尖状峰值。
+- 过度使用终结器（Finalizer），该对象没有立即被 GC。
+- 内存泄漏（Memory Leak），大量对象引用没有释放，JVM 无法对其自动回收，常见于使用了 File 等资源没有回收。
+
+##### 解决方案
+
+针对大部分情况，通常只需要通过 `-Xmx` 参数调高 JVM 堆内存空间即可。如果仍然没有解决，可以参考以下情况做进一步处理：
+
+- 如果是超大对象，可以检查其合理性，比如是否一次性查询了数据库全部结果，而没有做结果数限制。
+- 如果是业务峰值压力，可以考虑添加机器资源，或者做限流降级。
+- 如果是内存泄漏，需要找到持有的对象，修改代码设计，比如关闭没有释放的连接。
+
+#### GC overhead limit exceeded
+
+当 Java 进程花费 98% 以上的时间执行 GC，但只恢复了不到 2% 的内存，且该动作连续重复了 5 次，就会抛出 `java.lang.OutOfMemoryError:GC overhead limit exceeded` 错误。简单地说，就是应用程序已经基本耗尽了所有可用内存， GC 也无法回收。
+
+此类问题的原因与解决方案跟 `Java heap space` 非常类似，可以参考上文。
+
+#### Permgen space
+
+该错误表示永久代（Permanent Generation）已用满，通常是因为加载的 class 数目太多或体积太大。
+
+##### 原因分析
+
+永久代存储对象主要包括以下几类：
+
+- 加载/缓存到内存中的 class 定义，包括类的名称，字段，方法和字节码；
+- 常量池；
+- 对象数组/类型数组所关联的 class；
+- JIT 编译器优化后的 class 信息。
+
+PermGen 的使用量与加载到内存的 class 的数量/大小正相关。
+
+##### 解决方案
+
+根据 Permgen space 报错的时机，可以采用不同的解决方案，如下所示：
+
+- 程序启动报错，修改 `-XX:MaxPermSize` 启动参数，调大永久代空间。
+- 应用重新部署时报错，很可能是没有应用没有重启，导致加载了多份 class 信息，只需重启 JVM 即可解决。
+- 运行时报错，应用程序可能会动态创建大量 class，而这些 class 的生命周期很短暂，但是 JVM 默认不会卸载 class，可以设置 `-XX:+CMSClassUnloadingEnabled` 和 `-XX:+UseConcMarkSweepGC` 这两个参数允许 JVM 卸载 class。
+
+如果上述方法无法解决，可以通过 jmap 命令 dump 内存对象 `jmap -dump:format=b,file=dump.hprof <process-id>` ，然后利用 [Eclipse MAT](https://www.eclipse.org/mat/) 功能逐一分析开销最大的 classloader 和重复 class。
+
+#### Metaspace
+
+DK 1.8 使用 Metaspace 替换了永久代（Permanent Generation），该错误表示 Metaspace 已被用满，通常是因为加载的 class 数目太多或体积太大。
+
+此类问题的原因与解决方法跟 `Permgen space` 非常类似，可以参考上文。需要特别注意的是调整 Metaspace 空间大小的启动参数为 `-XX:MaxMetaspaceSize`。
+
+#### Unable to create new native thread
+
+每个 Java 线程都需要占用一定的内存空间，当 JVM 向底层操作系统请求创建一个新的 native 线程时，如果没有足够的资源分配就会报此类错误。
+
+##### 原因分析
+
+JVM 向 OS 请求创建 native 线程失败，就会抛出 `Unable to create new native thread`，常见的原因包括以下几类：
+
+- 线程数超过操作系统最大线程数 ulimit 限制。
+- 线程数超过 kernel.pid_max（只能重启）。
+- native 内存不足。
+
+该问题发生的常见过程主要包括以下几步：
+
+1. JVM 内部的应用程序请求创建一个新的 Java 线程；
+2. JVM native 方法代理了该次请求，并向操作系统请求创建一个 native 线程；
+3. 操作系统尝试创建一个新的 native 线程，并为其分配内存；
+4. 如果操作系统的虚拟内存已耗尽，或是受到 32 位进程的地址空间限制，操作系统就会拒绝本次 native 内存分配；
+5. JVM 将抛出 `java.lang.OutOfMemoryError: Unable to create new native thread` 错误。
+
+##### 解决方案
+
+- 升级配置，为机器提供更多的内存；
+- 降低 Java Heap Space 大小；
+- 修复应用程序的线程泄漏问题；
+- 限制线程池大小；
+- 使用 -Xss 参数减少线程栈的大小；
+- 调高 OS 层面的线程最大数：执行 `ulimia -a` 查看最大线程数限制，使用 `ulimit -u xxx` 调整最大线程数限制。
+
+```
+ulimit -a
+.... 省略部分内容 .....
+max user processes              (-u) 16384
+```
+
+#### Out of swap space？
+
+该错误表示所有可用的虚拟内存已被耗尽。虚拟内存（Virtual Memory）由物理内存（Physical Memory）和交换空间（Swap Space）两部分组成。当运行时程序请求的虚拟内存溢出时就会报 `Out of swap space?` 错误。
+
+##### 原因分析
+
+该错误出现的常见原因包括以下几类：
+
+- 地址空间不足；
+- 物理内存已耗光；
+- 应用程序的本地内存泄漏（native leak），例如不断申请本地内存，却不释放。
+- 执行 `jmap -histo:live <pid>` 命令，强制执行 Full GC；如果几次执行后内存明显下降，则基本确认为 Direct ByteBuffer 问题。
+
+##### 解决方案
+
+根据错误原因可以采取如下解决方案：
+
+- 升级地址空间为 64 bit；
+- 使用 [Arthas](https://github.com/alibaba/arthas) 检查是否为 Inflater/Deflater 解压缩问题，如果是，则显式调用 end 方法。
+- Direct ByteBuffer 问题可以通过启动参数 `-XX:MaxDirectMemorySize` 调低阈值。
+- 升级服务器配置/隔离部署，避免争用。
+
+#### Kill process or sacrifice child
+
+有一种内核作业（Kernel Job）名为 Out of Memory Killer，它会在可用内存极低的情况下“杀死”（kill）某些进程。OOM Killer 会对所有进程进行打分，然后将评分较高的进程“杀死”，具体的评分规则可以参考 [Surviving the Linux OOM Killer](https://dev.to/rrampage/surviving-the-linux-oom-killer-2ki9)。
+
+不同于其他的 OOM 错误，`Kill process or sacrifice child` 错误不是由 JVM 层面触发的，而是由操作系统层面触发的。当系统空闲内存突然大幅被释放，有较大概率触发了 OOM Killer 杀掉了某些进程。
+
+![image-20220726151232866](images/image-20220726151232866.png)
+
+##### 原因分析
+
+默认情况下，Linux 内核允许进程申请的内存总量大于系统可用内存，通过这种“错峰复用”的方式可以更有效的利用系统资源。
+
+然而，这种方式也会无可避免地带来一定的“超卖”风险。例如某些进程持续占用系统内存，然后导致其他进程没有可用内存。此时，系统将自动激活 OOM Killer，寻找评分高的进程，并将其“杀死”，释放内存资源。
+
+##### 解决方案
+
+- 升级服务器配置/隔离部署，避免争用。
+- [OOM Killer 调优](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/6/html/performance_tuning_guide/s-memory-captun)。
+
+#### Requested array size exceeds VM limit
+
+JVM 限制了数组的最大长度，该错误表示程序请求创建的数组超过最大长度限制。
+
+JVM 在为数组分配内存前，会检查要分配的数据结构在系统中是否可寻址，通常为 `Integer.MAX_VALUE - 2`。
+
+此类问题比较罕见，通常需要检查代码，确认业务是否需要创建如此大的数组，是否可以拆分为多个块，分批执行。
+
+#### Direct buffer memory
+
+Java 允许应用程序通过 Direct ByteBuffer 直接访问堆外内存，许多高性能程序通过 Direct ByteBuffer 结合内存映射文件（Memory Mapped File）实现高速 IO。
+
+##### 原因分析
+
+Direct ByteBuffer 的默认大小为 64 MB，一旦使用超出限制，就会抛出 `Direct buffer memory` 错误。
+
+##### 解决方案
+
+- Java 只能通过 ByteBuffer.allocateDirect 方法使用 Direct ByteBuffer，因此，可以通过 [Arthas](https://github.com/alibaba/arthas) 等在线诊断工具拦截该方法进行排查。
+- 检查是否直接或间接使用了 NIO，如 netty，jetty 等。
+- 通过启动参数 `-XX:MaxDirectMemorySize` 调整 Direct ByteBuffer 的上限值。
+- 检查 JVM 参数是否有 `-XX:+DisableExplicitGC` 选项，如果有就去掉，因为该参数会使 `System.gc()` 失效。
+- 检查堆外内存使用代码，确认是否存在内存泄漏；或者通过反射调用 `sun.misc.Cleaner` 的 `clean()` 方法来主动释放被 Direct ByteBuffer 持有的内存空间。
+- 内存容量确实不足，升级配置。
+
+
+
 ## 🕸️Netty
 
 ### Reactor模型
@@ -4578,10 +4802,7 @@ Proactor 正是采用了异步 I/O 技术，所以被称为异步网络模型。
 public Object getBean(String name) throws BeansException {
     assertBeanFactoryActive();
     return getBeanFactory().getBean(name);
-}
- 
-        Copied!
-    
+} 
 ```
 
 2、**工厂方法模式**：`FactoryBean`就是典型的工厂方法模式。spring在使用`getBean()`调用获得该bean时，会自动调用该bean的`getObject()`方法。每个 Bean 都会对应一个 `FactoryBean`，如 `SqlSessionFactory` 对应 `SqlSessionFactoryBean`。
@@ -6637,9 +6858,9 @@ Redis 内存淘汰策略共有八种，这八种策略大体分为「不进行�
 在设置了过期时间的数据中进行淘汰：
 
 - **volatile-random**：随机淘汰设置了过期时间的任意键值；
-- **volatile-ttl**：优先淘汰更早过期的键值。
 - **volatile-lru**（Redis3.0 之前，默认的内存淘汰策略）：淘汰所有设置了过期时间的键值中，最久未使用的键值；
 - **volatile-lfu**（Redis 4.0 后新增的内存淘汰策略）：淘汰所有设置了过期时间的键值中，最少使用的键值；
+- **volatile-ttl**：优先淘汰更早过期的键值。
 
 在所有数据范围内进行淘汰：
 
@@ -8526,6 +8747,344 @@ Kafka  从生产者到消费者消费消息这一整个过程其实都是可以�
 
 ## 🔗 分布式
 
+### 理论基础
+
+#### CAP理论
+
+CAP 理论/定理起源于 2000年，由加州大学伯克利分校的Eric Brewer教授在分布式计算原理研讨会（PODC）上提出，因此 CAP定理又被称作 **布鲁尔定理（Brewer’s theorem）**
+
+2年后，麻省理工学院的Seth Gilbert和Nancy Lynch 发表了布鲁尔猜想的证明，CAP理论正式成为分布式领域的定理。
+
+##### 简介
+
+**CAP** 也就是 **Consistency（一致性）**、**Availability（可用性）**、**Partition Tolerance（分区容错性）** 这三个单词首字母组合。
+
+![image-20220726125103940](images/image-20220726125103940.png)
+
+CAP 理论的提出者布鲁尔在提出 CAP 猜想的时候，并没有详细定义 **Consistency**、**Availability**、**Partition Tolerance** 三个单词的明确定义。
+
+因此，对于 CAP 的民间解读有很多，一般比较被大家推荐的是下面 👇 这种版本的解读。
+
+在理论计算机科学中，CAP 定理（CAP theorem）指出对于一个分布式系统来说，当设计读写操作时，只能同时满足以下三点中的两个：
+
+- **一致性（Consistency）** : 所有节点访问同一份最新的数据副本
+- **可用性（Availability）**: 非故障的节点在合理的时间内返回合理的响应（不是错误或者超时的响应）。
+- **分区容错性（Partition tolerance）** : 分布式系统出现网络分区的时候，仍然能够对外提供服务。
+
+##### 网络分区
+
+> 分布式系统中，多个节点之前的网络本来是连通的，但是因为某些故障（比如部分节点网络出了问题）某些节点之间不连通了，整个网络就分成了几块区域，这就叫网络分区。
+
+![image-20220726132654526](images/image-20220726132654526.png)
+
+##### 不是所谓的“3 选 2”
+
+大部分人解释这一定律时，常常简单的表述为：“一致性、可用性、分区容忍性三者你只能同时达到其中两个，不可能同时达到”。实际上这是一个非常具有误导性质的说法，而且在 CAP 理论诞生 12 年之后，CAP 之父也在 2012 年重写了之前的论文。
+
+> **当发生网络分区的时候，如果我们要继续服务，那么强一致性和可用性只能 2 选 1。也就是说当网络分区之后 P 是前提，决定了 P 之后才有 C 和 A 的选择。也就是说分区容错性（Partition tolerance）我们是必须要实现的。**
+>
+> 简而言之就是：CAP 理论中分区容错性 P 是一定要满足的，在此基础上，只能满足可用性 A 或者一致性 C。
+
+因此，**分布式系统理论上不可能选择 CA 架构，只能选择 CP 或者 AP 架构。** 比如 ZooKeeper、HBase 就是 CP 架构，Cassandra、Eureka 就是 AP 架构，Nacos 不仅支持 CP 架构也支持 AP 架构。
+
+**为啥不可能选择 CA 架构呢？** 举个例子：若系统出现“分区”，系统中的某个节点在进行写操作。为了保证 C， 必须要禁止其他节点的读写操作，这就和 A 发生冲突了。如果为了保证 A，其他节点的读写操作正常的话，那就和 C 发生冲突了。
+
+**选择 CP 还是 AP 的关键在于当前的业务场景，没有定论，比如对于需要确保强一致性的场景如银行一般会选择保证 CP 。**
+
+另外，需要补充说明的一点是： **如果网络分区正常的话（系统在绝大部分时候所处的状态），也就说不需要保证 P 的时候，C 和 A 能够同时保证。**
+
+##### CAP 实际应用案例
+
+我这里以注册中心来探讨一下 CAP 的实际应用。考虑到很多小伙伴不知道注册中心是干嘛的，这里简单以 Dubbo 为例说一说。
+
+下图是 Dubbo 的架构图。**注册中心 Registry 在其中扮演了什么角色呢？提供了什么服务呢？**
+
+注册中心负责服务地址的注册与查找，相当于目录服务，服务提供者和消费者只在启动时与注册中心交互，注册中心不转发请求，压力较小。
+
+![image-20220726132721865](images/image-20220726132721865.png)
+
+常见的可以作为注册中心的组件有：ZooKeeper、Eureka、Nacos...。
+
+1. **ZooKeeper 保证的是 CP。** 任何时刻对 ZooKeeper 的读请求都能得到一致性的结果，但是， ZooKeeper 不保证每次请求的可用性比如在 Leader 选举过程中或者半数以上的机器不可用的时候服务就是不可用的。
+2. **Eureka 保证的则是 AP。** Eureka 在设计的时候就是优先保证 A （可用性）。在 Eureka 中不存在什么 Leader 节点，每个节点都是一样的、平等的。因此  Eureka 不会像 ZooKeeper 那样出现选举过程中或者半数以上的机器不可用的时候服务就是不可用的情况。 Eureka  保证即使大部分节点挂掉也不会影响正常提供服务，只要有一个节点是可用的就行了。只不过这个节点上的数据可能并不是最新的。
+3. **Nacos 不仅支持 CP 也支持 AP。**
+
+
+
+#### Base理论
+
+[BASE 理论](https://dl.acm.org/doi/10.1145/1394127.1394128)起源于 2008 年， 由eBay的架构师Dan Pritchett在ACM上发表。
+
+##### 简介
+
+**BASE** 是 **Basically Available（基本可用）** 、**Soft-state（软状态）** 和 **Eventually Consistent（最终一致性）** 三个短语的缩写。BASE 理论是对 CAP 中一致性 C 和可用性 A 权衡的结果，其来源于对大规模互联网系统分布式实践的总结，是基于 CAP 定理逐步演化而来的，它大大降低了我们对系统的要求。
+
+##### BASE 理论的核心思想
+
+即使无法做到强一致性，但每个应用都可以根据自身业务特点，采用适当的方式来使系统达到最终一致性。
+
+> 也就是牺牲数据的一致性来满足系统的高可用性，系统中一部分数据不可用或者不一致时，仍需要保持系统整体“主要可用”。
+
+**BASE 理论本质上是对 CAP 的延伸和补充，更具体地说，是对 CAP 中 AP 方案的一个补充。**
+
+**为什么这样说呢？**
+
+CAP 理论这节我们也说过了：
+
+> 如果系统没有发生“分区”的话，节点间的网络连接通信正常的话，也就不存在 P 了。这个时候，我们就可以同时保证 C 和 A 了。因此，**如果系统发生“分区”，我们要考虑选择 CP 还是 AP。如果系统没有发生“分区”的话，我们要思考如何保证 CA 。**
+
+因此，AP 方案只是在系统发生分区的时候放弃一致性，而不是永远放弃一致性。在分区故障恢复后，系统应该达到最终一致性。这一点其实就是 BASE 理论延伸的地方。
+
+##### BASE 理论三要素
+
+![image-20220726133418075](images/image-20220726133418075.png)
+
+##### 基本可用
+
+基本可用是指分布式系统在出现不可预知故障的时候，允许损失部分可用性。但是，这绝不等价于系统不可用。
+
+**什么叫允许损失部分可用性呢？**
+
+- **响应时间上的损失**: 正常情况下，处理用户请求需要 0.5s 返回结果，但是由于系统出现故障，处理用户请求的时间变为 3 s。
+- **系统功能上的损失**：正常情况下，用户可以使用系统的全部功能，但是由于系统访问量突然剧增，系统的部分非核心功能无法使用。
+
+##### 软状态
+
+软状态指允许系统中的数据存在中间状态（**CAP 理论中的数据不一致**），并认为该中间状态的存在不会影响系统的整体可用性，即允许系统在不同节点的数据副本之间进行数据同步的过程存在延时。
+
+##### 最终一致性
+
+最终一致性强调的是系统中所有的数据副本，在经过一段时间的同步后，最终能够达到一个一致的状态。因此，最终一致性的本质是需要系统保证最终数据能够达到一致，而不需要实时保证系统数据的强一致性。
+
+> 分布式一致性的 3 种级别：
+>
+> 1. **强一致性** ：系统写入了什么，读出来的就是什么。
+> 2. **弱一致性** ：不一定可以读取到最新写入的值，也不保证多少时间之后读取到的数据是最新的，只是会尽量保证某个时刻达到数据一致的状态。
+> 3. **最终一致性** ：弱一致性的升级版，系统会保证在一定时间内达到数据一致的状态。
+>
+> **业界比较推崇是最终一致性级别，但是某些对数据一致要求十分严格的场景比如银行转账还是要保证强一致性。**
+
+那实现最终一致性的具体方式是什么呢? [《分布式协议与算法实战》](http://gk.link/a/10rZM)中是这样介绍：
+
+> - **读时修复** : 在读取数据时，检测数据的不一致，进行修复。比如 Cassandra 的 Read Repair 实现，具体来说，在向 Cassandra 系统查询数据的时候，如果检测到不同节点 的副本数据不一致，系统就自动修复数据。
+> - **写时修复** : 在写入数据，检测数据的不一致时，进行修复。比如 Cassandra 的 Hinted Handoff 实现。具体来说，Cassandra 集群的节点之间远程写数据的时候，如果写失败 就将数据缓存下来，然后定时重传，修复数据的不一致性。
+> - **异步修复** : 这个是最常用的方式，通过定时对账检测副本数据的一致性，并修复。
+
+比较推荐 **写时修复**，这种方式对性能消耗比较低。
+
+#### Paxos 算法
+
+Paxos 算法是 Leslie Lamport（[莱斯利·兰伯特](https://zh.wikipedia.org/wiki/莱斯利·兰伯特)）在 **1990** 年提出了一种分布式系统 **共识** 算法。这也是第一个被证明完备的共识算法（前提是不存在拜占庭将军问题，也就是没有恶意节点）。
+
+为了介绍 Paxos 算法，兰伯特专门写了一篇幽默风趣的论文。在这篇论文中，他虚拟了一个叫做 Paxos 的希腊城邦来更形象化地介绍 Paxos 算法。
+
+不过，审稿人并不认可这篇论文的幽默。于是，他们就给兰伯特说：“如果你想要成功发表这篇论文的话，必须删除所有 Paxos 相关的故事背景”。兰伯特一听就不开心了：“我凭什么修改啊，你们这些审稿人就是缺乏幽默细胞，发不了就不发了呗！”。
+
+于是乎，提出 Paxos 算法的那篇论文在当时并没有被成功发表。
+
+直到 1998 年，系统研究中心 (Systems Research  Center，SRC）的两个技术研究员需要找一些合适的分布式算法来服务他们正在构建的分布式系统，Paxos  算法刚好可以解决他们的部分需求。因此，兰伯特就把论文发给了他们。在看了论文之后，这俩大佬觉得论文还是挺不错的。于是，兰伯特在 **1998** 年重新发表论文 [《The Part-Time Parliament》](http://lamport.azurewebsites.net/pubs/lamport-paxos.pdf)。
+
+论文发表之后，各路学者直呼看不懂，言语中还略显调侃之意。这谁忍得了，在 **2001** 年的时候，兰伯特专门又写了一篇 [《Paxos Made Simple》](http://lamport.azurewebsites.net/pubs/paxos-simple.pdf)的论文来简化对 Paxos 的介绍，主要讲述两阶段共识协议部分，顺便还不忘嘲讽一下这群学者。
+
+《Paxos Made Simple》这篇论文就 14 页，相比于 《The Part-Time Parliament》的33 页精简了不少。最关键的是这篇论文的摘要就一句话：
+
+> The Paxos algorithm, when presented in plain English, is very simple.
+
+翻译过来的意思大概就是：当我用无修饰的英文来描述时，Paxos 算法真心简单！
+
+有没有感觉到来自兰伯特大佬满满地嘲讽的味道？
+
+兰伯特当时提出的 Paxos 算法主要包含 2 个部分:
+
+- **Basic Paxos 算法** ： 描述的是多节点之间如何就某个值(提案 Value)达成共识。
+- **Multi-Paxos 思想** ： 描述的是执行多个 Basic Paxos 实例，就一系列值达成共识。Multi-Paxos 说白了就是执行多次 Basic Paxos ，核心还是 Basic Paxos 。
+
+由于 Paxos 算法在国际上被公认的非常难以理解和实现，因此不断有人尝试简化这一算法。到了2013 年才诞生了一个比 Paxos 算法更易理解和实现的共识算法—[Raft 算法](https://javaguide.cn/distributed-system/theorem&algorithm&protocol/raft-algorithm.html) 。更具体点来说，Raft 是Multi-Paxos的一个变种，其简化了 Multi-Paxos 的思想，变得更容易被理解以及工程实现。
+
+针对没有恶意节点的情况，除了 Raft 算法之外，当前最常用的一些共识算法比如 ZAB 协议、 Fast Paxos 算法都是基于 Paxos 算法改进的。
+
+针对存在恶意节点的情况，一般使用的是工作量证明（POW，Proof-of-Work）、权益证明（PoS，Proof-of-Stake ）等共识算法。这类共识算法最典型的应用就是区块链，就比如说前段时间以太坊官方宣布其共识机制正在从工作量证明(PoW)转变为权益证明(PoS)。
+
+区块链系统使用的共识算法需要解决的核心问题是 **拜占庭将军问题** ，这和我们日常接触到的 ZooKeeper、Etcd、Consul 等分布式中间件不太一样。
+
+下面我们来对 Paxos 算法的定义做一个总结：
+
+- Paxos 算法是兰伯特在 **1990** 年提出了一种分布式系统共识算法。
+- 兰伯特当时提出的 Paxos 算法主要包含 2 个部分:Basic Paxos 算法和Multi-Paxos 思想。
+- Raft 算法、ZAB 协议、 Fast Paxos 算法都是基于 Paxos 算法改进而来。
+
+##### 一致性（Consistency）与共识（Consensus）
+
+很多人会误把 Paxos 看作是一致性算法，这其实是一个非常大的误区。
+
+⚠️注意：**Paxos 不是一致性算法而是共识算法，一致性和共识并不是一个概念。**
+
+##### Basic Paxos 算法
+
+Basic Paxos 中存在 3 个重要的角色：
+
+1. **提议者（Proposer）**：也可以叫做协调者（coordinator），提议者负责接受客户端发起的提议，然后尝试让接受者接受该提议，同时保证即使多个提议者的提议之间产生了冲突，那么算法都能进行下去；
+2. **接受者（Acceptor）**：也可以叫做投票员（voter），负责对提议者的提议投票，同时需要记住自己的投票历史；
+3. **学习者（Learner）**：如果有超过半数接受者就某个提议达成了共识，那么学习者就需要接受这个提议，并就该提议作出运算，然后将运算结果返回给客户端。
+
+![image-20220726133642419](images/image-20220726133642419.png)
+
+##### Multi Paxos 思想
+
+因为兰伯特提到的 Multi-Paxos 思想，缺少代码实现的必要细节(比如怎么选举领导者)，所以在理解上比较难。
+
+⚠️**注意** ： Multi-Paxos 只是一种思想，这种思想的核心就是通过多个 Basic Paxos 实例就一系列值达成共识。
+
+二阶段提交是达成共识常用的方式，Basic Paxos 就是通过二阶段提交的方式来达成共识。Basic Paxos 还支持容错，少于一般的节点出现故障时，集群也能正常工作。
+
+#### Raft 算法
+
+当今的数据中心和应用程序在高度动态的环境中运行，为了应对高度动态的环境，它们通过额外的服务器进行横向扩展，并且根据需求进行扩展和收缩。同时，服务器和网络故障也很常见。
+
+因此，系统必须在正常操作期间处理服务器的上下线。它们必须对变故做出反应并在几秒钟内自动适应；对客户来说的话，明显的中断通常是不可接受的。
+
+幸运的是，分布式共识可以帮助应对这些挑战。
+
+##### 拜占庭将军
+
+在介绍共识算法之前，先介绍一个简化版拜占庭将军的例子来帮助理解共识算法。
+
+> 假设多位拜占庭将军中没有叛军，信使的信息可靠但有可能被暗杀的情况下，将军们如何达成是否要进攻的一致性决定？
+
+解决方案大致可以理解成：先在所有的将军中选出一个大将军，用来做出所有的决定。
+
+举例如下：假如现在一共有 3 个将军 A，B 和  C，每个将军都有一个随机时间的倒计时器，倒计时一结束，这个将军就把自己当成大将军候选人，然后派信使传递选举投票的信息给将军 B 和 C，如果将军 B 和 C 还没有把自己当作候选人（自己的倒计时还没有结束），并且没有把选举票投给其他人，它们就会把票投给将军 A，信使回到将军 A 时，将军 A 知道自己收到了足够的票数，成为大将军。在有了大将军之后，是否需要进攻就由大将军 A  决定，然后再去派信使通知另外两个将军，自己已经成为了大将军。如果一段时间还没收到将军 B 和 C  的回复（信使可能会被暗杀），那就再重派一个信使，直到收到回复。
+
+
+
+##### 共识算法
+
+共识是可容错系统中的一个基本问题：即使面对故障，服务器也可以在共享状态上达成一致。
+
+共识算法允许一组节点像一个整体一样一起工作，即使其中的一些节点出现故障也能够继续工作下去，其正确性主要是源于复制状态机的性质：一组`Server`的状态机计算相同状态的副本，即使有一部分的`Server`宕机了它们仍然能够继续运行。
+
+![image-20220726134912102](images/image-20220726134912102.png)
+
+一般通过使用复制日志来实现复制状态机。每个`Server`存储着一份包括命令序列的日志文件，状态机会按顺序执行这些命令。因为每个日志包含相同的命令，并且顺序也相同，所以每个状态机处理相同的命令序列。由于状态机是确定性的，所以处理相同的状态，得到相同的输出。
+
+因此共识算法的工作就是保持复制日志的一致性。服务器上的共识模块从客户端接收命令并将它们添加到日志中。它与其他服务器上的共识模块通信，以确保即使某些服务器发生故障。每个日志最终包含相同顺序的请求。一旦命令被正确地复制，它们就被称为已提交。每个服务器的状态机按照日志顺序处理已提交的命令，并将输出返回给客户端，因此，这些服务器形成了一个单一的、高度可靠的状态机。
+
+适用于实际系统的共识算法通常具有以下特性：
+
+- 安全。确保在非拜占庭条件（也就是上文中提到的简易版拜占庭）下的安全性，包括网络延迟、分区、包丢失、复制和重新排序。
+- 高可用。只要大多数服务器都是可操作的，并且可以相互通信，也可以与客户端进行通信，那么这些服务器就可以看作完全功能可用的。因此，一个典型的由五台服务器组成的集群可以容忍任何两台服务器端故障。假设服务器因停止而发生故障；它们稍后可能会从稳定存储上的状态中恢复并重新加入集群。
+- 一致性不依赖时序。错误的时钟和极端的消息延迟，在最坏的情况下也只会造成可用性问题，而不会产生一致性问题。
+- 在集群中大多数服务器响应，命令就可以完成，不会被少数运行缓慢的服务器来影响整体系统性能。
+
+##### 节点类型
+
+一个 Raft 集群包括若干服务器，以典型的 5 服务器集群举例。在任意的时间，每个服务器一定会处于以下三个状态中的一个：
+
+- `Leader`：负责发起心跳，响应客户端，创建日志，同步日志。
+- `Candidate`：Leader 选举过程中的临时角色，由 Follower 转化而来，发起投票参与竞选。
+- `Follower`：接受 Leader 的心跳和日志同步数据，投票给 Candidate。
+
+在正常的情况下，只有一个服务器是 Leader，剩下的服务器是 Follower。Follower 是被动的，它们不会发送任何请求，只是响应来自 Leader 和 Candidate 的请求。
+
+![image-20220726134943719](images/image-20220726134943719.png)
+
+##### 任期
+
+![image-20220726134951395](images/image-20220726134951395.png)
+
+如图 3 所示，raft 算法将时间划分为任意长度的任期（term），任期用连续的数字表示，看作当前 term  号。每一个任期的开始都是一次选举，在选举开始时，一个或多个 Candidate 会尝试成为 Leader。如果一个 Candidate  赢得了选举，它就会在该任期内担任 Leader。如果没有选出 Leader，将会开启另一个任期，并立刻开始下一次选举。raft  算法保证在给定的一个任期最少要有一个 Leader。
+
+每个节点都会存储当前的 term 号，当服务器之间进行通信时会交换当前的  term 号；如果有服务器发现自己的 term 号比其他人小，那么他会更新到较大的 term 值。如果一个 Candidate 或者  Leader 发现自己的 term 过期了，他会立即退回成 Follower。如果一台服务器收到的请求的 term  号是过期的，那么它会拒绝此次请求。
+
+##### 日志
+
+- `entry`：每一个事件成为 entry，只有 Leader 可以创建 entry。entry 的内容为`<term,index,cmd>`其中 cmd 是可以应用到状态机的操作。
+- `log`：由 entry 构成的数组，每一个 entry 都有一个表明自己在 log 中的 index。只有 Leader 才可以改变其他节点的  log。entry 总是先被 Leader 添加到自己的 log 数组中，然后再发起共识请求，获得同意后才会被 Leader  提交给状态机。Follower 只能从 Leader 获取新日志和当前的 commitIndex，然后把对应的 entry  应用到自己的状态机中。
+
+##### 领导人选举
+
+raft 使用心跳机制来触发 Leader 的选举。
+
+如果一台服务器能够收到来自 Leader 或者 Candidate 的有效信息，那么它会一直保持为 Follower 状态，并且刷新自己的 electionElapsed，重新计时。
+
+Leader 会向所有的 Follower 周期性发送心跳来保证自己的 Leader 地位。如果一个 Follower  在一个周期内没有收到心跳信息，就叫做选举超时，然后它就会认为此时没有可用的 Leader，并且开始进行一次选举以选出一个新的 Leader。
+
+为了开始新的选举，Follower 会自增自己的 term 号并且转换状态为 Candidate。然后他会向所有节点发起 RequestVoteRPC 请求， Candidate 的状态会持续到以下情况发生：
+
+- 赢得选举
+- 其他节点赢得选举
+- 一轮选举结束，无人胜出
+
+赢得选举的条件是：一个 Candidate 在一个任期内收到了来自集群内的多数选票`（N/2+1）`，就可以成为 Leader。
+
+在 Candidate 等待选票的时候，它可能收到其他节点声明自己是 Leader 的心跳，此时有两种情况：
+
+- 该 Leader 的 term 号大于等于自己的 term 号，说明对方已经成为 Leader，则自己回退为 Follower。
+- 该 Leader 的 term 号小于自己的 term 号，那么会拒绝该请求并让该节点更新 term。
+
+由于可能同一时刻出现多个 Candidate，导致没有 Candidate 获得大多数选票，如果没有其他手段来重新分配选票的话，那么可能会无限重复下去。
+
+raft 使用了随机的选举超时时间来避免上述情况。每一个 Candidate 在发起选举后，都会随机化一个新的枚举超时时间，这种机制使得各个服务器能够分散开来，在大多数情况下只有一个服务器会率先超时；它会在其他服务器超时之前赢得选举。
+
+##### 日志复制
+
+一旦选出了 Leader，它就开始接受客户端的请求。每一个客户端的请求都包含一条需要被复制状态机（`Replicated State Mechine`）执行的命令。
+
+Leader 收到客户端请求后，会生成一个 entry，包含`<index,term,cmd>`，再将这个 entry 添加到自己的日志末尾后，向所有的节点广播该 entry，要求其他服务器复制这条 entry。
+
+如果 Follower 接受该 entry，则会将 entry 添加到自己的日志后面，同时返回给 Leader 同意。
+
+如果 Leader 收到了多数的成功响应，Leader 会将这个 entry 应用到自己的状态机中，之后可以成为这个 entry 是 committed 的，并且向客户端返回执行结果。
+
+raft 保证以下两个性质：
+
+- 在两个日志里，有两个 entry 拥有相同的 index 和 term，那么它们一定有相同的 cmd
+- 在两个日志里，有两个 entry 拥有相同的 index 和 term，那么它们前面的 entry 也一定相同
+
+通过“仅有 Leader 可以生存 entry”来保证第一个性质，第二个性质需要一致性检查来进行保证。
+
+一般情况下，Leader 和 Follower 的日志保持一致，然后，Leader 的崩溃会导致日志不一样，这样一致性检查会产生失败。Leader 通过强制  Follower 复制自己的日志来处理日志的不一致。这就意味着，在 Follower 上的冲突日志会被领导者的日志覆盖。
+
+为了使得 Follower 的日志和自己的日志一致，Leader 需要找到 Follower 与它日志一致的地方，然后删除 Follower 在该位置之后的日志，接着把这之后的日志发送给 Follower。
+
+`Leader` 给每一个`Follower` 维护了一个 `nextIndex`，它表示 `Leader` 将要发送给该追随者的下一条日志条目的索引。当一个 `Leader` 开始掌权时，它会将 `nextIndex` 初始化为它的最新的日志条目索引数+1。如果一个 `Follower` 的日志和 `Leader` 的不一致，`AppendEntries` 一致性检查会在下一次 `AppendEntries RPC` 时返回失败。在失败之后，`Leader` 会将 `nextIndex` 递减然后重试 `AppendEntries RPC`。最终 `nextIndex` 会达到一个 `Leader` 和 `Follower` 日志一致的地方。这时，`AppendEntries` 会返回成功，`Follower` 中冲突的日志条目都被移除了，并且添加所缺少的上了 `Leader` 的日志条目。一旦 `AppendEntries` 返回成功，`Follower` 和 `Leader` 的日志就一致了，这样的状态会保持到该任期结束。
+
+##### 选举限制
+
+Leader 需要保证自己存储全部已经提交的日志条目。这样才可以使日志条目只有一个流向：从 Leader 流向 Follower，Leader 永远不会覆盖已经存在的日志条目。
+
+每个 Candidate 发送 RequestVoteRPC 时，都会带上最后一个 entry 的信息。所有节点收到投票信息时，会对该 entry 进行比较，如果发现自己的更新，则拒绝投票给该 Candidate。
+
+判断日志新旧的方式：如果两个日志的 term 不同，term 大的更新；如果 term 相同，更长的 index 更新。
+
+##### 节点崩溃
+
+如果 Leader 崩溃，集群中的节点在 electionTimeout 时间内没有收到 Leader 的心跳信息就会触发新一轮的选主，在选主期间整个集群对外是不可用的。
+
+如果 Follower 和 Candidate 崩溃，处理方式会简单很多。之后发送给它的 RequestVoteRPC 和  AppendEntriesRPC 会失败。由于 raft  的所有请求都是幂等的，所以失败的话会无限的重试。如果崩溃恢复后，就可以收到新的请求，然后选择追加或者拒绝 entry。
+
+##### 时间与可用性
+
+raft 的要求之一就是安全性不依赖于时间：系统不能仅仅因为一些事件发生的比预想的快一些或者慢一些就产生错误。为了保证上述要求，最好能满足以下的时间条件：
+
+```
+broadcastTime << electionTimeout << MTBF
+```
+
+- `broadcastTime`：向其他节点并发发送消息的平均响应时间；
+- `electionTimeout`：选举超时时间；
+- `MTBF(mean time between failures)`：单台机器的平均健康时间；
+
+`broadcastTime`应该比`electionTimeout`小一个数量级，为的是使`Leader`能够持续发送心跳信息（heartbeat）来阻止`Follower`开始选举；
+
+`electionTimeout`也要比`MTBF`小几个数量级，为的是使得系统稳定运行。当`Leader`崩溃时，大约会在整个`electionTimeout`的时间内不可用；我们希望这种情况仅占全部时间的很小一部分。
+
+由于`broadcastTime`和`MTBF`是由系统决定的属性，因此需要决定`electionTimeout`的时间。
+
+一般来说，broadcastTime 一般为 `0.5～20ms`，electionTimeout 可以设置为 `10～500ms`，MTBF 一般为一两个月。
+
+
+
 ### 了解RPC吗？
 
 一言蔽之：**RPC （Remote Procedure Call）的出现就是为了让你调用远程方法像调用本地方法一样简单。**
@@ -8988,7 +9547,7 @@ UPDATE my_table SET price=price+50,version=version+1 WHERE id=1 AND version=5
 
 > 注意，在并发情况下，执行 Redis 查找数据与删除需要保证原子性，否则很可能在并发下无法保证幂等性。其实现方法可以使用分布式锁或者使用 Lua 表达式来注销查询与删除操作。
 
-#### 方案四:下游传递唯一序列号
+##### 方案四:下游传递唯一序列号
 
 **方案描述：**
 
@@ -9188,6 +9747,235 @@ ksuid由两部分组成
 单点登录的英文名叫做：Single Sign On（简称**SSO**）。
 
 在**初学/以前**的时候，一般我们就**单系统**，所有的功能都在同一个系统上。
+
+
+
+### Dubbo面试汇总
+
+#### 什么是 Dubbo?
+
+[Apache Dubbo](https://github.com/apache/dubbo)|ˈdʌbəʊ| 是一款高性能、轻量级的开源 Java RPC 框架。
+
+根据 [Dubbo 官方文档](https://dubbo.apache.org/zh/)的介绍，Dubbo 提供了六大核心能力
+
+1. 面向接口代理的高性能RPC调用。
+2. 智能容错和负载均衡。
+3. 服务自动注册和发现。
+4. 高度可扩展能力。
+5. 运行期流量调度。
+6. 可视化的服务治理与运维。
+
+![image-20220726154002025](images/image-20220726154002025.png)
+
+简单来说就是： **Dubbo 不光可以帮助我们调用远程服务，还提供了一些其他开箱即用的功能比如智能负载均衡。**
+
+
+
+#### Dubbo 的负载均衡策略
+
+在集群负载均衡时，Dubbo 提供了多种均衡策略，默认为 `random` 随机调用。我们还可以自行扩展负载均衡策略（参考Dubbo SPI机制）。
+
+在 Dubbo 中，所有负载均衡实现类均继承自 `AbstractLoadBalance`，该类实现了 `LoadBalance` 接口，并封装了一些公共的逻辑。
+
+```java
+public abstract class AbstractLoadBalance implements LoadBalance {
+
+    static int calculateWarmupWeight(int uptime, int warmup, int weight) {
+    }
+
+    @Override
+    public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+    }
+
+    protected abstract <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation);
+
+
+    int getWeight(Invoker<?> invoker, Invocation invocation) {
+
+    }
+}
+```
+
+`AbstractLoadBalance` 的实现类有下面这些：
+
+![image-20220726154345877](images/image-20220726154345877.png)
+
+官方文档对负载均衡这部分的介绍非常详细，推荐小伙伴们看看，地址：https://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/#m-zhdocsv27devsourceloadbalance
+
+##### RandomLoadBalance
+
+根据权重随机选择（对加权随机算法的实现）。这是Dubbo默认采用的一种负载均衡策略。
+
+` RandomLoadBalance` 具体的实现原理非常简单，假如有两个提供相同服务的服务器 S1,S2，S1的权重为7，S2的权重为3。
+
+我们把这些权重值分布在坐标区间会得到：S1->[0, 7) ，S2->[7, 10)。我们生成[0, 10) 之间的随机数，随机数落到对应的区间，我们就选择对应的服务器来处理请求。
+
+![image-20220726154405163](images/image-20220726154405163.png)
+
+`RandomLoadBalance` 的源码非常简单，简单花几分钟时间看一下。
+
+> 以下源码来自 Dubbo master 分支上的最新的版本 2.7.9。
+
+```java
+public class RandomLoadBalance extends AbstractLoadBalance {
+
+    public static final String NAME = "random";
+
+    @Override
+    protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+
+        int length = invokers.size();
+        boolean sameWeight = true;
+        int[] weights = new int[length]; 
+        int totalWeight = 0;
+        // 下面这个for循环的主要作用就是计算所有该服务的提供者的权重之和 totalWeight（），
+        // 除此之外，还会检测每个服务提供者的权重是否相同
+        for (int i = 0; i < length; i++) {
+            int weight = getWeight(invokers.get(i), invocation);
+            totalWeight += weight;
+            weights[i] = totalWeight;
+            if (sameWeight && totalWeight != weight * (i + 1)) {
+                sameWeight = false;
+            }
+        }
+        if (totalWeight > 0 && !sameWeight) {
+            // 随机生成一个 [0, totalWeight) 区间内的数字
+            int offset = ThreadLocalRandom.current().nextInt(totalWeight);
+            // 判断会落在哪个服务提供者的区间
+            for (int i = 0; i < length; i++) {
+                if (offset < weights[i]) {
+                    return invokers.get(i);
+                }
+            }
+  
+        return invokers.get(ThreadLocalRandom.current().nextInt(length));
+    }
+
+}
+```
+
+
+
+##### LeastActiveLoadBalance
+
+`LeastActiveLoadBalance` 直译过来就是**最小活跃数负载均衡**。
+
+这个名字起得有点不直观，不仔细看官方对活跃数的定义，你压根不知道这玩意是干嘛的。
+
+我这么说吧！初始状态下所有服务提供者的活跃数均为 0（每个服务提供者的中特定方法都对应一个活跃数，我在后面的源码中会提到），每收到一个请求后，对应的服务提供者的活跃数 +1，当这个请求处理完之后，活跃数 -1。
+
+因此，**Dubbo 就认为谁的活跃数越少，谁的处理速度就越快，性能也越好，这样的话，我就优先把请求给活跃数少的服务提供者处理。**
+
+**如果有多个服务提供者的活跃数相等怎么办？**
+
+很简单，那就再走一遍 `RandomLoadBalance` 。
+
+```java
+public class LeastActiveLoadBalance extends AbstractLoadBalance {
+
+    public static final String NAME = "leastactive";
+
+    @Override
+    protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+        int length = invokers.size();
+        int leastActive = -1;
+        int leastCount = 0;
+        int[] leastIndexes = new int[length];
+        int[] weights = new int[length];
+        int totalWeight = 0;
+        int firstWeight = 0;
+        boolean sameWeight = true;
+        // 这个 for 循环的主要作用是遍历 invokers 列表，找出活跃数最小的 Invoker
+        // 如果有多个 Invoker 具有相同的最小活跃数，还会记录下这些 Invoker 在 invokers 集合中的下标，并累加它们的权重，比较它们的权重值是否相等
+        for (int i = 0; i < length; i++) {
+            Invoker<T> invoker = invokers.get(i);
+            // 获取 invoker 对应的活跃(active)数
+            int active = RpcStatus.getStatus(invoker.getUrl(), invocation.getMethodName()).getActive();
+            int afterWarmup = getWeight(invoker, invocation);
+            weights[i] = afterWarmup;
+            if (leastActive == -1 || active < leastActive) {
+                leastActive = active;
+                leastCount = 1;
+                leastIndexes[0] = i;
+                totalWeight = afterWarmup;
+                firstWeight = afterWarmup;
+                sameWeight = true;
+            } else if (active == leastActive) {
+                leastIndexes[leastCount++] = i;
+                totalWeight += afterWarmup;
+                if (sameWeight && afterWarmup != firstWeight) {
+                    sameWeight = false;
+                }
+            }
+        }
+       // 如果只有一个 Invoker 具有最小的活跃数，此时直接返回该 Invoker 即可
+        if (leastCount == 1) {
+            return invokers.get(leastIndexes[0]);
+        }
+        // 如果有多个 Invoker 具有相同的最小活跃数，但它们之间的权重不同
+        // 这里的处理方式就和  RandomLoadBalance 一致了
+        if (!sameWeight && totalWeight > 0) {
+            int offsetWeight = ThreadLocalRandom.current().nextInt(totalWeight);
+            for (int i = 0; i < leastCount; i++) {
+                int leastIndex = leastIndexes[i];
+                offsetWeight -= weights[leastIndex];
+                if (offsetWeight < 0) {
+                    return invokers.get(leastIndex);
+                }
+            }
+        }
+        return invokers.get(leastIndexes[ThreadLocalRandom.current().nextInt(leastCount)]);
+    }
+}
+```
+
+活跃数是通过 `RpcStatus` 中的一个 `ConcurrentMap` 保存的，根据 URL 以及服务提供者被调用的方法的名称，我们便可以获取到对应的活跃数。也就是说服务提供者中的每一个方法的活跃数都是互相独立的。
+
+```java
+public class RpcStatus {
+    
+    private static final ConcurrentMap<String, ConcurrentMap<String, RpcStatus>> METHOD_STATISTICS =
+            new ConcurrentHashMap<String, ConcurrentMap<String, RpcStatus>>();
+
+   public static RpcStatus getStatus(URL url, String methodName) {
+        String uri = url.toIdentityString();
+        ConcurrentMap<String, RpcStatus> map = METHOD_STATISTICS.computeIfAbsent(uri, k -> new ConcurrentHashMap<>());
+        return map.computeIfAbsent(methodName, k -> new RpcStatus());
+    }
+    public int getActive() {
+        return active.get();
+    }
+
+}
+```
+
+##### ConsistentHashLoadBalance
+
+`ConsistentHashLoadBalance` 小伙伴们应该也不会陌生，在分库分表、各种集群中就经常使用这个负载均衡策略。
+
+`ConsistentHashLoadBalance` 即**一致性Hash负载均衡策略**。 `ConsistentHashLoadBalance` 中没有权重的概念，具体是哪个服务提供者处理请求是由你的请求的参数决定的，也就是说相同参数的请求总是发到同一个服务提供者。
+
+![image-20220726154509626](images/image-20220726154509626.png)
+
+另外，Dubbo 为了避免数据倾斜问题（节点不够分散，大量请求落到同一节点），还引入了虚拟节点的概念。通过虚拟节点可以让节点更加分散，有效均衡各个节点的请求量。
+
+![image-20220726154517156](images/image-20220726154517156.png)
+
+官方有详细的源码分析：https://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/#23-consistenthashloadbalance 。
+
+
+
+##### RoundRobinLoadBalance
+
+加权轮询负载均衡。
+
+轮询就是把请求依次分配给每个服务提供者。加权轮询就是在轮询的基础上，让更多的请求落到权重更大的服务提供者上。比如假如有两个提供相同服务的服务器 S1,S2，S1的权重为7，S2的权重为3。
+
+如果我们有 10 次请求，那么 7 次会被 S1处理，3次被 S2处理。
+
+但是，如果是 `RandomLoadBalance` 的话，很可能存在10次请求有9次都被 S1 处理的情况（概率性问题）。
+
+Dubbo 中的 `RoundRobinLoadBalance` 的代码实现被修改重建了好几次，Dubbo-2.6.5 版本的 `RoundRobinLoadBalance` 为平滑加权轮询算法。
 
 
 
