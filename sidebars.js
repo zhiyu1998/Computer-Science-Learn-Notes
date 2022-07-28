@@ -108,6 +108,11 @@ const sidebars = {
           id: 'Java/docker/main',
           label: 'Docker'
         },
+        {
+          type: 'doc',
+          id: 'Java/integration/main',
+          label: 'SpringBoot整合其他框架'
+        }
       ]
     },
     {

@@ -68,7 +68,8 @@
 * Spring-Data-Jpa笔记 ✅
 * JVM笔记 ✅
 * JUC笔记 ✅
-* k8s笔记 🚫
+* k8s笔记（短期内不更，欢迎PR） 🚫
+* 【新坑】SpringBoot整合其他框架（根据项目经验）⏳ 
 
 
 
@@ -76,7 +77,7 @@
 
 * Vue2&Vue3笔记 ✅
 * React笔记 ✅
-* Electron笔记 🚫
+* Electron笔记 （短期内不更，欢迎PR）🚫
 * TypeScript笔记 ✅
 
 

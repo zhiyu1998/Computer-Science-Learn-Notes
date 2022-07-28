@@ -70,6 +70,7 @@ title: 导读
 *  [Concurrent](Java\concurrent\concurrent.md)  JUC笔记 ✅ 
 *  [Docker](Java\docker\main.md)  Docker笔记 ✅
 *  k8s 笔记 🚫
+*  [【新坑】SpringBoot整合其他框架](Java\integration\main.md)（根据项目经验）⏳ 
 
 
 
