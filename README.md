@@ -27,6 +27,7 @@
 ## :baby_chick: Foundation
 
 * C语言数据结构思维导图 ✅
+* 个人技术成长 ⏳
 
 
 
@@ -69,7 +70,8 @@
 * JVM笔记 ✅
 * JUC笔记 ✅
 * k8s笔记（短期内不更，欢迎PR） 🚫
-* 【新坑】SpringBoot整合其他框架（根据项目经验）⏳ 
+* SpringBoot整合其他框架 ⏳ 
+* Kotlin结合Spring生态 ⏳ 
 
 
 
