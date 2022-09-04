@@ -131,7 +131,7 @@ const sidebars = {
         },
         {
           type: 'doc',
-          id: 'Java/eightpart/personal/main',
+          id: 'Java/eightpart/personal',
           label: '常见面试题精选'
         },
         {

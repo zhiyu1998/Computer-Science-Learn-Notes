@@ -126,13 +126,13 @@ const sidebars = {
       items: [
         {
           type: 'doc',
-          id: 'Java/eightpart/giant/main',
+          id: 'Java/eightpart/main',
           label: '大厂面试题'
         },
         {
           type: 'doc',
-          id: 'Java/eightpart/personal/main',
-          label: '常见面试题精选'
+          id: 'Java/eightpart/personal',
+          label: '2022面试题精选'
         },
         {
           type: 'doc',
