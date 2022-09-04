@@ -126,12 +126,12 @@ const sidebars = {
       items: [
         {
           type: 'doc',
-          id: 'Java/eightpart/giant/main',
+          id: 'Java/eightpart/giant',
           label: '大厂面试题'
         },
         {
           type: 'doc',
-          id: 'Java/eightpart/personal/main',
+          id: 'Java/eightpart/personal',
           label: '常见面试题精选'
         },
         {
