@@ -181,12 +181,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * @program: xxx
- * @description: Bean 转换工具类
- * @author: 52Hz
- * @create: 2021-10-21 16:31
- **/
 public class BeanUtil {
 
 
