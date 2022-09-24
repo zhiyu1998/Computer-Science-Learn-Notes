@@ -492,3 +492,34 @@ public static boolean isValid(Supplier<Object>... suppliers) {
 }
 ```
 
+
+
+## SQL技巧汇总
+
+### 判断奇数的 6 种方法
+
+> [620. 有趣的电影 - 力扣（LeetCode）](https://leetcode.cn/problems/not-boring-movies/)
+
+* mod(x, 2) = 1 ，如果余数是 1 就是奇数。
+* power(-1, x) = -1 ， 如果结果是 -1 就是奇数
+* x % 2 = 1 ，如果余数是 1 就是奇数。
+* x & 1 = 1 ，如果是 1 就是奇数
+* x regexp '[1, 3, 5, 7, 9]$' = 1 如果为 1 就是奇数
+* x>>1<<1 != x 如果右移一位在左移一位不等于原值，就是奇数
+
+
+
+### 开窗分组技巧
+
+> 如果要分组后进行计数使用
+
+```
+COUNT(*) OVER (PARTITION BY XXX)
+```
+
+> 如果要对某一个属性进行排名可以
+
+```sql
+id-RANK() OVER (ORDER BY xxx)
+```
+

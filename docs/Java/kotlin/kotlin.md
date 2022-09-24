@@ -397,6 +397,8 @@ val (x, y) = pair
 
 #### 函数引用
 
+这个和Java8的函数应用一致
+
 符号是：`::`
 
 像是定义了一个函数
@@ -602,7 +604,7 @@ public abstract class AbsClass {
 }
 ```
 
-Kotlin（默认不可以覆写，只有通过open才能被覆写）
+Kotlin（默认不可以覆写，只有通过`open`才能被覆写）
 
 ```kotlin
 abstract class AbsClass {
@@ -624,7 +626,7 @@ public class SimpleClassextends AbsClass implements Simplelnf {
 }
 ```
 
-Kotlin（注意继承类的时候加上括号，表示调用父类的构造方法）
+Kotlin（注意继承类的时候`加上括号，表示调用父类的构造方法`）
 
 ```kotlin
 class SimpleClass(var x:Int) : AbsClass(), SimpleInf{
@@ -639,11 +641,16 @@ class SimpleClass(var x:Int) : AbsClass(), SimpleInf{
 这个基本和函数引用差不多
 
 ```kotlin
-val ageRef = Person.:age
-val person = Person(18, "Bennyhuo")
+class Person(var name: String, var age: Int) {}
+
+val ageRef = Person::age
 val nameRef = person::name
+val person = Person(18, "Bennyhuo")
 ageRef.set(person, 20)
-nameRef.set(" Andyhuo")
+nameRef.set("Andyhuo")
+=======================================
+Andyhuo
+20
 ```
 
 
@@ -685,7 +692,7 @@ var length = nullable?.length ?: 0
 
 ### 父子替换
 
-父类可以替换为子类，但是反过来不行（Number是Int的父类）
+父类可以替换为子类，但是反过来不行（Number是Int的父类）`小的可以替换大的`
 
 ```kotlin
 var x: String = "Hello'
@@ -736,5 +743,1185 @@ if(value != nulI){ t
 
 
 
-### 中缀表达式
+### 表达式
 
+#### 分支表达式
+
+##### if..else区别
+
+Java
+
+```java
+c = a == 3 ? 4 : 5;
+```
+
+Kotlin
+
+```java
+c = if (a == 3) 4 else 5
+```
+
+
+
+##### switch & when
+
+Java中的switch
+
+```java
+switch(a) {
+    case 0 :
+        c = 5; break;
+    case 1 :
+        c = 100; break;
+    default :
+        c = 20
+}
+```
+
+Kotlin中的when
+
+```kotlin
+when(a) {
+    0 -> c = 5
+    1 -> c = 100
+    else -> c = 20
+}
+```
+
+Kotlin中when的智能转换(如果x是字符串，则在`x.length`自动转换成字符串)
+
+```kotlin
+var x: Any = ...
+when {
+    x is String -> c = x.length
+    x == 1 -> c = 100
+    else c = 20
+}
+```
+
+#### 捕获异常
+
+Java和Kotlin都一致
+
+```kotlin
+try {
+    c = a / b
+} catch (e: Exception) {
+    e.printStackTrace()
+    c = 0
+}
+```
+
+但是Kotlin可以进一步写为
+
+```kotlin
+c = try {
+    a / b
+} catch (e: Exception) {
+    e.printStackTrace()
+    c = 0
+}
+```
+
+
+
+#### 中缀表达式
+
+`infix` 定义了Kotlin的简写
+
+infix函数（中缀方法）需要几个条件:
+
+- 只有`一个参数`
+- 在方法前必须加`infix`关键字
+- 必须是`成员方法`或者`扩展方法`
+
+```kotlin
+fun main() {
+    println("HelloWorld" rotate 5)
+}
+
+infix fun String.rotate(count: Int): String {
+    val index = count % length
+    return this.substring(index) + this.substring(0, index)
+}
+==============================================================
+WorldHello
+```
+
+再例如
+
+```kotlin
+class Book
+class Desk
+
+infix fun Book.on(desk: Desk) {
+    
+}
+
+fun main() {
+    val book = Book()
+    val desk = Desk()
+    book on desk // 具体用法
+}
+```
+
+
+
+#### Lambda表达式
+
+##### 匿名函数
+
+func是变量名
+
+```kotlin
+val func = fun() {
+    println("Hello")
+}
+
+func() // 调用
+```
+
+
+
+##### 匿名函数的类型
+
+```kotlin
+val func: () -> Unit = fun() {
+    println("Hello")
+}
+```
+
+
+
+##### Lambda表达式
+
+Java
+
+```java
+// Jdk 8
+Runnable lambda = () -> {
+    ....
+}
+// Jdk 10以上
+var lambda = () -> {
+    ....
+}
+```
+
+Kotlin
+
+```kotlin
+val lambda = {
+    println("Hello")
+}
+// 有返回参数的
+val lambda: () -> Unit = {
+    println("Hello")
+}
+```
+
+表达式参数类型从表达式类型推断出来
+
+```kotlin
+val f1: (Int) -> Unit = {
+        p: Int -> println(p)
+    }
+```
+
+```kotlin
+val f1: Function1<Int, Unit> = {
+        p -> println(p)
+    }
+```
+
+表达式从声明推断而来
+
+```kotlin
+val f1 = {
+        p: Int -> println(p)
+    }
+```
+
+表达式的`最后一行表示返回值`
+
+```kotlin
+val f1 = {
+        p: Int -> println(p)
+        "Hello"
+    }
+```
+
+另外还有省略参数的形式
+
+```kotlin
+val f1: Function1<Int, Unit> = {
+        println(it)
+        "Hello"
+    }
+```
+
+
+
+#### 自己实现hashcode注意问题
+
+需要注意的是：自己实现hashcode如果某个变量发生了变化要移除是移除不了的，除非定义构造函数的时候使用val而不是var
+
+```kotlin
+class Person(var name: String, var age: Int) {
+    override fun equals(other: Any?): Boolean {
+        val other = other as? Person ?: return false
+        return other.age == age && other.name == name
+    }
+
+    override fun hashCode(): Int {
+        return 1 + 7 * age + 13 * name.hashCode()
+    }
+}
+
+fun main() {
+    val persons = HashSet<Person>()
+
+//    (0..5).forEach{
+    val person = Person("Benny", 20)
+    persons += person
+//    }
+
+    println(persons.size)
+    person.age++ // 变化
+
+    persons -= person // 移除不了
+
+    println(persons.size)
+}
+===========================================
+1
+1
+```
+
+
+
+### 高阶函数
+
+#### 内联函数
+
+* public/protected的内联方法只能访问对应类的public成员
+* 内联函数的内联函数参数不能被存储(赋值给变量)
+* 内联函数的内联函数参数只能传递给其他内联函数参数
+
+```kotlin
+fun cost(block: () -> Unit) {
+    val start = System.currentTimeMillis()
+    block()
+    println("${System.currentTimeMillis() - start}ms")
+}
+
+fun main() {
+    cost {
+        println("Hello")
+    }
+}
+```
+
+上述的写法相当于，如果不加`inline`则就是一个Lambda表达式
+
+```kotlin
+fun main() {
+    val start = System.currentTimeMillis()
+    println("Hello")
+    println("${System.currentTimeMillis() - start}ms")
+}
+```
+
+
+
+#### non-local return
+
+定义
+
+```kotlin
+inline fun nonLocalReturen(block: ()->Unit) {
+    
+}
+
+nonLocalReturn{
+    return
+}
+```
+
+如何禁止？ `crossinline`
+
+
+
+#### 几个有用的高阶函数
+
+![image-20220919172117338](./images/image-20220919172117338.png)
+
+
+
+#### 集合遍历
+
+##### filter操作
+
+Java
+
+```java
+list.stream().filter(e -> e % 2 == 0)
+```
+
+Kotlin
+
+```kotlin
+list.filter { it % 2 == 0 }
+```
+
+Kotlin还可以转换为懒序列
+
+```kotlin
+list.asSequence().filter { it % 2 == 0 }
+```
+
+
+
+##### map
+
+Java
+
+```java
+list.stream().map(e -> e * 2 + 1)
+```
+
+Kotlin
+
+```kotlin
+list.filter { it * 2 + 1 }
+```
+
+
+
+##### flatMap
+
+![image-20220919174842822](./images/image-20220919174842822.png)
+
+Java
+
+```java
+var list = new ArrayList<Integer>();
+list.addAll(Arrays.asList(1, 2, 3, 4));
+list.stream().flatMap(e -> {
+    var list1 = new ArrayList<Integer>(e);
+    for (int i = 0; i < e; i++) {
+        list1.add(i);
+    }
+    return list1.stream();
+}).collect(Collectors.toList()).forEach(System.out::print);
+```
+
+Kotlin
+
+```kotlin
+list.flatMap { 0 until it }.forEach(::print)
+```
+
+
+
+##### fold
+
+![image-20220919175051480](./images/image-20220919175051480.png)
+
+
+
+
+
+#### SAM转换
+
+Java
+
+- 一个参数类型为只有一个方法的接口的方法调用时可用Lambda表达式做转换作为参数
+
+Kotlin
+
+- 一个参数类型为只有一个方法的Java接口的Java方法调用时可用Lambda表达式做转换作为参数
+
+![image-20220920091657937](./images/image-20220920091657937.png)
+
+
+
+
+
+### 类的进阶
+
+### 构造器
+
+#### 构造器的基本写法
+
+前一个类内全局可见，name构造器可见（init块，属性初始化）
+
+```kotlin
+class Person(var age: Int, name: String)
+```
+
+
+
+#### init块
+
+init块可以有多个
+
+```java
+class Person(var age: Int, name: String) {
+    var name: String
+    init {
+        this.name = name
+    }
+    var firstName = name.split(",")[0]
+    init {
+        
+    }
+}
+```
+
+
+
+#### 继承及调用副构造器
+
+```kotlin
+class Person(var age: Int, name: String) : Animals() {
+    constructor(age:Int):this(age, "unknown")
+    // 定义了主构造器后在类内部
+    // 再定义构造器都称为副构造器
+}
+```
+
+
+
+#### 默认构造器
+
+```kotlin
+class Person(var age: Int, var name = "unknown") : Animals()
+```
+
+如果要让Java以重载的方式调用可以加上注解`@JvmOverLoads`
+
+```kotlin
+
+class Person
+@JvmOverLoads
+constructor(var age: Int, var name = "unknown") : Animals()
+```
+
+
+
+### 类成员的可见性
+
+#### default & internal
+
+* 一般由SDK或公共组件开发者用于隐藏模块内部细节实现
+* default可通过外部创建相同包名来访问,访问控制非常弱
+* default会导致不同抽象层次的类聚集到相同包之下
+* internal可方便处理内外隔离,提升模块代码内聚减少接口暴露
+* internal修饰的Kotlin类或成员在Java当中可直接访问
+
+
+
+### 延迟初始化
+
+#### 使用null
+
+如果非要初始化（像是安卓里的TextView）那么有以下解决方案
+
+```kotlin
+private var nameView? = null
+```
+
+#### lateinit
+
+```kotlin
+private lateinit var nameView: TextView
+```
+
+判断`lateinit`如何初始化
+
+```kotlin
+if(::nameView.isInitialized) {}
+```
+
+* lateinit会让编译器忽略变量的初始化,不支持Int等基本类型
+* 开发者必须能够在完全确定变量值的生命周期下使用lateinit
+* 不要在复杂的逻辑中使用lateinit，它只会让你的代码更加脆弱
+* Kotlin 1.2加入的判断lateinit属性是否初始化的API最好不要用
+
+
+
+#### 【推荐】lazy
+
+```kotlin
+private val nameView by lazy {
+}
+```
+
+
+
+### 代理
+
+#### 接口代理
+
+```kotlin
+interface Api {
+    fun a()
+	fun b()
+	fun c()
+}
+-------------
+class ApiImpl : Api {
+    override fun a() {}
+    override fun b() {}
+    override fun c() {}
+}
+```
+
+使用接口代理（日志、埋点）
+
+```kotlin
+class ApiWrapper(val api: Api) 
+: Api by api {
+    override fun c() {
+        println("c is called")
+        api.c()
+    }
+}
+```
+
+
+
+### 单例模式
+
+饿汉式在Java中是体现在new,类加载时实例化对象`Singleton`
+
+```java
+class Singleton {
+    public static final Singleton INSTANCE = new Singleton();
+}
+```
+
+Kotlin
+
+```kotlin
+object Singleton {}
+```
+
+
+
+如何访问object成员呢？
+
+kotlin
+
+```kotlin
+object Singleton {
+    var x: Int = 2
+    fun y(){}
+}
+
+Singleton.x
+Singleton.y()
+```
+
+Java
+
+```java
+Singleton.INSTANCE.getX();
+Singleton.INSTANCE.setX();
+Singleton.INSTANCE.y();
+```
+
+
+
+#### 静态成员 @JvmStatic
+
+这样声明之后是静态的，但是还是需要getter/setter
+
+```kotlin
+object Singleton {
+    @JvmStatic var x: Int = 2
+    @JvmStatic fun y(){}
+}
+```
+
+如果使用`@JvmField`，在被Java调用的时候就可以不用getter/setter
+
+```kotlin
+object Singleton {
+    @JvmField var x: Int = 2
+    @JvmStatic fun y(){}
+}
+```
+
+
+
+#### 伴生对象
+
+```kotlin
+class Foo {
+    companion object {
+        @JvmStatic fun y(){}
+    }
+}
+```
+
+在Java中是这样
+
+```java
+public class Foo {
+    public static void y(){}
+}
+```
+
+
+
+### 内部类
+
+Java
+
+```java
+class Outer {
+    class Inner {}
+    static class StaticInner{}
+}
+```
+
+Kotlin
+
+```kotlin
+class Outer {
+    inner class Inner
+    class StaticInner
+}
+```
+
+
+
+#### 内部object
+
+```kotlin
+object OuterObject{
+    object StaticInnerObject
+}
+```
+
+
+
+#### 匿名内部类
+
+容易造成泄露,因为它定义在非静态区域
+
+Java
+
+```java
+new Runnable() {
+    @Override
+    public void run() {
+        
+    }
+}
+```
+
+Kotlin，可以看到object后直接忽略了名字
+
+```kotlin
+object: Runnable{
+    override fun run() {
+        
+    }
+}
+```
+
+Java中不支持`实现多个接口的匿名内部类`，但是Kotlin支持
+
+```kotlin
+object: Cloneable, Runnable{
+    override fun run() {
+        
+    }
+}
+```
+
+
+
+### 数据类
+
+定义之前加一个`data`
+
+```kotlin
+data class Book(val id: Long,
+               val name: String,
+               val author: String)
+```
+
+比较Java可以看到这个在干嘛（@Data来源于Lombok）
+
+```java
+@Data
+public class Book {
+    private long id;
+    private String name;
+    private Person person;
+}
+```
+
+
+
+#### 数据类解构
+
+```kotlin
+fun main() {
+    val pair = "Hello" to "World"
+    val (hello, world) = pair
+}
+//结构原理
+data class Pair<out A, out B> (
+    public val first: A,
+    public val second: B
+):java.io.Serializable
+```
+
+Java Bean & data class
+
+![image-20220924133546730](./images/image-20220924133546730.png)
+
+
+
+#### JSON序列化示例
+
+##### Gson
+
+```kotlin
+data class Person(val name:String, val age:Int)
+
+fun main() {
+    var str = """
+        {
+    "name": "请求成功",
+    "age": "18"
+}
+    """.trimIndent()
+    
+    println(Gson().toJson(Person("Zhiyu 1998", 20)))
+    println(Gson().fromJson(str, Person::class.java))
+}
+```
+
+
+
+##### Moshi
+
+导包：
+
+```kotlin
+implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+```
+
+使用
+
+```kotlin
+val moshi: Moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+val jsonAdapter: JsonAdapter<Person> = moshi.adapter(Person::class.java)
+println(jsonAdapter.toJson(Person("Zhiyu", 20)))
+println(jsonAdapter.fromJson(
+    """
+        {
+            "name": "zhiyu",
+            "age": "199999"
+        }
+    """.trimIndent()
+))
+```
+
+
+
+##### Kotlinx
+
+导包注意项：
+
+```kotlin
+plugins {
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
+}
+
+dependencies {
+    ...
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+}
+```
+
+就可以编写了
+
+```kotlin
+@Serializable
+data class Person(var name:String, var age:Int) {
+    init {
+        if (name.isNullOrBlank()){
+            name="kotlinx.serialization";
+            age=12
+        }
+    }
+}
+
+fun main() {
+    println(
+        Json.decodeFromString<Person>(
+            """
+                {"name":"kotlinx.serialization","age":12}
+            """
+        )
+    )
+}
+```
+
+
+
+### 枚举类
+
+Java
+
+```java
+enum State {
+    Idle, Busy
+}
+State.Idle.name(); // Idle
+State.Idle.ordinal(); // 0
+```
+
+Kotlin
+
+```kotlin
+enum class State{
+    Idle, Busy
+}
+State.Idle.name // Idle
+State.Idle.ordinal // 0
+```
+
+
+
+#### 定义构造器
+
+```java
+enum State{
+    Idle(0), Busy(1);
+    int id;
+    State(int id) {
+        this.id = id;
+    }
+}
+```
+
+Kotlin
+
+```kotlin
+enum class State(val id:Int) {
+    Idle(0), Busy(1)
+}
+```
+
+
+
+#### 枚举定义扩展
+
+```kotlin
+fun State.next(): State {
+    return State.values.let {
+        val nextOrdinal = (ordinal + 1) % it.size
+        it[nextOrdinal]
+    }
+}
+```
+
+
+
+### 密封类
+
+* 密封类是一种特殊的`抽象类`
+* 密封类的子类定义在与自身相同的文件中
+* 密封类的子类的个数是有限的
+
+```kotlin
+sealed class PlayerState {
+    constructor()
+    
+    constructor(int: Int)
+}
+```
+
+
+
+#### 密封类&枚举类区别
+
+![image-20220924135345615](./images/image-20220924135345615.png)
+
+
+
+### 内联类
+
+* 内联类是对某一个类型的包装
+* 内联类是类似于Java装箱类型的一种类型
+* 编译器会尽可能使用被包装的类型进行优化
+
+
+
+定义示例：
+
+```kotlin
+inline class BoxInt(val value: Int)
+```
+
+
+
+#### 内联类的方法
+
+```kotlin
+inline class BoxInt(val value: Int) {
+    operator fun inc(): BoxInt {
+        return BoxInt(value + 1)
+    }
+}
+```
+
+
+
+#### 【错误设想】内联类的属性
+
+这样会`报错`：inline class cannot have properties with backing field
+
+```kotlin
+inline class BoxInt(val value: Int) {
+    val name = "BoxInt($value)"
+}
+```
+
+
+
+#### 内联类的继承结构
+
+内联类可以实现接口，但不能继承父类也不能被继承
+
+```kotlin
+inline class BoxInt(val value: Int): Comparable<Int> {
+    override fun compareTo(other: Int) = value.compareTo(other)
+}
+```
+
+
+
+#### 编译优化
+
+```kotlin
+var boxInt = BoxInt(5)
+if (boxInt < 10) {
+    println("value is less than 10")
+}
+```
+
+编译优化成Int类型: var value: Int = 5
+
+使用Int类型: val newValue = value * 200
+
+方法编译成静态方法: BoxInt.inc-impl(value)
+
+必要时使用包装类型: println(BoxInt(value))
+
+```kotlin
+var boxInt = BoxInt(5)
+val newValue = BoxInt.value * 200
+println(newValue)
+boxInt++
+println(boxInt)
+```
+
+
+
+#### 使用场景
+
+##### 无符号类型
+
+```kotlin
+inline class UInt
+internal constructor(internal val data:Int): Comparable<UInt> {
+   
+}
+```
+
+##### 模拟枚举
+
+```kotlin
+inline class State(val ordinal: Int) {
+    companion object {
+        val Idle = State(0)
+        val Busy = State(1)
+    }
+    fun values = arrayOf(Idle, Busy)
+    val name: String
+    	get() = ...
+}
+```
+
+
+
+#### 限制
+
+* 主构造器必须有且仅有一个只读属性
+* 不能定义有backing-field 的其他属性
+* 被包装类型必须不能是泛型类型
+* 不能继承父类也不能被继承
+* 不能定义为其他类的内部类
+
+
+
+#### 对比typealias
+
+![image-20220924141434215](./images/image-20220924141434215.png)
+
+
+
+### 泛型
+
+以maxOf看一下泛型：
+```kotlin
+public actual fun <T : Comparable<T>> maxOf(a: T, b: T): T {
+    return if (a >= b) a else b
+}
+```
+
+再看一下Java
+
+```java
+public static <T extends Comparable<T>> T maxOf(T a,T b) {
+    if (a.compareTo(b) > 0) return a;
+    else return b;
+}
+
+```
+
+#### 给泛型添加约束
+
+其中Comparable就是约束
+
+```kotlin
+fun<T:Comparable<T>> maxOf(a: T, b: T): T {
+```
+
+可以看一下Java的多个约束
+
+```java
+public static <T extends Comparable<T> & Supplier<R>,
+    R extends Number>
+R callMax(T a, T b) {
+    if (a.compareTo(b) > 0) return a.get();
+    else return b.get();
+}
+```
+
+
+
+多个泛型参数
+
+```kotlin
+fun <T, R> callMax(a: T,b: T): R
+	where T : Comparable<T>,T:()-> R,
+		R: Number{
+	return if(a> b) a() else b()
+}
+```
+
+更常见的是map的key,value
+
+```kotlin
+public interface Map<K, out V>
+```
+
+
+
+#### 泛型的型变
+
+* 协变:继承关系一致
+* 逆变:继承关系相反
+* 不变:没有继承关系
+
+##### 不变
+
+此时`val list = List.Cons(1.0, List.Nil)`会报错，Nil不能满足`List<T>`
+
+```kotlin
+sealed class List<T> {
+    object Nil : List <Nothing>()
+}
+val list = List.Cons(1.0, List.Nil)
+```
+
+
+
+##### 协变
+
+out 子类不能替代父类
+
+概念：
+
+Int 继承于 Number
+
+`List<Int>` 继承于 `List<Number>`
+
+意义：子类提供子类，父类提供给父类，提供的保持一致
+
+```kotlin
+sealed class List<out T> {
+    object Nil : List <Nothing>()
+}
+val list = List.Cons(1.0, List.Nil)
+```
+
+* 子类Derived兼容父类Base
+* 生产者`Producer<Derived>` 兼容`Producer <Base>`
+* 存在协变点的类的泛型参数必须声明为协变或不变
+* 当泛型类作为泛型参数类实例的生产者时用协变
+
+
+
+##### 逆变
+
+in 子类可以替代父类
+
+（干垃圾能扔垃圾桶和干垃圾桶， 垃圾只能扔垃圾桶）
+
+```kotlin
+public interface Function2<in P1, in P2, out R> : Function<R> {
+	public operator fun invoke(p1: P1, p2: P2): R
+}
+```
+
+* 子类Derived兼容父类Base
+* 消费者`Consumer <Base>`兼容`Consumer<Derived>`
+* 存在逆变点的类的泛型参数必须声明为逆变或不变
+* 当泛型类作为泛型参数类实例的消费者时用逆变
+
+
+
+#### 星投影
+
+\'\*\'可用在变量类型声明的位置
+\'\*\'可用以描述一个未知的类型
+\'\*\'所替换的类型在:
+
+* `协变`点返回泛型参数`上限`类型
+* `逆变`点接收泛型参数`下限`类型
+
+
+
+#### 泛型实现对比
+
+Java、kotlin使用类型擦除
+
+![QQ截图20220924192536](./images/QQ%E6%88%AA%E5%9B%BE20220924192536.png)
+
+
+
+#### 内联特化
