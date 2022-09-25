@@ -124,16 +124,6 @@ async function createConfig() {
           },
         }
       } ),
-    plugins: [ 
-      [
-        "@docusaurus/plugin-pwa",
-        /** @type {import('@docusaurus/plugin-pwa').PluginOptions} */
-        {
-          debug: false,
-          offlineModeActivationStrategies: ["appInstalled", "standalone", "queryString"],
-        },
-        ]
-    ],
   };
   return config;
 }

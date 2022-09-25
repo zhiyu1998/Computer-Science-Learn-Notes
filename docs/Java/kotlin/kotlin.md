@@ -1925,3 +1925,302 @@ Java、kotlin使用类型擦除
 
 
 #### 内联特化
+
+
+
+### 反射
+
+![image-20220925112803220](./images/image-20220925112803220.png)
+
+Gradle引入
+
+```kotlin
+dependencies {
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.21")
+}
+```
+
+Maven引入
+
+```xml
+<dependency>
+    <groupId>org.jetbrains.kotlin</groupId>
+    <artifactId>kotlin-reflect</artifactId>
+</dependency>
+```
+
+与Java对比反射
+
+![image-20220925113035776](./images/image-20220925113035776.png)
+
+Java反射
+
+* 优点:无需引入额外依赖,首次使用速度相对较快
+* 缺点:无法访问Kotlin语法特性,需对Kotlin生成的字节码足够了解
+
+Kotlin反射
+
+* 优点:支持访问Kotlin几乎所有特性, API设计更友好
+* 缺点:引入Kotlin反射库(2.5MB ,编译后400KB) ,首次调用慢
+
+
+
+#### Kotlin中两种找到函数的方法
+
+```kotlin
+class UserDTO(val name:String, val age: Int)
+
+interface Api {
+    fun getUser(): List<UserDTO>
+}
+
+abstract class SuperType<T>
+
+class SubType: SuperType<String>()
+
+fun main() {
+    Api::class.declaredFunctions.first {
+        it.name == "getUser"
+    }.returnType.arguments.forEach {
+        println(it)
+    }
+
+    Api::getUser.returnType.arguments.forEach {
+        println(it)
+    }
+}
+================================================
+UserDTO
+UserDTO
+```
+
+对应Kotlin调用Java反射
+
+```kotlin
+(Api::class.java.getDeclaredMethod("getUser").genericReturnType as ParameterizedType)
+.actualTypeArguments.forEach {
+    println(it)
+}
+===================================
+class UserDTO
+```
+
+
+
+#### 反射参数
+
+通过下面的这个反射可以看到方法`class SubType: SuperType<String>()`的泛型参数为String
+
+```kotlin
+abstract class SuperType<T> {
+    val typeParameter by lazy {
+        this::class.supertypes.first().arguments.first().type!!
+    }
+
+    val typeParameterJava by lazy {
+        this.javaClass.genericSuperclass.safeAs<ParameterizedType>()?.actualTypeArguments?.first()
+    }
+}
+
+class SubType: SuperType<String>()
+
+fun main() {
+    val subType = SubType()
+    subType.typeParameter.let (::println)
+    subType.typeParameterJava.let (::println)
+}
+
+fun <T> Any.safeAs(): T? {
+    return this as? T
+}
+================================================
+kotlin.String
+class java.lang.String
+```
+
+
+
+#### 深拷贝
+
+前提：
+
+```kotlin
+data class Group(val id: Int, val name: String, val location: String)
+
+data class Person2(val id: Int, val name: String, val group: Group)
+```
+
+
+
+深度拷贝函数：
+
+```kotlin
+fun <T : Any> T.deepCopy(): T {
+    //如果不是数据类，直接返回
+    if (!this::class.isData) {
+        return this
+    }
+
+    //拿到构造函数
+    return this::class.primaryConstructor!!.let { primaryConstructor ->
+        primaryConstructor.parameters.map { parameter ->
+            //转换类型
+            //memberProperties 返回非扩展属性中的第一个并将构造函数赋值给其
+            //最终value=第一个参数类型的对象
+            val value = (this::class as KClass<T>).memberProperties.first {
+                it.name == parameter.name
+            }.get(this)
+
+            //如果当前类(这里的当前类指的是参数对应的类型，比如说这里如果非基本类型时)是数据类
+            if ((parameter.type.classifier as? KClass<*>)?.isData == true) {
+                parameter to value?.deepCopy()
+            } else {
+                parameter to value
+            }
+
+
+            //最终返回一个新的映射map,即返回一个属性值重新组合的map，并调用callBy返回指定的对象
+        }.toMap().let(primaryConstructor::callBy)
+    }
+}
+```
+
+
+
+结果：
+
+> 注意：3等号比较的是引用，2等号是比较值
+
+```kotlin
+fun main() {
+    val person = Person2(
+        0,
+        "zhiyu",
+        Group(
+            0,
+            "Kotlin.cn",
+            "China"
+        )
+    )
+
+    val copiedPerson = person.copy()
+    val deepCopiedPerson = person.deepCopy()
+
+    println(copiedPerson)
+    println(deepCopiedPerson)
+
+    println(person === copiedPerson)
+    println(person === deepCopiedPerson)
+    println(person.group === copiedPerson.group)
+    println(person.group === deepCopiedPerson.group)
+}
+=================================================
+Person2(id=0, name=zhiyu, group=Group(id=0, name=Kotlin.cn, location=China))
+Person2(id=0, name=zhiyu, group=Group(id=0, name=Kotlin.cn, location=China))
+false
+false
+true
+false
+```
+
+
+
+#### model映射
+
+map转换为任意类型
+
+```kotlin
+inline fun <reified To : Any> Map<String, Any?>.mapAs(): To {
+    // 主构造器
+    return To::class.primaryConstructor!!.let {
+        // 泛型参数
+        it.parameters.map { parameter ->
+            parameter to (this[parameter.name] ?: if (parameter.type.isMarkedNullable) null
+            else throw IllegalArgumentException("${parameter.name} is required but missing"))
+        }.toMap()
+        // 调用
+            .let(it::callBy)
+    }
+}
+```
+
+map转换为其他map
+
+```kotlin
+inline fun <reified From : Any, reified To : Any> From.mapAs(): To {
+    return From::class.memberProperties.map { it.name to it.get(this) }
+        .toMap().mapAs()
+}
+```
+
+实践
+
+```kotlin
+class UserDTO2(val id: Int, val login: String, val avatarUrl: String, val url: String, val htmlUrl: String)
+
+class UserVO(val id: Int, val login: String, val avatarUrl: String, val url: String)
+
+fun main() {
+    val userDTO = UserDTO2(
+        0,
+        "Zhiyu",
+        "https://static.hetaousercontent.com/labs/squares/random?theme=duskfalling&user_id=2886891",
+        "https://github.com/",
+        "https://github.com/zhiyu1998/Computer-Science-Learn-Notes"
+    )
+
+    val userVO: UserVO = userDTO.mapAs()
+    println(userVO)
+
+    val userMap = mapOf(
+        "id" to 0,
+        "login" to "Zhiyu",
+        "avatarUrl" to "https://github.com",
+        "url" to "https://github.com/zhiyu1998/Computer-Science-Learn-Notes"
+    )
+
+    val userVOFromMap:UserVO = userMap.mapAs()
+    println(userVOFromMap)
+}
+=======================================
+UserVO@1046d517
+UserVO@3b7d3a38
+```
+
+
+
+### 注解
+
+关键字：`annotation`
+
+限定标注注解位置`Target`：
+
+```kotlin
+@Target(AnnotationTarget.CLASS)
+annotation class Api
+```
+
+指定作用时机`Retention`：
+
+```kotlin
+@Retention(AnnotationRetention.RUNTIME)
+@Target(AnnotationTarget.CLASS)
+annotation class Api
+```
+
+Java相比：
+
+```java
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
+public @interface Aspect {
+    public Class type();
+}
+```
+
+明确标注对象
+
+```kotlin
+@file:JvmName("Hello")
+package com.zhiyu.kotlin.annoation.basic
+```
