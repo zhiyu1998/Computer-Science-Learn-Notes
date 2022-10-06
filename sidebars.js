@@ -110,11 +110,6 @@ const sidebars = {
         },
         {
           type: 'doc',
-          id: 'Java/integration/main',
-          label: 'SpringBoot整合其他框架'
-        },
-        {
-          type: 'doc',
           id: 'Java/kotlin/kotlin',
           label: 'Kotlin with Spring'
         }

@@ -70,7 +70,6 @@
 * JVM笔记 ✅
 * JUC笔记 ✅
 * k8s笔记（短期内不更，欢迎PR） 🚫
-* SpringBoot整合其他框架 ⏳ 
 * Kotlin结合Spring生态 ⏳ 
 
 

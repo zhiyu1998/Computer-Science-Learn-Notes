@@ -71,7 +71,6 @@ title: 导读
 *  [Concurrent](Java\concurrent\concurrent.md)  JUC笔记 ✅ 
 *  [Docker](Java\docker\main.md)  Docker笔记 ✅
 *  k8s 笔记 🚫
-*  [SpringBoot整合其他框架](Java\integration\main.md)⏳ 
 *  [Kotlin结合SpringBoot](Java\kotlin\kotlin.md)🚫
 
 
