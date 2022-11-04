@@ -457,16 +457,39 @@ Optional
     .ifPresent(dtos::addAll);
 ```
 
-或者
+链式判空：链式调用如果出现空值也会报空指针异常，使用Optional+map即可解决
 
 ```java
-boolean isValid = Optional.ofNullable(country)
-    .map(country -> country.getCity()) //Or use method reference Country::getCity
-    .map(city -> city.getSchool())
-    .map(school -> school.getStudent())
-    .map(student -> true)
-    .orElse(false);
+String address = Optional.ofNullable(order)
+    .map(Order::getExpressInfo)
+    .map(Order::getAddress)
+    .orElse(null);
 ```
+
+### 字符串判空
+
+`Stream.of`
+
+```java
+String s = Stream.of(str1, str2, str3)
+    .filter(Objects::nonNull)
+    .findFirst()
+    .orElse(str4);
+```
+
+封装函数：
+
+```java
+public static Optional<String> firstNonNull(String... strings) {
+    return Arrays.stream(strings)
+            .filter(Objects::nonNull)
+            .findFirst();
+}
+// such as 
+String s = firstNonNull(str1, str2, str3).orElse(str4);
+```
+
+
 
 ### 使用Supplier`<Object> `var-args参数判断null值
 
@@ -490,6 +513,190 @@ public static boolean isValid(Supplier<Object>... suppliers) {
     }
     return true;
 }
+```
+
+
+
+## 1、0替换-异或
+
+采用`异或(^)思想
+
+0和1互换（原数值异或上 1）
+
+a=0；   a^1=1;
+
+a=1;    a^1=0;
+
+0和2 互换（原数值异或上 2）
+
+a=0;    a^2=2;
+
+a=2;    a^2=0;
+
+1和2 互换（原数值异或上 3）
+
+a=1;    a^3=2;
+
+a=2;    a^3=1;
+
+
+
+## Maven构建问题（父子工程）
+
+如果父工程使用的Spring init创建的，那么末尾它会给你添加一个build，删了即可，不然后续出问题子工程的有些依赖都添加不上
+
+以下就是创建时会自动生成的（父），删掉即可。
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <configuration>
+                <excludes>
+                    <exclude>
+                        <groupId>org.projectlombok</groupId>
+                        <artifactId>lombok</artifactId>
+                    </exclude>
+                </excludes>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+```
+
+> 要记住：spring-boot-maven-plugin插件在打Jar包时会引入依赖包
+
+
+
+## HashMap-computeIfAbsent用法
+
+```java
+import java.util.*; 
+  
+public class GFG { 
+  
+    // Main method 
+    public static void main(String[] args) 
+    { 
+  
+        Map<Integer, String> map = new Hashtable<>(); 
+        map.put(1, "100RS"); 
+        map.put(2, "500RS"); 
+        map.put(3, "1000RS"); 
+  
+        System.out.println("hashTable: "
+                           + map.toString()); 
+  
+        // 不存在健值对的情况
+        // 使用computeIfAbsent方法
+        map.computeIfAbsent(4, k -> "600RS"); 
+  
+        // 如果存在不会有任何影响
+        // key为1已经存在了 
+        map.computeIfAbsent(1, k -> "800RS"); 
+  
+        System.out.println("new hashTable: "
+                           + map); 
+    } 
+} 
+// ============================================
+hashTable：{3 = 1000RS，2 = 500RS，1 = 100RS}
+new hashTable：{4 = 600RS，3 = 1000RS，2 = 500RS，1 = 100RS}
+```
+
+
+
+## List转Map
+
+### Java8之前
+
+```java
+public Map<Integer, Animal> convertListBeforeJava8(List<Animal> list) {
+    Map<Integer, Animal> map = new HashMap<>();
+    for (Animal animal : list) {
+        map.put(animal.getId(), animal);
+    }
+    return map;
+}
+```
+
+### Java 8
+
+#### toMap
+
+```java
+ public Map<Integer, Animal> convertListAfterJava8(List<Animal> list) {
+    Map<Integer, Animal> map = list.stream()
+      .collect(Collectors.toMap(Animal::getId, Function.identity()));
+    return map;
+}
+```
+
+#### groupingBy
+
+```java
+HashMap<String, List<HlImmuneTodoListDtoResult>> planMap = plans.stream()
+        .map(this::planApply)
+        .collect(Collectors.groupingBy(HlImmuneTodoListDtoResult::getStatus, HashMap::new, Collectors.toList()));
+HashMap<String, List<HlImmuneTodoListDtoResult>> jobMap = jobs.stream()
+        .map(this::jobApply)
+        .collect(Collectors.groupingBy(HlImmuneTodoListDtoResult::getStatus, HashMap::new, Collectors.toList()));
+```
+
+
+
+### Apache
+
+```java
+public Map<Integer, Animal> convertListWithApacheCommons2(List<Animal> list) {
+    Map<Integer, Animal> map = new HashMap<>();
+    MapUtils.populateMap(map, list, Animal::getId);
+    return map;
+}
+```
+
+
+
+### Guava
+
+```java
+public Map<Integer, Animal> convertListWithGuava(List<Animal> list) {
+    Map<Integer, Animal> map = Maps
+      .uniqueIndex(list, Animal::getId);
+    return map;
+}
+```
+
+
+
+### 问题：key值重复
+
+> 一般出现此问题都会运行 java.lang.IllegalStateException: Duplicate key 
+
+ (key1, key2) -> key1 表示如果出现重复使用第一个
+
+```java
+// 使用key1
+ public Map<Integer, Animal> convertListAfterJava8(List<Animal> list) {
+    Map<Integer, Animal> map = list.stream()
+      .collect(Collectors.toMap(Animal::getId, Function.identity(), (key1, key2) -> key1));
+    return map;
+}
+// 如果是Guava出现重复键使用：ImmutableListMultimap
+Multimaps.index()
+```
+
+Guava写法(value是列表)：
+
+```java
+userList.stream().collect(Collectors.toMap(User::getId,
+e -> Lists.newArrayList(e.getUsername()),
+(List<String> oldList, List<String> newList) -> {
+    oldList.addAll(newList);
+    return oldList;
+}));
 ```
 
 
@@ -521,5 +728,328 @@ COUNT(*) OVER (PARTITION BY XXX)
 
 ```sql
 id-RANK() OVER (ORDER BY xxx)
+```
+
+
+
+## 工具类封装
+
+### BeanUtils封装
+
+```java
+/**
+ * Spring-BeanUtils.copyProperties扩展类
+ *
+ * @author zhiyu
+ * @description 解决BeanUtils.copyProperties不能浅拷贝列表及其他扩展
+ * @since 2022/10/13
+ */
+public class BeanExtUtils extends BeanUtils {
+
+    /**
+     * 将源实例的内容复制到目标实例
+     * @param source        源数据
+     * @param target        目标类型
+     * @param ignoreNull    是否忽略空值
+     * @param <S>           源类型
+     * @param <T>           目标类型
+     * @return
+     */
+    public static <S, T> T copyProperties(S source, T target, boolean ignoreNull) {
+        if (source == null) {
+            return target;
+        }
+        if (ignoreNull) {
+            copyProperties(source, target, getNullPropertyNames(source));
+        } else {
+            copyProperties(source, target);
+        }
+
+        return target;
+    }
+
+    /**
+     * 将源实例的内容复制到目标实例
+     * @param source 源数据
+     * @param target 目标类型
+     * @param <S>    源类型
+     * @param <T>    目标类型
+     * @return
+     */
+    public static <S, T> T copyProperties(S source, Supplier<T> target) {
+        T result = target.get();
+        if (source == null) {
+            return result;
+        }
+        copyProperties(source, result);
+        return result;
+    }
+
+    /**
+     * 使用场景：List中每个Java实体的循环复制
+     * @param sources           源实体
+     * @param targetSupplier    目标实体
+     * @param <S>               源实体列表的类型
+     * @param <T>               目标实体列表的类型
+     * @return
+     */
+    public static <S, T> List<T> copyListProperties(List<S> sources, Supplier<T> targetSupplier) {
+        if (sources == null || sources.isEmpty()) {
+            return new ArrayList<>(0);
+        }
+        List<T> list = new ArrayList<>(sources.size());
+        for (S source : sources) {
+            T target = copyProperties(source, targetSupplier);
+            list.add(target);
+        }
+        return list;
+    }
+
+    /**
+     * 获取给定对象的空字段名称数组
+     * @param source 目标对象
+     * @return 值为 null 的字段名称数组
+     */
+    public static String[] getNullPropertyNames(Object source) {
+        final BeanWrapper src = new BeanWrapperImpl(source);
+        java.beans.PropertyDescriptor[] pds = src.getPropertyDescriptors();
+
+        Set<String> emptyNames = new HashSet<>();
+        for (java.beans.PropertyDescriptor pd : pds) {
+            Object srcValue = src.getPropertyValue(pd.getName());
+            if (srcValue == null) {
+                emptyNames.add(pd.getName());
+            }
+        }
+        String[] result = new String[emptyNames.size()];
+        return emptyNames.toArray(result);
+    }
+}
+```
+
+### CopyUtils封装
+
+库：cglib
+
+```java
+public class CopyUtils {
+    public CopyUtils() {
+    }
+
+    public static <T, S> T copySingle(Class<T> targetClazz, S sourceData) {
+        if (sourceData == null) {
+            return null;
+        } else {
+            BeanCopier beanCopier = BeanCopier.create(sourceData.getClass(), targetClazz, false);
+            return copySingle(targetClazz, sourceData, beanCopier);
+        }
+    }
+
+    private static <T, S> T copySingle(Class<T> targetClazz, S sourceData, BeanCopier beanCopier) {
+        try {
+            T temp = targetClazz.getDeclaredConstructor().newInstance();
+            beanCopier.copy(sourceData, temp, (Converter)null);
+            return temp;
+        } catch (Exception var5) {
+            return null;
+        }
+    }
+
+    public static <T, S> List<T> copyMulti(Class<T> targetClazz, List<S> sourceDataList) {
+        if (CollectionUtils.isEmpty(sourceDataList)) {
+            return new ArrayList();
+        } else {
+            List<T> result = new ArrayList(sourceDataList.size());
+            BeanCopier beanCopier = BeanCopier.create(sourceDataList.get(0).getClass(), targetClazz, false);
+            Iterator var4 = sourceDataList.iterator();
+
+            while(var4.hasNext()) {
+                S temp = var4.next();
+                result.add(copySingle(targetClazz, temp, beanCopier));
+            }
+
+            return result;
+        }
+    }
+}
+```
+
+```java
+public class CopyUtils {
+
+    /**
+     * 单值拷贝
+     *
+     * @param targetClazz 目标类
+     * @param sourceData  源数据
+     * @param <T>         目标泛型
+     * @param <S>         源泛型
+     * @return 拷贝对象
+     */
+    public static <T, S> T copySigle(Class<T> targetClazz, S sourceData) {
+        if (sourceData == null) {
+            return null;
+        }
+        //复制器 默认带缓存.所以不用存起来.
+        BeanCopier beanCopier = BeanCopier.create(sourceData.getClass(), targetClazz, false);
+        return copySigle(targetClazz, sourceData, beanCopier);
+    }
+
+    /**
+     * 单值复制器
+     *
+     * @param targetClazz 目标类
+     * @param sourceData  源数据
+     * @param beanCopier  复制器
+     * @param <T>         目标泛型
+     * @param <S>         源泛型
+     * @return 复制结果
+     */
+    private static <T, S> T copySigle(Class<T> targetClazz, S sourceData, BeanCopier beanCopier) {
+        T temp;
+        try {
+            temp = targetClazz.newInstance();
+            beanCopier.copy(sourceData, temp, null);
+        } catch (Exception e) {
+            return null;
+        }
+        return temp;
+    }
+
+    /**
+     * 列表拷贝
+     *
+     * @param targetClazz    目标类
+     * @param sourceDataList 源数据
+     * @param <T>            目标泛型
+     * @param <S>            源泛型
+     * @return 拷贝列表
+     */
+    public static <T, S> List<T> copyMulti(Class<T> targetClazz, List<S> sourceDataList) {
+
+        if (CollectionUtils.isEmpty(sourceDataList)) {
+            return null;
+        }
+        List<T> result = new ArrayList<>(sourceDataList.size());
+        BeanCopier beanCopier = BeanCopier.create(sourceDataList.get(0).getClass(), targetClazz, false);
+
+        for (S temp : sourceDataList) {
+            result.add(copySigle(targetClazz, temp, beanCopier));
+        }
+        return result;
+    }
+}
+```
+
+### 并发查询模板
+
+```java
+Java
+CompletableFuture.supplyAsync(() ->
+    // A查询
+).thenCombine(CompletableFuture.supplyAsync(() ->
+    // B查询
+), (a, b) -> {
+    // 组合
+});
+```
+
+### 线程工厂封装
+
+```java
+public class ExecutorUtil {
+    public ExecutorUtil() {
+    }
+
+    public static Future<?> submit(Runnable task) {
+        return ExecutorUtil.ExecutorHolder.COMMON_EXECUTOR.submit(task);
+    }
+
+    public static <T> Future<T> submit(Callable<T> task) {
+        return ExecutorUtil.ExecutorHolder.COMMON_EXECUTOR.submit(task);
+    }
+
+    public static void execute(Runnable command) {
+        ExecutorUtil.ExecutorHolder.COMMON_EXECUTOR.execute(command);
+    }
+
+    public static void asyncExecute(Runnable command) {
+        ExecutorUtil.ExecutorHolder.ASYNC_EXECUTOR.execute(command);
+    }
+
+    public static void toolExecute(Runnable command) {
+        ExecutorUtil.ExecutorHolder.TOOL_EXECUTOR.execute(command);
+    }
+
+    public static void executeHeavyTask(Runnable command) {
+        ExecutorUtil.ExecutorHolder.HEAVY_EXECUTOR.execute(command);
+    }
+
+    private static ExecutorService getCommonPool() {
+        return ExecutorUtil.ExecutorHolder.COMMON_EXECUTOR;
+    }
+
+    static class BizThreadFactory implements ThreadFactory {
+        private static final AtomicInteger POOL_NUMBER = new AtomicInteger(1);
+        private final ThreadGroup group;
+        private final AtomicInteger threadNumber = new AtomicInteger(1);
+        private final String namePrefix;
+
+        BizThreadFactory(String name) {
+            SecurityManager s = System.getSecurityManager();
+            this.group = s != null ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            this.namePrefix = "newhope-biz-" + name + "-" + POOL_NUMBER.getAndIncrement() + "-thread-";
+        }
+
+        public Thread newThread(Runnable task) {
+            Thread t = new Thread(this.group, task, this.namePrefix + this.threadNumber.getAndIncrement(), 0L);
+            if (t.isDaemon()) {
+                t.setDaemon(false);
+            }
+
+            if (t.getPriority() != 5) {
+                t.setPriority(5);
+            }
+
+            return t;
+        }
+    }
+
+    private static class ExecutorHolder {
+        private static final ExecutorService COMMON_EXECUTOR;
+        private static final ExecutorService HEAVY_EXECUTOR;
+        private static final ExecutorService ASYNC_EXECUTOR;
+        private static final ExecutorService TOOL_EXECUTOR;
+
+        private ExecutorHolder() {
+        }
+
+        static {
+            COMMON_EXECUTOR = new ThreadPoolExecutor(32, 64, 3000L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue(16), new ExecutorUtil.BizThreadFactory("common"), new CallerRunsPolicy());
+            HEAVY_EXECUTOR = new ThreadPoolExecutor(4, 8, 3000L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue(4), new ExecutorUtil.BizThreadFactory("heavy"), new CallerRunsPolicy());
+            ASYNC_EXECUTOR = new ThreadPoolExecutor(16, 16, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue(4096), new ExecutorUtil.BizThreadFactory("async"), new CallerRunsPolicy());
+            TOOL_EXECUTOR = new ThreadPoolExecutor(8, 8, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue(8), new ExecutorUtil.BizThreadFactory("tool"), new CallerRunsPolicy());
+        }
+    }
+}
+```
+
+
+
+### 批处理简单封装
+
+```java
+public class BatchExecuteUtil {
+
+    public static <T, R> List<R> execute(Function<List<T>, R> function, List<T> list, Integer num) {
+        List<R> result = new ArrayList<>();
+
+        for (int i = 0; i < list.size(); ) {
+            result.add(function.apply(list.subList(i, Math.min(i + num, list.size()))));
+            i += num;
+        }
+        return result;
+    }
+}
 ```
 
