@@ -105,11 +105,6 @@ const sidebars = {
         },
         {
           type: 'doc',
-          id: 'Java/docker/main',
-          label: 'Docker'
-        },
-        {
-          type: 'doc',
           id: 'Java/kotlin/kotlin',
           label: 'Kotlin with Spring'
         }
