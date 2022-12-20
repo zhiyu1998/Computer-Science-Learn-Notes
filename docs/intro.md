@@ -32,18 +32,8 @@ title: 导读
 ## :penguin: Algorithm
 
 * [LeetCode-Notes](Java\leetcode\leetcode.md) 力扣刷题笔记（Java）⏳ 
-  * 二叉树  ✅
-  * 链表 ✅
-  * 字符串  ✅
-  * 动态规划 ⏳
-  * 回溯 🚫
-  * 滑动窗口
-  * 分支 🚫
-  * 分治 🚫
-  * 贪心 🚫
-  * 专题
-    * 剑指offer ⏳
-    * 热门100题 ⏳
+  * 剑指offer ⏳
+  * 热门100题 ⏳
 
 
 
