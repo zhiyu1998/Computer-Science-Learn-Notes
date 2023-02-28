@@ -126,6 +126,11 @@ const sidebars = {
         },
         {
           type: 'doc',
+          id: 'Java/eightpart/think',
+          label: '基于面试题的一些思考'
+        },
+        {
+          type: 'doc',
           id: 'Java/leetcode/leetcode',
           label: '力扣刷题顺序'
         },
