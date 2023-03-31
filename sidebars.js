@@ -117,12 +117,83 @@ const sidebars = {
         {
           type: 'doc',
           id: 'Java/eightpart/giant',
-          label: '大厂面试题'
+          label: '2022大厂面试题'
         },
         {
-          type: 'doc',
-          id: 'Java/eightpart/personal',
-          label: '常见面试题精选'
+          type: 'category',
+          label: '常见面试题精选',
+          items: [
+            {
+              type: 'doc',
+              id: 'Java/eightpart/intro',
+              label: '前言',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/foundation',
+              label: 'Java基础',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/concurrency',
+              label: 'Java并发',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/virtualMachine',
+              label: 'JVM',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/spring',
+              label: 'Spring系列',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/mysql',
+              label: 'MySQL',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/redis',
+              label: 'Redis',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/distribution',
+              label: '分布式',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/messageQueue',
+              label: '消息队列',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/netty',
+              label: 'Netty',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/network',
+              label: '计算机网络',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/system',
+              label: '操作系统',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/datastruct',
+              label: '数据结构',
+            },
+            {
+              type: 'doc',
+              id: 'Java/eightpart/intelligenceQuestion',
+              label: '智力题',
+            },
+          ]
         },
         {
           type: 'doc',
