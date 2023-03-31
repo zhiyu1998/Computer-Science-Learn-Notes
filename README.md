@@ -79,12 +79,16 @@
 
 
 
-## :chart_with_upwards_trend: Trend
+## :chart_with_upwards_trend: 趋势
 
 [![Star History Chart](https://api.star-history.com/svg?repos=zhiyu1998/Computer-Science-Learn-Notes&type=Date)](https://star-history.com/#zhiyu1998/Computer-Science-Learn-Notes&Date)
 
 
 
-## :tea: 请我喝杯奶茶
+## 🌸鸣谢贡献
 
-<img src="static/img/image-20220612101512485.png" alt="image-20220612101512485" style="zoom:33%;" />
+感谢以下开发者对 Computer-Science-Learn-Notes 作出的贡献：
+
+<a href="https://github.com/zhiyu1998/Computer-Science-Learn-Notes/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=zhiyu1998/Computer-Science-Learn-Notes&max=1000" />
+</a>
