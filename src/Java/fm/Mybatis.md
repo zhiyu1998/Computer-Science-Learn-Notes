@@ -1,5 +1,5 @@
 ---
-index: 3
+order: 3
 title: Mybatis
 ---
 MyBatis ALL IN ONE

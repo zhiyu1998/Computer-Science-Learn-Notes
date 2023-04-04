@@ -1,6 +1,6 @@
 ---
 
-index: 1
+order: 1
 title: 从问题中学习到Go的精髓
 ---
 

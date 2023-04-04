@@ -1,5 +1,5 @@
 ---
-index: 6
+order: 6
 title: SpringSecurity
 ---
 - [Spring Security 基础](#spring-security-基础)
@@ -21,7 +21,7 @@ title: SpringSecurity
       - [开放静态资源](#开放静态资源)
     - [源码解析](#源码解析)
     - [自定义验证登录处理【重要】](#自定义验证登录处理重要)
-      - [后端处理 [JSON]](#后端处理-json)
+      - [后端处理 \[JSON\]](#后端处理-json)
       - [前端处理](#前端处理)
     - [Session会话安全管理器](#session会话安全管理器)
       - [基本用法](#基本用法)

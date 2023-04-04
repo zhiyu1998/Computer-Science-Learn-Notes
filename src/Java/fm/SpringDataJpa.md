@@ -1,8 +1,9 @@
 ---
-index: 5
+order: 5
 title: SpringDataJpa
 ---
 # Spring Data JPA ALL IN ONE
+- [Spring Data JPA ALL IN ONE](#spring-data-jpa-all-in-one)
   - [概述](#概述)
   - [Hibernate JPA](#hibernate-jpa)
     - [注解实现](#注解实现)

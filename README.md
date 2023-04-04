@@ -9,7 +9,7 @@
 
 :rocket: CS（Computer Science）生涯学习/读书笔记，集成Java知识体系！
 
-:fire: :fire: :fire:  推荐 | 在线阅读（V2）：<https://zhiyu1998.github.io/Computer-Science-Learn-Notes/>
+:fire: :fire: :fire:  推荐 | 在线阅读：<https://zhiyu1998.github.io/Computer-Science-Learn-Notes/>
 
 ## :milky_way:标志说明
 
