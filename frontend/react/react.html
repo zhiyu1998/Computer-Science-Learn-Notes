@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="generator" content="VuePress 2.0.0-beta.61" />
+    <meta name="theme" content="VuePress Theme Hope" />
+    <meta property="og:url" content="https://zhiyu1998.github.io/frontend/react/react.html"><meta property="og:title" content="React笔记"><meta property="og:description" content="安装脚手架命令 npx npx create-react-app my-app (npx comes with npm 5.2+ and higher, see instructions for older npm versions) npm npm init react-app my-app npm init is available in npm ..."><meta property="og:type" content="article"><meta property="og:image" content="https://zhiyu1998.github.io/"><meta property="og:locale" content="zh-CN"><meta property="og:updated_time" content="2023-04-04T16:22:46.000Z"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image:alt" content="React笔记"><meta property="article:author" content="zhiyu1998"><meta property="article:modified_time" content="2023-04-04T16:22:46.000Z"><script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"React笔记","image":["https://zhiyu1998.github.io/"],"dateModified":"2023-04-04T16:22:46.000Z","author":[{"@type":"Person","name":"zhiyu1998","url":"https://github.com/zhiyu1998"}]}</script><title>React笔记</title><meta name="description" content="安装脚手架命令 npx npx create-react-app my-app (npx comes with npm 5.2+ and higher, see instructions for older npm versions) npm npm init react-app my-app npm init is available in npm ...">
+    <style>
+      :root {
+        --bg-color: #fff;
+      }
+
+      html[data-theme="dark"] {
+        --bg-color: #1d1e1f;
+      }
+
+      html,
+      body {
+        background: var(--bg-color);
+      }
+    </style>
+    <script>
+      const userMode = localStorage.getItem("vuepress-theme-hope-scheme");
+      const systemDarkMode =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+      if (userMode === "dark" || (userMode !== "light" && systemDarkMode)) {
+        document.documentElement.setAttribute("data-theme", "dark");
+      }
+    </script>
+    <link rel="preload" href="/assets/style-36e15ede.css" as="style"><link rel="stylesheet" href="/assets/style-36e15ede.css">
+    <link rel="modulepreload" href="/assets/app-8ba9a2ae.js"><link rel="modulepreload" href="/assets/framework-afce0fe7.js"><link rel="modulepreload" href="/assets/react.html-fedfbbcc.js"><link rel="modulepreload" href="/assets/react.html-b42d5409.js"><link rel="prefetch" href="/assets/index.html-d9198133.js" as="script"><link rel="prefetch" href="/assets/slides.html-edfb2738.js" as="script"><link rel="prefetch" href="/assets/datastruct.html-a9bd8f96.js" as="script"><link rel="prefetch" href="/assets/learnInProblem.html-04764ac0.js" as="script"><link rel="prefetch" href="/assets/index.html-a6c08c42.js" as="script"><link rel="prefetch" href="/assets/disable.html-07a80b36.js" as="script"><link rel="prefetch" href="/assets/encrypt.html-54a2a05d.js" as="script"><link rel="prefetch" href="/assets/markdown.html-93d0c718.js" as="script"><link rel="prefetch" href="/assets/page.html-69476a55.js" as="script"><link rel="prefetch" href="/assets/personal_tech.html-f26ff8f0.js" as="script"><link rel="prefetch" href="/assets/rent_house.html-290723a7.js" as="script"><link rel="prefetch" href="/assets/basic.html-a3c5ecd3.js" as="script"><link rel="prefetch" href="/assets/concurrent.html-3da9a4c0.js" as="script"><link rel="prefetch" href="/assets/giant.html-ab6853ae.js" as="script"><link rel="prefetch" href="/assets/Mybatis.html-bc14cd60.js" as="script"><link rel="prefetch" href="/assets/Spring.html-f4f129e6.js" as="script"><link rel="prefetch" href="/assets/SpringBoot.html-9e971f03.js" as="script"><link rel="prefetch" href="/assets/SpringCloud.html-b526bd26.js" as="script"><link rel="prefetch" href="/assets/SpringDataJpa.html-cdf66782.js" as="script"><link rel="prefetch" href="/assets/SpringMVC.html-4c33563f.js" as="script"><link rel="prefetch" href="/assets/SpringSecurity.html-d540db39.js" as="script"><link rel="prefetch" href="/assets/kotlin.html-63ccc402.js" as="script"><link rel="prefetch" href="/assets/leetcode.html-b7cbfbc8.js" as="script"><link rel="prefetch" href="/assets/typescript.html-cb58f47d.js" as="script"><link rel="prefetch" href="/assets/vue.html-fa7d778e.js" as="script"><link rel="prefetch" href="/assets/1.简介.html-04af62ad.js" as="script"><link rel="prefetch" href="/assets/10.对象的实例化内存布局与访问定位.html-d64f2cd4.js" as="script"><link rel="prefetch" href="/assets/11.直接内存.html-62cb9ff8.js" as="script"><link rel="prefetch" href="/assets/12.执行引擎.html-61e5b407.js" as="script"><link rel="prefetch" href="/assets/13.StringTable.html-b734f6c7.js" as="script"><link rel="prefetch" href="/assets/14.垃圾回收概述.html-d9d106b0.js" as="script"><link rel="prefetch" href="/assets/15.垃圾回收相关算法.html-82ffc5a7.js" as="script"><link rel="prefetch" href="/assets/16.垃圾回收相关概念.html-e6b4a5ed.js" as="script"><link rel="prefetch" href="/assets/17-垃圾回收器.html-40d59697.js" as="script"><link rel="prefetch" href="/assets/2.类加载子系统.html-fd290b48.js" as="script"><link rel="prefetch" href="/assets/3.运行时数据区.html-94ed88a2.js" as="script"><link rel="prefetch" href="/assets/4.程序计数器（PC寄存器）.html-89192bf6.js" as="script"><link rel="prefetch" href="/assets/5.虚拟机栈.html-c5adb2fa.js" as="script"><link rel="prefetch" href="/assets/6.本地方法接口.html-42d32342.js" as="script"><link rel="prefetch" href="/assets/7.本地方法栈.html-1cd7cbda.js" as="script"><link rel="prefetch" href="/assets/8.堆.html-ee479adb.js" as="script"><link rel="prefetch" href="/assets/9.方法区.html-833038cb.js" as="script"><link rel="prefetch" href="/assets/03-数组中重复的数字.html-96c87dca.js" as="script"><link rel="prefetch" href="/assets/04-二维数组中的查找.html-325a1dff.js" as="script"><link rel="prefetch" href="/assets/05-替换空格.html-60d5584e.js" as="script"><link rel="prefetch" href="/assets/09-用两个栈实现队列.html-e03e09a0.js" as="script"><link rel="prefetch" href="/assets/10-I.斐波那契数列.html-fe1079df.js" as="script"><link rel="prefetch" href="/assets/10-II青蛙跳台阶问题.html-71978553.js" as="script"><link rel="prefetch" href="/assets/11-旋转数组的最小数字.html-11a1238d.js" as="script"><link rel="prefetch" href="/assets/12-矩阵中的路径.html-d64979a0.js" as="script"><link rel="prefetch" href="/assets/13-机器人的运动范围.html-d437b841.js" as="script"><link rel="prefetch" href="/assets/14-剪绳子.html-6542d6ed.js" as="script"><link rel="prefetch" href="/assets/15-二进制中1的个数.html-c46fa89d.js" as="script"><link rel="prefetch" href="/assets/16-数值的整数次方.html-a8465472.js" as="script"><link rel="prefetch" href="/assets/17-打印从1到最大的n位数.html-a3a5327b.js" as="script"><link rel="prefetch" href="/assets/18-删除链表的节点.html-e88ab049.js" as="script"><link rel="prefetch" href="/assets/22-链表中倒数第k个节点.html-238f7205.js" as="script"><link rel="prefetch" href="/assets/24-反转链表.html-9b5ee9ba.js" as="script"><link rel="prefetch" href="/assets/25-合并两个排序的链表.html-ff4b0b9b.js" as="script"><link rel="prefetch" href="/assets/26-树的子结构.html-439b0d2b.js" as="script"><link rel="prefetch" href="/assets/27-二叉树的镜像.html-0e823167.js" as="script"><link rel="prefetch" href="/assets/28-对称的二叉树.html-4f2707dc.js" as="script"><link rel="prefetch" href="/assets/58-II 左旋转字符串.html-813be194.js" as="script"><link rel="prefetch" href="/assets/常用方法封装合集.html-9d52740e.js" as="script"><link rel="prefetch" href="/assets/404.html-444aa4c2.js" as="script"><link rel="prefetch" href="/assets/index.html-af5a835d.js" as="script"><link rel="prefetch" href="/assets/index.html-6a5f6a81.js" as="script"><link rel="prefetch" href="/assets/index.html-ae873f0f.js" as="script"><link rel="prefetch" href="/assets/index.html-98f137be.js" as="script"><link rel="prefetch" href="/assets/index.html-b047ce6f.js" as="script"><link rel="prefetch" href="/assets/index.html-197abdbf.js" as="script"><link rel="prefetch" href="/assets/index.html-247ccb40.js" as="script"><link rel="prefetch" href="/assets/index.html-dc52867b.js" as="script"><link rel="prefetch" href="/assets/index.html-85439b7e.js" as="script"><link rel="prefetch" href="/assets/index.html-156ca8d1.js" as="script"><link rel="prefetch" href="/assets/index.html-571434fd.js" as="script"><link rel="prefetch" href="/assets/index.html-7891cba0.js" as="script"><link rel="prefetch" href="/assets/index.html-c5bdcde2.js" as="script"><link rel="prefetch" href="/assets/index.html-56abb5c0.js" as="script"><link rel="prefetch" href="/assets/index.html-d0df6dbe.js" as="script"><link rel="prefetch" href="/assets/index.html-9a3b6350.js" as="script"><link rel="prefetch" href="/assets/index.html-33da033f.js" as="script"><link rel="prefetch" href="/assets/index.html-ba00b820.js" as="script"><link rel="prefetch" href="/assets/slides.html-a991af2c.js" as="script"><link rel="prefetch" href="/assets/datastruct.html-472a60af.js" as="script"><link rel="prefetch" href="/assets/learnInProblem.html-c7e34a2a.js" as="script"><link rel="prefetch" href="/assets/index.html-c34e5275.js" as="script"><link rel="prefetch" href="/assets/disable.html-d972dbc6.js" as="script"><link rel="prefetch" href="/assets/encrypt.html-4170437a.js" as="script"><link rel="prefetch" href="/assets/markdown.html-61862a67.js" as="script"><link rel="prefetch" href="/assets/page.html-67d96e22.js" as="script"><link rel="prefetch" href="/assets/personal_tech.html-5568dee3.js" as="script"><link rel="prefetch" href="/assets/rent_house.html-1e0dd4dc.js" as="script"><link rel="prefetch" href="/assets/basic.html-c2646d44.js" as="script"><link rel="prefetch" href="/assets/concurrent.html-39cf5963.js" as="script"><link rel="prefetch" href="/assets/giant.html-d487f17f.js" as="script"><link rel="prefetch" href="/assets/Mybatis.html-4cc25a5e.js" as="script"><link rel="prefetch" href="/assets/Spring.html-f3f7fa46.js" as="script"><link rel="prefetch" href="/assets/SpringBoot.html-d4bd5cff.js" as="script"><link rel="prefetch" href="/assets/SpringCloud.html-98a8846e.js" as="script"><link rel="prefetch" href="/assets/SpringDataJpa.html-3f409240.js" as="script"><link rel="prefetch" href="/assets/SpringMVC.html-8aafdcdc.js" as="script"><link rel="prefetch" href="/assets/SpringSecurity.html-7207c9e2.js" as="script"><link rel="prefetch" href="/assets/kotlin.html-5d5ab39f.js" as="script"><link rel="prefetch" href="/assets/leetcode.html-f644d859.js" as="script"><link rel="prefetch" href="/assets/typescript.html-975b0d19.js" as="script"><link rel="prefetch" href="/assets/vue.html-4774ef96.js" as="script"><link rel="prefetch" href="/assets/1.简介.html-cce408a1.js" as="script"><link rel="prefetch" href="/assets/10.对象的实例化内存布局与访问定位.html-515f2516.js" as="script"><link rel="prefetch" href="/assets/11.直接内存.html-2ec20fbe.js" as="script"><link rel="prefetch" href="/assets/12.执行引擎.html-3ea322f7.js" as="script"><link rel="prefetch" href="/assets/13.StringTable.html-52eab086.js" as="script"><link rel="prefetch" href="/assets/14.垃圾回收概述.html-02cc39e1.js" as="script"><link rel="prefetch" href="/assets/15.垃圾回收相关算法.html-bb94208f.js" as="script"><link rel="prefetch" href="/assets/16.垃圾回收相关概念.html-9fa9bd26.js" as="script"><link rel="prefetch" href="/assets/17-垃圾回收器.html-e0eba67c.js" as="script"><link rel="prefetch" href="/assets/2.类加载子系统.html-b5ef1fef.js" as="script"><link rel="prefetch" href="/assets/3.运行时数据区.html-698c4b97.js" as="script"><link rel="prefetch" href="/assets/4.程序计数器（PC寄存器）.html-2216ef62.js" as="script"><link rel="prefetch" href="/assets/5.虚拟机栈.html-817a090b.js" as="script"><link rel="prefetch" href="/assets/6.本地方法接口.html-0df9672c.js" as="script"><link rel="prefetch" href="/assets/7.本地方法栈.html-034dc764.js" as="script"><link rel="prefetch" href="/assets/8.堆.html-8bc226c6.js" as="script"><link rel="prefetch" href="/assets/9.方法区.html-fbc5da79.js" as="script"><link rel="prefetch" href="/assets/03-数组中重复的数字.html-567f5361.js" as="script"><link rel="prefetch" href="/assets/04-二维数组中的查找.html-6e6af06d.js" as="script"><link rel="prefetch" href="/assets/05-替换空格.html-202212eb.js" as="script"><link rel="prefetch" href="/assets/09-用两个栈实现队列.html-19d03253.js" as="script"><link rel="prefetch" href="/assets/10-I.斐波那契数列.html-b6e27af0.js" as="script"><link rel="prefetch" href="/assets/10-II青蛙跳台阶问题.html-10ebe3d1.js" as="script"><link rel="prefetch" href="/assets/11-旋转数组的最小数字.html-f82a7837.js" as="script"><link rel="prefetch" href="/assets/12-矩阵中的路径.html-324f8453.js" as="script"><link rel="prefetch" href="/assets/13-机器人的运动范围.html-dad3810f.js" as="script"><link rel="prefetch" href="/assets/14-剪绳子.html-c23774d2.js" as="script"><link rel="prefetch" href="/assets/15-二进制中1的个数.html-14fb859b.js" as="script"><link rel="prefetch" href="/assets/16-数值的整数次方.html-64f6fe8a.js" as="script"><link rel="prefetch" href="/assets/17-打印从1到最大的n位数.html-8531c65c.js" as="script"><link rel="prefetch" href="/assets/18-删除链表的节点.html-3aeace11.js" as="script"><link rel="prefetch" href="/assets/22-链表中倒数第k个节点.html-2517eeed.js" as="script"><link rel="prefetch" href="/assets/24-反转链表.html-6a3f1b99.js" as="script"><link rel="prefetch" href="/assets/25-合并两个排序的链表.html-702f2779.js" as="script"><link rel="prefetch" href="/assets/26-树的子结构.html-4d99c9a3.js" as="script"><link rel="prefetch" href="/assets/27-二叉树的镜像.html-85287fc8.js" as="script"><link rel="prefetch" href="/assets/28-对称的二叉树.html-3aeebb13.js" as="script"><link rel="prefetch" href="/assets/58-II 左旋转字符串.html-a6dd23e1.js" as="script"><link rel="prefetch" href="/assets/常用方法封装合集.html-f4b05f8b.js" as="script"><link rel="prefetch" href="/assets/404.html-982c42ec.js" as="script"><link rel="prefetch" href="/assets/index.html-95691e99.js" as="script"><link rel="prefetch" href="/assets/index.html-a6d8def1.js" as="script"><link rel="prefetch" href="/assets/index.html-040d812d.js" as="script"><link rel="prefetch" href="/assets/index.html-44563782.js" as="script"><link rel="prefetch" href="/assets/index.html-e775c7d3.js" as="script"><link rel="prefetch" href="/assets/index.html-fca388e5.js" as="script"><link rel="prefetch" href="/assets/index.html-8663824d.js" as="script"><link rel="prefetch" href="/assets/index.html-c6c6d33d.js" as="script"><link rel="prefetch" href="/assets/index.html-a1738b34.js" as="script"><link rel="prefetch" href="/assets/index.html-eaa10b62.js" as="script"><link rel="prefetch" href="/assets/index.html-1271cf68.js" as="script"><link rel="prefetch" href="/assets/index.html-81d7f46f.js" as="script"><link rel="prefetch" href="/assets/index.html-b144c1dd.js" as="script"><link rel="prefetch" href="/assets/index.html-1fbfb2e6.js" as="script"><link rel="prefetch" href="/assets/index.html-96bcade0.js" as="script"><link rel="prefetch" href="/assets/index.html-7186d5f7.js" as="script"><link rel="prefetch" href="/assets/index.html-90e31230.js" as="script"><link rel="prefetch" href="/assets/waline-meta-a31b78ed.js" as="script"><link rel="prefetch" href="/assets/component-46822c2b.js" as="script"><link rel="prefetch" href="/assets/auto-ba5ecab5.js" as="script"><link rel="prefetch" href="/assets/index-b03bef79.js" as="script"><link rel="prefetch" href="/assets/flowchart-35969cab.js" as="script"><link rel="prefetch" href="/assets/mermaid.core-882ea22b.js" as="script"><link rel="prefetch" href="/assets/highlight.esm-a794bb63.js" as="script"><link rel="prefetch" href="/assets/markdown.esm-d92a2fc9.js" as="script"><link rel="prefetch" href="/assets/math.esm-70a288c8.js" as="script"><link rel="prefetch" href="/assets/notes.esm-224f94d9.js" as="script"><link rel="prefetch" href="/assets/reveal.esm-e5069ce0.js" as="script"><link rel="prefetch" href="/assets/search.esm-2c3fba7d.js" as="script"><link rel="prefetch" href="/assets/zoom.esm-b83b91d0.js" as="script"><link rel="prefetch" href="/assets/VuePlayground-5e047ead.js" as="script"><link rel="prefetch" href="/assets/photoswipe.esm-36cd6c3c.js" as="script">
+  </head>
+  <body>
+    <div id="app"><!--[--><!--[--><!--[--><span tabindex="-1"></span><a href="#main-content" class="skip-link sr-only">跳至主要內容</a><!--]--><div class="theme-container has-toc"><!--[--><header class="navbar" id="navbar"><div class="navbar-start"><button type="button" class="toggle-sidebar-button" title="Toggle Sidebar"><span class="icon"></span></button><!--[--><!----><!--]--><a href="/" class="brand"><img class="logo" src="/logo.svg" alt><!----><!----></a><!--[--><!----><!--]--></div><div class="navbar-center"><!--[--><!----><!--]--><nav class="nav-links"><div class="nav-item hide-in-mobile"><a href="/" class="nav-link" aria-label="主页"><span class="font-icon icon iconfont icon-home" style=""></span>主页<!----></a></div><div class="nav-item hide-in-mobile"><a href="/intro/" class="nav-link" aria-label="导读"><span class="font-icon icon iconfont icon-discover" style=""></span>导读<!----></a></div><div class="nav-item hide-in-mobile"><a href="https://github.com/zhiyu1998/Computer-Science-Learn-Notes/issues" rel="noopener noreferrer" target="_blank" aria-label="问题反馈" class="nav-link"><span class="font-icon icon iconfont icon-note" style=""></span>问题反馈<span><svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path><polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg><span class="external-link-icon-sr-only">open in new window</span></span><!----></a></div></nav><!--[--><!----><!--]--></div><div class="navbar-end"><!--[--><!----><!--]--><!----><div class="nav-item"><a class="repo-link" href="https://github.com/zhiyu1998/Computer-Science-Learn-Notes" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><svg xmlns="http://www.w3.org/2000/svg" class="icon github-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="github icon" style="width:1.25rem;height:1.25rem;vertical-align:middle;"><path d="M511.957 21.333C241.024 21.333 21.333 240.981 21.333 512c0 216.832 140.544 400.725 335.574 465.664 24.49 4.395 32.256-10.07 32.256-23.083 0-11.69.256-44.245 0-85.205-136.448 29.61-164.736-64.64-164.736-64.64-22.315-56.704-54.4-71.765-54.4-71.765-44.587-30.464 3.285-29.824 3.285-29.824 49.195 3.413 75.179 50.517 75.179 50.517 43.776 75.008 114.816 53.333 142.762 40.79 4.523-31.66 17.152-53.377 31.19-65.537-108.971-12.458-223.488-54.485-223.488-242.602 0-53.547 19.114-97.323 50.517-131.67-5.035-12.33-21.93-62.293 4.779-129.834 0 0 41.258-13.184 134.912 50.346a469.803 469.803 0 0 1 122.88-16.554c41.642.213 83.626 5.632 122.88 16.554 93.653-63.488 134.784-50.346 134.784-50.346 26.752 67.541 9.898 117.504 4.864 129.834 31.402 34.347 50.474 78.123 50.474 131.67 0 188.586-114.73 230.016-224.042 242.09 17.578 15.232 33.578 44.672 33.578 90.454v135.85c0 13.142 7.936 27.606 32.854 22.87C862.25 912.597 1002.667 728.747 1002.667 512c0-271.019-219.648-490.667-490.71-490.667z"></path></svg></a></div><div class="nav-item hide-in-mobile"><button type="button" id="appearance-switch"><svg xmlns="http://www.w3.org/2000/svg" class="icon auto-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="auto icon" style="display:block;"><path d="M512 992C246.92 992 32 777.08 32 512S246.92 32 512 32s480 214.92 480 480-214.92 480-480 480zm0-840c-198.78 0-360 161.22-360 360 0 198.84 161.22 360 360 360s360-161.16 360-360c0-198.78-161.22-360-360-360zm0 660V212c165.72 0 300 134.34 300 300 0 165.72-134.28 300-300 300z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" class="icon dark-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="dark icon" style="display:none;"><path d="M524.8 938.667h-4.267a439.893 439.893 0 0 1-313.173-134.4 446.293 446.293 0 0 1-11.093-597.334A432.213 432.213 0 0 1 366.933 90.027a42.667 42.667 0 0 1 45.227 9.386 42.667 42.667 0 0 1 10.24 42.667 358.4 358.4 0 0 0 82.773 375.893 361.387 361.387 0 0 0 376.747 82.774 42.667 42.667 0 0 1 54.187 55.04 433.493 433.493 0 0 1-99.84 154.88 438.613 438.613 0 0 1-311.467 128z"></path></svg><svg xmlns="http://www.w3.org/2000/svg" class="icon light-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="light icon" style="display:none;"><path d="M952 552h-80a40 40 0 0 1 0-80h80a40 40 0 0 1 0 80zM801.88 280.08a41 41 0 0 1-57.96-57.96l57.96-58a41.04 41.04 0 0 1 58 58l-58 57.96zM512 752a240 240 0 1 1 0-480 240 240 0 0 1 0 480zm0-560a40 40 0 0 1-40-40V72a40 40 0 0 1 80 0v80a40 40 0 0 1-40 40zm-289.88 88.08-58-57.96a41.04 41.04 0 0 1 58-58l57.96 58a41 41 0 0 1-57.96 57.96zM192 512a40 40 0 0 1-40 40H72a40 40 0 0 1 0-80h80a40 40 0 0 1 40 40zm30.12 231.92a41 41 0 0 1 57.96 57.96l-57.96 58a41.04 41.04 0 0 1-58-58l58-57.96zM512 832a40 40 0 0 1 40 40v80a40 40 0 0 1-80 0v-80a40 40 0 0 1 40-40zm289.88-88.08 58 57.96a41.04 41.04 0 0 1-58 58l-57.96-58a41 41 0 0 1 57.96-57.96z"></path></svg></button></div><!----><!--[--><!----><!--]--><button type="button" class="toggle-navbar-button" aria-label="Toggle Navbar" aria-expanded="false" aria-controls="nav-screen"><span class="button-container"><span class="button-top"></span><span class="button-middle"></span><span class="button-bottom"></span></span></button></div></header><!----><!--]--><!----><div class="toggle-sidebar-wrapper"><span class="arrow start"></span></div><aside class="sidebar" id="sidebar"><!--[--><!----><!--]--><ul class="sidebar-links"><li><section class="sidebar-group"><button class="sidebar-heading clickable active" type="button"><span class="font-icon icon iconfont icon-vscode" style=""></span><span class="title">前端</span><span class="arrow down"></span></button><ul class="sidebar-links"><li><section class="sidebar-group"><button class="sidebar-heading clickable active" type="button"><!----><span class="title">React</span><span class="arrow down"></span></button><ul class="sidebar-links"><li><!--[--><a aria-current="page" href="/frontend/react/react.html" class="router-link-active router-link-exact-active nav-link active sidebar-link sidebar-page active" aria-label="React笔记"><!---->React笔记<!----></a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#安装脚手架命令" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="安装脚手架命令"><!---->安装脚手架命令<!----></a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#npx" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="npx"><!---->npx<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#npm" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="npm"><!---->npm<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#yarn" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="Yarn"><!---->Yarn<!----></a><ul class="sidebar-sub-headers"></ul></li></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#原生开发" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="原生开发"><!---->原生开发<!----></a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#react开发" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="React开发"><!---->React开发<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#注意点" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="注意点"><!---->注意点<!----></a><ul class="sidebar-sub-headers"></ul></li></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#jsx语法-语法补充" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="JSX语法 &amp; 语法补充"><!---->JSX语法 &amp; 语法补充<!----></a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#类的语法补充" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="类的语法补充"><!---->类的语法补充<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#案例练习-实践for循环" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="案例练习 -- 实践for循环"><!---->案例练习 -- 实践for循环<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#案例联系-this的运用" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="案例联系 -- this的运用"><!---->案例联系 -- this的运用<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#jsx语法" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="JSX语法"><!---->JSX语法<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#案例-书籍计算" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="案例--书籍计算"><!---->案例--书籍计算<!----></a><ul class="sidebar-sub-headers"></ul></li></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#react组件化开发" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="React组件化开发"><!---->React组件化开发<!----></a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#render函数能返回什么类型" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="render函数能返回什么类型"><!---->render函数能返回什么类型<!----></a><ul class="sidebar-sub-headers"></ul></li><li class="sidebar-sub-header"><a aria-current="page" href="/frontend/react/react.html#生命周期" class="router-link-active router-link-exact-active nav-link sidebar-link heading" aria-label="生命周期"><!---->生命周期<!----></a><ul class="sidebar-sub-headers"></ul></li></ul></li></ul><!--]--></li></ul></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><!----><span class="title">Typescript</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><!----><span class="title">Vue</span><span class="arrow end"></span></button><!----></section></li></ul></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-timer" style=""></span><span class="title">Golang</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-build" style=""></span><span class="title">计算机基础</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-java" style=""></span><span class="title">Java基础</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-branch" style=""></span><span class="title">Java并发</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-profile" style=""></span><span class="title">Java面试</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-leaf" style=""></span><span class="title">Java框架</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-async" style=""></span><span class="title">Java虚拟机</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-launch" style=""></span><span class="title">Kotlin结合Spring</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-object" style=""></span><span class="title">LeetCode刷题顺序</span><span class="arrow end"></span></button><!----></section></li><li><section class="sidebar-group"><button class="sidebar-heading clickable" type="button"><span class="font-icon icon iconfont icon-repair" style=""></span><span class="title">经验总结</span><span class="arrow end"></span></button><!----></section></li></ul><!--[--><!----><!--]--></aside><!--[--><main class="page" id="main-content"><!--[--><!----><nav class="breadcrumb disable"></nav><div class="page-title"><h1><!---->React笔记</h1><div class="page-info"><span class="page-author-info" aria-label="作者🖊" data-balloon-pos="down"><svg xmlns="http://www.w3.org/2000/svg" class="icon author-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="author icon"><path d="M649.6 633.6c86.4-48 147.2-144 147.2-249.6 0-160-128-288-288-288s-288 128-288 288c0 108.8 57.6 201.6 147.2 249.6-121.6 48-214.4 153.6-240 288-3.2 9.6 0 19.2 6.4 25.6 3.2 9.6 12.8 12.8 22.4 12.8h704c9.6 0 19.2-3.2 25.6-12.8 6.4-6.4 9.6-16 6.4-25.6-25.6-134.4-121.6-240-243.2-288z"></path></svg><span><a class="page-author-item" href="https://github.com/zhiyu1998" target="_blank" rel="noopener noreferrer">zhiyu1998</a></span><span property="author" content="zhiyu1998"></span></span><!----><span class="page-date-info" aria-label="写作日期📅" data-balloon-pos="down"><svg xmlns="http://www.w3.org/2000/svg" class="icon calendar-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="calendar icon"><path d="M716.4 110.137c0-18.753-14.72-33.473-33.472-33.473-18.753 0-33.473 14.72-33.473 33.473v33.473h66.993v-33.473zm-334.87 0c0-18.753-14.72-33.473-33.473-33.473s-33.52 14.72-33.52 33.473v33.473h66.993v-33.473zm468.81 33.52H716.4v100.465c0 18.753-14.72 33.473-33.472 33.473a33.145 33.145 0 01-33.473-33.473V143.657H381.53v100.465c0 18.753-14.72 33.473-33.473 33.473a33.145 33.145 0 01-33.473-33.473V143.657H180.6A134.314 134.314 0 0046.66 277.595v535.756A134.314 134.314 0 00180.6 947.289h669.74a134.36 134.36 0 00133.94-133.938V277.595a134.314 134.314 0 00-133.94-133.938zm33.473 267.877H147.126a33.145 33.145 0 01-33.473-33.473c0-18.752 14.72-33.473 33.473-33.473h736.687c18.752 0 33.472 14.72 33.472 33.473a33.145 33.145 0 01-33.472 33.473z"></path></svg><span><!----></span><meta property="datePublished" content="2023-04-04T15:12:04.000Z"></span><span class="page-pageview-info" aria-label="访问量🔢" data-balloon-pos="down"><svg xmlns="http://www.w3.org/2000/svg" class="icon eye-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="eye icon"><path d="M992 512.096c0-5.76-.992-10.592-1.28-11.136-.192-2.88-1.152-8.064-2.08-10.816-.256-.672-.544-1.376-.832-2.08-.48-1.568-1.024-3.104-1.6-4.32C897.664 290.112 707.104 160 512 160c-195.072 0-385.632 130.016-473.76 322.592-1.056 2.112-1.792 4.096-2.272 5.856a55.512 55.512 0 00-.64 1.6c-1.76 5.088-1.792 8.64-1.632 7.744-.832 3.744-1.568 11.168-1.568 11.168-.224 2.272-.224 4.032.032 6.304 0 0 .736 6.464 1.088 7.808.128 1.824.576 4.512 1.12 6.976h-.032c.448 2.08 1.12 4.096 1.984 6.08.48 1.536.992 2.976 1.472 4.032C126.432 733.856 316.992 864 512 864c195.136 0 385.696-130.048 473.216-321.696 1.376-2.496 2.24-4.832 2.848-6.912.256-.608.48-1.184.672-1.728 1.536-4.48 1.856-8.32 1.728-8.32l-.032.032c.608-3.104 1.568-7.744 1.568-13.28zM512 672c-88.224 0-160-71.776-160-160s71.776-160 160-160 160 71.776 160 160-71.776 160-160 160z"></path></svg><span class="waline-pageview-count" id="ArtalkPV" data-path="/frontend/react/react.html">...</span></span><span class="page-reading-time-info" aria-label="阅读时间⌛" data-balloon-pos="down"><svg xmlns="http://www.w3.org/2000/svg" class="icon timer-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="timer icon"><path d="M799.387 122.15c4.402-2.978 7.38-7.897 7.38-13.463v-1.165c0-8.933-7.38-16.312-16.312-16.312H256.33c-8.933 0-16.311 7.38-16.311 16.312v1.165c0 5.825 2.977 10.874 7.637 13.592 4.143 194.44 97.22 354.963 220.201 392.763-122.204 37.542-214.893 196.511-220.2 389.397-4.661 5.049-7.638 11.651-7.638 19.03v5.825h566.49v-5.825c0-7.379-2.849-13.981-7.509-18.9-5.049-193.016-97.867-351.985-220.2-389.527 123.24-37.67 216.446-198.453 220.588-392.892zM531.16 450.445v352.632c117.674 1.553 211.787 40.778 211.787 88.676H304.097c0-48.286 95.149-87.382 213.728-88.676V450.445c-93.077-3.107-167.901-81.297-167.901-177.093 0-8.803 6.99-15.793 15.793-15.793 8.803 0 15.794 6.99 15.794 15.793 0 80.261 63.69 145.635 142.01 145.635s142.011-65.374 142.011-145.635c0-8.803 6.99-15.793 15.794-15.793s15.793 6.99 15.793 15.793c0 95.019-73.789 172.82-165.96 177.093z"></path></svg><span>大约 10 分钟</span><meta property="timeRequired" content="PT10M"></span><!----><!----></div><hr></div><div class="toc-place-holder"><aside id="toc"><!--[--><!----><!--]--><div class="toc-header">此页内容<button type="button" class="print-button" title="打印"><svg xmlns="http://www.w3.org/2000/svg" class="icon print-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="print icon"><path d="M819.2 364.8h-44.8V128c0-17.067-14.933-32-32-32H281.6c-17.067 0-32 14.933-32 32v236.8h-44.8C145.067 364.8 96 413.867 96 473.6v192c0 59.733 49.067 108.8 108.8 108.8h44.8V896c0 17.067 14.933 32 32 32h460.8c17.067 0 32-14.933 32-32V774.4h44.8c59.733 0 108.8-49.067 108.8-108.8v-192c0-59.733-49.067-108.8-108.8-108.8zM313.6 160h396.8v204.8H313.6V160zm396.8 704H313.6V620.8h396.8V864zM864 665.6c0 25.6-19.2 44.8-44.8 44.8h-44.8V588.8c0-17.067-14.933-32-32-32H281.6c-17.067 0-32 14.933-32 32v121.6h-44.8c-25.6 0-44.8-19.2-44.8-44.8v-192c0-25.6 19.2-44.8 44.8-44.8h614.4c25.6 0 44.8 19.2 44.8 44.8v192z"></path></svg></button></div><div class="toc-wrapper"><ul class="toc-list"><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#安装脚手架命令" class="router-link-active router-link-exact-active toc-link level2">安装脚手架命令</a></li><li><ul class="toc-list"><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#npx" class="router-link-active router-link-exact-active toc-link level3">npx</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#npm" class="router-link-active router-link-exact-active toc-link level3">npm</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#yarn" class="router-link-active router-link-exact-active toc-link level3">Yarn</a></li><!----><!--]--></ul></li><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#原生开发" class="router-link-active router-link-exact-active toc-link level2">原生开发</a></li><li><ul class="toc-list"><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#react开发" class="router-link-active router-link-exact-active toc-link level3">React开发</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#注意点" class="router-link-active router-link-exact-active toc-link level3">注意点</a></li><!----><!--]--></ul></li><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#jsx语法-语法补充" class="router-link-active router-link-exact-active toc-link level2">JSX语法 &amp; 语法补充</a></li><li><ul class="toc-list"><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#类的语法补充" class="router-link-active router-link-exact-active toc-link level3">类的语法补充</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#案例练习-实践for循环" class="router-link-active router-link-exact-active toc-link level3">案例练习 -- 实践for循环</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#案例联系-this的运用" class="router-link-active router-link-exact-active toc-link level3">案例联系 -- this的运用</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#jsx语法" class="router-link-active router-link-exact-active toc-link level3">JSX语法</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#案例-书籍计算" class="router-link-active router-link-exact-active toc-link level3">案例--书籍计算</a></li><!----><!--]--></ul></li><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#react组件化开发" class="router-link-active router-link-exact-active toc-link level2">React组件化开发</a></li><li><ul class="toc-list"><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#render函数能返回什么类型" class="router-link-active router-link-exact-active toc-link level3">render函数能返回什么类型</a></li><!----><!--]--><!--[--><li class="toc-item"><a aria-current="page" href="/frontend/react/react.html#生命周期" class="router-link-active router-link-exact-active toc-link level3">生命周期</a></li><!----><!--]--></ul></li><!--]--></ul></div><!--[--><!----><!--]--></aside></div><!----><div class="theme-hope-content"><h1 id="react笔记" tabindex="-1"><a class="header-anchor" href="#react笔记" aria-hidden="true">#</a> React笔记</h1><h2 id="安装脚手架命令" tabindex="-1"><a class="header-anchor" href="#安装脚手架命令" aria-hidden="true">#</a> 安装脚手架命令</h2><h3 id="npx" tabindex="-1"><a class="header-anchor" href="#npx" aria-hidden="true">#</a> npx</h3><blockquote><p>npx create-react-app my-app</p></blockquote><p>(npx comes with npm 5.2+ and higher, see instructions for older npm versions)</p><h3 id="npm" tabindex="-1"><a class="header-anchor" href="#npm" aria-hidden="true">#</a> npm</h3><blockquote><p>npm init react-app my-app</p></blockquote><p>npm init <code>&lt;initializer&gt;</code> is available in npm 6+</p><h3 id="yarn" tabindex="-1"><a class="header-anchor" href="#yarn" aria-hidden="true">#</a> Yarn</h3><blockquote><p>yarn create react-app my-app</p></blockquote><p>yarn create is available in Yarn 0.25+</p><figure><img src="/assets/image-20220414083224689-6a83e228.png" alt="image-20220414083224689" tabindex="0" loading="lazy"><figcaption>image-20220414083224689</figcaption></figure><h2 id="原生开发" tabindex="-1"><a class="header-anchor" href="#原生开发" aria-hidden="true">#</a> 原生开发</h2><p>JS改变某个标签的文字</p><div class="language-javascript line-numbers-mode" data-ext="js"><pre class="language-javascript"><code>    <span class="token comment">// 原生开发 -- 命令式编程</span>
+   <span class="token keyword">let</span> message <span class="token operator">=</span>  <span class="token string">&quot;Hello World&quot;</span>
+   <span class="token keyword">const</span> titleEL <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">getElementsByClassName</span><span class="token punctuation">(</span><span class="token string">&quot;title&quot;</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+   titleEL<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> message
+
+   <span class="token keyword">const</span> btnEL <span class="token operator">=</span> document<span class="token punctuation">.</span><span class="token function">getElementsByClassName</span><span class="token punctuation">(</span><span class="token string">&quot;btn&quot;</span><span class="token punctuation">)</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+   btnEL<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">&quot;click&quot;</span><span class="token punctuation">,</span> <span class="token parameter">e</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+     console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">&quot;按钮发送了点击&quot;</span><span class="token punctuation">)</span>
+     message <span class="token operator">=</span> <span class="token string">&#39;Hello React&#39;</span>
+     titleEL<span class="token punctuation">.</span>innerHTML <span class="token operator">=</span> message
+   <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+   <span class="token comment">// React -- 声明式编程</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="react开发" tabindex="-1"><a class="header-anchor" href="#react开发" aria-hidden="true">#</a> React开发</h3><h4 id="react开发需要以来的库" tabindex="-1"><a class="header-anchor" href="#react开发需要以来的库" aria-hidden="true">#</a> React开发需要以来的库</h4><ul><li>react：核心文件</li><li>react-dom：React渲染不同平台</li><li>babel：jsx转换为React代码</li></ul><div class="language-html line-numbers-mode" data-ext="html"><pre class="language-html"><code>   <span class="token comment">&lt;!-- 加载 React。--&gt;</span>
+  <span class="token comment">&lt;!-- 注意: 部署时，将 &quot;development.js&quot; 替换为 &quot;production.min.js&quot;。--&gt;</span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">&quot;</span>https://unpkg.com/react@17/umd/react.development.js<span class="token punctuation">&quot;</span></span> <span class="token attr-name">crossorigin</span><span class="token punctuation">&gt;</span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">&quot;</span>https://unpkg.com/react-dom@17/umd/react-dom.development.js<span class="token punctuation">&quot;</span></span> <span class="token attr-name">crossorigin</span><span class="token punctuation">&gt;</span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>script</span> <span class="token attr-name">src</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">&quot;</span>https://unpkg.com/babel-standalone@6/babel.min.js<span class="token punctuation">&quot;</span></span><span class="token punctuation">&gt;</span></span><span class="token script"></span><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>script</span><span class="token punctuation">&gt;</span></span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="重构原生代码" tabindex="-1"><a class="header-anchor" href="#重构原生代码" aria-hidden="true">#</a> 重构原生代码</h4><p>重构上述更改文字的代码，使用React</p><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>let message = &quot;Hello World&quot;;
+
+function btnClick() {
+    message = &#39;Hello React&#39;
+    // 与vue 不同，在React变量改变不会渲染，要手动渲染
+    render()
+}
+
+function render() {
+    // &lt;h2&gt;&lt;/h2&gt;  JSX代码
+    // JSX特点：多个标签最外层（根）只能有一个标签
+    ReactDOM.render(
+        &lt;div&gt;
+            &lt;h2&gt;{message}&lt;/h2&gt;
+            &lt;button onClick={btnClick}&gt;改变文本&lt;/button&gt;
+        &lt;/div&gt;, 
+        document.getElementById(&#39;app&#39;)
+    )
+}
+
+render()
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>再次重构React代码，使其标准化：</p><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>//封装APP
+class App extends React.Component {
+    constructor() {
+        super()
+        // this.message = &#39;Hello World&#39;
+        this.state = {
+            message: &#39;Hello World&#39;
+        }
+    }
+
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;h2&gt;{this.state.message}&lt;/h2&gt;
+                &lt;button onClick={this.btnClick.bind(this)}&gt;改变文本&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+
+    btnClick() {
+        console.log(this);
+        // this.state.message = &#39;Hello React&#39;
+        // 不能手动调用this.render()
+        // 也不能使用this.state.message
+        // 要使用setState传递对象
+        this.setState({
+            message: &#39;Hello React&#39;
+        })
+    }
+}
+
+ReactDOM.render(&lt;App/&gt;, document.getElementById(&#39;app&#39;))
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="注意点" tabindex="-1"><a class="header-anchor" href="#注意点" aria-hidden="true">#</a> 注意点</h3><ol><li>集成时，React.Component中的‘C’应该大写</li><li>construct中的state带this</li><li>render中需要渲染的变量除了带上单胡须&#39;{}&#39;外，还要带上this.state.变量</li><li>注意ReactDOM.render中的render不要拼写错误</li></ol><h2 id="jsx语法-语法补充" tabindex="-1"><a class="header-anchor" href="#jsx语法-语法补充" aria-hidden="true">#</a> JSX语法 &amp; 语法补充</h2><h3 id="类的语法补充" tabindex="-1"><a class="header-anchor" href="#类的语法补充" aria-hidden="true">#</a> 类的语法补充</h3><p>ES5创建一个类</p><div class="language-javascript line-numbers-mode" data-ext="js"><pre class="language-javascript"><code><span class="token comment">// ES5中定义类</span>
+<span class="token keyword">function</span> <span class="token function">Person</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token punctuation">,</span> age</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name
+    <span class="token keyword">this</span><span class="token punctuation">.</span>age <span class="token operator">=</span> age
+<span class="token punctuation">}</span>
+
+<span class="token comment">// 类中定义函数</span>
+<span class="token class-name">Person</span><span class="token punctuation">.</span>prototype<span class="token punctuation">.</span><span class="token function-variable function">running</span> <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>age<span class="token punctuation">,</span> <span class="token string">&quot;running&quot;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">var</span> p <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Person</span><span class="token punctuation">(</span><span class="token string">&quot;why&quot;</span><span class="token punctuation">,</span> <span class="token number">18</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>name<span class="token punctuation">,</span> p<span class="token punctuation">.</span>age<span class="token punctuation">)</span>
+p<span class="token punctuation">.</span><span class="token function">running</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>ES6创建一个类</p><div class="language-javascript line-numbers-mode" data-ext="js"><pre class="language-javascript"><code><span class="token comment">// ES6中通过class创建类</span>
+<span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 构造方法, 方法名固定</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token punctuation">,</span> age</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name
+        <span class="token keyword">this</span><span class="token punctuation">.</span>age <span class="token operator">=</span> age
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// 定义方法</span>
+    <span class="token function">running</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>age<span class="token punctuation">,</span> <span class="token string">&#39;running&#39;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">const</span> p <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Person</span><span class="token punctuation">(</span><span class="token string">&#39;why&#39;</span><span class="token punctuation">,</span> <span class="token number">18</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>p<span class="token punctuation">.</span>name<span class="token punctuation">,</span> p<span class="token punctuation">.</span>age<span class="token punctuation">)</span><span class="token punctuation">;</span>
+p<span class="token punctuation">.</span><span class="token function">running</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>ES6中继承父类：</p><div class="language-javascript line-numbers-mode" data-ext="js"><pre class="language-javascript"><code><span class="token keyword">class</span> <span class="token class-name">Person</span> <span class="token punctuation">{</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token punctuation">,</span> age</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name
+        <span class="token keyword">this</span><span class="token punctuation">.</span>age <span class="token operator">=</span> age
+    <span class="token punctuation">}</span>
+
+    <span class="token function">running</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">&#39;running&#39;</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Student</span> <span class="token keyword">extends</span> <span class="token class-name">Person</span><span class="token punctuation">{</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">name<span class="token punctuation">,</span> age<span class="token punctuation">,</span> sno</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token comment">// 子类必须初始化父类</span>
+        <span class="token keyword">super</span><span class="token punctuation">(</span>name<span class="token punctuation">,</span> age<span class="token punctuation">)</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>sno <span class="token operator">=</span> sno
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> stu <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Student</span><span class="token punctuation">(</span><span class="token string">&#39;Student:why&#39;</span><span class="token punctuation">,</span> <span class="token number">18</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>stu<span class="token punctuation">.</span>name<span class="token punctuation">,</span> stu<span class="token punctuation">.</span>age<span class="token punctuation">,</span> stu<span class="token punctuation">.</span>sno<span class="token punctuation">)</span>
+stu<span class="token punctuation">.</span><span class="token function">running</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="案例练习-实践for循环" tabindex="-1"><a class="header-anchor" href="#案例练习-实践for循环" aria-hidden="true">#</a> 案例练习 -- 实践for循环</h3><ul><li>方法一是利用for (element of array)</li><li>方法二是用ES6语法中的map实现。注：外边是一个大括号</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>class App extends React.Component{
+    constructor() {
+        super()
+        this.state = {
+            message: &#39;Hello World&#39;,
+            movies: [&#39;大话西游&#39;, &#39;盗梦空间&#39;, &#39;星际穿越&#39;, &#39;流浪地球&#39;]
+        }
+    }
+
+    render() {
+        const liArray = []
+        for (let movie of this.state.movies) {
+            liArray.push(&lt;li&gt;{movie}&lt;/li&gt;)
+        }
+
+        return(
+            &lt;div&gt;
+                &lt;h2&gt;电影列表1&lt;/h2&gt;
+                &lt;ul&gt;
+                    {liArray}
+                &lt;/ul&gt;
+
+                &lt;h2&gt;电影列表2&lt;/h2&gt;
+                &lt;ul&gt;
+                    {
+                        this.state.movies.map(one =&gt; {
+                            return &lt;li&gt;{one}&lt;/li&gt;
+                        })
+                    }
+                &lt;/ul&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+
+ReactDOM.render(&lt;App/&gt;, document.getElementById(&#39;app&#39;));
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="案例联系-this的运用" tabindex="-1"><a class="header-anchor" href="#案例联系-this的运用" aria-hidden="true">#</a> 案例联系 -- this的运用</h3><ul><li>根据目前所学的方法，如果方法中要使用this，必须bind(this)，不然就是undefined</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>class App extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            counter: 0
+        }
+    }
+
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;h2&gt;当前计数：{this.state.counter}&lt;/h2&gt;
+                {/* 绑定this，方便方法使用this */}
+                &lt;button onClick={this.increment.bind(this)}&gt;+&lt;/button&gt;
+                &lt;button onClick={this.decrement.bind(this)}&gt;-&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+
+    increment() {
+        this.setState({
+            counter: this.state.counter + 1
+        })
+    }
+
+    decrement() {
+        this.setState({
+            counter: this.state.counter - 1
+        })
+    }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="jsx语法" tabindex="-1"><a class="header-anchor" href="#jsx语法" aria-hidden="true">#</a> JSX语法</h3><blockquote><p>React 使用 JSX 来替代常规的 JavaScript。</p></blockquote><blockquote><p>JSX 是一个看起来很像 XML 的 JavaScript 语法扩展。</p></blockquote><blockquote><p>与Vue不同，Vue使用的是模板语法（v-if、v-for）</p></blockquote><h4 id="书写规范" tabindex="-1"><a class="header-anchor" href="#书写规范" aria-hidden="true">#</a> 书写规范</h4><ol><li><p>只能有一个根元素</p></li><li><p>为了方便阅读，在render函数中的return后加入&#39;()&#39;</p></li><li><p>JSX可以是单标签，也可以双标签</p><ol><li>单标签尾巴必须是&#39;/&gt;&#39; ，如下所示</li></ol></li></ol><h4 id="注释书写" tabindex="-1"><a class="header-anchor" href="#注释书写" aria-hidden="true">#</a> 注释书写</h4><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>render() {
+    return (
+        &lt;div&gt;
+            {/* 我是一个注释 */}
+            Hello World
+        &lt;/div&gt;
+    )
+}
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="嵌入变量-数据" tabindex="-1"><a class="header-anchor" href="#嵌入变量-数据" aria-hidden="true">#</a> 嵌入变量/数据</h4><p>纲要：</p><ul><li>{}中可以显示的内容</li><li>{}中不可以显示的内容。为什么？如果非要显示如何使用？</li><li>JSX对象能用{}显示吗？</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>class App extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            // 在{}中可以正常显示的内容
+            name: &#39;rzy&#39;,
+            age: 18,
+            names: [&#39;abc&#39;, &#39;cba&#39;, &#39;nba&#39;],
+
+            // 在{}不能显示的内容/忽略
+            // 为什么？真实渲染时经常会作判断，例如：三元运算符，判断为null就不会显示，不然容易出BUG
+            // 如果需要渲染出来
+            test1: null,
+            test2: undefined,
+            test3: false,
+
+            // 对象不能作为jsx的子类
+            friend: {
+                name: &#39;why&#39;,
+                age: 40
+            }
+        }
+    }
+
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;h2&gt;{this.state.name}&lt;/h2&gt;
+                &lt;h2&gt;{this.state.age}&lt;/h2&gt;
+                &lt;h2&gt;{this.state.names}&lt;/h2&gt;
+
+
+                &lt;h2&gt;{this.state.test1}&lt;/h2&gt;
+                &lt;h2&gt;{this.state.test2}&lt;/h2&gt;
+                &lt;h2&gt;{this.state.test3}&lt;/h2&gt;
+
+                {/* 硬显示 */}
+                &lt;h2&gt;{this.state.test1+&#39;&#39;}&lt;/h2&gt;
+                &lt;h2&gt;{this.state.test2+&#39;&#39;}&lt;/h2&gt;
+                &lt;h2&gt;{this.state.test3.toString()}&lt;/h2&gt;
+
+                {/* 对象作为子类 -- 错*/}
+                {/* &lt;h2&gt;{this.state.friend}&lt;/h2&gt;*/}
+            &lt;/div&gt;
+        )
+    }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="嵌入表达式" tabindex="-1"><a class="header-anchor" href="#嵌入表达式" aria-hidden="true">#</a> 嵌入表达式</h4><p>提纲：</p><ul><li>运算符表达式</li><li>三元运算符</li><li>函数调用</li><li>对象解构</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>class App extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            firstName: &#39;kobe&#39;,
+            lastName: &#39;bryant&#39;,
+            isLogin: true
+        }
+    }
+
+    render() {
+        // 对象的解构
+        const { firstName, lastName, isLogin } = this.state
+
+        return (
+            &lt;div&gt;
+                {/* 运算符表达式 */}
+                &lt;h2&gt;{firstName + &#39; &#39; + lastName}&lt;/h2&gt;
+                &lt;h2&gt;{20 * 50}&lt;/h2&gt;
+
+                {/* 三元运算符 */}
+                &lt;h2&gt;{isLogin ? &#39;欢迎回来&#39; : &#39;请先登录&#39;}&lt;/h2&gt;
+
+                {/* 函数调用 */}
+                &lt;h2&gt;{this.getFullName()}&lt;/h2&gt;
+            &lt;/div&gt;
+        )
+    }
+
+    // 区别于setState，因为setState在类内，需要bind，getFullName不在父类中，自己定义所以不用bind
+    getFullName() {
+        return this.state.firstName + &quot; &quot; + this.state.lastName
+    }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="绑定属性" tabindex="-1"><a class="header-anchor" href="#绑定属性" aria-hidden="true">#</a> 绑定属性</h4><p>纲要：</p><ul><li>绑定普通属性</li><li>绑定class</li><li>绑定style</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>function getSizeImage(imgUrl, size) {
+    return imgUrl + `?param=${size}y${size}`
+}
+
+class App extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            title: &#39;标题&#39;,
+            imgUrl: &#39;http://p4.music.126.net/-8A5EGZ8hz3byulhycfk2Q==/109951165108319236.jpg&#39;,
+            link: &#39;http://www.baidu.com&#39;,
+            active: true
+        }
+    }
+
+    render() {
+        const {title, imgUrl, link, active} = this.state
+
+        return (
+            &lt;div&gt;
+                {/* 绑定普通属性 */}
+                &lt;h2 title={title}&gt;我是标题&lt;/h2&gt;
+                &lt;img src={getSizeImage(imgUrl, 140)} alt=&quot;&quot; /&gt;
+                &lt;a href={link} target=&quot;_blank&quot;&gt;百度一下&lt;/a&gt;
+                {/* 绑定class */}
+                &lt;div className=&quot;box&quot;&gt;我是div元素&lt;/div&gt;
+                &lt;div className={&quot;box &quot; + (active ? &#39;active&#39; : &#39;&#39;)}&gt;我是div元素&lt;/div&gt;
+                &lt;label htmlFor=&quot;&quot;&gt;&lt;/label&gt;
+                {/* 绑定style */}
+                &lt;div style={{color: &#39;red&#39;, fontSize: &#39;50px&#39;}}&gt;我是div，绑定style属性&lt;/div&gt;
+            &lt;/div&gt;
+        )
+    }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="绑定事件" tabindex="-1"><a class="header-anchor" href="#绑定事件" aria-hidden="true">#</a> 绑定事件</h4><p>纲要：</p><ul><li>绑定事件不像html一样onclick，使用驼峰：onClick</li><li>绑定this的<strong>四种</strong>方案</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>class App extends React.Component {
+    constructor() {
+        super()
+        this.state = {
+            message: &#39;按钮发送了点击！！&#39;,
+            counter: 100
+        },
+            this.btnClick3 = this.btnClick3.bind(this) // 方案2：构造器绑定
+    }
+
+    render() {
+        return (
+            &lt;div&gt;
+                &lt;button onClick={this.btnClick}&gt;按钮1&lt;/button&gt;
+                {/* 方案1：通过bind绑定this */}
+                &lt;button onClick={this.btnClick2.bind(this)}&gt;按钮2&lt;/button&gt;
+                {/* 方案2：构造器绑定 */}
+                &lt;button onClick={this.btnClick3}&gt;按钮3&lt;/button&gt;
+                {/* 方案3：定义函数时，使用箭头函数 */}
+                &lt;button onClick={this.btnClick4}&gt;按钮4&lt;/button&gt;
+                {/* 方案4（推荐）：直接传入一个箭头函数，在箭头函数中直接传入需要执行的函数*/}
+                &lt;button onClick={() =&gt; { this.btnClick5() }}&gt;按钮5&lt;/button&gt;
+            &lt;/div&gt;
+        )
+    }
+
+    btnClick() {
+        console.log(&#39;按钮发送了点击！！&#39;);
+    }
+
+    btnClick2() {
+        console.log(this.state.message);
+    }
+
+    btnClick3() {
+        console.log(this.state.message);
+    }
+
+    // 箭头函数中永不绑定this，ES6中给对象增加属性的方式：class.field
+    btnClick4 = () =&gt; {
+        // 如果使用this这里不存在就会往上层找
+        console.log(this.state.counter);
+    }
+
+    btnClick5() {
+        console.log(this.state.counter);
+    }
+}
+
+ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="传递参数" tabindex="-1"><a class="header-anchor" href="#传递参数" aria-hidden="true">#</a> 传递参数</h4><p>提纲：</p><ul><li>传递event</li><li>传递函数参数，使用箭头函数</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+
+    &lt;!-- React开发依赖 --&gt;
+    &lt;script src=&quot;../js/react.development.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;../js/react-dom.development.js&quot;&gt;&lt;/script&gt;
+    &lt;!-- 生产环境中不建议使用 --&gt;
+    &lt;script src=&quot;../js/babel.min.js&quot;&gt;&lt;/script&gt;
+
+    &lt;script type=&quot;text/babel&quot;&gt;
+      class App extends React.Component {
+        constructor() {
+          super()
+
+          this.state = {
+            movies: [&#39;大话西游&#39;, &#39;海王&#39;, &#39;流浪地球&#39;, &#39;盗梦空间&#39;]
+          }
+        }
+
+        render() {
+          return (
+            &lt;div&gt;
+              &lt;button onClick={ (e)=&gt;{ this.btnClick(e) } }&gt;按钮&lt;/button&gt;
+              &lt;ul&gt;
+                {
+                  this.state.movies.map((movie, index, arr)=&gt; {
+                    return &lt;li onClick={(e) =&gt; {this.liClick(movie, index, e)}}&gt;{movie}&lt;/li&gt;
+                  })
+                }
+              &lt;/ul&gt;
+            &lt;/div&gt;
+          )
+        }
+
+        btnClick(event) {
+          console.log(event);
+        }
+
+        liClick(movie, index, e) {
+          console.log(movie + &#39;: &#39; + index);
+          console.log(e);
+        }
+
+      }
+
+      ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="条件渲染" tabindex="-1"><a class="header-anchor" href="#条件渲染" aria-hidden="true">#</a> 条件渲染</h4><p>Part one：</p><ul><li><em>逻辑判断</em></li><li><em>三元运算符</em></li><li><em>逻辑与</em></li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+
+    &lt;!-- React开发依赖 --&gt;
+    &lt;script src=&quot;../js/react.development.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;../js/react-dom.development.js&quot;&gt;&lt;/script&gt;
+    &lt;!-- 生产环境中不建议使用 --&gt;
+    &lt;script src=&quot;../js/babel.min.js&quot;&gt;&lt;/script&gt;
+
+    &lt;script type=&quot;text/babel&quot;&gt;
+      class App extends React.Component {
+        constructor() {
+          super()
+          this.state = {
+            isLogin: true
+          }
+        }
+
+        render() {
+          {/* 对象的解构 */}
+          const {isLogin} = this.state
+
+          {/* 逻辑判断 */}
+          let welcome = null
+          if (isLogin == true) {
+            welcome = &lt;h2&gt;欢迎回来&lt;/h2&gt;
+          } else {
+            welcome = &lt;h2&gt;请先登录！&lt;/h2&gt;
+          }
+
+          return (
+            &lt;div&gt;
+              {/* 三元运算符 */}
+              {welcome}
+              &lt;button onClick={()=&gt;{this.loginClick()}}&gt;{isLogin ? &#39;退出&#39; : &#39;登录&#39;}&lt;/button&gt;
+
+              &lt;hr/&gt;
+
+              {/* JS中最优方案：逻辑与 */}
+              &lt;h2&gt;{isLogin &amp;&amp; &#39;你哈啊,zhiyu&#39;}&lt;/h2&gt;
+            &lt;/div&gt;
+          )
+        }
+
+        loginClick() {
+          this.setState({
+            isLogin: !this.state.isLogin
+          })
+        }
+      }
+
+      ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>part two：</p><ul><li>利用<code>style={{CSS属性名：属性值}}</code>进行动态条件判断</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+
+    &lt;!-- React开发依赖 --&gt;
+    &lt;script src=&quot;../js/react.development.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;../js/react-dom.development.js&quot;&gt;&lt;/script&gt;
+    &lt;!-- 生产环境中不建议使用 --&gt;
+    &lt;script src=&quot;../js/babel.min.js&quot;&gt;&lt;/script&gt;
+
+    &lt;script type=&quot;text/babel&quot;&gt;
+      class App extends React.Component {
+        constructor() {
+          super()
+          this.state = {
+            isLogin: true
+          }
+        }
+
+        render() {
+          const { isLogin } = this.state
+
+          return (
+            &lt;div&gt;
+              &lt;button onClick={e =&gt; this.loginClick()}&gt;{isLogin ? &#39;退出&#39; : &#39;登录&#39;}&lt;/button&gt;
+              &lt;h2 style={{display: isLogin ? &#39;block&#39; : &#39;none&#39;}}&gt;你好啊，zhiyu&lt;/h2&gt;
+            &lt;/div&gt;
+          )
+        }
+
+        loginClick() {
+          this.setState({
+            isLogin: !this.state.isLogin
+          }) 
+        }
+      }
+
+      ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h4 id="列表渲染" tabindex="-1"><a class="header-anchor" href="#列表渲染" aria-hidden="true">#</a> 列表渲染</h4><ul><li>列表遍历</li><li>列表过滤</li><li>列表截取</li></ul><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;Document&lt;/title&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+
+    &lt;!-- React开发依赖 --&gt;
+    &lt;script src=&quot;../js/react.development.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;../js/react-dom.development.js&quot;&gt;&lt;/script&gt;
+    &lt;!-- 生产环境中不建议使用 --&gt;
+    &lt;script src=&quot;../js/babel.min.js&quot;&gt;&lt;/script&gt;
+
+    &lt;script type=&quot;text/babel&quot;&gt;
+      class App extends React.Component {
+        constructor() {
+          super()
+          this.state = {
+            names: [&#39;javascript&#39;, &#39;java&#39;, &#39;C#&#39;, &#39;Cpp&#39;, &#39;Python&#39;],
+            numbers: [100, 120, 123, 501, 201, 520, 310]
+          }
+        }
+
+        render() {
+          const {names, numbers} = this.state
+
+          return (
+            &lt;div&gt;
+              &lt;ul&gt;
+                {
+                  names.map((item)=&gt; {
+                    return &lt;li&gt;{item}&lt;/li&gt;
+                  })
+                }
+              &lt;/ul&gt;
+              &lt;hr/&gt;
+              &lt;p&gt;数字列表：过滤&lt;/p&gt;
+              &lt;ul&gt;
+                {
+                  numbers.filter(number =&gt; number &gt;= 50)
+                  .map(item =&gt; &lt;li&gt;{item}&lt;/li&gt;)
+                }
+              &lt;/ul&gt;
+              &lt;hr/&gt;
+              &lt;p&gt;数字列表：截取&lt;/p&gt;
+              &lt;ul&gt;
+                {
+                  numbers.slice(0, 4).map(item =&gt; &lt;li&gt;{item}&lt;/li&gt;)
+                }
+              &lt;/ul&gt;
+            &lt;/div&gt;
+          )
+        }
+      }
+
+      ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="案例-书籍计算" tabindex="-1"><a class="header-anchor" href="#案例-书籍计算" aria-hidden="true">#</a> 案例--书籍计算</h3><p>综合应用以上JSX语法：</p><div class="language-react line-numbers-mode" data-ext="react"><pre class="language-react"><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+  &lt;head&gt;
+    &lt;meta charset=&quot;UTF-8&quot; /&gt;
+    &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot; /&gt;
+    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot; /&gt;
+    &lt;title&gt;书籍内容填充&lt;/title&gt;
+    &lt;style&gt;
+      table {
+        border: 1px solid #000;
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid #000;
+        padding: 10px 10px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #bdc3c7;
+      }
+
+      .count {
+        margin: 5px
+      }
+    &lt;/style&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id=&quot;app&quot;&gt;&lt;/div&gt;
+
+    &lt;!-- React开发依赖 --&gt;
+    &lt;script src=&quot;../js/react.development.js&quot;&gt;&lt;/script&gt;
+    &lt;script src=&quot;../js/react-dom.development.js&quot;&gt;&lt;/script&gt;
+    &lt;!-- 生产环境中不建议使用 --&gt;
+    &lt;script src=&quot;../js/babel.min.js&quot;&gt;&lt;/script&gt;
+
+    &lt;script src=&quot;./formatUtil.js&quot;&gt;&lt;/script&gt;
+    &lt;script type=&quot;text/babel&quot;&gt;
+      class App extends React.Component {
+        constructor() {
+          super()
+          this.state = {
+            books: [
+              {
+                id: 1,
+                name: &#39;《算法导论》&#39;,
+                date: &#39;2006-9&#39;,
+                price: 85.00,
+                count: 1
+              },
+              {
+                id: 2,
+                name: &#39;《黑豹红狼》&#39;,
+                date: &#39;2021-5&#39;,
+                price: 57.80,
+                count: 1
+              },
+              {
+                id: 3,
+                name: &#39;《乡下人》&#39;,
+                date: &#39;2021-5&#39;,
+                price: 66.00,
+                count: 1
+              },
+              {
+                id: 4,
+                name: &#39;《切尔诺贝利的午夜》&#39;,
+                date: &#39;2021-3&#39;,
+                price: 62.40,
+                count: 1
+              },
+              {
+                id: 5,
+                name: &#39;《认识世界：古代与中世纪哲学》&#39;,
+                date: &#39;2021-4&#39;,
+                price: 71.90,
+                count: 1
+              }
+            ]
+          }
+        }
+
+        render() {
+          return this.state.books.length ? this.renderBooks() : this.renderEmptyTips();
+        }
+
+        getTotalPrice() {
+          {/*let totalPrice = 0
+          for (let item of this.state.books) {
+            totalPrice += item.price * item.count
+          }
+        return formatPrice(totalPrice)*/}
+          const totalPrice = this.state.books.reduce((pre, item)=&gt;{
+            return pre + item.price * item.count;
+          }, 0)
+          return formatPrice(totalPrice);
+        }
+
+        removeBook(index) {
+          this.setState({
+            books: this.state.books.filter((item, indey) =&gt; index != indey)
+          })
+        }
+
+        changeBookCount(index, count) {
+          let duplicateOfBooks = [...this.state.books]
+          console.log(duplicateOfBooks[index].count);
+          if (duplicateOfBooks[index].count + count &gt;= 0) {
+            duplicateOfBooks[index].count += count
+            this.setState({
+              books: duplicateOfBooks
+            })
+          }
+        }
+
+        renderBooks() {
+          const {books} = this.state
+          return (
+            &lt;div&gt;
+              &lt;table&gt;
+                &lt;thead&gt;
+                  &lt;th&gt;&lt;/th&gt;
+                  &lt;th&gt;书籍名称&lt;/th&gt;
+                  &lt;th&gt;出版日期&lt;/th&gt;
+                  &lt;th&gt;价格&lt;/th&gt;
+                  &lt;th&gt;购买数量&lt;/th&gt;
+                  &lt;th&gt;操作&lt;/th&gt;
+                &lt;/thead&gt;
+                &lt;tbody&gt;
+                  {
+                    books.map((item, index) =&gt; {
+                      return (
+                        &lt;tr&gt;
+                          &lt;td&gt;{index+1}&lt;/td&gt;
+                          &lt;td&gt;{item.name}&lt;/td&gt;
+                          &lt;td&gt;{item.date}&lt;/td&gt;
+                          &lt;td&gt;{formatPrice(item.price)}&lt;/td&gt;
+                          &lt;td&gt;
+                            &lt;button onClick={e =&gt; this.changeBookCount(index, -1)}&gt;-&lt;/button&gt;
+                            &lt;span className=&#39;count&#39;&gt;{item.count}&lt;/span&gt;
+                            &lt;button onClick={e =&gt; this.changeBookCount(index, +1)}&gt;+&lt;/button&gt;
+                          &lt;/td&gt;
+                          &lt;td&gt;&lt;button onClick={() =&gt; this.removeBook(index)}&gt;移除&lt;/button&gt;&lt;/td&gt;
+                        &lt;/tr&gt;
+                      )
+                    })
+                  }
+                &lt;/tbody&gt;
+              &lt;/table&gt;
+              &lt;h2&gt;总价格：{this.getTotalPrice()}&lt;/h2&gt;
+            &lt;/div&gt;
+          )
+        }
+
+        renderEmptyTips() {
+          return (
+            &lt;h2&gt;购物车为空~！&lt;/h2&gt;
+          )
+        }
+      }
+
+      ReactDOM.render(&lt;App /&gt;, document.getElementById(&#39;app&#39;))
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h2 id="react组件化开发" tabindex="-1"><a class="header-anchor" href="#react组件化开发" aria-hidden="true">#</a> React组件化开发</h2><h3 id="render函数能返回什么类型" tabindex="-1"><a class="header-anchor" href="#render函数能返回什么类型" aria-hidden="true">#</a> render函数能返回什么类型</h3><ul><li><p>React元素</p><ul><li>JSX创建</li></ul></li><li><p>数组或fragments</p></li><li><p>Protals</p></li><li><p>字符串或数值类型</p></li><li><p>布尔类型或null</p></li></ul><h3 id="生命周期" tabindex="-1"><a class="header-anchor" href="#生命周期" aria-hidden="true">#</a> 生命周期</h3><p>常用的生命周期：</p><ul><li><p>Constructor</p><ul><li>通过给this.state复制对象来初始化内部的state</li><li>为事件绑定实例（this）</li></ul></li><li><p>componentDidMount</p><ul><li>依赖于DOM的操作</li><li>（推荐）发送网络请求</li><li>添加订阅</li></ul></li><li><p>componentDidUpdate</p><ul><li>组件更新</li><li>网络请求</li></ul></li><li><p>componentWillUnmount</p><ul><li>清除操作</li></ul></li></ul><p>整个生命周期：</p><figure><img src="/assets/image-20220605230344345-4157fcef.png" alt="image-20220605230344345" tabindex="0" loading="lazy"><figcaption>image-20220605230344345</figcaption></figure><p>具体可以参考：<code>https://www.runoob.com/react/react-component-life-cycle.html</code></p><p>or <code>https://zh-hans.reactjs.org/docs/state-and-lifecycle.html</code></p></div><!----><footer class="page-meta"><div class="meta-item edit-link"><a href="https://github.com/zhiyu1998/Computer-Science-Learn-Notes/edit/main/demo/theme-docs/src/frontend/react/react.md" rel="noopener noreferrer" target="_blank" aria-label="在 GitHub 上编辑此页" class="nav-link label"><!--[--><svg xmlns="http://www.w3.org/2000/svg" class="icon edit-icon" viewBox="0 0 1024 1024" fill="currentColor" aria-label="edit icon"><path d="M430.818 653.65a60.46 60.46 0 0 1-50.96-93.281l71.69-114.012 7.773-10.365L816.038 80.138A60.46 60.46 0 0 1 859.225 62a60.46 60.46 0 0 1 43.186 18.138l43.186 43.186a60.46 60.46 0 0 1 0 86.373L588.879 565.55l-8.637 8.637-117.466 68.234a60.46 60.46 0 0 1-31.958 11.229z"></path><path d="M728.802 962H252.891A190.883 190.883 0 0 1 62.008 771.98V296.934a190.883 190.883 0 0 1 190.883-192.61h267.754a60.46 60.46 0 0 1 0 120.92H252.891a69.962 69.962 0 0 0-69.098 69.099V771.98a69.962 69.962 0 0 0 69.098 69.098h475.911A69.962 69.962 0 0 0 797.9 771.98V503.363a60.46 60.46 0 1 1 120.922 0V771.98A190.883 190.883 0 0 1 728.802 962z"></path></svg><!--]-->在 GitHub 上编辑此页<span><svg class="external-link-icon" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path><polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg><span class="external-link-icon-sr-only">open in new window</span></span><!----></a></div><div class="meta-item git-info"><div class="update-time"><span class="label">上次编辑于: </span><!----></div><div class="contributors"><span class="label">贡献者: </span><!--[--><!--[--><span class="contributor" title="email: 542716863@qq.com">RrOrange</span><!--]--><!--]--></div></div></footer><!----><!----><!----><!--]--></main><!--]--><footer class="footer-wrapper"><div class="footer">默认页脚</div><div class="copyright">Copyright © 2023 zhiyu1998</div></footer></div><!--]--><!----><!--]--></div>
+    <script type="module" src="/assets/app-8ba9a2ae.js" defer></script>
+  </body>
+</html>
