@@ -1,0 +1,29 @@
+<template><div><p>[toc]</p>
+<h1 id="本地方法栈" tabindex="-1"><a class="header-anchor" href="#本地方法栈" aria-hidden="true">#</a> 本地方法栈</h1>
+<ul>
+<li><code v-pre>Java虚拟机栈用于管理Java方法的调用，而本地方法栈用于管理本地方法的调用</code>。</li>
+<li><code v-pre>本地方法栈，也是线程私有的</code>。</li>
+<li>允许被实现成<strong>固定或者是可动态扩展的内存大小</strong>（在内存溢出方面和虚拟机栈相同）
+<ul>
+<li>如果线程请求分配的栈容量超过本地方法栈允许的最大容量，Java虚拟机将会抛出一个StackoverflowError 异常。</li>
+<li>如果本地方法栈可以动态扩展，并且在尝试扩展的时候无法申请到足够的内存，或者在创建新的线程时没有足够的内存去创建对应的本地方法栈，那么Java虚拟机将会抛出一个OutofMemoryError异常。* 本地方法一般是使用C语言实现的。</li>
+</ul>
+</li>
+<li>它的具体做法是Native Method Stack中登记native方法，在Execution Engine 执行时加载本地方法库。</li>
+</ul>
+<figure><img src="@source/Java/jvm/part1/images/okZw_KXaDYekORkdK-w8e3ZY6dIzHzvEKm4h7R3IyIE.webp" alt="image" tabindex="0" loading="lazy"><figcaption>image</figcaption></figure>
+<h1 id="注意事项" tabindex="-1"><a class="header-anchor" href="#注意事项" aria-hidden="true">#</a> 注意事项</h1>
+<ul>
+<li><code v-pre>当某个线程调用一个本地方法时，它就进入了一个全新的并且不再受虚拟机限制的世界。它和虚拟机拥有同样的权限</code>。
+<ul>
+<li>本地方法可以通过本地方法接口来<code v-pre>访问虚拟机内部的运行时数据区</code></li>
+<li>它甚至可以直接使用<code v-pre>本地处理器中的寄存器</code></li>
+<li>直接从<strong>本地内存的堆中分配任意数量的内存</strong></li>
+</ul>
+</li>
+<li>并不是所有的JVM都支持本地方法。因为Java虚拟机规范并没有明确要求本地方法栈的使用语言、具体实现方式、数据结构等。如果JVM产品不打算支持native方法，也可以无需实现本地方法栈。</li>
+<li>在Hotspot JVM中，直接将本地方法栈和虚拟机栈合二为一。</li>
+</ul>
+</div></template>
+
+

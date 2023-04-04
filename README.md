@@ -1,8 +1,9 @@
 <div align="center">
- <img width="180px" src="static/img/logo.png">
+ <img width="180px" src="src/.vuepress/public/logo.png">
     <p/>
  <h1>『Computer Science Learn Notes』</h1>
 </div>
+
 
 
 
@@ -22,7 +23,7 @@
 | :---------------------: | :-------------------------: | :--------------------: | :------------------: | :-----------------: | :--------------------: |
 | [:penguin:](#Algorithm) | [:baby_chick:](#Foundation) | [:tiger:](#Interview) | [:ocean:](#Frontend) | [:mouse:](#golang) |   [:coffee:](#java)    |
 
-<img align="right" alt="GIF" src="static/img/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
+<img align="right" alt="GIF" src="src/.vuepress/public/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
 
 ## :baby_chick: Foundation
 

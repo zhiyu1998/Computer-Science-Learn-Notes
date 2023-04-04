@@ -1,0 +1,14 @@
+export const data = JSON.parse("{\"key\":\"v-897b5816\",\"path\":\"/Java/jvm/part1/13.StringTable.html\",\"title\":\"StringTable\",\"lang\":\"zh-CN\",\"frontmatter\":{\"order\":13,\"title\":\"StringTable\",\"category\":[\"JVM\"],\"tag\":[\"JVM上篇\"],\"description\":\"[TOC]\\rString：字符串，使用一对\\\" \\\"引起来表示; ```java String s1 = “baidu”; //字面量的定义方式 String s2 = new String(\\\"hello\\\"); 12 ```\\rString声明为final的，不可被继承; \\rString实现了Serializable接口：表示字符串是支持序列化的; \\rStr...\",\"head\":[[\"meta\",{\"property\":\"og:url\",\"content\":\"https://zhiyu1998.github.io/Java/jvm/part1/13.StringTable.html\"}],[\"meta\",{\"property\":\"og:title\",\"content\":\"StringTable\"}],[\"meta\",{\"property\":\"og:description\",\"content\":\"[TOC]\\rString：字符串，使用一对\\\" \\\"引起来表示; ```java String s1 = “baidu”; //字面量的定义方式 String s2 = new String(\\\"hello\\\"); 12 ```\\rString声明为final的，不可被继承; \\rString实现了Serializable接口：表示字符串是支持序列化的; \\rStr...\"}],[\"meta\",{\"property\":\"og:type\",\"content\":\"article\"}],[\"meta\",{\"property\":\"og:image\",\"content\":\"https://zhiyu1998.github.io/\"}],[\"meta\",{\"property\":\"og:locale\",\"content\":\"zh-CN\"}],[\"meta\",{\"name\":\"twitter:card\",\"content\":\"summary_large_image\"}],[\"meta\",{\"name\":\"twitter:image:alt\",\"content\":\"StringTable\"}],[\"meta\",{\"property\":\"article:author\",\"content\":\"zhiyu1998\"}],[\"meta\",{\"property\":\"article:tag\",\"content\":\"JVM上篇\"}],[\"script\",{\"type\":\"application/ld+json\"},\"{\\\"@context\\\":\\\"https://schema.org\\\",\\\"@type\\\":\\\"Article\\\",\\\"headline\\\":\\\"StringTable\\\",\\\"image\\\":[\\\"https://zhiyu1998.github.io/\\\"],\\\"dateModified\\\":null,\\\"author\\\":[{\\\"@type\\\":\\\"Person\\\",\\\"name\\\":\\\"zhiyu1998\\\",\\\"url\\\":\\\"https://github.com/zhiyu1998\\\"}]}\"]]},\"headers\":[{\"level\":2,\"title\":\"String在jdk9中存储结构变更\",\"slug\":\"string在jdk9中存储结构变更\",\"link\":\"#string在jdk9中存储结构变更\",\"children\":[]},{\"level\":2,\"title\":\"String的基本特性\",\"slug\":\"string的基本特性-1\",\"link\":\"#string的基本特性-1\",\"children\":[]},{\"level\":2,\"title\":\"面试题\",\"slug\":\"面试题\",\"link\":\"#面试题\",\"children\":[]},{\"level\":2,\"title\":\"intern的使用：JDK6 vs JDK7/8\",\"slug\":\"intern的使用-jdk6-vs-jdk7-8\",\"link\":\"#intern的使用-jdk6-vs-jdk7-8\",\"children\":[]},{\"level\":2,\"title\":\"练习\",\"slug\":\"练习\",\"link\":\"#练习\",\"children\":[]},{\"level\":2,\"title\":\"intern的效率测试：空间角度\",\"slug\":\"intern的效率测试-空间角度\",\"link\":\"#intern的效率测试-空间角度\",\"children\":[]}],\"readingTime\":{\"minutes\":28.05,\"words\":8416},\"filePathRelative\":\"Java/jvm/part1/13.StringTable.md\",\"autoDesc\":true}")
+
+if (import.meta.webpackHot) {
+  import.meta.webpackHot.accept()
+  if (__VUE_HMR_RUNTIME__.updatePageData) {
+    __VUE_HMR_RUNTIME__.updatePageData(data)
+  }
+}
+
+if (import.meta.hot) {
+  import.meta.hot.accept(({ data }) => {
+    __VUE_HMR_RUNTIME__.updatePageData(data)
+  })
+}
