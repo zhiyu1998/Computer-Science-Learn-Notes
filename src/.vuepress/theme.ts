@@ -3,7 +3,7 @@ import { zhNavbar } from "./navbar/index.js";
 import { zhSidebar } from "./sidebar/index.js";
 
 export default hopeTheme({
-  hostname: "zhiyu1998.github.io",
+  hostname: "https://zhiyu1998.github.io/Computer-Science-Learn-Notes/",
 
   author: {
     name: "zhiyu1998",

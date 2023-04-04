@@ -24,6 +24,6 @@ yarn-error.log*
 .idea
 *.iml
 
-.temp
 dist
-.cache
+/src/.vuepress/.temp/
+/src/.vuepress/.cache/
