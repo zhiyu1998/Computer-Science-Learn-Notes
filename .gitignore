@@ -23,3 +23,7 @@ yarn-error.log*
 
 .idea
 *.iml
+
+.temp
+dist
+.cache

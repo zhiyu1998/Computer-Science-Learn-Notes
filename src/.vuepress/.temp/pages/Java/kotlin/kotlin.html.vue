@@ -22,7 +22,7 @@
 <span class="token keyword">val</span> f<span class="token operator">:</span>Long <span class="token operator">=</span> e<span class="token punctuation">.</span><span class="token function">toLong</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="无符号类型" tabindex="-1"><a class="header-anchor" href="#无符号类型" aria-hidden="true">#</a> 无符号类型</h3>
 <p>Java没有，但是kotlin有</p>
-<figure><img src="images/image-20220809110526087.png" alt="image-20220809110526087" tabindex="0" loading="lazy"><figcaption>image-20220809110526087</figcaption></figure>
+<figure><img src="@source/Java/kotlin/images/image-20220809110526087.png" alt="image-20220809110526087" tabindex="0" loading="lazy"><figcaption>image-20220809110526087</figcaption></figure>
 <h3 id="字符串模板" tabindex="-1"><a class="header-anchor" href="#字符串模板" aria-hidden="true">#</a> 字符串模板</h3>
 <div class="language-kotlin line-numbers-mode" data-ext="kt"><pre v-pre class="language-kotlin"><code><span class="token keyword">fun</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token keyword">val</span> j <span class="token operator">=</span> <span class="token string-literal singleline"><span class="token string">"I Love China"</span></span>
@@ -35,7 +35,7 @@
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div></div></div><div class="language-kotlin line-numbers-mode" data-ext="kt"><pre v-pre class="language-kotlin"><code><span class="token function">println</span><span class="token punctuation">(</span>k<span class="token operator">===</span>m<span class="token punctuation">)</span>
 <span class="token function">println</span><span class="token punctuation">(</span>k<span class="token operator">==</span>m<span class="token punctuation">)</span>
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="数组" tabindex="-1"><a class="header-anchor" href="#数组" aria-hidden="true">#</a> 数组</h3>
-<figure><img src="images/image-20220809171520308.png" alt="image-20220809171520308" tabindex="0" loading="lazy"><figcaption>image-20220809171520308</figcaption></figure>
+<figure><img src="@source/Java/kotlin/images/image-20220809171520308.png" alt="image-20220809171520308" tabindex="0" loading="lazy"><figcaption>image-20220809171520308</figcaption></figure>
 <h4 id="数组的创建" tabindex="-1"><a class="header-anchor" href="#数组的创建" aria-hidden="true">#</a> 数组的创建</h4>
 <p>Java</p>
 <div class="language-java line-numbers-mode" data-ext="java"><pre v-pre class="language-java"><code><span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span> c <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token keyword">int</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4</span><span class="token punctuation">,</span><span class="token number">5</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
@@ -127,7 +127,7 @@ a<span class="token punctuation">,</span> b<span class="token punctuation">,</sp
     <span class="token function">println</span><span class="token punctuation">(</span>i<span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><h3 id="集合" tabindex="-1"><a class="header-anchor" href="#集合" aria-hidden="true">#</a> 集合</h3>
-<figure><img src="images/image-20220810163454521.png" alt="image-20220810163454521" tabindex="0" loading="lazy"><figcaption>image-20220810163454521</figcaption></figure>
+<figure><img src="@source/Java/kotlin/images/image-20220810163454521.png" alt="image-20220810163454521" tabindex="0" loading="lazy"><figcaption>image-20220810163454521</figcaption></figure>
 <h4 id="list" tabindex="-1"><a class="header-anchor" href="#list" aria-hidden="true">#</a> List</h4>
 <p>Java中创建ArrayList</p>
 <div class="language-java line-numbers-mode" data-ext="java"><pre v-pre class="language-java"><code><span class="token class-name">List</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">Integer</span><span class="token punctuation">></span></span> intList <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token class-name">Arrays</span><span class="token punctuation">.</span><span class="token function">asList</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -137,7 +137,7 @@ a<span class="token punctuation">,</span> b<span class="token punctuation">,</sp
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div></div></div><p>如果想像Java一样创建集合则</p>
 <div class="language-kotlin line-numbers-mode" data-ext="kt"><pre v-pre class="language-kotlin"><code><span class="token keyword">val</span> stringList <span class="token operator">=</span> ArrayList<span class="token operator">&lt;</span>String<span class="token operator">></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div></div></div><p>那么它是如何实现创建集合和Java一样的呢？<strong>类型别名</strong></p>
-<figure><img src="images/image-20220810194304356.png" alt="image-20220810194304356" tabindex="0" loading="lazy"><figcaption>image-20220810194304356</figcaption></figure>
+<figure><img src="@source/Java/kotlin/images/image-20220810194304356.png" alt="image-20220810194304356" tabindex="0" loading="lazy"><figcaption>image-20220810194304356</figcaption></figure>
 <h5 id="增加元素-删除元素" tabindex="-1"><a class="header-anchor" href="#增加元素-删除元素" aria-hidden="true">#</a> 增加元素/删除元素</h5>
 <p>Java中的添加元素</p>
 <div class="language-java line-numbers-mode" data-ext="java"><pre v-pre class="language-java"><code><span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token class-name">String</span><span class="token punctuation">></span></span> stringList <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayList</span><span class="token generics"><span class="token punctuation">&lt;</span><span class="token punctuation">></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -180,7 +180,7 @@ map<span class="token punctuation">[</span><span class="token string-literal sin
 <div class="language-kotlin line-numbers-mode" data-ext="kt"><pre v-pre class="language-kotlin"><code><span class="token keyword">val</span> <span class="token punctuation">(</span>x<span class="token punctuation">,</span> y<span class="token punctuation">)</span> <span class="token operator">=</span> pair
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div></div></div><h3 id="函数" tabindex="-1"><a class="header-anchor" href="#函数" aria-hidden="true">#</a> 函数</h3>
 <p>结构如下：</p>
-<figure><img src="images/image-20220810235032740.png" alt="image-20220810235032740" tabindex="0" loading="lazy"><figcaption>image-20220810235032740</figcaption></figure>
+<figure><img src="@source/Java/kotlin/images/image-20220810235032740.png" alt="image-20220810235032740" tabindex="0" loading="lazy"><figcaption>image-20220810235032740</figcaption></figure>
 <h4 id="函数引用" tabindex="-1"><a class="header-anchor" href="#函数引用" aria-hidden="true">#</a> 函数引用</h4>
 <p>这个和Java8的函数应用一致</p>
 <p>符号是：<code v-pre>::</code></p>

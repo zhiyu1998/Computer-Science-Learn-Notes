@@ -65,7 +65,7 @@ val f:Long = e.toLong()
 
 Java没有，但是kotlin有
 
-![image-20220809110526087](images/image-20220809110526087.png)
+![image-20220809110526087](./images/image-20220809110526087.png)
 
 
 
@@ -100,7 +100,7 @@ println(k==m)
 
 ### 数组
 
-![image-20220809171520308](images/image-20220809171520308.png)
+![image-20220809171520308](./images/image-20220809171520308.png)
 
 
 
@@ -273,7 +273,7 @@ for(i in array.indices) {
 
 ### 集合
 
-![image-20220810163454521](images/image-20220810163454521.png)
+![image-20220810163454521](./images/image-20220810163454521.png)
 
 #### List
 
@@ -298,7 +298,7 @@ val stringList = ArrayList<String>()
 
 那么它是如何实现创建集合和Java一样的呢？**类型别名**
 
-![image-20220810194304356](images/image-20220810194304356.png)
+![image-20220810194304356](./images/image-20220810194304356.png)
 
 
 
@@ -398,7 +398,7 @@ val (x, y) = pair
 
 结构如下：
 
-![image-20220810235032740](images/image-20220810235032740.png)
+![image-20220810235032740](./images/image-20220810235032740.png)
 
 
 

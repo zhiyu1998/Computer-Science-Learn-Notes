@@ -1021,8 +1021,8 @@ part two：
 
 整个生命周期：
 
-![image-20220605230344345](images/image-20220605230344345.png)
+![image-20220605230344345](./images/image-20220605230344345.png)
 
-具体可以参考：https://www.runoob.com/react/react-component-life-cycle.html
+具体可以参考：`https://www.runoob.com/react/react-component-life-cycle.html`
 
-or https://zh-hans.reactjs.org/docs/state-and-lifecycle.html
+or `https://zh-hans.reactjs.org/docs/state-and-lifecycle.html`

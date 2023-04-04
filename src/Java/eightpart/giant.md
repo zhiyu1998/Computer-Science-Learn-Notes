@@ -196,7 +196,7 @@ public class DebugInvocationHandler implements InvocationHandler {
 
 **JDK1.8 之前**
 
-JDK1.8 之前 HashMap 底层是 **数组和链表** 结合在一起使用也就是 链表散列。HashMap 通过 key 的 hashCode 经过扰动函数处理过后得到 hash 值，然后通过 (n - 1) & hash 判断当前元素存放的位置（这里的 n 指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素的 hash 值以及 key 是否相同，如果相同的话，直接覆盖，`<u>`不相同就通过拉链法解决冲突`</u>`。
+JDK1.8 之前 HashMap 底层是 **数组和链表** 结合在一起使用也就是 链表散列。HashMap 通过 key 的 hashCode 经过扰动函数处理过后得到 hash 值，然后通过 (n - 1) & hash 判断当前元素存放的位置（这里的 n 指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素的 hash 值以及 key 是否相同，如果相同的话，直接覆盖，*不相同就通过拉链法解决冲突*。
 
 所谓扰动函数指的就是 HashMap 的 hash 方法。使用 hash 方法也就是扰动函数是为了防止一些实现比较差的 hashCode() 方法 换句话说使用扰动函数之后可以减少碰撞。
 
@@ -673,7 +673,7 @@ Buffer 有两种工作模式: 写模式和读模式。在读模式下，应用�
 
 泛型擦除：
 
- Java语言中的泛型被称为伪泛型，因为这种泛型它只在编写的源码中存在，在经过编译器编译后的字节码文件中不会包含泛型中的类型信息了，泛型信息在编译的时候被擦除了，并且会在相应的地方插入强制类型转换的代码，这个过程就是泛型擦除。例如new ArrayList\<String\>()，泛型擦除后就是new ArrayList()，对其元素的操作也会加上(String)强制类型转换。 
+ Java语言中的泛型被称为伪泛型，因为这种泛型它只在编写的源码中存在，在经过编译器编译后的字节码文件中不会包含泛型中的类型信息了，泛型信息在编译的时候被擦除了，并且会在相应的地方插入强制类型转换的代码，这个过程就是泛型擦除。例如`new ArrayList<String>()`，泛型擦除后就是`new ArrayList()`，对其元素的操作也会加上(String)强制类型转换。 
 
 ### 常见的索引结构有？哈希表结构属于哪种场景？（2022OPPO）
 
@@ -2027,11 +2027,11 @@ end
 
 `Quartz`是优秀的开源组件，它将定时任务抽象了三个角色：**调度器**、**执行器**和**任务**，以至于市面上的分布式定时任务框架都有类似角色划分。
 
-![img](giant_images/v2-98ad0b6c4c56cc6e1f1771d6717ff1be_r.jpg)
+![img](./giant_images/v2-98ad0b6c4c56cc6e1f1771d6717ff1be_r.jpg)
 
 对于我们使用方而言，一般是引入一个`client`包，然后根据它的规则（可能是使用注解标识，又或是实现某个接口），随后自定义我们自己的定时任务逻辑。
 
-![img](giant_images/v2-eb942305f30fc2cc4557f4a9c7fc48f8_r.jpg)
+![img](./giant_images/v2-eb942305f30fc2cc4557f4a9c7fc48f8_r.jpg)
 
 看着上面的执行图对应的角色抽象以及一般使用姿势，应该还是比较容易理解这个过程的。我们又可以再稍微思考两个问题：
 
@@ -2046,17 +2046,17 @@ end
 
 对于「中心化」流派来说，存储相关的信息很可能是在**数据库**（DataBase），而我们引入的`client`包实际上就是**执行器**相关的代码。调度器**实现了任务调度**的逻辑，**远程调用**执行器触发对应的逻辑。
 
-![img](giant_images/v2-4538a8cb2841347fbb9fc118423323fe_r.jpg)
+![img](./giant_images/v2-4538a8cb2841347fbb9fc118423323fe_r.jpg)
 
 调度器「通知」执行器去执行任务时，可以是通过「RPC」调用，也可以是把任务信息写入消息队列给执行器消费来达到目的。
 
-![img](giant_images/v2-fa4f08b5e4fc6e8478d5d84f4b89c961_r.jpg)
+![img](./giant_images/v2-fa4f08b5e4fc6e8478d5d84f4b89c961_r.jpg)
 
 对于「去中心化」流派来说存储相关的信息很可能是在**注册中心**（Zookeeper），而我们引入的`client`包实际上就是**执行器+调度器**相关的代码。
 
 依赖注册中心来完成**任务的分配**，「中心化」流派在调度的时候是需要保证一个任务只被一台机器消费，这就需要在代码里写分布式锁相关逻辑进行保证，而「去中心化」依赖注册中心就免去了这个环节。
 
-![img](giant_images/v2-02f9aa3113546908140829fd81b5a214_r.jpg)
+![img](./giant_images/v2-02f9aa3113546908140829fd81b5a214_r.jpg)
 
 针对第二个问题，调度器是怎么找到即将需要执行的任务的呢？现在一般较新的分布式定时任务框架都用了「**时间轮**」。
 
@@ -2068,7 +2068,7 @@ end
 
 **4**、最后再改进下，我们可以有**多层**环形数组，不同层次的环形数组的**精度**是不一样的，使用多层环形数组能大大提高我们的精度。
 
-![img](giant_images/v2-f94c4fbf49a6a4d14a00d57fe3fa8d22_r.jpg)
+![img](./giant_images/v2-f94c4fbf49a6a4d14a00d57fe3fa8d22_r.jpg)
 
 #### 分布式定时任务框架选型
 
@@ -4119,7 +4119,7 @@ Redission是一个基于Redis实现的分布式锁和其他分布式数据结构
 
 总之，Redission是一个基于Redis实现的高性能、可扩展、易用的Java分布式库，提供了多种分布式数据结构和机制的实现，可以满足各种分布式场景的需求。
 
-![img](giant_images/1090617-20190618183025891-1248337684.jpg)
+![img](./giant_images/1090617-20190618183025891-1248337684.jpg)
 
 ##### 加锁机制
 
@@ -4173,7 +4173,7 @@ Redisson可以实现可重入加锁机制的原因，我觉得跟两点有关：
 
 下面是redis存储的数据
 
-![img](giant_images/1090617-20190618183037704-975536201.png)
+![img](./giant_images/1090617-20190618183037704-975536201.png)
 
 这里表面数据类型是Hash类型,Hash类型相当于我们java的 `<key,<key1,value>>` 类型,这里key是指 'redisson'
 
@@ -4189,7 +4189,7 @@ Redission的可重入锁机制是一种允许同一个线程多次获取同一�
 
 **举图说明**
 
-![img](giant_images/1090617-20190618183046827-1994396879.png)
+![img](./giant_images/1090617-20190618183046827-1994396879.png)
 
 上面这图的意思就是可重入锁的机制，它最大的优点就是相同线程不需要在等待锁，而是可以直接进行相应操作。
 
@@ -5964,7 +5964,7 @@ sendfile+DMA scatter/gather实现的零拷贝流程如下：
 
 ### select、poll、epoll？（2022字节提前批）
 
-![image-20220727205646242](giant_images/image-20220727205646242.png)
+![image-20220727205646242](./giant_images/image-20220727205646242.png)
 
 ### epoll的两种触发模式？（2022字节提前批）
 
@@ -5986,7 +5986,7 @@ ps：思考虚拟内存和交换空间的区别？
 
 ❶ 直接映射
 
-![image-20220727224105269](giant_images/image-20220727224105269.png)
+![image-20220727224105269](./giant_images/image-20220727224105269.png)
 
 直接映射是页表缓存映射（TLB）的一种实现方式，它使用一个简单的哈希函数将虚拟页号映射到 TLB 中的一个条目。
 
@@ -6006,7 +6006,7 @@ ps：思考虚拟内存和交换空间的区别？
 
 ❷ 使用页表缓存映射
 
-![image-20220727224111385](giant_images/image-20220727224111385.png)
+![image-20220727224111385](./giant_images/image-20220727224111385.png)
 
 1. 应用程序生成虚拟地址。
 2. 虚拟地址被传递给 CPU 中的内存管理单元（MMU）。
@@ -6019,9 +6019,9 @@ ps：思考虚拟内存和交换空间的区别？
 
 ❸ 使用 TLB 映射
 
-![image-20220727224117545](giant_images/image-20220727224117545.png)
+![image-20220727224117545](./giant_images/image-20220727224117545.png)
 
-![image-20220727224120760](giant_images/image-20220727224120760.png)
+![image-20220727224120760](./giant_images/image-20220727224120760.png)
 
 使用 TLB 映射的过程包括以下步骤：
 
@@ -6144,7 +6144,7 @@ Linux 同时支持正常大小的内存页和大内存页（Huge Page）[1](http
 
 4KB 的内存页其实是一个历史遗留问题，在上个世纪 80 年代确定的 4KB 一直保留到了今天。虽然今天的硬件比过去丰富了很多，但是我们仍然沿用了过去主流的内存页大小。如下图所示，装过机的人应该对这里的内存条非常熟悉：
 
-![random-access-memory](giant_images/2020-05-29-15906831530375-random-access-memory.jpg)
+![random-access-memory](./giant_images/2020-05-29-15906831530375-random-access-memory.jpg)
 
 在今天，4KB 的内存页大小可能不是最佳的选择，8KB 或者 16KB 说不定是更好的选择，但是这是过去在特定场景下做出的权衡。我们在这篇文章中不要过于纠结于 4KB 这个数字，应该更重视决定这个结果的几个因素，这样当我们在遇到类似场景时才可以从这些方面考虑当下最佳的选择，我们在这篇文章中会介绍以下两个影响内存页大小的因素，它们分别是：
 
@@ -6159,7 +6159,7 @@ Linux 同时支持正常大小的内存页和大内存页（Huge Page）[1](http
 
 为了存储 64 位操作系统中 128 TiB 虚拟内存的映射数据，Linux 在 2.6.10 中引入了四层的页表辅助虚拟地址的转换，引入了五层的页表结构，在未来还可能会引入更多层的页表结构以支持 64 位的虚拟地址。
 
-![four-level-page-tables](giant_images/2020-05-29-15906831530398-four-level-page-tables.png)
+![four-level-page-tables](./giant_images/2020-05-29-15906831530398-four-level-page-tables.png)
 
 在如上图所示的四层页表结构中，操作系统会使用最低的 12 位作为页面的偏移量，剩下的 36 位会分四组分别表示当前层级在上一层中的索引，所有的虚拟地址都可以用上述的多层页表查找到对应的物理地址。
 
@@ -6173,7 +6173,7 @@ $$
 
 因为内存映射设备会在内存页的层面工作，所以操作系统认为内存分配的最小单元就是虚拟页。哪怕用户程序只是申请了 1 字节的内存，操作系统也会为它申请一个虚拟页，如下图所示，如果内存页的大小为 24KB，那么申请 1 字节的内存会浪费 ~99.9939% 的空间。
 
-![memory-utilization](giant_images/2020-05-29-15906831530405-memory-utilization.png)
+![memory-utilization](./giant_images/2020-05-29-15906831530405-memory-utilization.png)
 
 随着内存页大小的增加，内存的碎片化严情况会越来越严重，小的内存页会减少内存空间中的内存碎片，提高内存的利用率。上个世纪的内存资源还没有像今天这么丰富，在大多数情况下，内存都不是限制程序运行的资源，多数的在线服务都需要更多的CPU，而不是更多的内存。不过在上个世纪内存其实也是稀缺资源，所以提高稀缺资源的利用率是我们不得不考虑的事情：
 
@@ -6280,7 +6280,7 @@ TCP 连接的释放需要发送四个包（执行四个步骤），因此称为�
 
 ### tcp协议的四次挥手当中第二步和第三步能否合并成一步
 
-参考：https://www.zhihu.com/question/50646354
+`参考：https://www.zhihu.com/question/50646354`
 
 很多人有一个误区，即认为TCP连接是通信的全部，其实并不是这样，让我们来复习一下TCP连接断开的过程。
 
@@ -6441,7 +6441,7 @@ TCP 提供面向连接的服务。在传送数据之前必须先建立连接，�
 
 ### TCP 协议如何保证可靠传输【腾讯光子工作室】
 
-短文回答参考：https://www.iamshuaidi.com/1298.html or https://github.com/wolverinn/Waking-Up/blob/master/Computer%20Network.md#TCP%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%BC%A0%E8%BE%93%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7
+`短文回答参考：https://www.iamshuaidi.com/1298.html or https://github.com/wolverinn/Waking-Up/blob/master/Computer%20Network.md#TCP%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%BC%A0%E8%BE%93%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7`
 
 下面是理解：
 
@@ -6970,7 +6970,7 @@ OSI7 层：应用层（Application）、表示层（Presentation）、会话层�
 
 扩展：TCP为什么需要第三次握手？
 
-https://www.iamshuaidi.com/675.html
+`https://www.iamshuaidi.com/675.html`
 
 原因：
 
@@ -7065,9 +7065,9 @@ TCP拥塞控制是一种流量控制机制，它用于确保网络不会因为�
 
 窗口大小增长的指数性增长是因为TCP发送方希望尽快探测出网络的带宽容量，并且在不超过网络容量的情况下尽可能快地将数据发送出去。因此，在慢启动期间，发送方会通过呈指数增长的方式增加窗口大小，以尽可能快地占用网络带宽。
 
-![image-20220727220128549](giant_images/image-20220727220128549.png)
+![image-20220727220128549](./giant_images/image-20220727220128549.png)
 
-![image-20220727220131425](giant_images/image-20220727220131425.png)
+![image-20220727220131425](./giant_images/image-20220727220131425.png)
 
 ### 什么是 TIME_WAIT 状态，为什么需要 TIME_WAIT 状态？时间是多久，为什么？（2022字节提前批）
 
@@ -7075,7 +7075,7 @@ TCP拥塞控制是一种流量控制机制，它用于确保网络不会因为�
 可以防止 ACK 报文丢失，服务器没有收到会重复发 FIN 报文
 而 TIME_WAIT 的长度为 2*MSL 这样 ACK 丢失了，FIN 再次发送，在这时间里客户端还能收到 FIN 报文
 
-![image-20220727213947423](giant_images/image-20220727213947423.png)
+![image-20220727213947423](./giant_images/image-20220727213947423.png)
 
 ### HTTP各个版本 (1.0，1.1，2.0，3.0) （2022蔚来）
 
@@ -7101,7 +7101,7 @@ HTTP/1.0中浏览器与服务器只保持短暂的连接，连接无法复用。
 
 HTTP/1.1版还引入了管道机制（pipelining），即在同一个TCP连接里面，客户端可以同时发送多个请求。这样就进一步改进了HTTP协议的效率。
 
-![image-20220827111050845](giant_images/image-20220827111050845.png)
+![image-20220827111050845](./giant_images/image-20220827111050845.png)
 
 有了持久连接和管道，大大的提升了HTTP的效率。但是服务端还是顺序执行的，效率还有提升的空间。
 
@@ -7113,7 +7113,7 @@ HTTP/2 为了解决HTTP/1.1中仍然存在的效率问题，HTTP/2 采用了多�
 
 也就是说，老板可以同时下达多个命令，员工也可以收到了A请求和B请求，于是先回应A请求，结果发现处理过程非常耗时，于是就发送A请求已经处理好的部分， 接着回应B请求，完成后，再发送A请求剩下的部分。A请求的两部分响应在组合到一起发给老板。
 
-![image-20220827111109255](giant_images/image-20220827111109255.png)
+![image-20220827111109255](./giant_images/image-20220827111109255.png)
 
 而这个负责拆分、组装请求和二进制帧的一层就叫做二进制分帧层。
 
@@ -7133,7 +7133,7 @@ HTTP/1.1 不支持服务器主动推送资源给客户端，都是由客户端�
 
 比如，客户端通过  HTTP/1.1 请求从服务器那获取到了 HTML 文件，而 HTML 可能还需要依赖 CSS 来渲染页面，这时客户端还要再发起获取 CSS 文件的请求，需要两次消息往返，如下图左边部分：
 
-![image-20220827110512850](giant_images/image-20220827110512850.png)
+![image-20220827110512850](./giant_images/image-20220827110512850.png)
 
 如上图右边部分，在 HTTP/2 中，客户端在访问 HTML 时，服务器可以直接主动推送 CSS 文件，减少了消息传递的次数。
 
@@ -7149,7 +7149,7 @@ location /test.html {
 
 客户端发起的请求，必须使用的是奇数号 Stream，服务器主动的推送，使用的是偶数号 Stream。服务器在推送资源时，会通过 `PUSH_PROMISE` 帧传输 HTTP 头部，并通过帧中的 `Promised Stream ID` 字段告知客户端，接下来会在哪个偶数号 Stream 中发送包体。
 
-![image-20220827110523321](giant_images/image-20220827110523321.png)
+![image-20220827110523321](./giant_images/image-20220827110523321.png)
 
 如上图，在 Stream 1 中通知客户端 CSS 资源即将到来，然后在 Stream 2 中发送 CSS 资源，注意 Stream 1 和 2 是可以**并发**的。
 
@@ -7192,7 +7192,7 @@ location /test.html {
 
 HTTP 是一个非常好的例子。
 
-![图片](giant_images/a49a6bb8cd38ae1738d9c00aec68b444-16615695512401.png)
+![图片](./giant_images/a49a6bb8cd38ae1738d9c00aec68b444-16615695512401.png)
 
 HTTP 通过设置回车符、换行符作为 HTTP 报文协议的边界。
 
@@ -7394,7 +7394,7 @@ free -s 10 # 周期性的查询内存使用信息，每10s 执行一次命令
 .data：存放已经初始化的全局和静态变量
 .bss：存放未初始化或初始化为 0 的全局和静态变量，仅仅是占位符，不占空间，名称可以理解为 Better Save Space（实际起源并不是这个）
 
-![image-20220727223840133](giant_images/image-20220727223840133.png)
+![image-20220727223840133](./giant_images/image-20220727223840133.png)
 
 ### linux 命令，如何查看主机 CPU 核数？如何查看内存还剩多少？
 
@@ -7421,7 +7421,7 @@ netstat -tunlp | grep 80
 3. Page Cache存在后，CPU将数据从用户缓冲区拷贝到内核缓冲区，Page Cache变为脏页（Dirty Page），写流程返回；
 4. 用户主动触发刷盘或者达到特定条件内核触发刷盘，唤醒pdflush线程将内核缓冲区的数据刷入磁盘；
 
-![在这里插入图片描述](giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70.png)
+![在这里插入图片描述](./giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70.png)
 
 
 
@@ -7434,7 +7434,7 @@ netstat -tunlp | grep 80
 5. DMA 磁盘控制器向 CPU 发出数据读完的信号，由 CPU 负责将数据从内核缓冲区拷贝到用户缓冲区；
 6. 用户进程由内核态切换回用户态，获得文件数据；
 
-![在这里插入图片描述](giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70-166168653604411.png)
+![在这里插入图片描述](./giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70-166168653604411.png)
 
 ## 🛡️安全
 
@@ -8069,7 +8069,7 @@ public class Sun {
 
 ### git中merge和rebase区别（2022蔚来）
 
-![img](giant_images/759200-20160806092734215-279978821.png)
+![img](./giant_images/759200-20160806092734215-279978821.png)
 
 
 
@@ -8149,5 +8149,3 @@ public class Singleton
 6. https://www.iamshuaidi.com/ 帅地玩编程
 7. https://github.com/xiaolincoder/CS-Base 小林 x 图解计算机基础
 8. https://www.mianshiya.com/ 面试鸭
-
-[^QPS（Query Per Second]: 服务器每秒可以执行的查询次数；

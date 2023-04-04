@@ -951,9 +951,9 @@ ReactDOM.render(&lt;App /&gt;, document.getElementById('app'))
 </li>
 </ul>
 <p>整个生命周期：</p>
-<figure><img src="images/image-20220605230344345.png" alt="image-20220605230344345" tabindex="0" loading="lazy"><figcaption>image-20220605230344345</figcaption></figure>
-<p>具体可以参考：<a href="https://www.runoob.com/react/react-component-life-cycle.html" target="_blank" rel="noopener noreferrer">https://www.runoob.com/react/react-component-life-cycle.html<ExternalLinkIcon/></a></p>
-<p>or <a href="https://zh-hans.reactjs.org/docs/state-and-lifecycle.html" target="_blank" rel="noopener noreferrer">https://zh-hans.reactjs.org/docs/state-and-lifecycle.html<ExternalLinkIcon/></a></p>
+<figure><img src="@source/frontend/react/images/image-20220605230344345.png" alt="image-20220605230344345" tabindex="0" loading="lazy"><figcaption>image-20220605230344345</figcaption></figure>
+<p>具体可以参考：<code v-pre>https://www.runoob.com/react/react-component-life-cycle.html</code></p>
+<p>or <code v-pre>https://zh-hans.reactjs.org/docs/state-and-lifecycle.html</code></p>
 </div></template>
 
 

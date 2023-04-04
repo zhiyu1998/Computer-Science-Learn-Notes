@@ -147,7 +147,7 @@
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p><code v-pre>invoke()</code> 方法: 当我们的动态代理对象调用原生方法的时候，最终实际上调用到的是 <code v-pre>invoke()</code> 方法，然后 <code v-pre>invoke()</code> 方法代替我们去调用了被代理对象的原生方法。</p>
 <h3 id="讲讲-hashmap-底层原理是什么" tabindex="-1"><a class="header-anchor" href="#讲讲-hashmap-底层原理是什么" aria-hidden="true">#</a> 讲讲 hashmap，底层原理是什么？</h3>
 <p><strong>JDK1.8 之前</strong></p>
-<p>JDK1.8 之前 HashMap 底层是 <strong>数组和链表</strong> 结合在一起使用也就是 链表散列。HashMap 通过 key 的 hashCode 经过扰动函数处理过后得到 hash 值，然后通过 (n - 1) &amp; hash 判断当前元素存放的位置（这里的 n 指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素的 hash 值以及 key 是否相同，如果相同的话，直接覆盖，<code v-pre>&lt;u&gt;</code>不相同就通过拉链法解决冲突<code v-pre>&lt;/u&gt;</code>。</p>
+<p>JDK1.8 之前 HashMap 底层是 <strong>数组和链表</strong> 结合在一起使用也就是 链表散列。HashMap 通过 key 的 hashCode 经过扰动函数处理过后得到 hash 值，然后通过 (n - 1) &amp; hash 判断当前元素存放的位置（这里的 n 指的是数组的长度），如果当前位置存在元素的话，就判断该元素与要存入的元素的 hash 值以及 key 是否相同，如果相同的话，直接覆盖，<em>不相同就通过拉链法解决冲突</em>。</p>
 <p>所谓扰动函数指的就是 HashMap 的 hash 方法。使用 hash 方法也就是扰动函数是为了防止一些实现比较差的 hashCode() 方法 换句话说使用扰动函数之后可以减少碰撞。</p>
 <p>JDK 1.8 HashMap 的 hash 方法源码:</p>
 <p>JDK 1.8 的 hash 方法 相比于 JDK 1.7 hash 方法更加简化，但是原理不变。</p>
@@ -505,7 +505,7 @@
 <li>泛型中的类型在使用时指定，不需要强制类型转换（<strong>类型安全</strong>，编译器会<strong>检查类型</strong>）</li>
 </ul>
 <p>泛型擦除：</p>
-<p>Java语言中的泛型被称为伪泛型，因为这种泛型它只在编写的源码中存在，在经过编译器编译后的字节码文件中不会包含泛型中的类型信息了，泛型信息在编译的时候被擦除了，并且会在相应的地方插入强制类型转换的代码，这个过程就是泛型擦除。例如new ArrayList&lt;String&gt;()，泛型擦除后就是new ArrayList()，对其元素的操作也会加上(String)强制类型转换。</p>
+<p>Java语言中的泛型被称为伪泛型，因为这种泛型它只在编写的源码中存在，在经过编译器编译后的字节码文件中不会包含泛型中的类型信息了，泛型信息在编译的时候被擦除了，并且会在相应的地方插入强制类型转换的代码，这个过程就是泛型擦除。例如<code v-pre>new ArrayList&lt;String&gt;()</code>，泛型擦除后就是<code v-pre>new ArrayList()</code>，对其元素的操作也会加上(String)强制类型转换。</p>
 <h3 id="常见的索引结构有-哈希表结构属于哪种场景-2022oppo" tabindex="-1"><a class="header-anchor" href="#常见的索引结构有-哈希表结构属于哪种场景-2022oppo" aria-hidden="true">#</a> 常见的索引结构有？哈希表结构属于哪种场景？（2022OPPO）</h3>
 <p>哈希表、有序数组和搜索树。</p>
 <ul>
@@ -1468,9 +1468,9 @@ end;
 <p>既然现在已经有这么多的轮子了，那我们作为<strong>使用方/需求方</strong>就没必要自己重新实现一套了，用现有的就好了，我们可以学习现有轮子的实现设计思想。</p>
 <h4 id="分布式定时任务基础" tabindex="-1"><a class="header-anchor" href="#分布式定时任务基础" aria-hidden="true">#</a> 分布式定时任务基础</h4>
 <p><code v-pre>Quartz</code>是优秀的开源组件，它将定时任务抽象了三个角色：<strong>调度器</strong>、<strong>执行器</strong>和<strong>任务</strong>，以至于市面上的分布式定时任务框架都有类似角色划分。</p>
-<figure><img src="giant_images/v2-98ad0b6c4c56cc6e1f1771d6717ff1be_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/v2-98ad0b6c4c56cc6e1f1771d6717ff1be_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <p>对于我们使用方而言，一般是引入一个<code v-pre>client</code>包，然后根据它的规则（可能是使用注解标识，又或是实现某个接口），随后自定义我们自己的定时任务逻辑。</p>
-<figure><img src="giant_images/v2-eb942305f30fc2cc4557f4a9c7fc48f8_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/v2-eb942305f30fc2cc4557f4a9c7fc48f8_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <p>看着上面的执行图对应的角色抽象以及一般使用姿势，应该还是比较容易理解这个过程的。我们又可以再稍微思考两个问题：</p>
 <p><strong>1</strong>、 任务信息以及调度的信息是需要<strong>存储</strong>的，存储在哪？调度器是需要「<strong>通知</strong>」执行器去执行的，那「<strong>通知</strong>」是以什么方式去做？</p>
 <p><strong>2</strong>、调度器是怎么找到即将需要执行的任务的呢？</p>
@@ -1480,18 +1480,18 @@ end;
 <li>所谓的「去中心化」指的是：调度器和执行器<strong>耦合</strong>，自己调度自己执行</li>
 </ul>
 <p>对于「中心化」流派来说，存储相关的信息很可能是在<strong>数据库</strong>（DataBase），而我们引入的<code v-pre>client</code>包实际上就是<strong>执行器</strong>相关的代码。调度器<strong>实现了任务调度</strong>的逻辑，<strong>远程调用</strong>执行器触发对应的逻辑。</p>
-<figure><img src="giant_images/v2-4538a8cb2841347fbb9fc118423323fe_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/v2-4538a8cb2841347fbb9fc118423323fe_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <p>调度器「通知」执行器去执行任务时，可以是通过「RPC」调用，也可以是把任务信息写入消息队列给执行器消费来达到目的。</p>
-<figure><img src="giant_images/v2-fa4f08b5e4fc6e8478d5d84f4b89c961_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/v2-fa4f08b5e4fc6e8478d5d84f4b89c961_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <p>对于「去中心化」流派来说存储相关的信息很可能是在<strong>注册中心</strong>（Zookeeper），而我们引入的<code v-pre>client</code>包实际上就是<strong>执行器+调度器</strong>相关的代码。</p>
 <p>依赖注册中心来完成<strong>任务的分配</strong>，「中心化」流派在调度的时候是需要保证一个任务只被一台机器消费，这就需要在代码里写分布式锁相关逻辑进行保证，而「去中心化」依赖注册中心就免去了这个环节。</p>
-<figure><img src="giant_images/v2-02f9aa3113546908140829fd81b5a214_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/v2-02f9aa3113546908140829fd81b5a214_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <p>针对第二个问题，调度器是怎么找到即将需要执行的任务的呢？现在一般较新的分布式定时任务框架都用了「<strong>时间轮</strong>」。</p>
 <p><strong>1</strong>、如果我们日常要找到准备要执行的任务，可能会把这些任务放在一个<code v-pre>List</code>里然后进行判断，那此时查询的时间复杂度为O(n)</p>
 <p><strong>2</strong>、稍微改进下，我们可能把这些任务放在一个最小堆里（对时间进行排序），那此时的增删改时间复杂度为O(logn)，而查询是O(1)</p>
 <p><strong>3</strong>、再改进下，我们把这些任务放在一个<strong>环形数组</strong>里，那这时候的增删改查时间复杂度都是O(1)。但此时的环形数组大小决定着我们能存放任务的大小，超出环形数组的任务就需要用另外的数组结构存放。</p>
 <p><strong>4</strong>、最后再改进下，我们可以有<strong>多层</strong>环形数组，不同层次的环形数组的<strong>精度</strong>是不一样的，使用多层环形数组能大大提高我们的精度。</p>
-<figure><img src="giant_images/v2-f94c4fbf49a6a4d14a00d57fe3fa8d22_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/v2-f94c4fbf49a6a4d14a00d57fe3fa8d22_r.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <h4 id="分布式定时任务框架选型" tabindex="-1"><a class="header-anchor" href="#分布式定时任务框架选型" aria-hidden="true">#</a> 分布式定时任务框架选型</h4>
 <p>分布式定时任务框架现在可选择的还是挺多的，比较出名的有：<code v-pre>XXL-JOB</code>/<code v-pre>Elastic-Job</code>/<code v-pre>LTS</code>/<code v-pre>SchedulerX</code>/<code v-pre>Saturn</code>/<code v-pre>PowerJob</code>等等等。有条件的公司可能会基于<code v-pre>Quartz</code>进行拓展，自研一套符合自己的公司内的分布式定时任务框架。</p>
 <p>我并不是做这块出身的，对于我而言，我的<code v-pre>austin</code>项目技术选型主要会关注两块（其实跟选择apollo作为分布式配置中心的理由是一样的）：<strong>成熟、稳定、社区是否活跃</strong>。</p>
@@ -3136,7 +3136,7 @@ BITOP operation destkey key <span class="token punctuation">[</span>key <span cl
 <li>分布式限流：Redission通过Redis的计数器和限流器实现了分布式限流的机制，可以根据业务需求和性能需求进行自定义配置，同时支持分布式的并发访问。</li>
 </ol>
 <p>总之，Redission是一个基于Redis实现的高性能、可扩展、易用的Java分布式库，提供了多种分布式数据结构和机制的实现，可以满足各种分布式场景的需求。</p>
-<figure><img src="giant_images/1090617-20190618183025891-1248337684.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/1090617-20190618183025891-1248337684.jpg" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <h5 id="加锁机制" tabindex="-1"><a class="header-anchor" href="#加锁机制" aria-hidden="true">#</a> 加锁机制</h5>
 <p>线程去获取锁，获取成功: 执行lua脚本，保存数据到redis数据库。</p>
 <p>线程去获取锁，获取失败: 一直通过while循环尝试获取锁，获取成功后，执行lua脚本，保存数据到redis数据库。</p>
@@ -3170,7 +3170,7 @@ BITOP operation destkey key <span class="token punctuation">[</span>key <span cl
 <li>Hash数据类型的key值包含了当前线程信息。</li>
 </ol>
 <p>下面是redis存储的数据</p>
-<figure><img src="giant_images/1090617-20190618183037704-975536201.png" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/1090617-20190618183037704-975536201.png" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <p>这里表面数据类型是Hash类型,Hash类型相当于我们java的 <code v-pre>&lt;key,&lt;key1,value&gt;&gt;</code> 类型,这里key是指 'redisson'</p>
 <p>它的有效期还有9秒，我们再来看里们的key1值为<code v-pre>078e44a3-5f95-4e24-b6aa-80684655a15a:45</code>它的组成是:</p>
 <p>guid + 当前线程的ID。后面的value是就和可重入加锁有关。</p>
@@ -3181,7 +3181,7 @@ BITOP operation destkey key <span class="token punctuation">[</span>key <span cl
 <li>公平性和非公平性：Redission的可重入锁既支持公平性也支持非公平性，可以根据业务需求进行配置。当使用公平锁时，线程会按照获取锁的顺序依次获取锁；而使用非公平锁时，线程可以插队获取锁，这样可以提高锁的并发性能。</li>
 </ol>
 <p><strong>举图说明</strong></p>
-<figure><img src="giant_images/1090617-20190618183046827-1994396879.png" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/1090617-20190618183046827-1994396879.png" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <p>上面这图的意思就是可重入锁的机制，它最大的优点就是相同线程不需要在等待锁，而是可以直接进行相应操作。</p>
 <h3 id="mysql" tabindex="-1"><a class="header-anchor" href="#mysql" aria-hidden="true">#</a> MySql</h3>
 <h4 id="sqlserver-和-mysql-区别" tabindex="-1"><a class="header-anchor" href="#sqlserver-和-mysql-区别" aria-hidden="true">#</a> sqlserver 和 MySQL 区别</h4>
@@ -4731,7 +4731,7 @@ m<span class="token punctuation">.</span><span class="token function">get</span>
 </li>
 </ul>
 <h3 id="select、poll、epoll-2022字节提前批" tabindex="-1"><a class="header-anchor" href="#select、poll、epoll-2022字节提前批" aria-hidden="true">#</a> select、poll、epoll？（2022字节提前批）</h3>
-<figure><img src="giant_images/image-20220727205646242.png" alt="image-20220727205646242" tabindex="0" loading="lazy"><figcaption>image-20220727205646242</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727205646242.png" alt="image-20220727205646242" tabindex="0" loading="lazy"><figcaption>image-20220727205646242</figcaption></figure>
 <h3 id="epoll的两种触发模式-2022字节提前批" tabindex="-1"><a class="header-anchor" href="#epoll的两种触发模式-2022字节提前批" aria-hidden="true">#</a> epoll的两种触发模式？（2022字节提前批）</h3>
 <p>level 模式：该模式就是只要还有没有处理的事件就会一直通知
 edge 模式：该模式是当状态发生变化时才会通知</p>
@@ -4748,7 +4748,7 @@ edge 模式：该模式是当状态发生变化时才会通知</p>
 <p>ps：思考虚拟内存和交换空间的区别？</p>
 <h3 id="虚拟地址映射为物理地址的过程-2022字节提前批" tabindex="-1"><a class="header-anchor" href="#虚拟地址映射为物理地址的过程-2022字节提前批" aria-hidden="true">#</a> 虚拟地址映射为物理地址的过程？（2022字节提前批）</h3>
 <p>❶ 直接映射</p>
-<figure><img src="giant_images/image-20220727224105269.png" alt="image-20220727224105269" tabindex="0" loading="lazy"><figcaption>image-20220727224105269</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727224105269.png" alt="image-20220727224105269" tabindex="0" loading="lazy"><figcaption>image-20220727224105269</figcaption></figure>
 <p>直接映射是页表缓存映射（TLB）的一种实现方式，它使用一个简单的哈希函数将虚拟页号映射到 TLB 中的一个条目。</p>
 <p>下面是直接映射的过程：</p>
 <ol>
@@ -4764,7 +4764,7 @@ edge 模式：该模式是当状态发生变化时才会通知</p>
 </ol>
 <p>直接映射的主要优点是实现简单，速度较快，但缺点是容易出现冲突，因为多个虚拟页号可能会被映射到同一个 TLB 条目中。这会导致 TLB 中的某些条目被频繁替换，从而降低缓存命中率。为了解决这个问题，还可以使用其他的页表缓存映射方案，如全相联映射或组相联映射。</p>
 <p>❷ 使用页表缓存映射</p>
-<figure><img src="giant_images/image-20220727224111385.png" alt="image-20220727224111385" tabindex="0" loading="lazy"><figcaption>image-20220727224111385</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727224111385.png" alt="image-20220727224111385" tabindex="0" loading="lazy"><figcaption>image-20220727224111385</figcaption></figure>
 <ol>
 <li>应用程序生成虚拟地址。</li>
 <li>虚拟地址被传递给 CPU 中的内存管理单元（MMU）。</li>
@@ -4775,8 +4775,8 @@ edge 模式：该模式是当状态发生变化时才会通知</p>
 </ol>
 <p>在这个过程中，CPU 通过 MMU 来进行地址转换，把应用程序中使用的虚拟地址转换为实际的物理地址。MMU 实现地址转换的方式是通过页表来进行的，页表是由操作系统维护的数据结构，它记录了虚拟地址与物理地址的对应关系。</p>
 <p>❸ 使用 TLB 映射</p>
-<figure><img src="giant_images/image-20220727224117545.png" alt="image-20220727224117545" tabindex="0" loading="lazy"><figcaption>image-20220727224117545</figcaption></figure>
-<figure><img src="giant_images/image-20220727224120760.png" alt="image-20220727224120760" tabindex="0" loading="lazy"><figcaption>image-20220727224120760</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727224117545.png" alt="image-20220727224117545" tabindex="0" loading="lazy"><figcaption>image-20220727224117545</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727224120760.png" alt="image-20220727224120760" tabindex="0" loading="lazy"><figcaption>image-20220727224120760</figcaption></figure>
 <p>使用 TLB 映射的过程包括以下步骤：</p>
 <ol>
 <li>CPU 发出一个虚拟地址请求。</li>
@@ -4876,7 +4876,7 @@ edge 模式：该模式是当状态发生变化时才会通知</p>
 <p>我们都知道 Linux 会以页为单位管理内存，无论是将磁盘中的数据加载到内存中，还是将内存中的数据写回磁盘，操作系统都会以页面为单位进行操作，哪怕我们只向磁盘中写入一个字节的数据，我们也需要将整个页面中的全部数据刷入磁盘中。</p>
 <p>Linux 同时支持正常大小的内存页和大内存页（Huge Page）<a href="https://draveness.me/whys-the-design-linux-default-page/#fn:1" target="_blank" rel="noopener noreferrer">1<ExternalLinkIcon/></a>，绝大多数处理器上的内存页的默认大小都是 4KB，虽然部分处理器会使用 8KB、16KB 或者 64KB 作为默认的页面大小，但是 4KB 的页面仍然是操作系统默认内存页配置的主流；除了正常的内存页大小之外，不同的处理器上也包含不同大小的大页面，我们在 x86 处理器上就可以使用 2MB 的内存页。</p>
 <p>4KB 的内存页其实是一个历史遗留问题，在上个世纪 80 年代确定的 4KB 一直保留到了今天。虽然今天的硬件比过去丰富了很多，但是我们仍然沿用了过去主流的内存页大小。如下图所示，装过机的人应该对这里的内存条非常熟悉：</p>
-<figure><img src="giant_images/2020-05-29-15906831530375-random-access-memory.jpg" alt="random-access-memory" tabindex="0" loading="lazy"><figcaption>random-access-memory</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/2020-05-29-15906831530375-random-access-memory.jpg" alt="random-access-memory" tabindex="0" loading="lazy"><figcaption>random-access-memory</figcaption></figure>
 <p>在今天，4KB 的内存页大小可能不是最佳的选择，8KB 或者 16KB 说不定是更好的选择，但是这是过去在特定场景下做出的权衡。我们在这篇文章中不要过于纠结于 4KB 这个数字，应该更重视决定这个结果的几个因素，这样当我们在遇到类似场景时才可以从这些方面考虑当下最佳的选择，我们在这篇文章中会介绍以下两个影响内存页大小的因素，它们分别是：</p>
 <ul>
 <li>过小的页面大小会带来较大的页表项增加寻址时 TLB（Translation lookaside buffer）的查找速度和额外开销；</li>
@@ -4886,7 +4886,7 @@ edge 模式：该模式是当状态发生变化时才会通知</p>
 <h4 id="页表项" tabindex="-1"><a class="header-anchor" href="#页表项" aria-hidden="true">#</a> 页表项</h4>
 <p>Linux 中的虚拟内存，每个进程能够看到的都是独立的虚拟内存空间，虚拟内存空间只是逻辑上的概念，进程仍然需要访问虚拟内存对应的物理内存，从虚拟内存到物理内存的转换就需要使用每个进程持有页表。</p>
 <p>为了存储 64 位操作系统中 128 TiB 虚拟内存的映射数据，Linux 在 2.6.10 中引入了四层的页表辅助虚拟地址的转换，引入了五层的页表结构，在未来还可能会引入更多层的页表结构以支持 64 位的虚拟地址。</p>
-<figure><img src="giant_images/2020-05-29-15906831530398-four-level-page-tables.png" alt="four-level-page-tables" tabindex="0" loading="lazy"><figcaption>four-level-page-tables</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/2020-05-29-15906831530398-four-level-page-tables.png" alt="four-level-page-tables" tabindex="0" loading="lazy"><figcaption>four-level-page-tables</figcaption></figure>
 <p>在如上图所示的四层页表结构中，操作系统会使用最低的 12 位作为页面的偏移量，剩下的 36 位会分四组分别表示当前层级在上一层中的索引，所有的虚拟地址都可以用上述的多层页表查找到对应的物理地址。</p>
 <p>因为操作系统的虚拟地址空间大小都是一定的，整片虚拟地址空间被均匀分成了 N 个大小相同的内存页，所以内存页的大小最终会决定每个进程中页表项的层级结构和具体数量，虚拟页的大小越小，单个进程中的页表项和虚拟页也就越多。</p>
 <p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mi>a</mi><mi>g</mi><mi>e</mi><mi>s</mi><mi>C</mi><mi>o</mi><mi>u</mi><mi>n</mi><mi>t</mi><mo>=</mo><mfrac><mrow><mi>V</mi><mi>i</mi><mi>r</mi><mi>t</mi><mi>u</mi><mi>a</mi><mi>l</mi><mi>M</mi><mi>e</mi><mi>m</mi><mi>o</mi><mi>r</mi><mi>y</mi></mrow><mrow><mi>P</mi><mi>a</mi><mi>g</mi><mi>e</mi><mi>S</mi><mi>i</mi><mi>z</mi><mi>e</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">
@@ -4895,7 +4895,7 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 <p>因为目前的虚拟页大小为 4096 字节，所以虚拟地址末尾的 12 位可以表示虚拟页中的地址，如果虚拟页的大小降到了 512 字节，那么原本的四层页表结构或者五层页表结构会变成五层或者六层，这不仅会增加内存访问的额外开销，还会增加每个进程中页表项占用的内存大小。</p>
 <h4 id="碎片化" tabindex="-1"><a class="header-anchor" href="#碎片化" aria-hidden="true">#</a> 碎片化</h4>
 <p>因为内存映射设备会在内存页的层面工作，所以操作系统认为内存分配的最小单元就是虚拟页。哪怕用户程序只是申请了 1 字节的内存，操作系统也会为它申请一个虚拟页，如下图所示，如果内存页的大小为 24KB，那么申请 1 字节的内存会浪费 ~99.9939% 的空间。</p>
-<figure><img src="giant_images/2020-05-29-15906831530405-memory-utilization.png" alt="memory-utilization" tabindex="0" loading="lazy"><figcaption>memory-utilization</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/2020-05-29-15906831530405-memory-utilization.png" alt="memory-utilization" tabindex="0" loading="lazy"><figcaption>memory-utilization</figcaption></figure>
 <p>随着内存页大小的增加，内存的碎片化严情况会越来越严重，小的内存页会减少内存空间中的内存碎片，提高内存的利用率。上个世纪的内存资源还没有像今天这么丰富，在大多数情况下，内存都不是限制程序运行的资源，多数的在线服务都需要更多的CPU，而不是更多的内存。不过在上个世纪内存其实也是稀缺资源，所以提高稀缺资源的利用率是我们不得不考虑的事情：</p>
 <p>上个世纪八九十年代的内存条只有 512KB 或者 2MB，价格也贵得离谱，但是几 GB 的内存在今天却非常常见，所以虽然内存的利用率仍然十分重要，但是在内存的价格大幅降低的今天，碎片化的内存不再是需要解决的关键问题了。</p>
 <p>除了内存的利用率之外，较大的内存页也会增加内存拷贝时的额外开销，因为 Linux 上的写时拷贝机制，在多个进程共享同一块内存时，当其中的一个进程修改了共享的虚拟内存会触发内存页的拷贝，这时操作系统的内存页越小，写时拷贝带来的额外开销也就越小。</p>
@@ -4965,7 +4965,7 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 <p><code v-pre>TIME-WAIT</code> - 等待足够的时间以确保远程TCP接收到连接中断请求的确认；</p>
 <p>🚨 注意 ！！！这个时候由服务端到客户端的 TCP 连接并未释放掉，<strong>需要经过时间等待计时器设置的时间 2MSL（一个报文的来回时间） 后才会进入 <code v-pre>CLOSED</code> 状态</strong>（这样做的目的是确保服务端收到自己的 ACK 报文。如果服务端在规定时间内没有收到客户端发来的 ACK 报文的话，服务端会重新发送 FIN 报文给客户端，客户端再次收到 FIN  报文之后，就知道之前的 ACK 报文丢失了，然后再次发送 ACK 报文给服务端）。服务端收到 ACK 报文之后，就关闭连接了，处于 <code v-pre>CLOSED</code> 状态。</p>
 <h3 id="tcp协议的四次挥手当中第二步和第三步能否合并成一步" tabindex="-1"><a class="header-anchor" href="#tcp协议的四次挥手当中第二步和第三步能否合并成一步" aria-hidden="true">#</a> tcp协议的四次挥手当中第二步和第三步能否合并成一步</h3>
-<p>参考：<a href="https://www.zhihu.com/question/50646354" target="_blank" rel="noopener noreferrer">https://www.zhihu.com/question/50646354<ExternalLinkIcon/></a></p>
+<p><code v-pre>参考：https://www.zhihu.com/question/50646354</code></p>
 <p>很多人有一个误区，即认为TCP连接是通信的全部，其实并不是这样，让我们来复习一下TCP连接断开的过程。</p>
 <p>假定TCP client端主动发起断开连接</p>
 <ol>
@@ -5101,7 +5101,7 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 <p>TCP 提供面向连接的服务。在传送数据之前必须先建立连接，数据传送结束后要释放连接。 TCP 不提供广播或多播服务。由于 TCP 要提供可靠的，面向连接的传输服务（TCP 的可靠体现在 TCP 在传递数据之前，会有三次握手来建立连接，而且在数据传递时，有确认、窗口、重传、拥塞控制机制，在数据传完后，还会断开连接用来节约系统资源），这难以避免增加了许多开销，如确认，流量控制，计时器以及连接管理等。这不仅使协议数据单元的首部增大很多，还要占用许多处理机资源。TCP 一般用于文件传输、发送和接收邮件、远程登录等场景</p>
 <figure><img src="@source/Java/eightpart/giant_images/image-20220405203700321.png" alt="image-20220405203700321" tabindex="0" loading="lazy"><figcaption>image-20220405203700321</figcaption></figure>
 <h3 id="tcp-协议如何保证可靠传输【腾讯光子工作室】" tabindex="-1"><a class="header-anchor" href="#tcp-协议如何保证可靠传输【腾讯光子工作室】" aria-hidden="true">#</a> TCP 协议如何保证可靠传输【腾讯光子工作室】</h3>
-<p>短文回答参考：<a href="https://www.iamshuaidi.com/1298.html" target="_blank" rel="noopener noreferrer">https://www.iamshuaidi.com/1298.html<ExternalLinkIcon/></a> or <a href="https://github.com/wolverinn/Waking-Up/blob/master/Computer%20Network.md#TCP%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%BC%A0%E8%BE%93%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7" target="_blank" rel="noopener noreferrer">https://github.com/wolverinn/Waking-Up/blob/master/Computer Network.md#TCP如何保证传输的可靠性<ExternalLinkIcon/></a></p>
+<p><code v-pre>短文回答参考：https://www.iamshuaidi.com/1298.html or https://github.com/wolverinn/Waking-Up/blob/master/Computer%20Network.md#TCP%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%BC%A0%E8%BE%93%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7</code></p>
 <p>下面是理解：</p>
 <p>首先解释一下，什么是可靠传输：<strong>可靠传输就是保证接收方收到的字节流和发送方发出的字节流是完全一样的</strong>。</p>
 <p>网络层是没有可靠传输机制的，尽自己最大的努力进行交付。而传输层使用 TCP 实现可靠传输，TCP 保证可靠传输的机制有如下几种：</p>
@@ -5466,7 +5466,7 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 <li>如果重传指定次数到了后，仍然未收到ACK应答，那么一段时间后，服务端会自动关闭这个连接。但客户端认为这个连接已经建立，如果客户端向服务端写数据，服务端将回应RST包、强制关闭TCP连接，以防止SYN攻击。</li>
 </ol>
 <p>扩展：TCP为什么需要第三次握手？</p>
-<p><a href="https://www.iamshuaidi.com/675.html" target="_blank" rel="noopener noreferrer">https://www.iamshuaidi.com/675.html<ExternalLinkIcon/></a></p>
+<p><code v-pre>https://www.iamshuaidi.com/675.html</code></p>
 <p>原因：</p>
 <p>1）两次握手是最基本的，一般情况下能保证tcp连接正常进行。</p>
 <p>2）需要第三次握手是为了防止已失效的请求报文段突然又传送到了服务端而产生连接的误判 。</p>
@@ -5553,13 +5553,13 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 <p>TCP拥塞控制是一种流量控制机制，它用于确保网络不会因为发送的数据量过大而发生拥塞，从而导致网络性能下降或崩溃。TCP拥塞控制通过动态调整发送方的拥塞窗口大小来实现这一目的。</p>
 <p>在TCP连接建立之初，发送方会通过慢启动（Slow Start）算法来逐渐增加其发送窗口大小，以便在网络出现拥塞之前，尽可能充分利用网络带宽。在慢启动阶段，每个回合（Round Trip Time，RTT）结束时，发送窗口大小将加倍，从而呈指数增长，直到网络出现拥塞或者发送窗口大小达到某个限制（如接收方的接收窗口大小）。</p>
 <p>窗口大小增长的指数性增长是因为TCP发送方希望尽快探测出网络的带宽容量，并且在不超过网络容量的情况下尽可能快地将数据发送出去。因此，在慢启动期间，发送方会通过呈指数增长的方式增加窗口大小，以尽可能快地占用网络带宽。</p>
-<figure><img src="giant_images/image-20220727220128549.png" alt="image-20220727220128549" tabindex="0" loading="lazy"><figcaption>image-20220727220128549</figcaption></figure>
-<figure><img src="giant_images/image-20220727220131425.png" alt="image-20220727220131425" tabindex="0" loading="lazy"><figcaption>image-20220727220131425</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727220128549.png" alt="image-20220727220128549" tabindex="0" loading="lazy"><figcaption>image-20220727220128549</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727220131425.png" alt="image-20220727220131425" tabindex="0" loading="lazy"><figcaption>image-20220727220131425</figcaption></figure>
 <h3 id="什么是-time-wait-状态-为什么需要-time-wait-状态-时间是多久-为什么-2022字节提前批" tabindex="-1"><a class="header-anchor" href="#什么是-time-wait-状态-为什么需要-time-wait-状态-时间是多久-为什么-2022字节提前批" aria-hidden="true">#</a> 什么是 TIME_WAIT 状态，为什么需要 TIME_WAIT 状态？时间是多久，为什么？（2022字节提前批）</h3>
 <p>四次挥手客户端接受到服务端 FIN 报文后返回 ACK 报文的状态
 可以防止 ACK 报文丢失，服务器没有收到会重复发 FIN 报文
 而 TIME_WAIT 的长度为 2*MSL 这样 ACK 丢失了，FIN 再次发送，在这时间里客户端还能收到 FIN 报文</p>
-<figure><img src="giant_images/image-20220727213947423.png" alt="image-20220727213947423" tabindex="0" loading="lazy"><figcaption>image-20220727213947423</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727213947423.png" alt="image-20220727213947423" tabindex="0" loading="lazy"><figcaption>image-20220727213947423</figcaption></figure>
 <h3 id="http各个版本-1-0-1-1-2-0-3-0-2022蔚来" tabindex="-1"><a class="header-anchor" href="#http各个版本-1-0-1-1-2-0-3-0-2022蔚来" aria-hidden="true">#</a> HTTP各个版本 (1.0，1.1，2.0，3.0) （2022蔚来）</h3>
 <h4 id="http-1-0" tabindex="-1"><a class="header-anchor" href="#http-1-0" aria-hidden="true">#</a> HTTP/1.0</h4>
 <p>1996年5月，HTTP/1.0 版本发布，为了提高系统的效率，HTTP/1.0规定浏览器与服务器只保持短暂的连接，浏览器的每次请求都需要与服务器建立一个TCP连接，服务器完成请求处理后立即断开TCP连接，服务器不跟踪每个客户也不记录过去的请求。</p>
@@ -5574,13 +5574,13 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 <p>由于之前打一次电话只能说一件事儿，效率很低。后来人们提出一种想法，就是电话打完之后，先不直接挂断，而是持续一小段时间，这一小段时间内，如果还有事情沟通可以再次进行沟通。</p>
 <p>客户端和服务器发现对方一段时间没有活动，就可以主动关闭连接。或者客户端在最后一个请求时，主动告诉服务端要关闭连接。</p>
 <p>HTTP/1.1版还引入了管道机制（pipelining），即在同一个TCP连接里面，客户端可以同时发送多个请求。这样就进一步改进了HTTP协议的效率。</p>
-<figure><img src="giant_images/image-20220827111050845.png" alt="image-20220827111050845" tabindex="0" loading="lazy"><figcaption>image-20220827111050845</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220827111050845.png" alt="image-20220827111050845" tabindex="0" loading="lazy"><figcaption>image-20220827111050845</figcaption></figure>
 <p>有了持久连接和管道，大大的提升了HTTP的效率。但是服务端还是顺序执行的，效率还有提升的空间。</p>
 <h4 id="http-2" tabindex="-1"><a class="header-anchor" href="#http-2" aria-hidden="true">#</a> HTTP/2</h4>
 <p>HTTP/2 是 HTTP 协议自 1999 年 HTTP 1.1 发布后的首个更新，主要基于 SPDY 协议。</p>
 <p>HTTP/2 为了解决HTTP/1.1中仍然存在的效率问题，HTTP/2 采用了多路复用。即在一个连接里，客户端和浏览器都可以同时发送多个请求或回应，而且不用按照顺序一一对应。能这样做有一个前提，就是HTTP/2进行了二进制分帧，即 HTTP/2 会将所有传输的信息分割为更小的消息和帧（frame）,并对它们采用二进制格式的编码。</p>
 <p>也就是说，老板可以同时下达多个命令，员工也可以收到了A请求和B请求，于是先回应A请求，结果发现处理过程非常耗时，于是就发送A请求已经处理好的部分， 接着回应B请求，完成后，再发送A请求剩下的部分。A请求的两部分响应在组合到一起发给老板。</p>
-<figure><img src="giant_images/image-20220827111109255.png" alt="image-20220827111109255" tabindex="0" loading="lazy"><figcaption>image-20220827111109255</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220827111109255.png" alt="image-20220827111109255" tabindex="0" loading="lazy"><figcaption>image-20220827111109255</figcaption></figure>
 <p>而这个负责拆分、组装请求和二进制帧的一层就叫做二进制分帧层。</p>
 <p>除此之外，还有一些其他的优化，比如做Header压缩、服务端推送等。</p>
 <p>Header压缩就是压缩老板和员工之间的对话。</p>
@@ -5592,7 +5592,7 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 <h3 id="http2-0之前怎么实现服务器推送机制-2022蔚来" tabindex="-1"><a class="header-anchor" href="#http2-0之前怎么实现服务器推送机制-2022蔚来" aria-hidden="true">#</a> HTTP2.0之前怎么实现服务器推送机制（2022蔚来）</h3>
 <p>HTTP/1.1 不支持服务器主动推送资源给客户端，都是由客户端向服务器发起请求后，才能获取到服务器响应的资源。</p>
 <p>比如，客户端通过  HTTP/1.1 请求从服务器那获取到了 HTML 文件，而 HTML 可能还需要依赖 CSS 来渲染页面，这时客户端还要再发起获取 CSS 文件的请求，需要两次消息往返，如下图左边部分：</p>
-<figure><img src="giant_images/image-20220827110512850.png" alt="image-20220827110512850" tabindex="0" loading="lazy"><figcaption>image-20220827110512850</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220827110512850.png" alt="image-20220827110512850" tabindex="0" loading="lazy"><figcaption>image-20220827110512850</figcaption></figure>
 <p>如上图右边部分，在 HTTP/2 中，客户端在访问 HTML 时，服务器可以直接主动推送 CSS 文件，减少了消息传递的次数。</p>
 <p>在 Nginx 中，如果你希望客户端访问 /test.html 时，服务器直接推送 /test.css，那么可以这么配置：</p>
 <div class="language-text line-numbers-mode" data-ext="text"><pre v-pre class="language-text"><code>location /test.html { 
@@ -5600,7 +5600,7 @@ PagesCount=\frac{VirtualMemory}{PageSize}
 }
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>那 HTTP/2 的推送是怎么实现的？</p>
 <p>客户端发起的请求，必须使用的是奇数号 Stream，服务器主动的推送，使用的是偶数号 Stream。服务器在推送资源时，会通过 <code v-pre>PUSH_PROMISE</code> 帧传输 HTTP 头部，并通过帧中的 <code v-pre>Promised Stream ID</code> 字段告知客户端，接下来会在哪个偶数号 Stream 中发送包体。</p>
-<figure><img src="giant_images/image-20220827110523321.png" alt="image-20220827110523321" tabindex="0" loading="lazy"><figcaption>image-20220827110523321</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220827110523321.png" alt="image-20220827110523321" tabindex="0" loading="lazy"><figcaption>image-20220827110523321</figcaption></figure>
 <p>如上图，在 Stream 1 中通知客户端 CSS 资源即将到来，然后在 Stream 2 中发送 CSS 资源，注意 Stream 1 和 2 是可以<strong>并发</strong>的。</p>
 <h3 id="tcp粘包是什么原因-如何解决-2022虾皮" tabindex="-1"><a class="header-anchor" href="#tcp粘包是什么原因-如何解决-2022虾皮" aria-hidden="true">#</a> tcp粘包是什么原因，如何解决？（2022虾皮）</h3>
 <h4 id="什么是粘包" tabindex="-1"><a class="header-anchor" href="#什么是粘包" aria-hidden="true">#</a> 什么是粘包</h4>
@@ -5630,7 +5630,7 @@ TCP 是基于字节流的，虽然应用层和 TCP 传输层之间的数据交�
 <h5 id="特殊字符作为边界" tabindex="-1"><a class="header-anchor" href="#特殊字符作为边界" aria-hidden="true">#</a> 特殊字符作为边界</h5>
 <p>我们可以在两个用户消息之间插入一个特殊的字符串，这样接收方在接收数据时，读到了这个特殊字符，就把认为已经读完一个完整的消息。</p>
 <p>HTTP 是一个非常好的例子。</p>
-<figure><img src="giant_images/a49a6bb8cd38ae1738d9c00aec68b444-16615695512401.png" alt="图片" tabindex="0" loading="lazy"><figcaption>图片</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/a49a6bb8cd38ae1738d9c00aec68b444-16615695512401.png" alt="图片" tabindex="0" loading="lazy"><figcaption>图片</figcaption></figure>
 <p>HTTP 通过设置回车符、换行符作为 HTTP 报文协议的边界。</p>
 <p>有一点要注意，这个作为边界点的特殊字符，如果刚好消息内容里有这个特殊字符，我们要对这个字符转义，避免被接收方当作消息的边界点而解析到无效的数据。</p>
 <h2 id="🖼️场景题" tabindex="-1"><a class="header-anchor" href="#🖼️场景题" aria-hidden="true">#</a> 🖼️场景题</h2>
@@ -5779,7 +5779,7 @@ Swap:  5144568k total,       56k used,  5144512k free,  2013180k cached
 .rodata：只读数据，存放字符串字面量，全局常量以及 switch 跳转表之类
 .data：存放已经初始化的全局和静态变量
 .bss：存放未初始化或初始化为 0 的全局和静态变量，仅仅是占位符，不占空间，名称可以理解为 Better Save Space（实际起源并不是这个）</p>
-<figure><img src="giant_images/image-20220727223840133.png" alt="image-20220727223840133" tabindex="0" loading="lazy"><figcaption>image-20220727223840133</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/image-20220727223840133.png" alt="image-20220727223840133" tabindex="0" loading="lazy"><figcaption>image-20220727223840133</figcaption></figure>
 <h3 id="linux-命令-如何查看主机-cpu-核数-如何查看内存还剩多少" tabindex="-1"><a class="header-anchor" href="#linux-命令-如何查看主机-cpu-核数-如何查看内存还剩多少" aria-hidden="true">#</a> linux 命令，如何查看主机 CPU 核数？如何查看内存还剩多少？</h3>
 <p>cat /proc/cpuinfo</p>
 <p>cat /proc/meminfo</p>
@@ -5799,7 +5799,7 @@ Swap:  5144568k total,       56k used,  5144512k free,  2013180k cached
 <li>Page Cache存在后，CPU将数据从用户缓冲区拷贝到内核缓冲区，Page Cache变为脏页（Dirty Page），写流程返回；</li>
 <li>用户主动触发刷盘或者达到特定条件内核触发刷盘，唤醒pdflush线程将内核缓冲区的数据刷入磁盘；</li>
 </ol>
-<figure><img src="giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70.png" alt="在这里插入图片描述" tabindex="0" loading="lazy"><figcaption>在这里插入图片描述</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70.png" alt="在这里插入图片描述" tabindex="0" loading="lazy"><figcaption>在这里插入图片描述</figcaption></figure>
 <p>【拓展】读流程</p>
 <ol>
 <li>应用程序发起读请求，触发系统调用read()函数，用户态切换为内核态；</li>
@@ -5809,7 +5809,7 @@ Swap:  5144568k total,       56k used,  5144512k free,  2013180k cached
 <li>DMA 磁盘控制器向 CPU 发出数据读完的信号，由 CPU 负责将数据从内核缓冲区拷贝到用户缓冲区；</li>
 <li>用户进程由内核态切换回用户态，获得文件数据；</li>
 </ol>
-<figure><img src="giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70-166168653604411.png" alt="在这里插入图片描述" tabindex="0" loading="lazy"><figcaption>在这里插入图片描述</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhbmdndW9zYg==,size_16,color_FFFFFF,t_70-166168653604411.png" alt="在这里插入图片描述" tabindex="0" loading="lazy"><figcaption>在这里插入图片描述</figcaption></figure>
 <h2 id="🛡️安全" tabindex="-1"><a class="header-anchor" href="#🛡️安全" aria-hidden="true">#</a> 🛡️安全</h2>
 <h3 id="讲讲-jwt" tabindex="-1"><a class="header-anchor" href="#讲讲-jwt" aria-hidden="true">#</a> 讲讲 JWT</h3>
 <p>JWT（Json Web Token）, 是为了在网络应用环境间传递声明而执行的一种基于 JSON 的开放标准。JWT 一般被用来在身份提供者和服务提供者间传递被认证的用户身份信息，以便于从资源服务器获取资源，也可以增加一些额外的其它业务逻辑所必须的声明信息，该 token 也可直接被用于认证，也可被加密。</p>
@@ -6355,7 +6355,7 @@ Swap:  5144568k total,       56k used,  5144512k free,  2013180k cached
 <span class="token punctuation">}</span>
 </code></pre><div class="line-numbers" aria-hidden="true"><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div><div class="line-number"></div></div></div><p>这就是懒加载模式的“双检锁”：外层放宽入口，保证线程并发的高效性；内层加锁同步，保证实例化的单次运行。</p>
 <h3 id="git中merge和rebase区别-2022蔚来" tabindex="-1"><a class="header-anchor" href="#git中merge和rebase区别-2022蔚来" aria-hidden="true">#</a> git中merge和rebase区别（2022蔚来）</h3>
-<figure><img src="giant_images/759200-20160806092734215-279978821.png" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
+<figure><img src="@source/Java/eightpart/giant_images/759200-20160806092734215-279978821.png" alt="img" tabindex="0" loading="lazy"><figcaption>img</figcaption></figure>
 <h3 id="单例模式线程安全-2022蔚来" tabindex="-1"><a class="header-anchor" href="#单例模式线程安全-2022蔚来" aria-hidden="true">#</a> 单例模式线程安全（2022蔚来）</h3>
 <h4 id="多线程安全单例模式实例一-不使用同步锁" tabindex="-1"><a class="header-anchor" href="#多线程安全单例模式实例一-不使用同步锁" aria-hidden="true">#</a> 多线程安全单例模式实例一(不使用同步锁)</h4>
 <div class="language-java line-numbers-mode" data-ext="java"><pre v-pre class="language-java"><code><span class="token keyword">public</span> <span class="token keyword">class</span> <span class="token class-name">Singleton</span>
