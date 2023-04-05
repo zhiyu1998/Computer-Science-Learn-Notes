@@ -56,3 +56,5 @@ src/.vuepress/.cache/
 src/.vuepress/.temp/
 src/.vuepress/dist/
 /dist/
+.obsidian
+.history

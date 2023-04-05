@@ -243,9 +243,9 @@ ThreadLocalHandshakes.withThreadLocalHandshakes(() -> {
    例如，JVM 将不再默认扩展 Metaspace，而是在达到限制时开始垃圾回收或抛出 OutOfMemoryError。
    这些是 Java 17 中的主要新特性及其示例。
 
-### 关于泛型的一些理解
+## 关于泛型的一些理解
 
-#### 解释下这三个T分别代表什么意思？
+### 解释下这三个T分别代表什么意思？
 
 ```java
 public static <T> T copy(Class<T> clazz, Object source) {
@@ -274,7 +274,7 @@ public static <T> T copy(Class<T> clazz, Object source) {
  
 
 
-#### 进一步思考：如果没有`<T>`可以吗？
+### 进一步思考：如果没有`<T>`可以吗？
 如果在编译器中不带`<T>`，那么就会报错：`Cannot resolve symbol 'T'`
 ```java
 public T test(Class clazz) {
@@ -288,7 +288,7 @@ public T test(Class clazz) {
 }
 ```
 
-#### `<T>`就是接收参数的类型吗
+### `<T>`就是接收参数的类型吗
 这里的接收参数指的是：`Class<T> clazz, Object source`
 `<T>`不是接收参数的类型，它实际上是一种声明泛型类型参数的方式。在Java中，使用尖括号指定一个或多个泛型类型参数，并将其用于方法签名、类定义或接口定义中。
 
@@ -296,23 +296,23 @@ public T test(Class clazz) {
 
 这里的T并不是一个具体的类型，而是声明方法所接受和返回的类型参数的占位符。在调用该方法时，T会被替换成具体的类型，以告诉编译器如何解析该方法的参数和返回值类型。
 
-#### 方法中的static `<T>`中的`<T>`，与Class`<T>` clazz中的`<T>`是同一个意思吗
+### 方法中的static `<T>`中的`<T>`，与Class`<T>` clazz中的`<T>`是同一个意思吗
 
 static `<T>`和Class`<T>`中的`<T>`并不是相同的意思。在Java中，`<T>`或其他标识符（如E、K、V等）用于声明泛型类型参数。通过使用泛型类型参数，我们可以编写更通用、可重用的代码，以处理不同类型的数据。
 
 在`public static <T> T copy(Class<T> clazz, Object source)`方法中，`<T>`声明了一个名为T的泛型类型参数。它指示该方法将接受一个Class`<T>`类型的clazz参数，并返回一个T类型的对象。这里的`<T>`与后面的Class`<T>`是独立的定义，它们只是两个使用了相同标识符名称的不同类型声明而已。
 
-#### 为什么不能写成static T `<T>`
+### 为什么不能写成static T `<T>`
 如果尝试将方法签名写成`static T <T>`, 则会出现语法错误，因为在Java中，使用尖括号来声明泛型类型参数，不能将其放在返回类型之前。正确的方法声明应该是 `static <T> T copy(Class<T> clazz, Object source)`，即在返回类型之前使用尖括号声明泛型类型参数T。
 
-#### static `<T>`中T声明了T的泛型类型参数，Class`<T>`才能接收一个为T类型的clazz吗
+### static `<T>`中T声明了T的泛型类型参数，Class`<T>`才能接收一个为T类型的clazz吗
 在声明`static <T> T copy(Class<T> clazz, Object source)`方法时，`<T>`是泛型类型参数的声明部分，用于指定该方法将接受一个Class对象和一个Object对象作为参数，并返回一个与clazz参数指定的类相同类型的对象。
 
 同时，在方法的第一个参数中，clazz是一个Class`<T>`类型的参数，表示clazz参数传递的Class对象是T类型的。这里的T是在方法签名中声明的泛型类型参数，它可以在方法调用时被替换成实际的类型。因此，clazz参数将始终是一个Class对象，其类型与T相同。
 
 通过使用泛型类型参数T，我们可以定义一个通用的方法，它能够接受不同类型的Class对象作为参数，并返回相应类型的对象。这使得我们的代码更加灵活和通用，可以处理多种类型的数据。
  
-#### 总结
+ 总结
 在声明泛型方法的时候，尤其返回类型是泛型的时候，需要声明`<T>`
 * 第一个`<T>`
 * Class`<T>`

@@ -5038,7 +5038,7 @@ vuepress-plugin-photo-swipe@2.0.0-beta.201:
     vuepress-plugin-sass-palette "2.0.0-beta.201"
     vuepress-shared "2.0.0-beta.201"
 
-vuepress-plugin-pwa2@2.0.0-beta.201:
+vuepress-plugin-pwa2@2.0.0-beta.201, vuepress-plugin-pwa2@^2.0.0-beta.201:
   version "2.0.0-beta.201"
   resolved "https://registry.npmmirror.com/vuepress-plugin-pwa2/-/vuepress-plugin-pwa2-2.0.0-beta.201.tgz#3643123d4898b835d57144643a3e6ac6949e64a1"
   integrity sha512-kJKHJPAi9mD0mJbDFTq/n9zmRC6DzbgBQRoxS6/K3H/oWQHrlcGa9vfUbGbk6OfI5k0D1sIqsOAgwmazLMRMDw==
@@ -5082,6 +5082,22 @@ vuepress-plugin-sass-palette@2.0.0-beta.201:
     "@vuepress/utils" "2.0.0-beta.61"
     chokidar "^3.5.3"
     sass "^1.60.0"
+    vuepress-shared "2.0.0-beta.201"
+
+vuepress-plugin-search-pro@^2.0.0-beta.201:
+  version "2.0.0-beta.201"
+  resolved "https://registry.npmmirror.com/vuepress-plugin-search-pro/-/vuepress-plugin-search-pro-2.0.0-beta.201.tgz#f7dd504424a137c8d58b7ade86771b1831ebff12"
+  integrity sha512-w+uNQewRFP75cSy9Sr3I6G3s1l4/Qwpb/vvqwp3MF26RIbrwthgAlLBLXY7HS4HxH5xpRsYX2k0nhsVFMZ5lFQ==
+  dependencies:
+    "@vuepress/client" "2.0.0-beta.61"
+    "@vuepress/shared" "2.0.0-beta.61"
+    "@vuepress/utils" "2.0.0-beta.61"
+    "@vueuse/core" "^9.13.0"
+    cheerio "1.0.0-rc.12"
+    chokidar "^3.5.3"
+    vue "^3.2.47"
+    vue-router "^4.1.6"
+    vuepress-plugin-sass-palette "2.0.0-beta.201"
     vuepress-shared "2.0.0-beta.201"
 
 vuepress-plugin-seo2@2.0.0-beta.201:
