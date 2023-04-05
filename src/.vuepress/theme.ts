@@ -92,7 +92,9 @@ export default hopeTheme({
       vPre: true,
       vuePlayground: true,
     },
-
+    pwa: {
+      hintComponent: "检测到新内容，点击刷新"
+    },
     // uncomment these if you want a pwa
     // pwa: {
     //   favicon: "/favicon.ico",
