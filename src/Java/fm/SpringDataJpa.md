@@ -1,6 +1,9 @@
 ---
 order: 5
 title: SpringDataJpa
+category:
+  - Spring
+  - 数据库
 ---
 # Spring Data JPA ALL IN ONE
 - [Spring Data JPA ALL IN ONE](#spring-data-jpa-all-in-one)

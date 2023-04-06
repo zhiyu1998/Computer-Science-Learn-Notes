@@ -3,7 +3,7 @@ title: 导读
 index: false
 icon: discover
 category:
-  - Guide
+  - 导读
 ---
 
 ## :milky_way:标志说明

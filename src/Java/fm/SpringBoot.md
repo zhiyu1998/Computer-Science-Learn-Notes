@@ -1,6 +1,8 @@
 ---
 order: 4
 title: SpringBoot
+category:
+  - Spring
 ---
 # Spring-Boot-Note
 - [Spring-Boot-Note](#spring-boot-note)

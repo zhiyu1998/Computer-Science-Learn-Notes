@@ -1,6 +1,8 @@
 ---
 order: 6
 title: SpringSecurity
+category:
+  - Spring
 ---
 - [Spring Security 基础](#spring-security-基础)
   - [Spring Security 对比 Shiro](#spring-security-对比-shiro)

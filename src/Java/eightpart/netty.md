@@ -3,6 +3,9 @@
 order: 10
 author: zhiyu1998
 title: Netty
+category:
+  - netty
+  - 八股文
 ---
 
 ## 🕸️Netty

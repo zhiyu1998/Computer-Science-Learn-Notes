@@ -2,6 +2,8 @@
 
 order: 1
 title: 从问题中学习到Go的精髓
+category:
+  - golang
 ---
 
 # Golang-Learn-In-Problem 从问题中学习到Go的精髓

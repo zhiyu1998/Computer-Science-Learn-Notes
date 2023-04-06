@@ -1,6 +1,8 @@
 ---
 order: 1
 title: Spring
+category:
+  - Spring
 ---
 # Spring All in One
 

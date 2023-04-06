@@ -1,6 +1,8 @@
 ---
 order: 3
 title: Mybatis
+category:
+  - 数据库
 ---
 MyBatis ALL IN ONE
 

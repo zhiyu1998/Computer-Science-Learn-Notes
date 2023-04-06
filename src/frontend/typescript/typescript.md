@@ -3,8 +3,7 @@ order: 1
 title: TypeScript
 category:
   - frontend
-tag:
-  - typescript
+  - 前端
 ---
 【思维导图来自：https://github.com/jCodeLife/mind-map】
 

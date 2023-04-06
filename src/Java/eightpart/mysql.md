@@ -3,6 +3,9 @@
 order: 6
 author: zhiyu1998
 title: MySQL
+category:
+  - 数据库
+  - 八股文
 ---
 
 ## 🐬 MYSQL

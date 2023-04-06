@@ -3,8 +3,7 @@ order: 1
 title: Vue2&Vue3
 category:
   - frontend
-tag:
-  - vue
+  - 前端
 ---
 # Vue 2
 

@@ -3,6 +3,9 @@
 order: 4
 author: zhiyu1998
 title: JVM
+category:
+  - 虚拟机
+  - 八股文
 ---
 
 ## ♻️ JVM

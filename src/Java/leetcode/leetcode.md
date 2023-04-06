@@ -1,6 +1,8 @@
 ---
 sidebar_position: 4
 title: 力扣刷题顺序
+category:
+  - lc
 ---
 # 我的刷题顺序
 

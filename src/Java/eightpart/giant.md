@@ -1,6 +1,9 @@
 ---
 sidebar_position: 1
 title: 2022大厂八股文
+category:
+  - 八股文
+  - 大厂
 ---
 ## 🍤八股文经验&面经精选  
 

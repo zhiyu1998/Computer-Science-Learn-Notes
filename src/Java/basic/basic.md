@@ -1,6 +1,8 @@
 ---
 sidebar_position: 1
 title: 基础思维导图
+category:
+  - Java基础
 ---
 ## Java基础思维导图
 

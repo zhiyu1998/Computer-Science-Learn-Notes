@@ -3,6 +3,9 @@
 order: 1
 author: zhiyu1998
 title: Java基础
+category:
+  - Java基础
+  - 八股文
 ---
 
 ## ☕️ Java基础

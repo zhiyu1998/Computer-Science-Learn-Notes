@@ -1,6 +1,8 @@
 ---
 sidebar_position: 2
 title: 并发编程
+category:
+  - 并发
 ---
 ## 前言
 

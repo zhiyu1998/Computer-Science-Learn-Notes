@@ -1,6 +1,8 @@
 ---
 order: 2
 title: SpringMVC
+category:
+  - Spring
 ---
 # SpringMVC ALL IN ONE
 

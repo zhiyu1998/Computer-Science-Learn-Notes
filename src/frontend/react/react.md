@@ -1,6 +1,8 @@
 ---
 order: 1
 title: React笔记
+category:
+  - 前端
 ---
 # React笔记
 ## 安装脚手架命令

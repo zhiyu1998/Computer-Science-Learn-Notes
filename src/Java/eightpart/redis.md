@@ -3,6 +3,9 @@
 order: 7
 author: zhiyu1998
 title: redis
+category:
+  - Redis
+  - 八股文
 ---
 
 ## ♨️ redis

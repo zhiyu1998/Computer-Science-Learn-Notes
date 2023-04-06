@@ -3,6 +3,8 @@
 order: 1
 author: zhiyu1998
 title: Kotlin基础&结合Spring
+category:
+  - Kotlin
 ---
 
 ## 基础知识

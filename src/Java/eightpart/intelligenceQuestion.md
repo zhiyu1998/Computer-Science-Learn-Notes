@@ -3,6 +3,9 @@
 order: 14
 author: zhiyu1998
 title: 智力题
+category:
+  - 智力题
+  - 八股文
 ---
 
 
