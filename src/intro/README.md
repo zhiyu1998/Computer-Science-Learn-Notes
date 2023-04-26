@@ -43,7 +43,7 @@ category:
 ## :tiger: Interview
 
 * [Eight-Part-Notes](/Java/eightpart/giant.md)  Java后端大厂面试八股文碎片知识整理（目前收录：字节、美团、拼多多、携程） ⏳ 
-* [Eight-Part-Selected](/Java/eightpart/intro.md)  八股文精选集（精选高频和基础容易忽视的知识点）⏳ 
+* [Eight-Part-Selected](/Java/eightpart/foundation.md)  八股文精选集（精选高频和基础容易忽视的知识点）⏳ 
 * [Eight-Part-Think](/Java/eightpart/think.md)  八股文个人思考⏳
 
 > 注：收录的网站来自 力扣、牛客的热门讨论

@@ -32,7 +32,7 @@ features:
   - title: 大厂面试
     icon: profile
     details: 准备好，全面进阶；大厂面试，挑战不止，成功仅在一念之间
-    link: /java/eightpart/intro
+    link: /java/eightpart/foundation
 
   - title: Golang
     icon: emmet
