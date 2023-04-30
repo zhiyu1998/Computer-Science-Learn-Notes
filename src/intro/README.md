@@ -71,9 +71,7 @@ category:
 ## :ocean: Frontend
 
 *  [Vue](/frontend/vue/vue.md) Vue2&Vue3笔记 ✅ 
-*  [React](/frontend/react/react.md) React笔记 ✅ 
-*  [Typescript](/frontend/typescript/typescript.md) TypeScript笔记 ✅ 
-
+*  [React](/frontend/react/react.md) React笔记 ✅
 
 
 ## :mouse: Golang

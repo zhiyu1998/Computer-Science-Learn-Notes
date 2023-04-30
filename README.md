@@ -69,9 +69,6 @@
 
 * Vue2&Vue3笔记 ✅
 * React笔记 ✅
-* Electron笔记 （短期内不更，欢迎PR）🚫
-* TypeScript笔记 ✅
-
 
 
 ## :mouse: Golang
