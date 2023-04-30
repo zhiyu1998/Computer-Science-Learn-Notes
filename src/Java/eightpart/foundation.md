@@ -791,8 +791,6 @@ String类是final类，不可以被继承。
 
 ### 谈谈你对多态的理解？
 
-著作权归https://pdai.tech所有。 链接：https://www.pdai.tech/md/java/basic/java-basic-oop.html
-
 多态分为编译时多态和运行时多态:
 
 - 编译时多态主要指方法的重载
