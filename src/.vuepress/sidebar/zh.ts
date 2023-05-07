@@ -24,6 +24,13 @@ export const zhSidebar = sidebar({
       collapsible: true,
     },
     {
+      icon: "light",
+      text: "Rust",
+      prefix: "rust",
+      children: "structure",
+      collapsible: true,
+    },
+    {
       text: "Java",
       icon: "java",
       collapsible: true,
