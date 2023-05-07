@@ -1,0 +1,1 @@
+import{_ as t,W as a,X as s,a0 as e,a1 as c}from"./framework-c8643d23.js";const r={},o=e("h1",{id:"ts笔记",tabindex:"-1"},[e("a",{class:"header-anchor",href:"#ts笔记","aria-hidden":"true"},"#"),c(" TS笔记")],-1),n=[o];function _(d,i){return a(),s("div",null,n)}const l=t(r,[["render",_],["__file","typescript.html.vue"]]);export{l as default};
