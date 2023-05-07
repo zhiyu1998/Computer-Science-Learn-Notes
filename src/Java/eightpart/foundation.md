@@ -1391,12 +1391,77 @@ equals ：用来比较两个对象的内容是否相等。注意：equals 方法
 
 ### 如何决定使用 HashMap 还是 TreeMap？
 
-`TreeMap<K,V>`的Key值是要求实现java.lang.Comparable，所以迭代的时候TreeMap默认是按照Key值升序排序的；TreeMap的实现是基于红黑树结构。适用于按自然顺序或自定义顺序遍历键（key）。
+> 区别：
+> HashMap实现Map接口，而TreeMap实现SortedMap接口，它是Map的子接口。
+> HashMap使用哈希来存储键值对，而TreeMap使用红黑树，这是一种自平衡二叉搜索树。
+> HashMap不保证键或值的任何顺序，而TreeMap根据键的自然顺序或自定义比较器对键进行排序。
+> 对于大多数操作，如插入、删除和检索，HashMap比TreeMap更快，因为散列比树遍历更有效。 但是，TreeMap在某些操作上比HashMap更快，比如查找最小或最大键，因为它不需要扫描整个映射。
+> 参考资料：
+> 1. https://www.geeksforgeeks.org/hashmap-treemap-java/
+> 2. https://howtodoinjava.com/java/collections/java-treemap-vs-hashmap/
+> 3. https://stackoverflow.com/questions/2444359/what-is-the-difference-between-a-hashmap-and-a-treemap
+> 4. https://www.javatpoint.com/difference-between-hashmap-and-treemap
+> 5. https://www.baeldung.com/java-treemap-vs-hashmap
 
-`HashMap<K,V>`的Key值实现散列hashCode()，分布是散列的、均匀的，不支持排序；数据结构主要是桶(数组)，链表或红黑树。适用于在Map中插入、删除和定位元素。
+TreeMap 和HashMap 都继承自AbstractMap ，但是需要注意的是TreeMap它还实现了NavigableMap接口和SortedMap 接口。
+
+实现 NavigableMap 接口让 TreeMap 有了对集合内元素的搜索的能力。实现SortedMap接口让 TreeMap 有了对集合中的元素根据键排序的能力。默认是按 key 的升序排序，不过我们也可以指定排序的比较器。示例代码如下：
+
+```java
+/**
+ * @author shuang.kou
+ * @createTime 2020年06月15日 17:02:00
+ */
+public class Person {
+    private Integer age;
+
+    public Person(Integer age) {
+        this.age = age;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+
+    public static void main(String[] args) {
+        TreeMap<Person, String> treeMap = new TreeMap<>(new Comparator<Person>() {
+            @Override
+            public int compare(Person person1, Person person2) {
+                int num = person1.getAge() - person2.getAge();
+                return Integer.compare(num, 0);
+            }
+        });
+        treeMap.put(new Person(3), "person1");
+        treeMap.put(new Person(18), "person2");
+        treeMap.put(new Person(35), "person3");
+        treeMap.put(new Person(16), "person4");
+        treeMap.entrySet().stream().forEach(personStringEntry -> {
+            System.out.println(personStringEntry.getValue());
+        });
+    }
+}
+// person1
+// person4
+// person2
+// person3
+
+```
+可以看出，TreeMap 中的元素已经是按照 Person 的 age 字段的升序来排列了。
+
+上面，我们是通过传入匿名内部类的方式实现的，你可以将代码替换成 Lambda 表达式实现的方式：
+
+```java
+TreeMap<Person, String> treeMap = new TreeMap<>((person1, person2) -> {
+  int num = person1.getAge() - person2.getAge();
+  return Integer.compare(num, 0);
+});
+
+```
+
 
 **结论**
-如果你需要得到一个有序的结果时就应该使用TreeMap（因为HashMap中元素的排列顺序是不固定的）。除此之外，由于HashMap有更好的性能，所以大多不需要排序的时候我们会使用HashMap。
+如果你需要得到一个有序的结果时就应该使用TreeMap（因为HashMap中元素的排列顺序是不固定的）。除此之外，由于HashMap有更好的性能，所以大多不需要排序的时候我们会使用HashMap。另外，相比于HashMap来说 TreeMap 主要多了对集合中的元素根据键排序的能力以及对集合内元素的搜索的能力。
 
 ### ⭐HashMap 的底层实现
 
@@ -1759,11 +1824,52 @@ Queue：队列
 
 
 ### HashMap和HashTable有什么区别
+> 参考：https://www.javatpoint.com/difference-between-hashmap-and-hashtable
+- **线程是否安全**： HashMap 是非线程安全的，Hashtable 是线程安全的,因为 Hashtable 内部的方法基本都经过synchronized 修饰。（如果你要保证线程安全的话就使用 ConcurrentHashMap 吧！）；
+- **效率**： 因为线程安全的问题，HashMap 要比 Hashtable 效率高一点。另外，Hashtable 基本被淘汰，不要在代码中使用它；
+- **对 Null key 和 Null value 的支持**： HashMap 可以存储 null 的 key 和 value，但 null 作为键只能有一个，null 作为值可以有多个；Hashtable 不允许有 null 键和 null 值，否则会抛出 NullPointerException。初始容量大小和每次扩充容量大小的不同 ： ① 创建时如果不指定容量初始值，Hashtable 默认的初始大小为 11，之后每次扩充，容量变为原来的 2n+1。HashMap 默认的初始化大小为 16。之后每次扩充，容量变为原来的 2 倍。② 创建时如果给定了容量初始值，那么 Hashtable 会直接使用你给定的大小，而 HashMap 会将其扩充为 2 的幂次方大小（HashMap 中的tableSizeFor()方法保证，下面给出了源代码）。也就是说 HashMap 总是使用 2 的幂作为哈希表的大小,后面会介绍到为什么是 2 的幂次方。
+- **底层数据结构**： JDK1.8 以后的 HashMap 在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为 8）时，将链表转化为红黑树（将链表转换成红黑树前会判断，如果当前数组的长度小于 64，那么会选择先进行数组扩容，而不是转换为红黑树），以减少搜索时间（后文中我会结合源码对这一过程进行分析）。Hashtable 没有这样的机制。
+- **历史继承**：Hashtable使用了遗留类，实现了过时的Dictionary接口，而HashMap继承了较新的类，实现了Map接口。
+- **遍历方式**：Hashtable由Enumeration遍历，而HashMap由Iterator遍历。
 
-1. **HashMap**可以接受为null的key和value，key为null的键值对放在下标为0的头结点的链表中，而**Hashtable**则不行。
-2. HashMap是**非线程安全**的，HashTable是线程安全的。Jdk1.5提供了**ConcurrentHashMap**，它是HashTable的替代。
-3. **Hashtable**很多方法是**同步**方法，在单线程环境下它比HashMap要慢。
-4. **哈希值的使用**不同，HashTable直接使用对象的hashCode。而HashMap重新计算hash值。
+HashMap 中带有初始容量的构造函数：
+
+```java
+    public HashMap(int initialCapacity, float loadFactor) {
+        if (initialCapacity < 0)
+            throw new IllegalArgumentException("Illegal initial capacity: " +
+                                               initialCapacity);
+        if (initialCapacity > MAXIMUM_CAPACITY)
+            initialCapacity = MAXIMUM_CAPACITY;
+        if (loadFactor <= 0 || Float.isNaN(loadFactor))
+            throw new IllegalArgumentException("Illegal load factor: " +
+                                               loadFactor);
+        this.loadFactor = loadFactor;
+        this.threshold = tableSizeFor(initialCapacity);
+    }
+     public HashMap(int initialCapacity) {
+        this(initialCapacity, DEFAULT_LOAD_FACTOR);
+    }
+
+```
+
+下面这个方法保证了 HashMap 总是使用 2 的幂作为哈希表的大小。
+
+```java
+    /**
+     * Returns a power of two size for the given target capacity.
+     */
+    static final int tableSizeFor(int cap) {
+        int n = cap - 1;
+        n |= n >>> 1;
+        n |= n >>> 2;
+        n |= n >>> 4;
+        n |= n >>> 8;
+        n |= n >>> 16;
+        return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+    }
+
+```
 
 
 
@@ -1771,12 +1877,13 @@ Queue：队列
 
 `ConcurrentHashMap` 和 `Hashtable` 的区别主要体现在实现线程安全的方式上不同。
 
-底层数据结构：JDK1.7的 `ConcurrentHashMap`底层采用**分段的数组+链表**实现，JDK1.8采用的数据结构跟 `HashMap1.8`的结构一样，**数组+链表/红黑二叉树**。`Hashtable`和JDK1.8之前的 `HashMap`的底层数据结构类似都是采用数组+链表的形式，数组是 `HashMap`的主体，链表则是主要为了解决哈希冲突而存在的；
+**底层数据结构**：JDK1.7的 `ConcurrentHashMap`底层采用**分段的数组+链表**实现，JDK1.8采用的数据结构跟 `HashMap1.8`的结构一样，**数组+链表/红黑二叉树**。`Hashtable`和JDK1.8之前的 `HashMap`的底层数据结构类似都是采用数组+链表的形式，数组是 `HashMap`的主体，链表则是主要为了解决哈希冲突而存在的；
 
-实现线程安全的方式（重要）：
+**实现线程安全的方式（重要）**：
 
 1. 在JDK1.7的时候，ConcurrentHashMap（分段锁）对整个桶数组进行了分割分段(Segment)，每一把锁只锁容器其中一部分数据，多线程访问容器里不同数据段的数据，就不会存在锁竞争，提高并发访问率。到了JDK1.8的时候已经摒弃了Segment的概念，而是直接用Node数组+链表+红黑树的数据结构来实现，并发控制使用synchronized和CAS来操作。（JDK1.6以后对synchronized锁做了很多优化）整个看起来就像是优化过且线程安全的HashMap，虽然在JDK1.8中还能看到Segment的数据结构，但是已经简化了属性，只是为了兼容旧版本；
-2. HashTable和HashMap的实现原理几乎一样，差别无非是**1.HashTable不允许key和value为null；2.HashTable是线程安全的。**但是HashTable线程安全的策略实现代价却太大了，简单粗暴，get/put所有相关操作都是synchronized的，这相当于给整个哈希表加了一把**大锁**，多线程访问时候，只要有一个线程访问或操作该对象，那其他线程只能阻塞，相当于将所有的操作**串行化**，在竞争激烈的并发场景中性能就会非常差。
+2. 到了 JDK1.8 的时候，ConcurrentHashMap 已经摒弃了 Segment 的概念，而是直接用 Node 数组+链表+红黑树的数据结构来实现，并发控制使用 synchronized 和 CAS 来操作。（JDK1.6 以后 synchronized 锁做了很多优化） 整个看起来就像是优化过且线程安全的 HashMap，虽然在 JDK1.8 中还能看到 Segment 的数据结构，但是已经简化了属性，只是为了兼容旧版本；
+3. Hashtable(同一把锁) :使用 synchronized 来保证线程安全，效率非常低下。当一个线程访问同步方法时，其他线程也访问同步方法，可能会进入阻塞或轮询状态，如使用 put 添加元素，另一个线程不能使用 put 添加元素，也不能使用 get，竞争会越来越激烈效率越低。
 
 ![image-20220606221411976](./personal_images/image-20220606221411976.png)
 
