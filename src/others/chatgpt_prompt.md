@@ -366,7 +366,7 @@ Jason Wei等作者对思维链的定义是一系列的中间推理步骤（ a se
 #### 第一步：知识生成
 这里我们打算通过 ChatGPT 回复常识性问题；“How many wings does a penguin have?”
 ChatGPT认为企鹅是没有翅膀的。
-![wiki-1](wiki-209a19e269ee228ffa691db6cac386ee.png)
+![wiki-1](./images/wiki-209a19e269ee228ffa691db6cac386ee.png)
 再打开一个对话框搜索，接着我们让 ChatGPT 生成一些跟企鹅有关的知识：`Generate 5 facts about penguins`
 1. Penguins are flightless birds found mainly in the Southern Hemisphere.
 2. There are 18 species of penguins, ranging in size from the Little Blue Penguin to the Emperor Penguin.
