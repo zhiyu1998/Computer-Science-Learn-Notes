@@ -6,6 +6,8 @@ export default defineUserConfig({
   base: "/Computer-Science-Learn-Notes/",
   // 设置正在使用的语言
   lang: "zh-CN",
+  // 设置网站标题
+  title: "CSLN",
   theme,
   plugins: [
       searchProPlugin({

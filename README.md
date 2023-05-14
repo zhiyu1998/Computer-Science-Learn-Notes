@@ -29,14 +29,7 @@
 
 * C语言数据结构思维导图 ✅
 * 个人技术成长 ⏳
-
-
-
-## :penguin: Algorithm
-
-* 力扣刷题笔记（Java）⏳
-  * 剑指offer ⏳
-  * 热门100题 ⏳
+* ChatGPT常用Prompt ⏳
 
 
 
@@ -63,6 +56,10 @@
 * k8s笔记（短期内不更，欢迎PR） 🚫
 * Kotlin结合Spring生态 ⏳ 
 
+## 🦀 Rust
+
+- Rust笔记-基础篇 ✅
+
 
 
 ## :ocean: Frontend
@@ -73,7 +70,7 @@
 
 ## :mouse: Golang
 
-* 从问题中学习到Go的精髓（因原先笔记难以阅读，所以重构笔记） ⏳
+* 从问题中学习到Go的精髓（因原先笔记难以阅读，所以重构笔记）✅
 
 
 

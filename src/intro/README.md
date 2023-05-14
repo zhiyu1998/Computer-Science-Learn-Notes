@@ -29,14 +29,7 @@ category:
 
 * [DataStruct-BrainMind](/fundamental/datastruct.md) 语言数据结构思维导图 ✅ 
 * [others](/others/rent_house.md) 个人技术成长 ⏳
-
-
-
-## :penguin: Algorithm
-
-* [LeetCode-Notes](/Java/leetcode/leetcode.md) 力扣刷题笔记（Java）⏳ 
-  * 剑指offer ⏳
-  * 热门100题 ⏳
+* [prompt](/others/chatgpt_prompt) ChatGPT常用Prompt ⏳
 
 
 
@@ -45,6 +38,7 @@ category:
 * [Eight-Part-Notes](/Java/eightpart/giant.md)  Java后端大厂面试八股文碎片知识整理（目前收录：字节、美团、拼多多、携程） ⏳ 
 * [Eight-Part-Selected](/Java/eightpart/foundation.md)  八股文精选集（精选高频和基础容易忽视的知识点）⏳ 
 * [Eight-Part-Think](/Java/eightpart/think.md)  八股文个人思考⏳
+* [LeetCode-Notes](/Java/leetcode/leetcode.md) 力扣刷题笔记（Java）⏳ 
 
 > 注：收录的网站来自 力扣、牛客的热门讨论
 
@@ -65,6 +59,12 @@ category:
 * [Concurrent](/Java/concurrent/concurrent.md)  JUC笔记 ✅ 
 * k8s 笔记 🚫
 * [Kotlin结合SpringBoot](/Java/kotlin/kotlin.md)🚫
+
+
+
+## 🦀 Rust
+
+- Rust笔记-基础篇 ✅
 
 
 
