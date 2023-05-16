@@ -1,5 +1,7 @@
 ---
-sidebar_position: 1
+
+order: 13
+author: zhiyu1998
 title: 2022大厂八股文
 category:
   - 八股文

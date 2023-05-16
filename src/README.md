@@ -3,8 +3,8 @@ home: true
 icon: home
 title: 主页
 heroImage: /logo.png
-heroText: Computer Science Learn Notes
-tagline: CS（Computer Science）生涯：读书笔记，集成Java知识体系！
+heroText: CSLN
+tagline: CSLN（Computer Science Learn Notes）CS生涯：读书笔记，集成Java知识体系！
 actions:
   - text: 进入学习 💡
     link: /intro/
@@ -41,12 +41,12 @@ features:
 
   - title: 工作总结
     icon: info
-    details: 工作总结的Java工具是用Java语言开发的可用于快速生成工作总结的应用程序
+    details: Java工具类是用Java语言开发的可用于快速生成工作总结的应用程序
     link: /others/personal_tech
 
-  - title: 成长经验
+  - title: 好物推荐
     icon: blog
-    details: 成长经验是通过不断的实践和积累所获得的生活智慧和人生经验
+    details: 推荐一些个人经常使用的插件、网页、开源项目等
     link: /others/rent_house
 copyright: false
 footer: 使用 <a href="https://github.com/zhiyu1998/Computer-Science-Learn-Notes" target="_blank">Github © 2023 Computer Science Learn Notes</a> MIT 协议, 版权所有 © 2023-present zhiyu1998

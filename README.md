@@ -1,8 +1,9 @@
 <div align="center">
  <img width="180px" src="src/.vuepress/public/logo.png">
     <p/>
- <h1>『Computer Science Learn Notes』</h1>
+ <h1>『CSLN（Computer Science Learn Notes）』</h1>
 </div>
+
 
 
 
@@ -19,9 +20,9 @@
 
 ## :bird:目录概览
 
-|          算法           |          基础学科           |       面试&nbsp;       |         前端         | &nbsp;Golang&nbsp;  | &nbsp;Java&nbsp;&nbsp; |
+|          Rust       |          基础学科           |       面试&nbsp;       |         前端         | &nbsp;Golang&nbsp;  | &nbsp;Java&nbsp;&nbsp; |
 | :---------------------: | :-------------------------: | :--------------------: | :------------------: | :-----------------: | :--------------------: |
-| [:penguin:](#Algorithm) | [:baby_chick:](#Foundation) | [:tiger:](#Interview) | [:ocean:](#Frontend) | [:mouse:](#golang) |   [:coffee:](#java)    |
+| [🦀](#Rust) | [:baby_chick:](#Foundation) | [:tiger:](#Interview) | [:ocean:](#Frontend) | [:mouse:](#golang) |   [:coffee:](#java)    |
 
 <img align="right" alt="GIF" src="src/.vuepress/public/code.gif" width="343" height="220" title="Do what you like, and do it best!"> &nbsp;
 

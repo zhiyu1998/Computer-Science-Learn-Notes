@@ -30,7 +30,7 @@ int binarySearch(int[] nums, int target) {
 ```
 
 
-## 双指针
+## ↖️↗️双指针
 
 ### 快慢指针的常见算法
 
@@ -196,7 +196,7 @@ void slidingWindow(string s, string t) {
 ```
 
 
-## 回溯
+## ↩️ 回溯
 回溯的大致模板就是以下，掌握三个核心点就行：
 - 递归函数
 - 递归里肯定有一个if（至少一个）
@@ -242,7 +242,7 @@ void backtrack(int[] nums, LinkedList<Integer> track) {
 - [全排列](https://leetcode.cn/problems/permutations/)
 - [单词搜索](https://leetcode.cn/submissions/detail/432257030/)
 
-## 贪心
+## 🔝 贪心
 贪心的3个核心点：
 - for循环
 - Math.max
@@ -265,7 +265,7 @@ bool canJump(vector<int>& nums) {
 - [跳跃游戏](https://leetcode.cn/problems/jump-game/)
 - [买卖股票的最佳时机 II](https://leetcode.cn/problems/best-time-to-buy-and-sell-stock-ii/description/)
 
-## 动态规划
+## 🛣️ 动态规划
 动态规划是我最怕的题目之一，主要是要思考状态转移方程
 ```java
 # 初始化 base case
@@ -280,10 +280,10 @@ for 状态1 in 状态1的所有取值：
 - [不同路径](https://leetcode.cn/problems/unique-paths/)
 - [剑指 Offer 13. 机器人的运动范围](https://leetcode.cn/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/)
 
-## 分治
+## 🌈 分治
 @todo
 
-## 并查集
+## 🔎 并查集
 @todo
 
 # 刷题顺序
@@ -306,7 +306,7 @@ for 状态1 in 状态1的所有取值：
 - [ ] [验证二叉搜索树](https://leetcode-cn.com/problems/validate-binary-search-tree/)
 - [ ] [二叉搜索树中的插入操作](https://leetcode-cn.com/problems/insert-into-a-binary-search-tree/)
 
-## 链表 ✅
+## 链表
 
 * null/nil异常处理
 * dummy node哑巴节点
@@ -332,7 +332,7 @@ for 状态1 in 状态1的所有取值：
 
 
 
-## 字符串 ✅
+## 字符串
 
 需要考虑的问题：
 
@@ -351,7 +351,7 @@ for 状态1 in 状态1的所有取值：
 
 
 
-## 动态规划 🚫
+## 动态规划
 
 最长递增子序列  :arrow_right: 单词拆分 :arrow_right:  编辑距离
 
