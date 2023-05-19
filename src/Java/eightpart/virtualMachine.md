@@ -158,12 +158,34 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 都是常量池，常量池表和运行时常量池有啥关系吗？运行时常量池是干嘛的呢？
 
 **运行时常量池可以在运行期间将 class 常量池表中的符号引用解析为直接引用**。简单来说，class 常量池表就相当于一堆索引，运行时常量池根据这些索引来查找对应方法或字段所属的类型信息和名称及描述符信息
+> 那么运行时常量池中的引用到底是什么东西呢？
+> System.out.println("Hello, world!");
+> 上面这段代码生成以下字节码（javap输出）：
+> 0:   getstatic       #2; java.
+> 3:   ldc     #3; //String Hello, world!
+> 5:   invokevirtual   #4; java.
+> **# n这里是常量池的引用**。 #2 是对System.out字段的符号引用，#3 是一个Hello, world!字符串和#4 是对PrintStream.println(String)方法的符号引用。
+> 符号引用不仅仅是名称。例如，还有对方法的符号引用，包含有关其参数（Ljava/lang/String;）和返回类型（V表示void）的信息。
+> 参考：
+> - https://stackoverflow.com/questions/10209952/what-is-the-purpose-of-the-java-constant-pool
+> - https://stackoverflow.com/questions/22921010/what-is-run-time-constant-pool-and-method-area-in-java
+> - https://stackoverflow.com/questions/17406159/symbolic-references-in-java
+> - https://docs.oracle.com/javase/specs/jvms/se6/html/ConstantPool.doc.html
 
 为什么需要常量池这个东西呢？主要是为了避免频繁的创建和销毁对象而影响系统性能，其实现了对象的共享。以**字符串常量池**为例，字符串 `String` 既然作为 `Java` 中的一个类，那么它和其他的对象分配一样，需要耗费高昂的时间与空间代价，作为最基础最常用的数据类型，大量频繁的创建字符串，将会极大程度的影响程序的性能。为此，JVM 为了提高性能和减少内存开销，在实例化字符串常量的时候进行了一些优化：
 
 - 为字符串开辟了一个**字符串常量池 String Pool**，可以理解为缓存区
 - 创建字符串常量时，首先检查字符串常量池中是否存在该字符串
 - **若字符串常量池中存在该字符串，则直接返回该引用实例，无需重新实例化**；若不存在，则实例化该字符串并放入池中。
+
+> 字符串常量池支持的引用类型：（参考：https://www.baeldung.com/jvm-constant-pool）
+> - Integer, Float: with 32-bit constants
+> - Double, Long: with 64-bit constants
+> - String: a 16-bit string constant that points at another entry in the pool which contains the actual bytes
+> - Class: contains the fully qualified class name
+> - Utf8: a stream of bytes
+> - NameAndType: a colon-separated pair of values, first entry represents the name while the second entry indicates the type
+> - Fieldref, Methodref, InterfaceMethodref: a dot-separated pair of values, first value points at Class entry whereas the second value points as NameAndType entry
 
 需要注意的是，字符串常量池的位置在 JDK 1.7 前后有所变化，可以参考下面这张表：
 
@@ -196,9 +218,9 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 系统提供了 3 种类加载器：
 
-- 启动类加载器（Bootstrap ClassLoader）： 负责将存放在 `<JAVA_HOME>\lib` 目录中的，并且能被虚拟机识别的（仅按照文件名识别，如 rt.jar，名字不符合的类库即使放在 lib 目录中也不会被加载）类库加载到虚拟机内存中。
-- 扩展类加载器（Extension ClassLoader）： 负责加载 `<JAVA_HOME>\lib\ext` 目录中的所有类库，开发者可以直接使用扩展类加载器。
-- 应用程序类加载器（Application ClassLoader）： 由于这个类加载器是 ClassLoader 中的 `getSystemClassLoader()` 方法的返回值，所以一般也称它为“系统类加载器”。它负责加载用户类路径（classpath）上所指定的类库，开发者可以直接使用这个类加载器，如果应用程序中没有自定义过自己的类加载器，一般情况下这个就是程序中默认的类加载器。
+- **启动类加载器（Bootstrap ClassLoader）**： 负责将存放在 `<JAVA_HOME>\lib` 目录中的，并且能被虚拟机识别的（仅按照文件名识别，如 rt.jar，名字不符合的类库即使放在 lib 目录中也不会被加载）类库加载到虚拟机内存中。
+- **扩展类加载器（Extension ClassLoader）**： 负责加载 `<JAVA_HOME>\lib\ext` 目录中的所有类库，开发者可以直接使用扩展类加载器。
+- **应用程序类加载器（Application ClassLoader）**： 由于这个类加载器是 ClassLoader 中的 `getSystemClassLoader()` 方法的返回值，所以一般也称它为“系统类加载器”。它负责加载用户类路径（classpath）上所指定的类库，开发者可以直接使用这个类加载器，如果应用程序中没有自定义过自己的类加载器，一般情况下这个就是程序中默认的类加载器。
 
 ### 如何对栈进行参数调优
 
@@ -425,7 +447,7 @@ Parallel Scavenge 收集器也是使用标记-复制算法的多线程收集器�
 
 **Parallel Scavenge 收集器关注点是吞吐量（高效率的利用 CPU）。CMS 等垃圾收集器的关注点更多的是用户线程的停顿时间（提高用户体验）。所谓吞吐量就是 CPU 中用于运行用户代码的时间与 CPU 总消耗时间的比值。** Parallel Scavenge  收集器提供了很多参数供用户找到最合适的停顿时间或最大吞吐量，如果对于收集器运作不太了解，手工优化存在困难的时候，使用 Parallel  Scavenge 收集器配合自适应调节策略，把内存管理优化交给虚拟机去完成也是一个不错的选择。
 
-**👶新生代采用标记-复制算法，👴老年代采用标记-整理算法。**
+**👶新生代采用[标记-复制算法](#标记-复制算法，Mark-Copy)，👴老年代采用[标记-整理算法](#标记-整理算法，Mark-Compact)。**
 
 ![image-20220628153114059](./personal_images/image-20220628153114059.png)
 
@@ -456,16 +478,16 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 
 #### CMS 收集器
 
-**CMS（Concurrent Mark Sweep）收集器是一种以获取最短回收停顿时间为目标的收集器。它非常符合在注重用户体验的应用上使用。**
-
-**CMS（Concurrent Mark Sweep）收集器是 HotSpot 虚拟机第一款真正意义上的并发收集器，它第一次实现了让垃圾收集线程与用户线程（基本上）同时工作。**
+**CMS（Concurrent Mark Sweep）** 收集器是一种以获取最短回收停顿时间为目标的收集器。在每个主要GC周期中，CMS收集器在收集开始时短暂暂停所有应用程序线程，并在收集过程中再次暂停。第二个暂停往往是两个暂停中较长的一个。在两个暂停期间，多个线程用于执行收集工作。收集的其余部分（包括大部分活动对象的跟踪和无法访问的对象的清除）由一个或多个与应用程序同时运行的垃圾收集器线程完成。
 
 从名字中的**Mark Sweep**这两个词可以看出，CMS 收集器是一种 **“标记-清除”算法**实现的，它的运作过程相比于前面几种垃圾收集器来说更加复杂一些。整个过程分为四个步骤：
 
-1. **初始标记 (inital mark)**：标记 `GC Roots` 能直接关联到的对象，耗时短但需要暂停用户线程；
-2. **并发标记 (concurrent mark)**：从 `GC Roots` 能直接关联到的对象开始遍历整个对象图，耗时长但不需要暂停用户线程；
-3. **重新标记 (remark)**：采用增量更新算法，对并发标记阶段因为用户线程运行而产生变动的那部分对象进行重新标记，耗时比初始标记稍长且需要暂停用户线程；
-4. **并发清除 (inital sweep)**：并发清除掉已经死亡的对象，耗时长但不需要暂停用户线程。
+1. **初始标记 (inital mark)**：在这个阶段，CMS GC会标记所有的`GC Roots`，以及从这些GC Roots可直接关联到的对象。这个过程需要`“Stop The World”`，也就是暂停所有的用户线程，以保证在对象图遍历过程中，对象图不会发生变化。因为只是标记GC Roots直接可达的对象，所以这个阶段的时间通常会比较短。
+2. **并发标记 (concurrent mark)**：从初始标记结束后，开始进行并发标记阶段，这个阶段 GC 线程会遍历对象图，标记所有从 `GC Roots` 开始的可达对象，这个过程是与用户线程并发执行的，也就是说在这个过程中，用户线程并不会停止。因此，这个阶段可能会随着堆内存对象数量的增加而耗时较长。
+3. **重新标记 (remark)**：并发标记阶段结束后，会进行一次`“Stop The World”`操作，目的是修正并发标记阶段由于用户线程继续运行而导致的可达对象的变化。`这个过程也称为"并发标记的第二次"`，由于只是修正，并且使用了`增量更新（Incremental Update）算法`，所以这个过程的耗时通常比初始标记阶段稍长，但远小于并发标记阶段。
+4. **并发清除 (inital sweep)**：在标记完所有的存活对象后，GC 线程会进行并发清除，清除所有未被标记的对象，也就是不可达的对象。`这个过程是与用户线程并发执行的，因此不会造成用户线程的停顿`。但是这个阶段的耗时可能会比较长，因为需要清理的对象可能会比较多。
+
+> 需要注意的是，CMS收集器由于其“标记-清除”算法的特性，会导致内存碎片问题，可能会触发一次Full GC以进行内存整理。而G1收集器则通过“标记-整理”算法有效解决了这个问题。
 
 ![image-20220628153004557](./personal_images/image-20220628153004557.png)
 
@@ -475,15 +497,16 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 - **无法处理浮动垃圾；**
 - **它使用的回收算法-“标记-清除”算法会导致收集结束时会有大量空间碎片产生。**
 
-> CMS通常有两个阶段会进行STW
+> 细节：CMS通常有两个阶段会进行STW（🕊️ 妙记：并发的不会STW）
+> ==第一阶段和第三阶段==
+> - **初始标记（Initial-Mark）阶段**：在这个阶段中，程序中所有的工作线程 (用户线程) 都将会因为  “Stop-The-World” 机制而出现短暂的暂停，这个阶段的主要任务仅仅只是标记出 GC Roots  能直接关联到的对象。一旦标记完成之后就会恢复之前被暂停的所有应用线程。由于直接关联对象比较小，所以这里的速度非常快。
+> - **重新标记（Remark）阶段**：由于在并发标记阶段中，程序的工作线程会和垃圾收集线程同时运行或者交叉运行，因此为了修正并发标记期间，因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间通常会比初始标记阶段稍长一些，但也远比并发标记阶段的时间短。
 
-第一阶段和第三阶段
-
-* **初始标记（Initial-Mark）阶段**：在这个阶段中，程序中所有的工作线程 (用户线程) 都将会因为  “Stop-The-World” 机制而出现短暂的暂停，这个阶段的主要任务仅仅只是标记出 GC Roots  能直接关联到的对象。一旦标记完成之后就会恢复之前被暂停的所有应用线程。由于直接关联对象比较小，所以这里的速度非常快。
-
-* **重新标记（Remark）阶段**：由于在并发标记阶段中，程序的工作线程会和垃圾收集线程同时运行或者交叉运行，因此为了修正并发标记期间，因用户程序继续运作而导致标记产生变动的那一部分对象的标记记录，这个阶段的停顿时间通常会比初始标记阶段稍长一些，但也远比并发标记阶段的时间短。
-
-
+> 参考文献：
+> - https://en.wikipedia.org/wiki/Concurrent_mark_sweep_collector
+> - https://www.baeldung.com/jvm-garbage-collectors
+> - https://docs.oracle.com/javase/8/docs/technotes/guides/vm/gctuning/cms.html
+> - https://www.herongyang.com/Java-GC/Concurrent-What-Is-CMS-Collector.html
 
 #### G1 收集器
 > 根据网上搜集的资料：
@@ -703,6 +726,77 @@ ZGC中读屏障的代码作用：在对象标记和转移过程中，用于确�
 - **（红色虚线）**由于维护和兼容性测试的成本，在 JDK 8 时将 Serial + CMS、ParNew + Serial Old 这两个组合声明为废弃（JEP173），并在 JDK 9 中完全取消了这些组合的支持（JEP214），即：移除。
 - **（绿色虚线）**JDK 14 中：弃用 Parallel Scavenge 和 Serialold GC 组合（JEP366）。
 - **（青色虚线）**JDK 14 中：删除 CMS 垃圾回收器（JEP363）。
+
+### 卡表
+对于HotSpot JVM，使用了**卡标记（Card Marking）** 技术来解决**老年代到新生代的引用问题（也就是跨代引用问题，2023面试题目之一）**。具体是，使用**卡表（Card Table）** 和**写屏障（Write Barrier）** 来进行标记并加快对GC Roots的扫描。
+
+#### 卡表（Card Table）的概念
+卡表（Card Table）是一种用于垃圾收集优化的数据结构，主要用于跟踪从老年代到新生代的对象引用。在Java的HotSpot虚拟机中，卡表与写屏障（Write Barrier）一起工作，用于标记并加快对GC Roots的扫描。
+
+在基于卡表的设计中，通常将堆空间划分为一系列2次幂大小的卡页（Card Page）。每个卡页在卡表中都有一个对应的标记项。当对一个对象引用进行写操作时（例如，改变一个对象的字段为另一个对象的引用），写屏障逻辑将会标记对象所在的卡页为dirty，这个过程被称为卡标记（Card Marking）。
+
+写屏障和卡表的交互：当对一个对象引用进行写操作时（对象引用改变），写屏障逻辑将会标记对象所在的卡页为dirty。这样，每次对引用的更新，无论是否更新了老年代对新生代对象的引用，都会进行一次写屏障操作。这会增加一些额外的开销。
+> 写屏障是一种运行时技术，用于在对象引用发生更改时进行操作。在HotSpot JVM中，写屏障的主要任务是标记脏卡，即那些包含了被修改的对象引用的卡页。
+
+在卡表中，被标记为dirty的卡页被称为脏卡（Dirty Card）。这意味着该卡页中的某个对象引用发生了更改。在进行垃圾收集时，只需要扫描这些脏卡，而不是整个老年代，从而大大提高了垃圾收集的效率。
+
+![card-table](./giant_images/v2-8cec22d735be76cd4a140ac30513ca49_b.jpg)
+
+
+#### 卡表在垃圾收集中的作用
+在进行垃圾收集时，卡表可以帮助我们快速找到那些可能包含从老年代到新生代的引用的对象，从而避免扫描整个老年代。这对于新生代的垃圾收集（Minor GC）尤其重要，因为新生代的垃圾收集通常比老年代的垃圾收集（Major GC）要频繁得多。
+
+#### 卡表在CMS GC和G1 GC中的应用
+CMS（Concurrent Mark Sweep）和G1（Garbage-First）是HotSpot JVM中的两种垃圾收集器。它们都使用卡表来优化垃圾收集过程。在CMS的并发标记阶段，应用线程和GC线程是并发执行的，因此可能产生新的对象或对象关系发生变化。为了提高重新标记的效率，并发标记阶段会把这些发生变化的对象所在的Card标识为Dirty，这样后续阶段就只需要扫描这些Dirty Card的对象，从而避免扫描整个老年代。
+
+#### 虚共享（False Sharing）问题
+在高并发环境下，写屏障可能会引发虚共享（false sharing）问题。在高并发情况下，频繁的写屏障很容易发生虚共享，从而带来性能开销。为了解决这个问题，JDK 7引入了一个新的JVM参数-XX:+UseCondCardMark，在执行写屏障之前，先简单的做一下判断。如果卡页已被标识过，则不再进行标识。
+
+> 参考文献如下：
+> - https://stackoverflow.com/questions/19154607/how-actually-card-table-and-writer-barrier-work 卡表和写屏障是如何工作的？
+> - https://tschatzl.github.io/2022/02/15/card-table-card-size.html Card Table Card Size Shenanigans
+> - https://www.mo4tech.com/jvm-card-table.html JVM Card Table
+> - https://www.cnblogs.com/hongdada/p/12016020.html JVM-卡表（Card Table）
+> - http://blog.ragozin.info/2011/06/understanding-gc-pauses-in-jvm-hotspots.html Alexey Ragozin
+
+###  TLAB（Thread Local Allocation Buffer）
+> 关于TLAB的基本理解，它是一个专用于单个线程的小块Eden区域。这种设计可以实现无锁并发快速分配，因为每个线程都有自己的专用区域，所以在对象分配时无需担心其他线程的争用。TLAB的使用提高了在多线程环境中对象分配的性能。
+
+在Java中，所有新的对象分配都应该发生在Eden Space中。将整个堆的子区域用于新的分配是JVM中新分配如此之快的原因之一。为了更快地分配，JVM将Eden空间划分为更多的子区域，每个子区域专用于特定的线程。每个专用区域都称为线程本地分配缓冲区或简称**TLAB（Thread Local Allocation Buffer）**。该机制允许每个线程有一个自己可以使用的TLAB区域，并且只有该线程可以使用该区域。因此，TLAB是每个线程独立的。只要对象在TLAB区域内进行分配，就不需要进行任何类型的同步。在TLAB区域内部进行分配只需要简单的指针碰撞操作。
+![](./personal_images/tlab-gens.png)
+
+![](./personal_images/tlab-regions.png)
+
+**分配满的情况**：
+然而，TLAB并非无限的，某些时刻，它会变满。如果某个线程需要分配一个新对象，但当前的TLAB几乎已满，可能会发生以下两件事情：
+- 在TLAB之外分配对象。由于分配直接发生在Eden空间内，因此称为慢速分配（Slow Allocation）。
+- 创建一个新的TLAB并在新的TLAB中分配该对象。从技术上讲，JVM淘汰了旧的TLAB。
+
+如果对象较大（大于TLAB的大小），那么对象将被分配到Eden的非TLAB区域，即直接在Eden区分配，这被称为慢速分配（Slow Allocation）。由于这种情况下可能会有多个线程尝试在Eden区域分配对象，因此需要同步处理：
+![](./personal_images/tlab-empty.png)
+如果对象较小，可能会为该线程分配新的TLAB，并在新的TLAB中分配对象。旧的TLAB将被视为已满，并在下次Minor GC时清理：
+![](./personal_images/tlab-full.png)
+
+默认情况下，TLAB会为每个线程单独动态调整大小。TLAB的大小会根据Eden的大小、线程数量及分配率等参数重新计算。如果某个线程需要分配一个超出TLAB大小限制的大对象（比如大数组），那么它将被分配到Eden中的共享区域。这样一来，就会需要同步操作。在我的应用程序中，某些对象因其尺寸过大，从未在TLAB中分配过。
+
+此外，如果你的应用程序有特定的需求，JVM也允许手动设置TLAB的大小：
+- `-XX:TLABWasteTargetPercent=N` 该参数指定了TLAB（Thread-Local Allocation Buffer）的浪费空间目标百分比。当TLAB内存空间分配后被使用的比例小于该百分比时，JVM会尝试将TLAB的大小调整为更小的值，以减少浪费的空间。默认值是 1%。
+- `-XX:TLABWasteIncrement=N `该参数指定了TLAB内存空间大小的最小增量。当JVM调整TLAB大小时，会将调整后的大小向上增加最小增量的整数倍。默认值是 1KB。
+- `-XX:+PrintTLAB` 该参数使JVM输出有关TLAB分配使用情况的详细日志信息。这些信息包括TLAB的总分配次数、使用次数、空闲次数以及使用的总空间大小。这些信息可帮助开发人员调整和优化应用程序的内存使用情况。
+
+**分配的对象过大问题**：
+在某些情况下，通过TLAB之外的分配机制来分配对象并不是一件坏事。例如，在小GC之前就可以这样进行。但是，与TLAB内部相比，使用TLAB之外进行的对象分配数量较大。此时，有两种选择：
+- 让对象变小
+- 调整TLAB的大小
+
+手动调整TLAB大小并不是最好的选择。毕竟，只有较少的对象类型会分配到TLAB之外。因此，在修复代码时，我们应优先考虑使对象满足分配到TLAB区域内部的条件。具体可以根据以下选择：
+- 如果你的应用程序经常需要创建大对象，那么可能需要调整TLAB的大小，以减少在Eden区域进行的慢速分配。但是，增大TLAB的大小也会减少可以同时活动的线程数量，因此需要谨慎权衡。
+- 如果只有少数类型的对象是大对象，那么可能更好的策略是尝试减小这些对象的大小，或者更改程序设计，以避免创建这些大对象。
+
+>参考文献：
+>- https://stackoverflow.com/questions/43747221/what-is-a-tlab-thread-local-allocation-buffer
+>- https://alidg.me/blog/2019/6/21/tlab-jvm
+>- https://www.opsian.com/blog/jvm-tlabs-important-multicore/
 
 ### Minor Gc 和 Full GC 有什么不同呢
 
@@ -966,6 +1060,15 @@ public static void main(java.lang.String[]);
 优点 不需要额外的开辟一块空间存储引用，在原有对象头中添加指针指向即可，访问对象实体数据的时候效率高
 
 ### 安全点和安全区各代表什么？
+#### 概览
+**安全点（Safepoint）**：安全点是JVM用于停止所有的Java线程以进行全局操作（如全局垃圾收集）的一种机制。在这些点上，JVM可以确保对象引用和对象状态的一致性。一般来说，JVM会在特定的、可以预知的指令序列上设置安全点。比如方法调用、循环跳转和异常抛出等地方。这些地方的共同特点是，在执行到这些指令时，Java线程的执行状态可以明确地被JVM知晓。
+
+**安全区（Safe Region）**：安全区是在安全点的基础上进一步扩展的概念。在某些情况下，如果一个线程长时间运行在一个无法设置安全点的代码片段中，会阻碍JVM进行全局操作。这时候，就需要引入"安全区"的概念。安全区可以认为是一段代码片段，在这段代码中，所有的引用关系不会发生变化。一旦线程运行在安全区中，那么JVM就可以直接将其挂起。
+
+----
+给面试官解释这两个概念时，可以这样说：
+安全点和安全区都是JVM在进行全局操作时用来确保系统状态的一致性的机制。安全点可以看作是在程序运行过程中的特定位置，这些位置可以确保JVM对对象的引用关系和状态有准确的认知。而安全区则是一段特定的代码区域，在这个区域中，线程的引用关系不会发生变化，这样JVM就可以安全地挂起这个线程。这两个概念在垃圾收集和线程同步等操作中都非常重要。
+
 
 > 本节内容摘自周志明老师的《深入理解Java虚拟机》内容
 

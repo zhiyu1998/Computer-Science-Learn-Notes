@@ -10,10 +10,194 @@ category:
 
 
 ## 前言
-2022有的大厂面试题不会在2023再次出现（也有可能会因为粗心加上，欢迎issue或者PR指正和修改），如果想要了解可以先看[2022大厂面试](/Java/eightpart/giant.md)版本
+2022有的大厂面试题不会在2023再次出现（也有可能会因为粗心加上，欢迎issue或者PR指正和修改），如果想要了解可以先看[2022大厂面试](/Java/eightpart/giant.md)版本。
+
+## 🐦Java 基础
+### ArrayList线程安全吗？把ArrayList变成线程安全有哪些方法？（2023美团）
+将ArrayList变成线程安全有几种方法：
+1. 使用**Collections.synchronizedList()** 方法将ArrayList转换为线程安全的List。该方法会返回一个线程安全的List，使用该List时需要在访问它的方法上添加synchronized关键字，以保证多线程访问的安全性。
+```java
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+        List<String> synchronizedList = Collections.synchronizedList(list);
+    }
+}
+```
+2. 使用**CopyOnWriteArrayList**类来代替ArrayList。CopyOnWriteArrayList是一种线程安全的List实现，它通过在写操作时复制整个数组来保证线程安全性，在读操作时不需要加锁，因此可以提高读取效率。
+
+```java
+import java.util.concurrent.CopyOnWriteArrayList;
+
+public class Main {
+    public static void main(String[] args) {
+        CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
+    }
+}
+```
+
+3. 使用Lock接口来实现同步。可以使用ReentrantLock类来实现对ArrayList的同步操作，该类提供了与synchronized类似的功能，但是具有更高的灵活性。比如可以使用tryLock()方法来尝试获取锁，避免了线程的长时间等待。
+4. 使用读写锁来实现同步。可以使用ReentrantReadWriteLock类来实现对ArrayList的读写操作的同步。该类提供了读锁和写锁两种锁，多个线程可以同时获取读锁，但是只有一个线程可以获取写锁，在写操作时需要先获取写锁，以保证线程安全。
+
+> 参考文献：
+> - https://stackoverflow.com/questions/2444005/how-do-i-make-my-arraylist-thread-safe-another-approach-to-problem-in-java 如何使我的ArrayList线程安全？Java问题的另一种方法？
+> - https://stackoverflow.com/questions/18983362/how-to-prove-arraylist-is-not-thread-safe-with-a-test 如何用测试证明数组列表不是线程安全的？
+> - https://stackoverflow.com/questions/300519/arraylist-vs-vectors-in-java-if-thread-safety-isnt-a-concern ArrayList与vector，Java如果线程安全不是一个问题
+
+### 面向过程的方法存在哪些问题？（2023美团）
+1. 可维护性较差：面向过程编程主要依赖于函数和过程，随着代码规模的增大，可能会导致代码结构复杂，不易维护。
+2. 可复用性较低：面向过程编程难以实现模块化，导致代码难以复用，进一步增加开发时间和成本。
+3. 扩展性不足：面向过程编程在代码逻辑发生变化时，往往需要对程序进行大量的修改，这样的代码扩展性不足。
+4. 抽象能力有限：面向过程编程主要关注过程和算法，而不是数据结构和对象，这使得它在表达现实世界的复杂问题时抽象能力有限。
+5. 封装性差：面向过程编程没有提供良好的封装机制，程序中的数据和处理过程容易暴露，可能导致数据安全性和程序稳定性问题。
+6. 强耦合：面向过程编程的方法往往导致程序组件之间存在强耦合，当一个组件发生变化时，可能会影响其他组件的正常工作。
+
+### 面向过程好处是什么？（2023美团）
+- 面向过程编程采用自顶向下的编程方式，将问题分解为一个个小的模块，便于理解和编写。
+- 每个模块相对独立，出现问题时可以单独调试，降低了调试难度。
+- 面向过程编程适合解决简单、逻辑性强的问题，对于初学者来说，学习成本较低。
 
 
-## 数据库
+## 🕝 并发编程
+### 使用多线程要注意哪些问题？（2023美团）
+使用多线程时需要注意以下问题：
+1. **线程安全**：当多个线程同时访问某一数据时，如果不进行正确的同步控制，可能会导致数据的不一致。需要通过使用synchronized，Lock，volatile等机制来保证线程安全。
+2. **死锁**：死锁是指两个或两个以上的线程在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力干涉那他们都将无法推进下去。我们应避免在代码中产生死锁。
+3. **活锁**：活锁指的是线程虽然没有被阻塞，但是由于某种条件没有被满足，始终无法向前执行，就像在原地踏步。
+4. **饥饿**：由于线程的优先级设置不合理或者锁机制不公平，导致某些线程始终无法获取到CPU资源或者锁资源，从而无法进行工作。
+5. **资源消耗**：每个线程都会占用一定的内存资源，过多的线程可能会导致系统资源消耗过大。同时，线程上下文切换也会消耗CPU资源，过多的线程也可能会导致CPU负载过大。
+6. **数据共享和可见性**：多线程之间共享数据，需要保证一个线程对数据的修改对其他线程可见，可以使用volatile或者Atomic类来保证。
+7. **线程的生命周期管理**：需要合理的创建、启动、暂停、恢复、终止线程，不合理的管理可能会导致程序错误或者资源泄漏。
+8. **线程异常处理**：线程中的未捕获异常会导致线程终止，而且这个异常不能被外部捕获。需要为线程设置UncaughtExceptionHandler来处理未捕获的异常。
+
+### 保证数据的一致性有哪些方案呢？（2023美团）
+在Java中，有多种方式可以保证数据的一致性：
+1. **同步语句块(Synchronized Blocks)**：在Java中，你可以使用synchronized关键字对一个对象或者方法进行锁定，来保证在一个时刻只有一个线程可以访问该对象或者方法，从而避免数据的不一致。
+2. **Volatile关键字**：volatile关键字可以保证变量的可见性。当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去主存中读取新值。
+3. **原子类（Atomic Classes）**：Java提供了一组原子类（如AtomicInteger、AtomicLong等），它们使用了高效的机器级指令来保证原子性操作，从而避免了复杂的同步。
+4. **Lock接口和相关类**：Java并发库提供了显式的锁机制，包括ReentrantLock、ReadWriteLock等，可以提供比synchronized更灵活的锁定机制。
+5. **并发集合（Concurrent Collections）**：Java提供了一组并发集合类（如ConcurrentHashMap、CopyOnWriteArrayList等），它们内部已经实现了并发控制，可以在并发环境中安全使用。
+6. **事务（Transactions）**：在数据库和某些支持事务的系统中，可以通过事务来保证数据的一致性。Java中的JPA和Spring等框架提供了对事务的支持。
+
+以上就是在Java中保证数据一致性的一些常用方案，选择哪种方案取决于具体的应用场景和需求。
+
+## 🍃 常用框架
+### MyBatis运用了哪些常见的设计模式？（2023美团）
+- **工厂模式**，工厂模式在 MyBatis 中的典型代表是 SqlSessionFactory
+- **建造者模式**，建造者模式在 MyBatis 中的典型代表是 SqlSessionFactoryBuilder
+- **单例模式**，单例模式在 MyBatis 中的典型代表是 ErrorContext
+- **适配器模式**，适配器模式在 MyBatis 中的典型代表是 Log
+- **代理模式**，代理模式在 MyBatis 中的典型代表是 MapperProxyFactory
+- **模板方法模式**，模板方法在 MyBatis 中的典型代表是 BaseExecutor
+- **装饰器模式**，装饰器模式在 MyBatis 中的典型代表是 Cache
+- **迭代器模式**，如迭代器模式Properties tyTokenizer；
+- **组合模式**，如SqlNode和每个子类ChooseSqlNode；
+
+> 参考文献：
+> - https://programming.vip/docs/6200e8e7b682c.html 【Mybatis源码解析】Mybatis源码涉及的设计模式总结
+> - https://programming.vip/docs/mybatis-design-pattern.html Mybatis设计模式
+
+### MyBatis中创建了一个Mapper接口，在写一个xml文件，java的接口是要实现的，为什么这没有实现呢？（2023美团）
+MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签名。MyBatis会根据Mapper接口中的方法名、参数类型和返回值类型，自动生成实现方法。因此，Mapper接口中的方法不需要实现，也不需要在该接口中编写任何方法体。
+
+相反，你需要编写一个与Mapper接口同名的XML文件，来实现这些方法的具体SQL操作。这样，当你在Java代码中调用Mapper接口中的方法时，MyBatis会自动将该方法映射到对应的XML文件中的SQL语句，并执行该语句。
+
+### 与传统的JDBC相比，MyBatis的优点？（2023美团）
+- mybatis的全局配置文件中可以设置数据库连接池，和spring整合可以配置数据库连接
+- mybatis把sql和代码分离，提供了Mapper.xml映射文件，在映射文件中通过标签来写sql
+- mybatis中自动完成java对象和sql中参数的映射
+- mybatis中通过ResultSetHandler自动将结果集映射到对应的java对象中
+
+### JDBC连接数据库的步骤吗？（2023美团）
+1. 加载数据库驱动程序：使用Class.forName()方法加载对应的数据库驱动程序，例如：Class.forName("com.mysql.jdbc.Driver");
+2. 建立数据库连接：使用DriverManager.getConnection()方法建立与数据库的连接，需要指定数据库的URL、用户名和密码，例如：Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/mydatabase", "username", "password");
+3. 创建Statement对象：使用Connection对象的createStatement()方法创建一个Statement对象，用于执行SQL语句，例如：Statement stmt = conn.createStatement();
+4. 执行SQL语句：使用Statement对象的executeQuery()或executeUpdate()方法执行SQL语句，例如：ResultSet rs = stmt.executeQuery("SELECT * FROM mytable");
+5. 处理查询结果：如果执行的是查询语句，需要使用ResultSet对象来处理查询结果，例如：while (rs.next()) { String name = rs.getString("name"); int age = rs.getInt("age"); }
+6. 关闭数据库连接：在程序结束时，需要使用Connection对象的close()方法关闭数据库连接，例如：conn.close();
+
+### 怎么理解SpringIoc？（2023美团）
+**IoC（Inversion of Control）是“控制反转”** 的缩写，是一种设计思想，也是Spring框架的核心。IoC是将你设计好的对象交给容器控制，而不是传统的在你的对象内部直接控制。如何理解好IoC呢？可以从以下几点来看：
+1. **控制反转**：传统的程序是由我们自己在对象内部通过new进行创建对象，是由程序控制对象的创建。在Spring框架中，对象的创建是由Spring容器来进行的，它负责控制对象的生命周期。所谓“控制反转”就是把传统的有我们自己控制的对象创建过程交给Spring框架来做。
+2. **依赖注入**：IoC的一个重要的具体实现方法是DI（Dependency Injection），也叫作依赖注入。在我们设计好的对象中会有一些其他对象的引用（即依赖），如果没有Spring容器，我们需要使用很多复杂的方法来管理这些依赖。而有了Spring容器，我们只需要告诉Spring这些依赖即可，Spring会自动把这些依赖注入到对象中。
+3. **容器**：在Spring的IoC下，Spring容器是一个非常重要的角色，它包含并管理了应用中定义的各种组件，负责实例化、配置、装配对象，管理对象的整个生命周期。
+4. **减轻耦合**：通过IoC，对象间的耦合度可以降低，对象只需要关注自身的业务逻辑，而不需要关心其他对象是如何创建和管理的，大大增强了代码的可维护性和可测试性。
+5. **提供配置**：Spring容器可以使用XML、Java注解、Java代码等多种方式来进行配置，提供了非常大的灵活性。
+
+### 如果让你设计一个SpringIoc，你觉得会从哪些方面考虑这个设计？（2023美团）
+- Bean的生命周期管理：需要设计Bean的创建、初始化、销毁等生命周期管理机制，可以考虑使用工厂模式和单例模式来实现。
+- 依赖注入：需要实现依赖注入的功能，包括属性注入、构造函数注入、方法注入等，可以考虑使用反射机制和XML配置文件来实现。
+- Bean的作用域：需要支持多种Bean作用域，比如单例、原型、会话、请求等，可以考虑使用Map来存储不同作用域的Bean实例。
+- AOP功能的支持：需要支持AOP功能，可以考虑使用动态代理机制和切面编程来实现。
+- 异常处理：需要考虑异常处理机制，包括Bean创建异常、依赖注入异常等，可以考虑使用try-catch机制来处理异常。
+- 配置文件加载：需要支持从不同的配置文件中加载Bean的相关信息，可以考虑使用XML、注解或者Java配置类来实现。
+
+
+### Spring给我们提供了很多扩展点，这些有了解吗？（2023美团）
+1. BeanFactoryPostProcessor：允许在Spring容器实例化bean之前修改bean的定义。常用于修改bean属性或改变bean的作用域。
+2. BeanPostProcessor：可以在bean实例化、配置以及初始化之后对其进行额外处理。常用于代理bean、修改bean属性等。
+3. PropertySource：用于定义不同的属性源，如文件、数据库等，以便在Spring应用中使用。
+4. ImportSelector和ImportBeanDefinitionRegistrar：用于根据条件动态注册bean定义，实现配置类的模块化。
+5. Spring MVC中的HandlerInterceptor：用于拦截处理请求，可以在请求处理前、处理中和处理后执行特定逻辑。
+6. Spring MVC中的ControllerAdvice：用于全局处理控制器的异常、数据绑定和数据校验。
+7. Spring Boot的自动配置：通过创建自定义的自动配置类，可以实现对框架和第三方库的自动配置。
+8. 自定义注解：创建自定义注解，用于实现特定功能或约定，如权限控制、日志记录等。
+
+### 大致了解SpringMVC的处理流程吗？（2023美团）
+1. **接收请求**：用户发送请求至前端控制器DispatcherServlet。
+2. **查找处理器映射**：DispatcherServlet收到请求后，调用HandlerMapping处理器映射器。
+3. **处理器映射返回处理器执行链**：HandlerMapping根据请求的URL找到对应的Controller并返回一个HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象，多个HandlerInterceptor拦截器对象）。
+4. **调用处理器适配器**：DispatcherServlet通过HandlerAdapter进行多类型的页面控制器的适配，调用对应的Controller（处理器）。
+5. **Controller执行业务逻辑**：Controller开始执行页面控制器的处理方法，并返回一个ModelAndView对象（模型和视图）。
+6. **视图解析**：DispatcherServlet通过视图解析器进行解析（根据逻辑视图名解析成实际视图/页面），并将ModelAndView对象中的模型数据填充到request域对象中。
+7. **返回视图**：DispatcherServlet把返回的视图对象返回给用户。
+
+###  SpringAOP主要想解决什么问题（2023美团）
+Spring AOP主要解决的是横切关注点的问题，即在一个系统中，可能存在多个模块或组件都需要实现类似的功能，比如日志记录、权限校验、事务管理等等。如果每个模块都去实现这些功能，就会导致代码冗余，可维护性和可扩展性降低。而AOP则是基于动态代理的机制，在不修改原有代码的情况下，通过在代码执行前后插入增强代码的方式，实现对横切关注点的统一处理，从而提高代码的复用性和可维护性。
+
+### SpringAOP的原理了解吗（2023美团）
+Spring AOP的主要目的是将横切关注点（如日志、安全和事务管理等）从业务逻辑中分离出来，从而提高代码的模块性和可维护性。
+
+原理主要包括以下几个方面：
+1. 代理模式：Spring AOP基于代理模式实现，主要有两种代理方式，JDK动态代理和CGLIB代理。JDK动态代理要求目标类必须实现接口，而CGLIB代理则可以针对没有实现接口的类进行代理。
+2. 切面（Aspect）：切面是将横切关注点模块化的实现。切面通常包含通知（Advice）和切点（Pointcut）。通知是在特定的切点执行的动作，切点则用于定义通知应该在何处执行。
+3. 连接点（Joinpoint）：连接点代表在应用程序中可以插入切面的点，如方法调用、异常处理等。
+4. 织入（Weaving）：织入是将切面应用到目标对象的过程，从而创建代理对象。在Spring AOP中，织入过程发生在运行时。
+
+通过以上原理，Spring AOP能够在不修改原有业务代码的情况下，将横切关注点进行模块化管理，提高代码的可读性和易维护性。
+
+## 📑 数据库
+
+### 可重复读和已提交读隔离级别表现的现象是什么，区别是什么样的？（2023美团）
+- 读提交，指一个事务提交之后，它做的变更才能被其他事务看到，会有不可重复读、幻读的问题。
+- 可重复读，指一个事务执行过程中看到的数据，一直跟这个事务启动时看到的数据是一致的，MySQL InnoDB 引擎的默认隔离级别，解决了不可重复读的问题，并且以很大程度上避免幻读现象的发生。
+
+### 数据文件大体分成哪几种数据文件？（2023美团）
+我们每创建一个 database（数据库） 都会在 /var/lib/mysql/ 目录里面创建一个以 database 为名的目录，然后保存表结构和表数据的文件都会存放在这个目录里。
+
+比如，我这里有一个名为 my_test 的 database，该 database 里有一张名为 t_order 数据库表。
+![](./giant_images/641.png)
+然后，我们进入 /var/lib/mysql/my_test 目录，看看里面有什么文件？
+```java
+[root ~]#ls /var/lib/mysql/my_test
+db.opt  
+t_order.frm  
+t_order.ibd
+```
+可以看到，共有三个文件，这三个文件分别代表着：
+- db.opt，用来存储当前数据库的默认字符集和字符校验规则。
+- t_order.frm ，t_order 的表结构会保存在这个文件。在 MySQL 中建立一张表都会生成一个.frm 文件，该文件是用来保存每个表的元数据信息的，主要包含表结构定义。
+- t_order.ibd，t_order 的表数据会保存在这个文件。表数据既可以存在共享表空间文件（文件名：ibdata1）里，也可以存放在独占表空间文件（文件名：表名字.ibd）。这个行为是由参数 innodb_file_per_table 控制的，若设置了参数 innodb_file_per_table 为 1，则会将存储的数据、索引等信息单独存储在一个独占表空间，从 MySQL 5.6.6 版本开始，它的默认值就是 1 了，因此从这个版本之后， MySQL 中每一张表的数据都存放在一个独立的 .ibd 文件。
+
+### 对一个慢sql怎么去排查？（2023美团）
+可通过开启mysql的慢日志查询，设置好时间阈值，进行捕获
+
+### 索引字段是不是建的越多越好（2023美团）
+索引越多，在写入频繁的场景下，对于B+树的维护所付出的性能消耗也会越大
 
 ### 什么是覆盖索引？（2023 快手）
 > 这个其实在2022年的大厂面试中出现过，但是是以聚簇索引形式提问出现
@@ -161,6 +345,21 @@ G1垃圾回收器将堆内存划分为多个小块（Region），每个小块可
 
 总的来说，垃圾回收器在每个阶段的结束条件主要取决于当前阶段的任务是否完成，例如是否所有的对象都已经被标记，或者是否所有的垃圾都已经被清除。
 
-## 💦算法汇总
+## 🌐 计算机网络
+### http协议的报文的格式有了解吗？
+![](./giant_images/640.png)
+HTTP 的请求报文分为三个部分：
+
+请求行、首部行、实体主体。
+
+## 🎨 设计模式
+### 代理模式和适配器模式有什么区别？
+代理模式和适配器模式是两种常用的设计模式，它们的区别主要体现在以下几个方面：
+1. 作用不同：代理模式是为了控制对对象的访问，而适配器模式是为了解决接口不匹配的问题。
+2. 解决问题的角度不同：代理模式是从外部控制访问，保护目标对象，而适配器模式是从内部改变对象接口，让其能够适配客户端的要求。
+3. 实现方式不同：代理模式通常使用面向对象的继承或者组合方式实现，而适配器模式则通常使用对象组合方式实现。
+4. 适用场景不同：代理模式适用于需要对对象进行控制和保护的情况，例如远程代理、虚拟代理等。适配器模式适用于需要将一个类的接口转换成客户端期望的另一个接口的情况，例如旧系统的升级改造、不兼容接口的统一等。
+
+## 💦 算法汇总
 
 1. [二叉树的公共祖先（2023 快手）](https://leetcode.cn/problems/er-cha-shu-de-zui-jin-gong-gong-zu-xian-lcof/)
