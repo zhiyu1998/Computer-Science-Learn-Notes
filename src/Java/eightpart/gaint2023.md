@@ -48,6 +48,21 @@ public class Main {
 > - https://stackoverflow.com/questions/18983362/how-to-prove-arraylist-is-not-thread-safe-with-a-test 如何用测试证明数组列表不是线程安全的？
 > - https://stackoverflow.com/questions/300519/arraylist-vs-vectors-in-java-if-thread-safety-isnt-a-concern ArrayList与vector，Java如果线程安全不是一个问题
 
+### ArrayList的并发修改异常了解吗？单线程情况下会发生吗？（2023小红书）
+这种异常通常发生在对ArrayList进行遍历时，同时尝试修改它的结构（例如添加或删除元素）。这种异常被称为ConcurrentModificationException。
+
+在单线程情况下，这种异常也可能发生。当你在使用迭代器遍历ArrayList集合时，如果使用ArrayList的方法（如add()或remove()）修改了集合的结构，就可能触发这个异常。这是因为ArrayList的内部实现使用了一个modCount变量来跟踪结构修改的次数。当迭代器检测到modCount发生变化时，它会抛出ConcurrentModificationException异常。
+
+为了避免这种异常，你可以在遍历ArrayList时采用以下方法：
+1. 使用Iterator的remove()方法来删除元素，而不是直接使用ArrayList的remove()方法。这样可以确保modCount的值在迭代过程中保持一致。
+2. 如果需要遍历过程中添加元素，可以考虑使用ListIterator，它提供了add()方法，允许在遍历过程中修改列表结构。
+3. 另一种方法是使用Java 8的Stream API，它提供了一种更安全的方式来处理集合的并发修改问题。
+4. 如果你确实需要在遍历过程中修改ArrayList，可以考虑先复制一个新的ArrayList，然后在新的ArrayList上进行修改。遍历完成后，再将新的ArrayList赋值给原来的引用。这样可以避免在遍历过程中修改原始ArrayList的结构。
+
+> 参考：
+> 1. https://stackoverflow.com/questions/602636/why-is-a-concurrentmodificationexception-thrown-and-how-to-debug-it 为什么会抛出它会抛出ConcurrentModificationException异常以及如何调试它
+> 2. https://www.javatpoint.com/concurrentmodificationexception-in-java
+
 ### 面向过程的方法存在哪些问题？（2023美团）
 1. 可维护性较差：面向过程编程主要依赖于函数和过程，随着代码规模的增大，可能会导致代码结构复杂，不易维护。
 2. 可复用性较低：面向过程编程难以实现模块化，导致代码难以复用，进一步增加开发时间和成本。
@@ -63,6 +78,29 @@ public class Main {
 
 
 ## 🕝 并发编程
+
+### 线程池的拒绝策略能自定义拒绝策略吗？（2023阿里）
+Java线程池拒绝策略是可以自定义的。你可以使用RejecttedExecutionHandler接口来定义你自己的拒绝策略。该接口只有一个方法拒绝执行（Runnable r，ThreadPoolExecator执行器），当执行器无法执行任务时调用。你可以实现这个方法来定义你自己的拒绝策略。
+
+示例：
+```java
+public class CustomRejectedExecutionHandler implements RejectedExecutionHandler {
+    @Override
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        // Your custom rejection policy here
+    }
+}
+
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+        corePoolSize,
+        maxPoolSize,
+        keepAliveTime,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(),
+        new CustomRejectedExecutionHandler()
+);
+```
+
 ### 使用多线程要注意哪些问题？（2023美团）
 使用多线程时需要注意以下问题：
 1. **线程安全**：当多个线程同时访问某一数据时，如果不进行正确的同步控制，可能会导致数据的不一致。需要通过使用synchronized，Lock，volatile等机制来保证线程安全。
@@ -276,6 +314,20 @@ SELECT `name`, `age`, `address` FROM `tbl_user` WHERE `name` = 'John' AND `age` 
 > - https://www.red-gate.com/simple-talk/databases/sql-server/learn/using-covering-indexes-to-improve-query-performance/ 使用覆盖索引以提高查询性能
 
 
+### redis怎么实现分布式锁 set nx命令有什么问题 如何解决？（2023小红书）
+
+Redis实现分布式锁的基本思路是使用SET命令的NX（Not eXists）选项。NX选项表示只有当键不存在时，才会设置键值对。这样可以确保在分布式环境中，只有一个客户端能够成功地获取锁。以下是一个简单的示例：
+```shell
+SET lock_key some_value NX PX 30000
+```
+这个命令尝试设置一个名为lock_key的键，值为some_value，并且使用NX选项。PX选项表示设置一个过期时间，单位为毫秒，在这个例子中是30000毫秒（30秒）。
+然而，使用SET NX命令实现分布式锁存在一些问题：
+1. 非原子操作：在某些情况下，客户端可能在设置锁和设置过期时间之间崩溃，导致锁永远不会被释放。这可以通过使用SET命令的PX选项来解决，它可以在设置锁的同时设置过期时间，确保操作是原子的。
+2. 无法解决锁超时问题：如果持有锁的客户端在锁过期之前没有完成任务，其他客户端可能会获取到锁，导致并发问题。为了解决这个问题，可以在获取锁时设置一个唯一的值（例如UUID），并在释放锁时检查该值。这样可以确保只有锁的持有者才能释放锁。
+3. 无法解决锁释放问题：如果持有锁的客户端在释放锁之前崩溃，锁可能永远不会被释放。为了解决这个问题，可以使用一个后台线程定期检查并释放过期的锁。
+4. 无法实现公平锁：SET NX命令无法保证公平性，即等待时间最长的客户端不一定能够优先获取锁。要实现公平锁，可以使用Redis的LIST数据结构，将等待锁的客户端按照先进先出（FIFO）的顺序排队。
+综上所述，虽然SET NX命令可以实现基本的分布式锁功能，但在实际应用中可能需要考虑更多的问题。为了解决这些问题，可以使用成熟的Redis分布式锁库，如Redlock。Redlock提供了一个更加健壮和可靠的分布式锁实现，可以解决上述问题
+
 ## ♻️ JVM
 
 ### 堆是如何管理内存的（2023 快手）
@@ -345,6 +397,36 @@ G1垃圾回收器将堆内存划分为多个小块（Region），每个小块可
 
 总的来说，垃圾回收器在每个阶段的结束条件主要取决于当前阶段的任务是否完成，例如是否所有的对象都已经被标记，或者是否所有的垃圾都已经被清除。
 
+### 什么时候会发生FULL GC？（2023 小红书）
+每当堆满时，就会触发Full GC。在这种情况下，首先收集年轻代，然后收集老年代。如果老年代太满而无法接受年轻代的内容，则省略年轻代GC，并使用旧代GC以并行或串行方式收集完整堆。
+
+另外：
+1. Young Generation 已满,而 Old Generation 中又没有足够的空间存活对象时,会触发 full gc。
+2. 已使用的内存超过最大堆内存(通过 -Xmx 设置)时,也会触发 full gc 以回收内存。
+3. 调用 System.gc() 方法时,如果 JVM 检测到 Old Generation 中有足够的垃圾需要清理,也会触发 full gc。
+4. Minor GC 完成后,如果 JVM 检测到 Old Generation 中有足够的垃圾需要清理,也会触发 full gc。
+
+> 参考：
+> 1. https://stackoverflow.com/questions/24766118/when-is-a-full-gc-triggered
+
+
+### 可以在代码中捕获oom异常吗？（2023 小红书）
+可以通过代码捕获 OOM(OutOfMemory)异常。例如:
+```java
+try {
+    // 可能触发 OOM 的代码
+} catch (OutOfMemoryError e) {
+    System.out.println("Out of Memory");
+}
+```
+当 JVM 的可用内存不足以满足应用的内存需求时,会抛出 OOM 异常。捕获这个异常可以让应用优雅地处理 OOM 错误,而不是直接崩溃。
+
+## 🤹‍♂️微服务、分布式
+### RPC如何进行序列化？（2023 阿里）
+RPC的序列化是将数据结构或对象转换成可以通过网络传输的格式的过程。序列化后的数据可以通过网络传输，并在另一端反序列化，以重建原始数据结构或对象。
+有很多方法可以序列化RPC数据，包括使用二进制格式，如Protocol Buffers1、JSON、XML等。
+
+
 ## 🌐 计算机网络
 ### http协议的报文的格式有了解吗？
 ![](./giant_images/640.png)
@@ -352,13 +434,44 @@ HTTP 的请求报文分为三个部分：
 
 请求行、首部行、实体主体。
 
+### http2了解吗？（2023小红书）
+HTTP/2是对万维网使用的HTTP网络协议的重大修订。它源自较早的实验性SPDY协议，最初由Google开发。HTTP/2不是对协议的彻底重写；HTTP方法、状态码和语义学与HTTP/1. x相同（可能有一些小的补充）来表示协议。新的二进制成帧机制的引入改变了客户端和服务器之间数据交换的方式。要描述这个过程，可以熟悉HTTP/2术语 -- `Stream`：已建立连接内的双向字节流，它可能携带一条或多条消息。
+
+您还可以提到HTTP/2旨在提高网站性能并减少延迟。它通过引入几个新功能来做到这一点，例如服务器推送、标头压缩和多路复用。
+
+> 参考：
+> 1. https://http2.github.io/
+> 2. https://en.wikipedia.org/wiki/HTTP/2
+> 3. https://web.dev/performance-http2/
+> 4. https://www.digitalocean.com/community/tutorials/http-1-1-vs-http-2-what-s-the-difference
+
+## 🖥️操作系统
+### linux有几种IO模型（2023阿里）
+> 参考：https://linyunwen.github.io/2022/01/02/linux-io-model/
+
 ## 🎨 设计模式
-### 代理模式和适配器模式有什么区别？
-代理模式和适配器模式是两种常用的设计模式，它们的区别主要体现在以下几个方面：
-1. 作用不同：代理模式是为了控制对对象的访问，而适配器模式是为了解决接口不匹配的问题。
-2. 解决问题的角度不同：代理模式是从外部控制访问，保护目标对象，而适配器模式是从内部改变对象接口，让其能够适配客户端的要求。
-3. 实现方式不同：代理模式通常使用面向对象的继承或者组合方式实现，而适配器模式则通常使用对象组合方式实现。
-4. 适用场景不同：代理模式适用于需要对对象进行控制和保护的情况，例如远程代理、虚拟代理等。适配器模式适用于需要将一个类的接口转换成客户端期望的另一个接口的情况，例如旧系统的升级改造、不兼容接口的统一等。
+### 适配器模式、装饰器模式、代理模式有什么区别？（2023小红书）
+- **适配器模式**：适配器模式就像是一个电源适配器，它允许两个不兼容的接口可以一起工作。例如，一个类的接口与客户端代码需要的接口不一致时，可以通过创建一个适配器类来转换接口，使得客户端代码能够利用现有的类。
+- **装饰器模式**：装饰器模式可以动态地向对象添加额外的职责，而不改变其实现。装饰器封装了一个类，并提供和该类相同的接口，但在调用其方法时，可以额外执行一些操作。装饰器可以被无限地堆叠，每个装饰器都添加一些额外的行为。
+- **代理模式**：代理模式在不改变接口的前提下，为其他对象提供一个代理或占位符以控制对这个对象的访问。代理可以用于许多不同的目的，如安全控制、复杂性隐藏、延迟加载等。代理通常控制对其委托对象的访问，并可能选择创建或删除它。
+
+综上所述，适配器模式用于让不兼容的接口能够一起工作，装饰器模式用于动态添加功能，代理模式用于控制对另一个对象的访问。
+
+## 其他
+### 讲一讲cms？
+CMS是Content Management System的缩写,意为内容管理系统。它是一种管理网站内容的软件应用程序。
+
+CMS的主要功能有:
+1. 内容发布:提供页面内容的发布与管理,比如文章、图片、视频等。内容贡献者可以方便地发布和修改内容。
+2. 模板机制:通过模板可以控制网站的布局和样式,实现统一的网站风格。
+3. 分类和标签:articles可以对内容进行分类和标签,方便用户浏览。
+4. 权限管理:不同的用户可以有不同的权限,控制谁可以发布、修改和删除内容。
+5. SEO优化:CMS可以方便实现SEO优化,比如定制页面标题、关键词、描述等。
+6. 插件扩展:CMS支持插件机制,可以安装各种插件扩展功能。
+7. 友好的后台:CMS提供一个可视化的后台管理界面,降低网站管理难度。
+
+目前主流的CMS系统有WordPress、Drupal、Joomla等。使用CMS可以大大简化网站的建设和管理,特别适合内容更新比较频繁的网站,比如博客、新闻站点等。
+总的来说,CMS让普通人也可以轻松建设和管理一个网站,极大地降低了网站管理的难度。它是建站的一大趋势,被越来越多的网站采用。
 
 ## 💦 算法汇总
 

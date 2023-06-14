@@ -280,6 +280,10 @@ for 状态1 in 状态1的所有取值：
 - [不同路径](https://leetcode.cn/problems/unique-paths/)
 - [剑指 Offer 13. 机器人的运动范围](https://leetcode.cn/problems/ji-qi-ren-de-yun-dong-fan-wei-lcof/)
 
+> 更进阶的动态规划可能还要考虑更多情况
+
+- 考虑负数情况：[乘积最大子数组](https://leetcode.cn/problems/maximum-product-subarray/description/)
+
 ## 🌈 分治
 @todo
 
@@ -288,7 +292,7 @@ for 状态1 in 状态1的所有取值：
 
 # 刷题顺序
 
-## 二叉树 ✅
+## 二叉树 
 
 * 掌握二叉树递归与非递归遍历
 * 理解 DFS 前序遍历与分治法

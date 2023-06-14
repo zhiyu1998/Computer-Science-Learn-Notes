@@ -33,22 +33,68 @@ category:
 - **Optional 类** − Optional 类已经成为 Java 8 类库的一部分，用来解决空指针异常。
 - **Nashorn, JavaScript 引擎** − Java 8提供了一个新的Nashorn javascript引擎，它允许我们在JVM上运行特定的javascript应用。
 
-### 重载和重写的区别？
+### 重载（Overloading）和重写（Overriding）的区别？
+1. 重载（Overloading）
+重载是指在同一个类中，方法名相同但参数列表不同（参数的顺序、类型、数量不同）的多个方法。重载允许我们根据不同的输入参数对同一个方法名进行多次定义。
+```java
+class Printer {
+    void print(int number) {
+        System.out.println("打印整数: " + number);
+    }
 
-发生在同一个类中，方法名必须相同，参数类型不同、个数不同、顺序不同，方法返回值和访问
-修饰符可以不同。
-下面是《Java 核心技术》对重载这个概念的介绍：
+    void print(double number) {
+        System.out.println("打印浮点数: " + number);
+    }
 
-综上：重载就是同一个类中多个同名方法根据不同的传参来执行不同的逻辑处理。
-重写：
-重写发生在运行期，是子类对父类的允许访问的方法的实现过程进行重新编写。
+    void print(String text) {
+        System.out.println("打印文本: " + text);
+    }
+}
+```
 
-1. 返回值类型、方法名、参数列表必须相同，抛出的异常范围小于等于父类，访问修饰符范围
-   大于等于父类。
-2. 如果父类方法访问修饰符为 private/final/static 则子类就不能重写该方法，但是被 static 修饰
-   的方法能够被再次声明。
-3. 构造方法无法被重写
-   综上：重写就是子类对父类方法的重新改造，外部样子不能改变，内部逻辑可以改变
+2. 重写（Overriding）
+
+重写是指子类继承父类时，子类中重新定义了父类中的方法。重写的方法必须与父类方法具有相同的方法名、参数列表和返回类型。重写的目的是为了让子类可以提供与父类相同的方法名，但具有不同的实现，从而实现多态。
+```java
+class Shape {
+    double area() {
+        return 0;
+    }
+}
+
+class Circle extends Shape {
+    double radius;
+
+    Circle(double radius) {
+        this.radius = radius;
+    }
+
+    @Override
+    double area() {
+        return Math.PI * radius * radius;
+    }
+}
+
+class Rectangle extends Shape {
+    double width, height;
+
+    Rectangle(double width, double height) {
+        this.width = width;
+        this.height = height;
+    }
+
+    @Override
+    double area() {
+        return width * height;
+    }
+}
+```
+
+在面试中介绍这两个概念时，可以按以下步骤进行：
+1. 首先定义重载和重写，强调它们之间的区别。
+2. 举例说明重载和重写的应用场景。
+3. 提及重载和重写在代码实现上的规则（方法名、参数列表、返回类型）。
+4. 可以简要提及重载和重写在实现多态和代码可读性方面的作用。
 
 ![image-20220617164632798](./personal_images/image-20220617164632798.png)
 
@@ -144,7 +190,7 @@ class Outter {
 
 #### static
 
-**static 关键字主要有以下四种使用场景：**
+static 关键字主要有以下四种使用场景：
 
 1. **修饰成员变量和成员方法:** 被 static 修饰的成员属于类，不属于单个这个类的某个对象，被类中所有对象共享，可以并且建议通过类名调用。被 static 声明的成员变量属于静态成员变量，静态变量 存放在 Java 内存区域的方法区。调用格式：`类名.静态变量名` `类名.静态方法名()`
 2. **静态代码块:** 静态代码块定义在类中方法外, 静态代码块在非静态代码块之前执行(静态代码块—>非静态代码块—>构造方法)。 该类不管创建多少对象，静态代码块只执行一次.

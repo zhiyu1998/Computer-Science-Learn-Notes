@@ -44,21 +44,120 @@ category:
 
 > 精简版
 
-**进程是系统资源分配和调度的基本单位**，它能并发执行较高系统资源的利用率.
+**进程**是系统资源**分配和调度的一个独立单位**，每个进程有自己的内存空间和系统资源。一个进程可以包含多个线程，这些线程共享进程的堆和元空间（JDK1.8之后的方法区），但每个线程有自己的程序计数器、虚拟机栈和本地方法栈。线程作为进程内部的并发执行单位，切换代价小，但可能会相互影响。
 
-**线程**是**比进程更小**的能独立运行的基本单位,创建、销毁、切换成本要小于进程,可以减少程序并发执行时的时间和空间开销，使得操作系统具有更好的并发性。
+**线程**是程序并发执行的**最小单位**，因为创建、销毁、切换的成本相较于进程更小，所以能够更好地提高程序的并发性和系统资源的利用率。
+
+> 另外在这里还可以再扩展一下：**协程**和Java 19的**虚拟线程**
+> 1. **协程（Coroutines）** 是一种比线程更轻量级的存在，它们的特点是可以在用户态进行调度，而无需涉及到系统调度，因此创建、切换的成本更低。不过，协程并不是由操作系统提供的概念，而是由特定的编程语言或者库提供。协程的一个重要特性是可以通过 yield 和 resume 操作进行手动调度，允许在函数内部保存状态，从而实现非常轻量级的任务切换和并发。
+> 2. **Java 19引入了虚拟线程（Virtual Threads）** 的概念，也被称为轻量级线程或者**纤程（fibers）**。虚拟线程是为了解决Java并发编程中的一些问题，比如高并发时线程资源的消耗，线程切换导致的性能开销等。相比于常规线程，虚拟线程的创建和切换开销更小，这是因为虚拟线程的调度不是由操作系统来完成，而是在用户态由Java运行时系统来完成。虚拟线程使得开发者可以在不担心性能和资源问题的前提下，创建大量的线程来提高程序的并发性能。
+> - https://docs.oracle.com/en/java/javase/19/core/virtual-threads.html 官方虚拟线程介绍
+> - https://www.javacodegeeks.com/2023/03/intro-to-java-virtual-threads.html 虚拟线程Java简介
+> - https://spring.io/blog/2022/10/11/embracing-virtual-threads 拥抱虚拟线程
+> - https://stackoverflow.com/questions/796217/what-is-the-difference-between-a-thread-and-a-fiber 线程和fibers有什么区别？
 
 ### Java线程的创建方式
 
 有**四种**方式可以用来创建线程：
 
-- 继承**Thread**类
-- 实现**Runnable**接口
-- **Callable**和**FutureTask**创建线程：为了解决异步执行的结果问题，Java语言在1.5版本之后提供了一种新的多线程创建方法：通过Callable接口和FutureTask类相结合创建线程。
-- **线程池**创建线程
-  - 使用Executors创建线程池
+1. 继承**Thread**类
+```java
+public class MyThread extends Thread {
+    @Override
+    public void run() {
+        System.out.println("This is a thread created by extending Thread class.");
+    }
+
+    public static void main(String[] args) {
+        MyThread myThread = new MyThread();
+        myThread.start();
+    }
+}
+```
+2. 实现**Runnable**接口
+```java
+public class MyRunnable implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("This is a thread created by implementing Runnable interface.");
+    }
+
+    public static void main(String[] args) {
+        MyRunnable myRunnable = new MyRunnable();
+        Thread thread = new Thread(myRunnable);
+        thread.start();
+    }
+}
+```
+3. **Callable**和**FutureTask**创建线程：为了解决异步执行的结果问题，Java语言在1.5版本之后提供了一种新的多线程创建方法：通过Callable接口和FutureTask类相结合创建线程。
+```java
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+
+public class MyCallable implements Callable<String> {
+    @Override
+    public String call() {
+        return "This is a thread created by using Callable and FutureTask.";
+    }
+
+    public static void main(String[] args) {
+        MyCallable myCallable = new MyCallable();
+        FutureTask<String> futureTask = new FutureTask<>(myCallable);
+        Thread thread = new Thread(futureTask);
+        thread.start();
+
+        try {
+            System.out.println(futureTask.get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
+4. **线程池**创建线程，使用Executors创建线程池
+```java
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class ThreadPoolExample {
+    public static void main(String[] args) {
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+
+        Runnable task1 = () -> System.out.println("Task 1 is executed by a thread in the thread pool.");
+        Runnable task2 = () -> System.out.println("Task 2 is executed by a thread in the thread pool.");
+        Runnable task3 = () -> System.out.println("Task 3 is executed by a thread in the thread pool.");
+
+        executorService.execute(task1);
+        executorService.execute(task2);
+        executorService.execute(task3);
+
+        executorService.shutdown();
+    }
+}
+```
 
 实现Runnable接口这种方式更受欢迎，因为这不需要继承Thread类。在应用设计中已经继承了别的对象的情况下，这需要多继承（而Java不支持多继承），只能实现接口。同时，线程池也是非常高效的，很容易实现和使用。
+
+> 扩展：Java19如何创建一个虚拟线程
+
+```java
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+public class FiberExample {
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.submit(() -> {
+            System.out.println("Hello from fiber!");
+        }).get();
+        executor.shutdown();
+        executor.awaitTermination(1, TimeUnit.SECONDS);
+    }
+}
+```
 
 ### JMM 是什么？
 
@@ -148,7 +247,7 @@ JMM规定：
 happens-before 这个概念最早诞生于 Leslie Lamport 于 1978 年发表的论文[《Time，Clocks and the Ordering of Events in a Distributed System》](https://lamport.azurewebsites.net/pubs/time-clocks.pdf)。在这篇论文中，Leslie Lamport 提出了逻辑时钟open in new window的概念，这也成了第一个逻辑时钟算法 。在分布式环境中，通过一系列规则来定义逻辑时钟的变化，从而能通过逻辑时钟来对分布式系统中的事件的先后顺序进行判断。逻辑时钟并不度量时间本身，仅区分事件发生的前后顺序，其本质就是定义了一种 happens-before 关系。
 
 上面提到的 happens-before 这个概念诞生的背景并不是重点，简单了解即可。
-
+ 
 JSR 133 引入了 happens-before 这个概念来描述两个操作之间的内存可见性。
 
 为什么需要 happens-before 原则？ happens-before 原则的诞生是为了程序员和编译器、处理器之间的平衡。程序员追求的是易于理解和编程的强内存模型，遵守既定规则编码即可。编译器和处理器追求的是较少约束的弱内存模型，让它们尽己所能地去优化性能，让性能最大化。happens-before 原则的设计思想其实非常简单：

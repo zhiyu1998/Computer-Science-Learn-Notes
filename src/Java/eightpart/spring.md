@@ -292,33 +292,37 @@ Spring 中配置 DataSource 的时候，DataSource  可能是不同的数据库�
 
 ### SpringBoot启动流程
 
+1. **初始化**：Spring Boot应用程序首先初始化SpringApplication对象，该对象负责管理应用程序的启动和运行。在这个阶段，Spring Boot会加载应用程序的配置文件和命令行参数。
+2. **创建Spring应用上下文**：Spring Boot会创建一个Spring应用上下文（ApplicationContext），它是Spring容器的核心，负责管理应用程序中的所有Bean。在这个阶段，Spring Boot会扫描应用程序中的所有组件（如@Service、@Controller等），并将它们注册到Spring容器中。
+3. **自动配置**：Spring Boot会自动配置应用程序，根据应用程序的依赖关系和配置文件，自动创建和配置Bean。这使得开发人员可以专注于业务逻辑的实现，而不需要手动配置大量的Bean。
+4. **启动嵌入式Web服务器**（如果有的话）：如果应用程序是一个Web应用程序，Spring Boot会启动一个嵌入式的Web服务器（如Tomcat、Jetty等），并将应用程序部署到该服务器上。
+5. **应用程序启动完成**：在这个阶段，Spring Boot会触发ApplicationReadyEvent事件，表示应用程序已经启动并准备好接受请求。你可以在这个阶段执行一些自定义的初始化逻辑，例如设置数据库、启动定时任务等。
+
 ![image-20220627213051378](./personal_images/image-20220627213051378.png)
 
-### Bean生命周期
+### 🌟 Spring Bean生命周期
 
 ![img](./personal_images/20220709213529.png)
 
-1.调用bean的构造方法创建Bean
+首先简要介绍 Spring Bean 和 Spring IoC（控制反转）容器的基本概念。
 
-2.通过反射调用setter方法进行属性的依赖注入
+Spring Bean 是 Spring 框架中的一个基本组成部分，它们是由 Spring IoC 容器管理的 Java 对象。Spring Bean 生命周期描述了从对象创建到销毁的整个过程，这个过程由容器管理并通过各种回调方法来执行。
 
-3.如果Bean实现了`BeanNameAware`接口，Spring将调用`setBeanName`()，设置 `Bean`的name（xml文件中bean标签的id）
+**生命周期阶段**：详细介绍 Spring Bean 生命周期的各个阶段。
+- 实例化（Instantiation）：Spring IoC 容器创建 Bean 实例。
+- 属性赋值（Populate properties）：容器根据 Bean 定义的依赖关系，为 Bean 的属性赋值。
+- 初始化（Initialization）：Bean 初始化的几个步骤：
+	- 如果 Bean 实现了 `BeanNameAware` 接口，容器会调用 `setBeanName()` 方法传入 Bean 的名称。
+	- 如果 Bean 实现了 `BeanFactoryAware` 接口，容器会调用 `setBeanFactory()` 方法传入 Bean 工厂。
+	- 如果 Bean 实现了 `ApplicationContextAware` 接口，容器会调用 `setApplicationContext()` 方法传入应用上下文。
+	- 如果 Bean 配置了 `BeanPostProcessor`，则在初始化前后调用 `postProcessBeforeInitialization()` 和 `postProcessAfterInitialization()` 方法。
+	- 如果 Bean 实现了 `InitializingBean` 接口，容器会调用 `afterPropertiesSet()` 方法。
+	- 如果 Bean 配置了自定义的初始化方法，容器会调用该方法。
+- 销毁（Destruction）：Bean 销毁的几个步骤：
+	- 如果 Bean 实现了 `DisposableBean` 接口，容器会调用 `destroy()` 方法。
+	- 如果 Bean 配置了自定义的销毁方法，容器会调用该方法。
 
-4.如果Bean实现了`BeanFactoryAware`接口，Spring将调用`setBeanFactory()`把bean factory设置给Bean
-
-5.如果存在`BeanPostProcessor`，Spring将调用它们的`postProcessBeforeInitialization`（预初始化）方法，在Bean初始化前对其进行处理
-
-6.如果Bean实现了`InitializingBean`接口，Spring将调用它的`afterPropertiesSet`方法，然后调用xml定义的 init-method 方法，两个方法作用类似，都是在初始化 bean 的时候执行
-
-7.如果存在`BeanPostProcessor`，Spring将调用它们的`postProcessAfterInitialization`（后初始化）方法，在Bean初始化后对其进行处理
-
-8.Bean初始化完成，供应用使用，这里分两种情况：
-
-8.1 如果Bean为单例的话，那么容器会返回Bean给用户，并存入缓存池。如果Bean实现了`DisposableBean`接口，Spring将调用它的`destory`方法，然后调用在xml中定义的 `destory-method`方法，这两个方法作用类似，都是在Bean实例销毁前执行。
-
-8.2 如果Bean是多例的话，容器将Bean返回给用户，剩下的生命周期由用户控制。
-
-
+实际意义：了解 Spring Bean 生命周期有助于更好地理解和使用 Spring 框架。通过实现不同的接口或配置自定义方法，开发者可以在 Bean 生命周期的各个阶段执行特定操作，如添加日志、资源释放等。这有助于实现更高效、可维护的代码。
 
 ### @Autowired 和 @Resource 的区别是什么？
 
@@ -394,7 +398,7 @@ private SmsService smsService;
 - `Autowired` 默认的注入方式为 `byType`（根据类型进行匹配），`@Resource`默认注入方式为 `byName`（根据名称进行匹配）。
 - 当一个接口存在多个实现类的情况下，`@Autowired` 和 `@Resource`都需要通过名称才能正确匹配到对应的 Bean。`Autowired` 可以通过 `@Qualifier` 注解来显示指定名称，`@Resource`可以通过 `name` 属性来显示指定名称。
 
-### 请描述Spring MVC的工作流程？描述一下 DispatcherServlet 的工作流程？
+### 🌟 请描述Spring MVC的工作流程？描述一下 DispatcherServlet 的工作流程？
 
 1. 用户发送request请求到前端控制器DispatcherServlet。
 2. 前端控制器DispatcherServlet通过request请求的url地址，向映射器HandlerMapping请求调用对应的处理器handler。
@@ -457,7 +461,13 @@ public class Role {
 
 
 
-### :star:Spring怎么解决循环依赖的问题？
+### ✨ Spring怎么解决循环依赖的问题？
+>《概览》
+>1. 通过三级缓存解决。Spring的三级缓存分别是 singletonObjects、earlySingletonObjects 和 singletonFactories。当BeanA依赖于BeanB,而BeanB又依赖于BeanC时，Spring会先创建BeanA并将其放入singletonObjects中，然后创建BeanB并将其放入singletonFactories中，最后再创建BeanC。这样就避免了循环引用的问题。
+>2. 通过使用延迟加载解决。这种方法是将一个Bean使用延时加载，也就是说这个Bean并没有完全初始化完，实际上它注入的是一个代理，只有当它首次被使用的时候才会被完全初始化。
+>3. 通过使用构造函数注入解决。这种方法是将一个Bean的属性通过构造函数注入到另一个Bean中，从而避免了循环引用的问题。
+
+#### 三级缓存
 
 **构造器注入的循环依赖：Spring处理不了**，直接抛出`BeanCurrentlylnCreationException`异常。
 
@@ -493,7 +503,7 @@ public class Role {
 2. `populateBean`：进行依赖注入。
 3. `initializeBean`：初始化bean。
 
-Spring为了解决单例的循环依赖问题，使用了**三级缓存**：
+Spring为了解决单例的循环依赖问题，使用了**三级缓存（这个缓存机制包括singletonObjects、earlySingletonObjects以及singletonFactories）**：
 
 ```java
 /** Cache of singleton objects: bean name --> bean instance */
@@ -507,64 +517,183 @@ private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<Str
     
 ```
 
-* **第一层缓存（singletonObjects）**：单例对象缓存池，已经实例化并且属性赋值，这里的对象是**成熟对象**；
-* **第二层缓存（earlySingletonObjects）**：单例对象缓存池，已经实例化但尚未属性赋值，这里的对象是**半成品对象**；
-* **第三层缓存（singletonFactories）**: 单例工厂的缓存
+* **第一层缓存（singletonObjects）**：单例对象缓存池，已经实例化并且属性赋值，这里的对象是**成熟对象**，具体而言这个缓存用于存储已经完全初始化好的单例bean；
+* **第二层缓存（earlySingletonObjects）**：单例对象缓存池，已经实例化但尚未属性赋值，这里的对象是**半成品对象**，这个缓存用于存储已经实例化但尚未完全初始化的bean。这个缓存主要用于解决循环依赖的问题；
+* **第三层缓存（singletonFactories）**: 单例工厂的缓存，这个缓存用于存储用于创建bean的工厂对象。当一个bean需要被提前暴露（即尚未完全初始化）时，可以通过这个缓存获取对应的工厂对象，然后调用工厂对象的方法获取bean实例。
 
-如下是获取单例中
+现在让我们详细了解一下在解决循环依赖时，这三个缓存是如何发挥作用的：
 
+1. 当Spring开始实例化A时，首先会创建一个A的实例，然后将A的实例放入`singletonFactories`缓存。
+2. 接下来，Spring开始处理A的属性，发现A依赖B。因此，Spring开始实例化B。
+3. 跟A类似，B的实例首先被放入`singletonFactories`缓存。
+4. 当处理B的属性时，发现B依赖A。这时，Spring会尝试从`singletonObjects`缓存中获取A的实例。但是，由于A尚未完全初始化，所以获取不到。
+5. 接着，Spring会尝试从earlySingletonObjects缓存中获取A的实例。由于A已经被实例化，所以这个时候可以从这个缓存中获取到A的实例。
+6. 由于已经获取到了A的实例，Spring可以继续完成B的属性注入。完成后，将B的实例从`singletonFactories`移除，同时将B的实例放入`earlySingletonObjects`和`singletonObjects`缓存。
+7. 此时，Spring回到处理A的属性，由于已经获取到了B的实例，可以完成A的属性注入。完成后，将A的实例从`singletonFactories`移除，同时将A的实例放入`earlySingletonObjects`和`singletonObjects`缓存。
+> 这个解决方案只适用于单例作用域的bean（默认作用域）。对于其他作用域的bean，例如原型作用域，Spring不会解决循环依赖问题。
+
+#### 使用@Lazy
+使用一个简单的例子进行说明：
 ```java
-protected Object getSingleton(String beanName, boolean allowEarlyReference) {
-  // Spring首先从singletonObjects（一级缓存）中尝试获取
-  Object singletonObject = this.singletonObjects.get(beanName);
-  // 若是获取不到而且对象在建立中，则尝试从earlySingletonObjects(二级缓存)中获取
-  if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
-    synchronized (this.singletonObjects) {
-        singletonObject = this.earlySingletonObjects.get(beanName);
-        if (singletonObject == null && allowEarlyReference) {
-          ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
-          if (singletonFactory != null) {
-            //若是仍是获取不到而且容许从singletonFactories经过getObject获取，则经过singletonFactory.getObject()(三级缓存)获取
-              singletonObject = singletonFactory.getObject();
-              //若是获取到了则将singletonObject放入到earlySingletonObjects,也就是将三级缓存提高到二级缓存中
-              this.earlySingletonObjects.put(beanName, singletonObject);
-              this.singletonFactories.remove(beanName);
-          }
-        }
+@Component
+public class CircularDependencyA {
+
+    private CircularDependencyB circB;
+
+    @Autowired
+    public CircularDependencyA(CircularDependencyB circB) {
+        this.circB = circB;
     }
-  }
-  return (singletonObject != NULL_OBJECT ? singletonObject : null);
 }
-    
 ```
-
-补充一些方法和参数
-
-- `isSingletonCurrentlyInCreation()`：判断当前单例bean是否正在建立中，也就是没有初始化完成(好比A的构造器依赖了B对象因此得先去建立B对象， 或则在A的populateBean过程当中依赖了B对象，得先去建立B对象，这时的A就是处于建立中的状态。)
-- `allowEarlyReference` ：是否容许从singletonFactories中经过getObject拿到对象
-
-分析getSingleton()的整个过程，Spring首先从一级缓存singletonObjects中获取。若是获取不到，而且对象正在建立中，就再从二级缓存earlySingletonObjects中获取。若是仍是获取不到且容许singletonFactories经过getObject()获取，就从三级缓存singletonFactory.getObject()(三级缓存)获取，若是获取到了则从三级缓存移动到了二级缓存。
-
-从上面三级缓存的分析，咱们能够知道，Spring解决循环依赖的诀窍就在于singletonFactories这个三级cache。这个cache的类型是ObjectFactory，定义以下：
-
 ```java
-public interface ObjectFactory<T> {
-    T getObject() throws BeansException;
+@Component
+public class CircularDependencyB {
+
+    private CircularDependencyA circA;
+
+    @Autowired
+    public CircularDependencyB(CircularDependencyA circA) {
+        this.circA = circA;
+    }
 }
 ```
 
-在bean建立过程当中，有两处比较重要的匿名内部类实现了该接口。一处是Spring利用其建立bean的时候，另外一处就是:
-
+使用@Lazy
 ```java
-addSingletonFactory(beanName, new ObjectFactory<Object>() {
-   @Override   public Object getObject() throws BeansException {
-      return getEarlyBeanReference(beanName, mbd, bean);
-   }});
+@Component
+public class CircularDependencyA {
+
+    private CircularDependencyB circB;
+
+    @Autowired
+    public CircularDependencyA(@Lazy CircularDependencyB circB) {
+        this.circB = circB;
+    }
+}
 ```
 
-此处就是解决循环依赖的关键，这段代码发生在createBeanInstance以后，也就是说单例对象此时已经被建立出来的。这个对象已经被生产出来了，虽然还不完美（尚未进行初始化的第二步和第三步），可是已经能被人认出来了（根据对象引用能定位到堆中的对象），因此Spring此时将这个对象提早曝光出来让你们认识，让你们使用。
+#### 使用Setter/字段注入
+简而言之，我们可以通过改变bean的连接方式来解决这个问题——使用setter注入（或字段注入）而不是构造函数注入。这样，Spring创建bean，但依赖项在需要之前不会注入。
 
-好比“A对象setter依赖B对象，B对象setter依赖A对象”，A首先完成了初始化的第一步，而且将本身提早曝光到singletonFactories中，此时进行初始化的第二步，发现本身依赖对象B，此时就尝试去get(B)，发现B尚未被create，因此走create流程，B在初始化第一步的时候发现本身依赖了对象A，因而尝试get(A)，尝试一级缓存singletonObjects(确定没有，由于A还没初始化彻底)，尝试二级缓存earlySingletonObjects（也没有），尝试三级缓存singletonFactories，因为A经过ObjectFactory将本身提早曝光了，因此B可以经过ObjectFactory.getObject拿到A对象(半成品)，B拿到A对象后顺利完成了初始化阶段一、二、三，彻底初始化以后将本身放入到一级缓存singletonObjects中。此时返回A中，A此时能拿到B的对象顺利完成本身的初始化阶段二、三，最终A也完成了初始化，进去了一级缓存singletonObjects中，并且更加幸运的是，因为B拿到了A的对象引用，因此B如今hold住的A对象完成了初始化。
+```java
+@Component
+public class CircularDependencyA {
+
+    private CircularDependencyB circB;
+
+    @Autowired
+    public void setCircB(CircularDependencyB circB) {
+        this.circB = circB;
+    }
+
+    public CircularDependencyB getCircB() {
+        return circB;
+    }
+}
+```
+
+```java
+@Component
+public class CircularDependencyB {
+
+    private CircularDependencyA circA;
+
+    private String message = "Hi!";
+
+    @Autowired
+    public void setCircA(CircularDependencyA circA) {
+        this.circA = circA;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}
+```
+
+#### 使用@PostConstruct
+
+```java
+@Component
+public class CircularDependencyA {
+
+    @Autowired
+    private CircularDependencyB circB;
+
+    @PostConstruct
+    public void init() {
+        circB.setCircA(this);
+    }
+
+    public CircularDependencyB getCircB() {
+        return circB;
+    }
+}
+```
+
+```java
+@Component
+public class CircularDependencyB {
+
+    private CircularDependencyA circA;
+	
+    private String message = "Hi!";
+
+    public void setCircA(CircularDependencyA circA) {
+        this.circA = circA;
+    }
+	
+    public String getMessage() {
+        return message;
+    }
+}
+```
+
+#### 实现应用上下文感知和初始化Bean
+
+```java
+@Component
+public class CircularDependencyA implements ApplicationContextAware, InitializingBean {
+
+    private CircularDependencyB circB;
+
+    private ApplicationContext context;
+
+    public CircularDependencyB getCircB() {
+        return circB;
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        circB = context.getBean(CircularDependencyB.class);
+    }
+
+    @Override
+    public void setApplicationContext(final ApplicationContext ctx) throws BeansException {
+        context = ctx;
+    }
+}
+```
+
+```java
+@Component
+public class CircularDependencyB {
+
+    private CircularDependencyA circA;
+
+    private String message = "Hi!";
+
+    @Autowired
+    public void setCircA(CircularDependencyA circA) {
+        this.circA = circA;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}
+```
 
 
 
