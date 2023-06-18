@@ -40,8 +40,36 @@ public class Main {
 }
 ```
 
-3. 使用Lock接口来实现同步。可以使用ReentrantLock类来实现对ArrayList的同步操作，该类提供了与synchronized类似的功能，但是具有更高的灵活性。比如可以使用tryLock()方法来尝试获取锁，避免了线程的长时间等待。
-4. 使用读写锁来实现同步。可以使用ReentrantReadWriteLock类来实现对ArrayList的读写操作的同步。该类提供了读锁和写锁两种锁，多个线程可以同时获取读锁，但是只有一个线程可以获取写锁，在写操作时需要先获取写锁，以保证线程安全。
+3. 使用**Lock接口**来实现同步。可以使用ReentrantLock类来实现对ArrayList的同步操作，该类提供了与synchronized类似的功能，但是具有更高的灵活性。比如可以使用tryLock()方法来尝试获取锁，避免了线程的长时间等待。
+```java
+Lock lock = new ReentrantLock();
+...
+lock.lock();
+try {
+    // 对 ArrayList 的操作
+} finally {
+    lock.unlock();
+}
+```
+4. 使用**读写锁**来实现同步。可以使用ReentrantReadWriteLock类来实现对ArrayList的读写操作的同步。该类提供了读锁和写锁两种锁，多个线程可以同时获取读锁，但是只有一个线程可以获取写锁，在写操作时需要先获取写锁，以保证线程安全。
+```java
+ReadWriteLock rwLock = new ReentrantReadWriteLock();
+...
+rwLock.readLock().lock();
+try {
+    // 对 ArrayList 的读操作
+} finally {
+    rwLock.readLock().unlock();
+}
+...
+rwLock.writeLock().lock();
+try {
+    // 对 ArrayList 的写操作
+} finally {
+    rwLock.writeLock().unlock();
+}
+```
+5. 使用 **Vector**: Vector 是一个线程安全的类，与 ArrayList 非常相似，可以作为替代品。但是，由于 Vector 的所有方法都是同步的，这可能会导致性能问题。
 
 > 参考文献：
 > - https://stackoverflow.com/questions/2444005/how-do-i-make-my-arraylist-thread-safe-another-approach-to-problem-in-java 如何使我的ArrayList线程安全？Java问题的另一种方法？
@@ -76,11 +104,80 @@ public class Main {
 - 每个模块相对独立，出现问题时可以单独调试，降低了调试难度。
 - 面向过程编程适合解决简单、逻辑性强的问题，对于初学者来说，学习成本较低。
 
+### object 有哪些方法（2023百度）
+当面试官问到 Java 中 Object 类的方法时，如果你无法记住所有的方法，可以采用以下回答策略：
+
+- 强调**基本方法**：首先提及最常用和最基本的几个方法，如 equals()、hashCode()、toString()，这些方法几乎在每个对象中都会用到。
+	- equals(Object obj): 检查当前对象是否与另一个对象相等。
+	- hashCode(): 返回对象的哈希码值。
+	- toString(): 返回对象的字符串表示。
+- 提及**重要的方法**：接下来可以提及一些较为重要的方法，如 getClass() 用于获取对象的运行时类，clone() 用于创建对象的副本等。
+	- clone(): 创建并返回当前对象的副本。
+	- getClass(): 返回对象的运行时类。
+- 谈论**对象间的通信**：强调 wait()、notify()、notifyAll() 这些用于线程间通信的方法，说明其在多线程编程中的作用。
+	- notify(): 唤醒在该对象上等待的单个线程。
+	- notifyAll(): 唤醒在该对象上等待的所有线程。
+	- wait(): 导致当前线程等待，直到另一个线程调用该对象的 notify() 或 notifyAll() 方法。
+- 谈论**垃圾回收**：提及 finalize() 方法，它在对象被垃圾回收之前调用，可以用于执行一些清理操作。
+	- finalize(): 在对象被垃圾回收器回收之前调用。
+
+### 如果让你自己实现一个 map 你会怎么做（2023百度）
+我认为这个问题可以转换一个思路：设计一个Map这样的数据结构时，需要考虑以下因素？
+- **哈希函数**：哈希函数用于将键转化为数组索引。好的哈希函数应尽量使得每个键都映射到不同的索引上，以减少冲突。
+- **冲突处理**：如果两个不同的键哈希到相同的索引上，就会产生冲突。常见的冲突处理方法有链地址法和开放地址法。
+- **动态扩容**：如果Map中的元素数量超过了当前数组的大小，就需要对数组进行扩容。扩容的过程通常会重新哈希所有元素，因此需要考虑何时进行扩容以及如何高效地进行扩容。
+- **数据类型**：需要考虑存储的数据类型，是基础类型还是自定义类型。如果是自定义类型，需要考虑如何定义哈希函数和相等性判断。
+- **线程安全**：是否需要支持多线程环境？如果需要，如何保证线程安全？
+- **API设计**：如何设计API使得使用者容易理解和使用？
+- **性能考虑**：需要考虑Map的主要操作（插入，删除，查找）的时间复杂性。对于Java的HashMap，这些操作的平均时间复杂性为O(1)。
+
+### 作为 map 的 key 需要重写哪些方法？（2023完美世界）
+首先，先理解面试题的意思，可以理解为：**如果你要用自己的类的对象作为Map的键，你需要重写这个类的哪些方法？**
+- 在Java中，Map接口是基于键值对的，每个键都必须是唯一的。Java使用键对象的hashCode()方法来计算哈希值，这个哈希值用于确定在Map内部存储结构中的位置。同时，Java也使用键对象的equals()方法来检查两个键是否相等。
+- 所以，如果你的类的对象要作为Map的键使用，那么通常需要你重写这个类的hashCode()和equals()方法，以确保它们的行为符合预期。
+- 如果不重写这两个方法，那么默认的hashCode()方法将返回每个对象的内存地址，equals()方法将仅比较两个对象的内存地址。这可能会导致不符合预期的行为，比如两个内容完全相同但内存地址不同的对象被视为不同的键。
+
+
+在Java中，作为Map的键（key），你通常需要重写以下两个方法：
+1. **hashCode()**：这个方法返回对象的哈希码，用于确定在哈希表中的存储位置。如果两个对象被认为相等（根据equals()方法），那么它们的hashCode()方法必须返回相同的值。
+2. **equals()**：这个方法用来判断两个对象是否相等。在Java的Map中，当我们调用get(key)或containsKey(key)方法时，Map实现会用这个方法来查找与给定键匹配的键。
+
+当你创建自定义的类并打算将其实例用作Map的键时，通常需要覆盖这两个方法以确保它们的行为符合预期。如果不这样做，Map可能无法正确地查找、添加或删除键值对。
+
+### List的实现类（2023阿里）
+Java中的List接口有多个实现类，常用的包括：
+
+- ArrayList：基于动态数组实现，优势在于支持随机访问和快速插入/删除元素，适用于频繁读取和遍历的场景。
+- LinkedList：基于双向链表实现，优势在于支持快速插入/删除元素，适用于频繁插入/删除元素的场景。
+- Vector：和ArrayList类似，但由于其线程安全性，适用于多线程环境。
+- Stack：基于Vector实现，是一个后进先出（LIFO）的数据结构，适用于需要按照后进先出顺序处理元素的场景。
+
+### List和Set的区别（2023阿里）
+1. 顺序：List是有序的集合，它可以按照元素插入的顺序进行存储和访问。而Set是无序的集合，元素在集合中的位置是不固定的。
+2. 重复元素：List允许存储重复的元素，即可以有多个相同的对象。Set不允许存储重复的元素，即每个对象在集合中只能出现一次。
+3. 实现类：List的常用实现类有ArrayList和LinkedList，分别使用数组和链表作为底层数据结构。Set的常用实现类有HashSet、LinkedHashSet和TreeSet，分别基于哈希表、链表+哈希表和红黑树实现。
+4. 性能：由于底层数据结构的差异，List和Set在增加、删除、查找等操作上的性能表现有所不同。例如，ArrayList在随机访问元素时性能较好，而LinkedList在插入和删除元素时性能较好。HashSet在查找、添加和删除元素时性能较好，但不保证元素顺序。TreeSet在保持元素排序的同时，也能提供较好的查找性能。
+
+> 补充：
+> Queue(实现排队功能的叫号机): 按特定的排队规则来确定先后顺序，存储的元素是有序的、可重复的。
+> Map(用 key 来搜索的专家): 使用键值对（key-value）存储，类似于数学上的函数 y=f(x)，"x" 代表 key，"y" 代表 value，key 是无序的、不可重复的，value 是无序的、可重复的，每个键最多映射到一个值。
+
+### 针对你说的List和Set的性质，那你会用这两种结构解决哪些问题（2023阿里）
+List（列表）适用于以下场景：
+1. 有序数据：列表中的元素按照插入顺序存储，因此适用于需要保持元素顺序的场景。
+2. 允许重复元素：列表允许存储重复的元素，因此适用于需要统计元素出现次数的场景。
+3. 需要根据索引进行查找、插入和删除操作：列表允许通过索引值直接访问、插入或删除元素，适用于需要频繁进行这些操作的场景。
+
+Set（集合）适用于以下场景：
+1. 去重：集合中的元素不能重复，因此适用于去除数据中重复元素的场景。
+2. 无需关心元素顺序：集合中的元素没有固定顺序，适用于元素顺序无关紧要的场景。
+3. 快速判断元素是否存在：集合提供了高效率的查找算法，适用于需要快速判断某个元素是否存在于数据集中的场景。
+4. 集合运算：集合支持交集、并集、差集等运算，适用于需要进行这些运算的场景。
 
 ## 🕝 并发编程
 
 ### 线程池的拒绝策略能自定义拒绝策略吗？（2023阿里）
-Java线程池拒绝策略是可以自定义的。你可以使用RejecttedExecutionHandler接口来定义你自己的拒绝策略。该接口只有一个方法拒绝执行（Runnable r，ThreadPoolExecator执行器），当执行器无法执行任务时调用。你可以实现这个方法来定义你自己的拒绝策略。
+Java线程池拒绝策略是可以自定义的。你可以使用`RejecttedExecutionHandler`接口来定义你自己的拒绝策略。该接口只有一个方法拒绝执行（Runnable r，ThreadPoolExecator执行器），当执行器无法执行任务时调用。你可以实现这个方法来定义你自己的拒绝策略。
 
 示例：
 ```java
@@ -145,18 +242,21 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 相反，你需要编写一个与Mapper接口同名的XML文件，来实现这些方法的具体SQL操作。这样，当你在Java代码中调用Mapper接口中的方法时，MyBatis会自动将该方法映射到对应的XML文件中的SQL语句，并执行该语句。
 
 ### 与传统的JDBC相比，MyBatis的优点？（2023美团）
-- mybatis的全局配置文件中可以设置数据库连接池，和spring整合可以配置数据库连接
-- mybatis把sql和代码分离，提供了Mapper.xml映射文件，在映射文件中通过标签来写sql
-- mybatis中自动完成java对象和sql中参数的映射
-- mybatis中通过ResultSetHandler自动将结果集映射到对应的java对象中
+在面试中，可以按照以下的方式来回答：
+1. 首先，我认为最大的优点是MyBatis提供了更高的**灵活性**。我们可以直接编写SQL，这样可以充分利用数据库的特性并且更好地控制查询。
+2. 其次，MyBatis使我们**无需手动**转换数据，它能自动将结果集映射到Java对象，这大大简化了编程工作。
+3. 此外，MyBatis支持**动态SQL**，我们可以在SQL语句中使用动态元素，如if、choose等，从而能够创建更复杂的查询。
+4. 除此之外，MyBatis将SQL语句放在**XML文件或注解**中，实现了SQL与Java代码的分离，这使得代码更加易于维护。
+5. MyBatis也能**更好地处理一对多、多对多**等复杂关系。
+6. 最后，MyBatis提供了**一些JDBC无法提供的特性**，如延迟加载，这对于性能优化是非常有用的。
 
 ### JDBC连接数据库的步骤吗？（2023美团）
-1. 加载数据库驱动程序：使用Class.forName()方法加载对应的数据库驱动程序，例如：Class.forName("com.mysql.jdbc.Driver");
-2. 建立数据库连接：使用DriverManager.getConnection()方法建立与数据库的连接，需要指定数据库的URL、用户名和密码，例如：Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/mydatabase", "username", "password");
-3. 创建Statement对象：使用Connection对象的createStatement()方法创建一个Statement对象，用于执行SQL语句，例如：Statement stmt = conn.createStatement();
-4. 执行SQL语句：使用Statement对象的executeQuery()或executeUpdate()方法执行SQL语句，例如：ResultSet rs = stmt.executeQuery("SELECT * FROM mytable");
-5. 处理查询结果：如果执行的是查询语句，需要使用ResultSet对象来处理查询结果，例如：while (rs.next()) { String name = rs.getString("name"); int age = rs.getInt("age"); }
-6. 关闭数据库连接：在程序结束时，需要使用Connection对象的close()方法关闭数据库连接，例如：conn.close();
+1. **加载数据库驱动程序**：首先，我们需要加载数据库驱动。这可以通过 Class.forName() 方法实现，例如 Class.forName("com.mysql.jdbc.Driver")。
+2. **建立数据库连接**：使用DriverManager.getConnection()方法建立与数据库的连接，需要指定数据库的URL、用户名和密码，例如：Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/mydatabase", "username", "password");
+3. **创建Statement对象**：使用Connection对象的createStatement()方法创建一个Statement对象，用于执行SQL语句，例如：Statement stmt = conn.createStatement();
+4. **执行SQL语句**：使用Statement对象的executeQuery()或executeUpdate()方法执行SQL语句，例如：ResultSet rs = stmt.executeQuery("SELECT * FROM mytable");
+5. **处理查询结果**：如果执行的是查询语句，需要使用ResultSet对象来处理查询结果，例如：while (rs.next()) { String name = rs.getString("name"); int age = rs.getInt("age"); }
+6. **关闭数据库连接**：在程序结束时，需要使用Connection对象的close()方法关闭数据库连接，例如：conn.close();
 
 ### 怎么理解SpringIoc？（2023美团）
 **IoC（Inversion of Control）是“控制反转”** 的缩写，是一种设计思想，也是Spring框架的核心。IoC是将你设计好的对象交给容器控制，而不是传统的在你的对象内部直接控制。如何理解好IoC呢？可以从以下几点来看：
@@ -195,18 +295,69 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 7. **返回视图**：DispatcherServlet把返回的视图对象返回给用户。
 
 ###  SpringAOP主要想解决什么问题（2023美团）
-Spring AOP主要解决的是横切关注点的问题，即在一个系统中，可能存在多个模块或组件都需要实现类似的功能，比如日志记录、权限校验、事务管理等等。如果每个模块都去实现这些功能，就会导致代码冗余，可维护性和可扩展性降低。而AOP则是基于动态代理的机制，在不修改原有代码的情况下，通过在代码执行前后插入增强代码的方式，实现对横切关注点的统一处理，从而提高代码的复用性和可维护性。
 
-### SpringAOP的原理了解吗（2023美团）
-Spring AOP的主要目的是将横切关注点（如日志、安全和事务管理等）从业务逻辑中分离出来，从而提高代码的模块性和可维护性。
+1. 代码分离：在许多应用程序中，你可能会发现你需要在多个方法或对象中重复相同的代码块，比如日志记录、事务管理、权限检查等。这种情况下，代码不是真正的分离，各部分功能模块的职责并不清晰。通过使用AOP，你可以把这些代码集中在一起，然后应用到程序的其他部分，实现"横切关注点"（cross-cutting concerns）的有效管理。
+2. 维护性：如果你需要修改一些重复的代码（比如更改日志记录的格式），你可能需要在多个位置进行更改。使用AOP，你只需要在一个地方更改，减少了出错的可能性，提高了代码的维护性。
+3. 可读性：AOP可以使得代码的可读性增强。因为重复的、固定的代码被分离出来，业务代码更加清晰，易于理解。
+4. 可重用性：由于AOP能将横切关注点抽象成独立的模块，这些模块可以在多个应用中重用。
 
-原理主要包括以下几个方面：
-1. 代理模式：Spring AOP基于代理模式实现，主要有两种代理方式，JDK动态代理和CGLIB代理。JDK动态代理要求目标类必须实现接口，而CGLIB代理则可以针对没有实现接口的类进行代理。
-2. 切面（Aspect）：切面是将横切关注点模块化的实现。切面通常包含通知（Advice）和切点（Pointcut）。通知是在特定的切点执行的动作，切点则用于定义通知应该在何处执行。
-3. 连接点（Joinpoint）：连接点代表在应用程序中可以插入切面的点，如方法调用、异常处理等。
-4. 织入（Weaving）：织入是将切面应用到目标对象的过程，从而创建代理对象。在Spring AOP中，织入过程发生在运行时。
+总的来说，Spring AOP能够让开发者更好地关注业务逻辑的开发，而将诸如日志记录、安全控制、事务处理等公共任务抽象和集中处理，从而提高代码的可维护性、可读性和可重用性。
 
-通过以上原理，Spring AOP能够在不修改原有业务代码的情况下，将横切关注点进行模块化管理，提高代码的可读性和易维护性。
+### SpringAOP的原理了解吗（2023美团、2023完美世界）
+Spring AOP (Aspect-Oriented Programming)其主要目的是将业务逻辑与系统服务解耦。在 Spring 中，AOP 的实现主要通过代理实现。下面是一些关于其工作原理的关键点：
+1. **代理模式**：Spring AOP 的实现主要依赖于代理模式。在运行时，Spring AOP 动态地在目标对象与实际对象之间创建一个代理对象，然后通过代理对象实现对目标对象的访问。
+2. **JoinPoint**：这是程序执行过程中明确的点，比如方法的调用或特定的异常被抛出。在 Spring AOP 中，一个 JoinPoint 总是代表一个方法的执行。
+3. **PointCut**：这是一组 JoinPoint，你可以通过表达式或规则定义。
+4. **Advice**：这是实际要在程序特定的 JoinPoint 执行的动作。它的类型可以是 Before, After, AfterReturning, AfterThrowing, Around 等。
+5. **Aspect**：这是一个关注点的模块化，这种关注点实现了某一种跨越一个应用程序的功能，通常包含一些 Advices 和 PointCuts。
+6. **Target Object**：代理模式的目标对象。
+7. **AOP Proxy**：AOP 框架创建的对象，包含了 advice。
+
+Spring AOP 使用这些元素来确保横切关注点（cross-cutting concerns）在应用中适当的位置被执行。Spring 可以在运行时动态地将 Advice 应用到目标对象上，从而实现了解耦和代码重用。
+
+在 Spring AOP 中，有两种类型的 AOP 代理：
+- 基于 JDK 的动态代理：如果被代理的目标对象实现了至少一个接口，则会使用 JDK 动态代理。在这种情况下，生成的代理对象会实现被代理对象所实现的接口。
+- CGLIB 代理：如果被代理的目标对象没有实现任何接口，则 Spring AOP 会创建一个被代理对象的子类，然后增强被代理对象的方法，这就是所谓的 CGLIB 代理。
+所有这些都为开发者提供了一个强大的工具，使他们能够将业务逻辑和系统服务（如事务管理、日志、安全等）分开，从而使业务代码更简洁、更易于维护和复用。
+
+> 面试的时候可以这样回答：
+> 🙋‍♂️ "Spring AOP 是一种面向切面编程的实现，它通过动态代理方式解耦了业务逻辑和系统服务。其主要组成部分包括 JoinPoint（程序执行过程中的某个特定点，如方法调用），PointCut（一组可以通过表达式或规则定义的 JoinPoint），Advice（在特定的 JoinPoint 执行的代码），和 Aspect（包含 Advice 和 PointCut 的模块）。
+> Spring AOP 根据目标对象是否实现接口来选择使用 JDK 动态代理还是 CGLIB 代理。如果目标对象实现了接口，Spring AOP 就会用 JDK 动态代理，否则会用 CGLIB 代理。这样，在运行时，Spring AOP 可以动态地将 Advice 应用到目标对象，实现系统服务和业务逻辑的解耦。
+> 通过这种方式，我们可以将一些通用的系统服务（比如事务管理、日志、安全等）抽象出来，从而使业务代码更简洁、更易于维护和复用。"
+
+### 拦截器有几个方法，分别在什么时候执行，对比过滤器（2023完美世界）
+拦截器和过滤器是Web开发中常用的两种处理方法。这里我假设你指的是Spring MVC拦截器和Java Servlet过滤器。
+拦截器 (Interceptor) 在Spring MVC中通常有3个方法：
+- `preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)`: 在请求被处理之前调用。如果返回true，处理流程继续；如果返回false，处理流程结束，不会调用后续的拦截器和处理器。
+- `postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView)`: 在请求被处理之后，视图被渲染之前调用。可以通过它来修改数据模型和视图或进行其他处理。
+- `afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)`: 在请求处理完毕后（视图渲染后）调用，通常用于进行资源清理等工作。
+
+过滤器 (Filter) 在Java Servlet API中通常有三个方法：
+- init(FilterConfig filterConfig): 在服务器启动时，创建Filter对象时调用。
+- doFilter(ServletRequest request, ServletResponse response, FilterChain chain): 每次在过滤请求时调用。可以进行逻辑处理，然后使用chain.doFilter(request, response);将请求传递到链中的下一个过滤器或资源（servlet或静态内容）。
+- destroy(): 在服务器关闭时，销毁Filter对象时调用。
+
+比较：
+- 相较于过滤器，拦截器更加灵活和强大。拦截器是基于Java的反射机制的，它在运行时动态地将逻辑插入到方法调用中，而不需要改变源码。此外，拦截器可以获得Spring容器中的各种bean，从而有更多的操作。
+- 过滤器则主要用于请求的过滤处理，包括日志记录、请求压缩、安全检查、用户登录校验等。它的运行速度一般比拦截器快，但功能上不如拦截器强大。
+
+
+### 导入一个 jar 包怎么让 springboot 知道哪些需要自动配置（2023完美世界）
+Spring Boot自动配置是通过@EnableAutoConfiguration注解实现的。它基本上是通过查找并加载META-INF/spring.factories配置文件来完成的。
+如果你想要将你的jar包在Spring Boot项目中进行自动配置，你需要以下步骤：
+1. 在你的jar包中创建一个spring.factories文件，并将其放入META-INF目录下
+2. 在spring.factories文件中添加你的自动配置类，格式如下
+```
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.yourpackage.YourAutoConfigurationClass
+```
+3. 确保你的AutoConfiguration类使用了@Configuration，并在需要的bean上使用了@Bean注解。
+
+这样，当Spring Boot项目启动时，它会读取META-INF/spring.factories文件，并自动配置那些bean。
+
+请注意，你的AutoConfiguration类应该尽可能的"幂等"，意味着多次运行结果应该是一致的，并且应该对已有的Bean有所尊重，如果容器中已经存在了你要创建的Bean，你应该避免再次创建。
+
+另外，你可能需要使用@Conditional注解以避免在不需要的情况下创建bean。
 
 ## 📑 数据库
 
@@ -328,6 +479,26 @@ SET lock_key some_value NX PX 30000
 4. 无法实现公平锁：SET NX命令无法保证公平性，即等待时间最长的客户端不一定能够优先获取锁。要实现公平锁，可以使用Redis的LIST数据结构，将等待锁的客户端按照先进先出（FIFO）的顺序排队。
 综上所述，虽然SET NX命令可以实现基本的分布式锁功能，但在实际应用中可能需要考虑更多的问题。为了解决这些问题，可以使用成熟的Redis分布式锁库，如Redlock。Redlock提供了一个更加健壮和可靠的分布式锁实现，可以解决上述问题
 
+### 什么情况使用 redis 反而降低性能（2023完美世界）
+
+- 数据集过大：Redis 将数据存储在内存中，如果数据集过大，超出了服务器可用内存的限制，就会导致 Redis 使用交换空间（swap space）或者频繁地从磁盘加载数据，从而严重影响性能。
+- 内存碎片化：当 Redis 频繁地进行写入、更新和删除操作时，可能会导致内存碎片化。这会导致 Redis 需要更多的内存来存储相同的数据，最终导致性能下降。
+- 大量的键过期操作：当 Redis 中有大量的键需要过期处理时，Redis 会执行定期清理操作来删除过期的键。如果这个清理操作耗时较长，会导致 Redis 在执行其他操作时的性能下降。
+- 高并发写入操作：当有大量的并发写入操作时，Redis 可能会因为竞争条件而降低性能。这种情况下，可以考虑使用 Redis 的事务功能来减少竞争并发。
+- 复杂的数据结构操作：Redis 提供了多种复杂的数据结构，如列表、集合和有序集合等。当对这些数据结构进行复杂的操作时，例如对大型列表进行频繁的插入和删除操作，可能会导致性能下降。
+
+需要注意的是，这些情况并不意味着 Redis 总是会降低性能，而是在特定的场景下可能会出现性能下降的情况。为了优化 Redis 的性能，可以根据具体的情况进行调整和优化，例如增加内存、合理设置过期时间、使用合适的数据结构等。
+
+> 参考资料：
+> 1. https://loadforge.com/guides/troubleshooting-redis-performance-issues
+> 2. https://severalnines.com/blog/performance-tuning-redis/
+
+### mysql的隔离级别是什么?mysql是如何实现的？（2023阿里）
+MySQL InnoDB 引擎的默认隔离级别虽然是「可重复读」，但是它很大程度上避免幻读现象（并不是完全解决了），解决的方案有两种：
+- 针对**快照读**（普通 select 语句），是通过 MVCC 方式解决了幻读，因为可重复读隔离级别下，事务执行过程中看到的数据，一直跟这个事务启动时看到的数据是一致的，即使中途有其他事务插入了一条数据，是查询不出来这条数据的，所以就很好了避免幻读问题。
+- 针对**当前读**（select ... for update 等语句），是通过 next-key lock（记录锁+间隙锁）方式解决了幻读，因为当执行 select ... for update 语句的时候，会加上 next-key lock，如果有其他事务在 next-key lock 锁范围内插入了一条记录，那么这个插入语句就会被阻塞，无法成功插入，所以就很好了避免幻读问题。
+- 
+> 参考：https://xiaolincoding.com/mysql/transaction/mvcc.html
 ## ♻️ JVM
 
 ### 堆是如何管理内存的（2023 快手）
@@ -421,10 +592,42 @@ try {
 ```
 当 JVM 的可用内存不足以满足应用的内存需求时,会抛出 OOM 异常。捕获这个异常可以让应用优雅地处理 OOM 错误,而不是直接崩溃。
 
+
+### 能不能说一下堆区具体怎么划分，为什么这样划分（2023百度）
+Java虚拟机（JVM）的堆区（Heap）是JVM所管理的最大的一块内存空间，也是Java内存管理中最关键的部分。它主要用于存放各种对象实例，包括Java类的实例和数组。
+
+堆区的具体划分可能会随着不同的JVM实现（例如HotSpot、JRockit、IBM J9等）和版本有所不同，但一般来说，可以划分为以下几个部分：
+1. **新生代（Young Generation）**：新生代是堆内存中的一部分，主要存放新创建的对象。新生代又可以分为三部分：
+	- **Eden区**：这是新生代的主要部分，大部分新创建的对象首先在Eden区分配内存。
+	- **Survivor区**：Survivor区包括两个，通常称为From Survivor和To Survivor，用于存放从Eden区经过一次Minor GC后仍然存活的对象。
+2. **老年代（Old Generation）**：当对象在新生代Survivor区中经历了一定次数的GC后，或者Eden区没有足够空间进行分配时，对象会被晋升到老年代。老年代的空间通常比新生代大，用于存放长时间存活的对象。
+3. **永久代（Permanent Generation）/元空间（Metaspace）**：这部分内存用于存放JVM加载的类信息、常量、静态变量等数据。在Java 8之后，永久代被移除，改为使用元空间。
+
+堆的这种划分方式主要基于一个观察到的现象，即大部分对象的生命周期都非常短，即“弱代假说”。基于此，JVM采用了分代回收的垃圾收集策略。
+
+新生代中的对象生命周期较短，所以可以通过Minor GC更频繁地收集新生代区域。当Eden区满时，会触发Minor GC，清理掉那些已经死亡的对象，把仍然存活的对象移动到Survivor区，如果Survivor区也满了，就会将对象移动到老年代。
+
+老年代中的对象一般存活时间较长，或者是Survivor空间无法容纳的大对象。因此，相比于新生代，老年代的GC（Major GC或Full GC）会相对少些，但每次GC时间会比Minor GC要长，因为需要对整个老年代进行整理。
+
+永久代/元空间存放的数据类型（如类信息、常量）的生命周期与一般的Java对象有所不同，其内存管理也有特殊之处，比如类的卸载等情况。
+
+这种内存划分和管理方式能够提高垃圾收集的效率，同时也减轻了Full GC的压力，提高了系统的性能和稳定性。
+
 ## 🤹‍♂️微服务、分布式
 ### RPC如何进行序列化？（2023 阿里）
 RPC的序列化是将数据结构或对象转换成可以通过网络传输的格式的过程。序列化后的数据可以通过网络传输，并在另一端反序列化，以重建原始数据结构或对象。
 有很多方法可以序列化RPC数据，包括使用二进制格式，如Protocol Buffers1、JSON、XML等。
+
+
+### dubbo 的请求处理流程（2023完美世界）
+Dubbo 是一个分布式服务框架，它采用了 RPC 远程调用的方式进行服务间的通信。下面是一个简单的 Dubbo 的请求处理流程：
+1. **服务提供者启动**：在服务提供者应用启动的时候，Dubbo 会自动检查所有 Spring 容器中定义的 Service Bean，自动识别出 Dubbo 服务并进行发布。
+2. **服务注册**：服务提供者启动后，Dubbo 会将提供的服务信息注册到注册中心（例如 ZooKeeper、Nacos）。这些信息通常包括服务提供者的 IP 地址、端口号、服务名称等。
+3. **服务发现**：服务消费者在启动的时候，会从注册中心获取到所有相关的服务信息，并保存在本地。同时，消费者还会向注册中心注册一个监听器，用来监听服务的变化。
+4. **服务调用**：当服务消费者需要调用某个服务的时候，首先会从本地的服务列表中选择一个服务提供者。选择的策略有很多种，例如轮询、随机等。选择好后，消费者就会通过 RPC 的方式调用服务提供者的方法。
+5. **负载均衡**：在服务调用的过程中，如果一个服务有多个服务提供者，那么就需要使用负载均衡策略来选择一个最合适的服务提供者。Dubbo 内置了多种负载均衡策略，例如随机、最小活跃数、一致性 Hash 等。
+6. **容错处理**：在服务调用的过程中，如果发生错误，Dubbo 会根据预先配置的容错策略进行处理。例如失败重试、失败忽略等。
+7. **结果返回**：服务提供者处理完消费者的请求后，会将结果返回给消费者。消费者收到结果后，就完成了一次服务调用。
 
 
 ## 🌐 计算机网络
@@ -445,6 +648,18 @@ HTTP/2是对万维网使用的HTTP网络协议的重大修订。它源自较早�
 > 3. https://web.dev/performance-http2/
 > 4. https://www.digitalocean.com/community/tutorials/http-1-1-vs-http-2-what-s-the-difference
 
+### 建立 TCP 连接后，客户端下线了会发生什么（2023百度）
+
+TCP（传输控制协议）连接建立后，如果客户端下线或断开，那么这个TCP连接就会被中断。
+
+在TCP协议中，任何一方（客户端或服务器）都可以主动断开连接。在正常情况下，断开连接会通过一个四步握手过程（四次挥手）来完成。这个过程保证了双方都能清楚地了解连接已经被关闭，而不会造成数据丢失。
+
+然而，如果客户端突然下线（比如因为网络中断、电源切断等原因），服务器可能并不会立刻知道这个情况。这是因为TCP协议的设计使得它能够在短暂的网络中断后恢复连接。所以，如果服务器尝试向客户端发送数据，这些数据可能会被阻塞，直到达到一定的重试次数或者超时，服务器才会认为连接已经断开。
+
+在客户端重新上线后，如果它尝试再次建立与服务器的连接，那么需要完全重新进行TCP的三次握手过程来建立新的连接。
+
+需要注意的是，TCP协议提供的是一种“可靠”的传输服务。即使在网络环境不稳定、丢包率高的情况下，TCP也能确保数据的完整性和有序性。但是，这种可靠性是通过复杂的错误检测和修复机制、以及重传机制来实现的，这也使得TCP在处理断开连接和重连的情况时相对复杂。
+
 ## 🖥️操作系统
 ### linux有几种IO模型（2023阿里）
 > 参考：https://linyunwen.github.io/2022/01/02/linux-io-model/
@@ -457,21 +672,164 @@ HTTP/2是对万维网使用的HTTP网络协议的重大修订。它源自较早�
 
 综上所述，适配器模式用于让不兼容的接口能够一起工作，装饰器模式用于动态添加功能，代理模式用于控制对另一个对象的访问。
 
+## 🖼️场景题
+
+### 服务端出现大量 close_wait 状态，可能的情况？（2023美团）
+`CLOSE_WAIT`状态通常意味着你的程序在关闭连接时有一些问题，或者说，它没有正确地关闭套接字连接。这通常发生在程序接收到了服务端的完成（FIN）信号，但是程序自身没有正确地关闭套接字，或者没有在适当的时间内关闭。当这种情况发生时，你会看到大量的连接处于`CLOSE_WAIT`状态。
+
+导致大量CLOSE_WAIT状态的可能情况有很多，以下是一些可能的情况：
+1. **应用程序故障**：应用程序可能没有正确地关闭连接。例如，应用程序可能在完成数据交换后忘记关闭连接，或者应用程序可能由于错误而无法关闭连接。这是最常见的原因。
+2. **网络故障**：网络连接问题可能会导致套接字无法正确关闭，从而导致大量的CLOSE_WAIT状态。
+3. **系统资源不足**：如果系统资源（如文件描述符）不足，可能会导致套接字无法关闭，从而产生大量的CLOSE_WAIT状态。
+4. **服务端负载过高**：如果服务器的负载过高，可能会导致套接字无法及时关闭，从而产生大量的CLOSE_WAIT状态。
+5. **服务端代码中有一个bug**： 服务器代码中的错误可能导致它意外关闭连接。 这也可能导致新请求处于等待状态。
+6. **服务端有硬件问题**： 硬件问题（如内存泄漏或CPU瓶颈）也可能导致服务器关闭连接。 这可能导致新请求处于等待状态。
+
+解决这种问题通常需要找出导致大量CLOSE_WAIT状态的原因，并进行相应的修复。例如，如果是应用程序没有正确关闭连接，那么可能需要修改应用程序的代码，确保它在完成数据交换后正确关闭连接。如果是网络问题，可能需要检查和修复网络连接。如果是系统资源不足，可能需要增加系统资源或优化应用程序以减少资源使用。如果是服务器负载过高，可能需要增加服务器资源或优化服务器配置来降低负载。
+
+> 参考：
+> 1. https://stackoverflow.com/questions/21033104/close-wait-state-in-server 服务器中的CLOSE_WAIT状态
+> 2. https://superuser.com/questions/173535/what-are-close-wait-and-time-wait-states 什么是CLOSE_WAITTIME_WAIT状态？
+> 3. https://learn.microsoft.com/en-us/answers/questions/337518/tcp-connections-locked-in-close-wait-status-with-i
+> 4. https://www.cnblogs.com/grey-wolf/p/10936657.html
+> 5. https://juejin.cn/post/6844903734300901390#heading-6
+
+### Java 程序运行了一周，发现老年代内存溢出，分析一下？（2023美团）
+Java程序的内存溢出常常意味着在Java堆中没有足够的空间分配新的对象。通常，这意味着程序创建了太多的对象并且没有及时的清理，或者是这些对象占用了太大的内存。
+
+Java的垃圾回收机制会自动清理不再使用的对象，释放内存空间。在HotSpot虚拟机中，内存被划分为年轻代和老年代。年轻代主要用于存放生命周期较短的对象，而老年代则用于存放生命周期较长的对象。如果老年代的内存溢出，这通常意味着存在以下可能的问题：
+1. **内存泄漏**：这是最常见的问题，程序可能在持续的创建对象，而这些对象没有被及时的清理，比如长生命周期的对象持有短生命周期对象的引用，或者在集合类中添加了对象但是忘记移除等。
+2. **配置问题**：JVM的堆大小是可以配置的，如果配置的老年代的大小不合理，也可能会导致内存溢出。例如，如果将堆的大部分空间都分配给了年轻代，那么老年代可能会因为空间不足而导致内存溢出。
+3. **程序逻辑问题**：如果程序的某部分代码创建了大量的长生命周期的对象，或者创建了大量的短生命周期的对象但没有足够的时间进行垃圾回收，那么也可能会导致老年代的内存溢出。
+
+分析这个问题，通常需要用到一些工具，比如JVisualVM，MAT，jmap等，通过这些工具我们可以看到堆的使用情况，以及哪些对象占用了大部分的内存，还可以分析对象的引用链，找出可能的内存泄漏点。
+
+要解决这个问题，你需要首先确定问题的根源。如果是内存泄漏，需要修改程序逻辑以确保不再创建不必要的对象或及时地清理不再使用的对象。如果是配置问题，需要调整JVM的参数以合理地分配堆空间。如果是程序逻辑问题，可能需要优化代码以减少对象的创建或提高垃圾回收的效率。
+
+### 如果核心线程数是 5，已经启动 4 个任务，后面又进来 1 个，是优先复用前面四个任务中的空闲线程还是重新创建新线程（2023完美世界）
+> 线程池是为了限制系统中执行线程的数量。根据系统的任务负载和资源容量，线程池可以灵活地调整线程的数量，优化线程的管理，这样可以减少线程创建和销毁带来的额外开销。
+
+这个问题的答案取决于你使用的是什么样的线程池。如果你使用的是Java的ThreadPoolExecutor线程池，其行为会按照以下规则：
+1. 如果当前运行的线程数量小于核心线程数，即使线程池中存在空闲线程，新任务到来也会创建新的线程处理任务。
+2. 只有在运行的线程数量已经达到核心线程数，但是任务队列未满时，新任务会被放到任务队列中等待。
+3. 如果当前运行的线程数量等于最大线程数且任务队列已满，新任务将会被拒绝。
+所以，在你提供的这种情况下，如果线程池使用的是Java的ThreadPoolExecutor，且核心线程数是5，已经启动4个任务，后面又进来1个任务，会新开一个线程处理新的任务，而不是复用前面四个任务中的空闲线程。这是因为核心线程数没有被用完，线程池会优先创建新的线程。
+
+### 如果大量请求进来你怎么限流（2023美团）
+一些通用的限流手段是：
+1. **令牌桶**：在令牌桶限流策略中，系统有一个令牌桶，桶中的令牌以一定的速率被添加。当一个新的请求到来时，系统会从桶中取出一个令牌。如果桶是空的，那么新的请求就会被拒绝。这种策略允许突然的大量请求，只要桶中有足够的令牌。在SpringCloud中可以使用spring-boot-starter-data-redis-reactive的令牌桶算法，根据Spring Cloud Gateway的客户端实际IP地址限制传入请求的速率。 简而言之，可以在路由上设置RequestRateLimiter过滤器，然后配置网关使用IP地址限制唯一客户端的请求。
+在Spring Cloud中，你可以通过整合Redis以及使用Reactive编程模式来实现令牌桶算法。以下是一个基本的步骤：
+
+首先，你需要在你的pom.xml文件中添加相关的依赖：
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+```
+在你的Spring Cloud Gateway应用中，你需要创建一个自定义的GatewayFilter。此过滤器将负责检查每个请求的IP地址，并限制每个IP地址的请求速率。
+```java
+@Component
+public class RateLimiterFilter implements GatewayFilterFactory<RateLimiterFilter.Config> {
+
+    private final RateLimiterService rateLimiterService;
+
+    public RateLimiterFilter(RateLimiterService rateLimiterService) {
+        this.rateLimiterService = rateLimiterService;
+    }
+
+    @Override
+    public GatewayFilter apply(Config config) {
+        return (exchange, chain) -> {
+            // 获取请求的IP地址
+            String ipAddress = exchange.getRequest().getRemoteAddress().getAddress().getHostAddress();
+
+            if (!rateLimiterService.isAllowed(ipAddress)) {
+                // 如果超过了限制，返回429状态码（Too Many Requests）
+                return Mono.error(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS));
+            }
+
+            return chain.filter(exchange);
+        };
+    }
+
+    public static class Config {
+        // 配置属性可以在这里定义
+    }
+}
+```
+然后，你需要创建一个RateLimiterService，在这个服务中，你可以使用令牌桶算法和Reactive Redis操作实现请求速率的限制：
+```java
+@Service
+public class RateLimiterService {
+
+    private final ReactiveStringRedisTemplate redisTemplate;
+
+    public RateLimiterService(ReactiveStringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
+    public boolean isAllowed(String ipAddress) {
+        // 使用Redis和令牌桶算法实现速率限制的逻辑
+        // 这个部分需要根据你的具体需求来实现
+    }
+}
+```
+最后，在你的路由配置中使用这个过滤器：
+```java
+@Bean
+public RouteLocator customRouteLocator(RouteLocatorBuilder builder, RateLimiterFilter rateLimiterFilter) {
+    return builder.routes()
+        .route(r -> r.path("/some-path/**")
+            .filters(f -> f.filter(rateLimiterFilter.apply(new RateLimiterFilter.Config())))
+            .uri("lb://some-service"))
+        .build();
+}
+```
+
+2. **Sentinel 通过注解（@SentinelResource）** 的方式将某个方法或者资源标记为受保护的资源，然后可以对这些资源设置各种规则，比如 QPS 限流，滑动窗口限流等。
+
+例如：
+```java
+@SentinelResource(value = "test", blockHandler = "exceptionHandler")
+public String test() {
+    // your logic here
+}
+```
+
+在这个例子中，test 方法被标记为受 Sentinel 保护的资源，如果这个方法的调用频率超过了设定的限制，Sentinel 就会调用 exceptionHandler 方法来处理这个问题。
+
+3. 使用**消息队列** (MQ) 进行限流也是一个常见的做法。通过将请求放入消息队列中，然后通过调整处理请求的速度来实现限流。例如，你可以使用 RabbitMQ、Kafka 等消息队列技术，这种方式也可以起到异步处理的作用，提高系统的吞吐量。
+
+
+### 写 MQ 时程序宕机了怎么办？（2023美团）
+如果在使用消息队列（MQ）时，生产者（Producer）程序在写入消息队列时宕机，那么你可能会面临消息丢失的问题。以下是一些可行的解决方案：
+1. **消息持久化**：大多数消息队列系统（如RabbitMQ，Kafka）都支持消息的持久化。持久化的消息即使在宕机情况下也不会丢失，因为它们被存储在磁盘上。当服务器恢复后，可以继续从存储介质上读取并处理这些消息。但是，使用持久化会增加系统的开销并可能影响性能。
+2. **高可用配置**：配置高可用集群可以提高系统的稳定性。对于Kafka，可以配置多个副本，当某个节点宕机时，其他节点可以继续提供服务。RabbitMQ 也支持类似的镜像队列（Mirrored Queues）机制。
+3. **生产者确认机制**：许多消息队列系统提供了生产者确认（Producer Acknowledgments）机制，生产者只有在收到消息已成功写入消息队列的确认后，才会认为消息已成功发送。这样，如果在写入过程中服务器宕机，生产者知道消息没有成功发送，并且可以在服务器恢复后重新发送。
+4. **使用事务**：如果你的应用场景允许，你可以使用事务来确保消息的完整性。在一次事务中，你可以将消息的发送和你的业务操作放在一起，要么都成功，要么都失败。但是，使用事务会增加系统的复杂性，并可能影响性能。
+5. **异步写入 + 本地日志**：对于非常关键的消息，可以采取异步写入+本地日志的方式。先将消息写入本地日志，然后再异步写入消息队列，如果消息队列写入失败，通过后台进程重试，直到写入成功。
+
+在设计和选择方案时，需要根据你的应用的具体需求和可接受的复杂性进行权衡。例如，你需要考虑你的应用是否能接受消息的丢失，是否需要保证消息的顺序，你的系统是否能承受持久化和事务的开销，以及你的系统是否有足够的资源来支持高可用配置。
+
 ## 其他
 ### 讲一讲cms？
-CMS是Content Management System的缩写,意为内容管理系统。它是一种管理网站内容的软件应用程序。
+内容管理系统（英语：content management system，缩写为 CMS）是指在一个合作模式下，用于管理工作流程的一套制度。该系统可应用于手工操作中，也可以应用到电脑或网络里。作为一种中央储存器（central repository），内容管理系统可将相关内容集中储存并具有群组管理、版本控制等功能。版本控制是内容管理系统的一个主要优势。
 
-CMS的主要功能有:
-1. 内容发布:提供页面内容的发布与管理,比如文章、图片、视频等。内容贡献者可以方便地发布和修改内容。
-2. 模板机制:通过模板可以控制网站的布局和样式,实现统一的网站风格。
-3. 分类和标签:articles可以对内容进行分类和标签,方便用户浏览。
-4. 权限管理:不同的用户可以有不同的权限,控制谁可以发布、修改和删除内容。
-5. SEO优化:CMS可以方便实现SEO优化,比如定制页面标题、关键词、描述等。
-6. 插件扩展:CMS支持插件机制,可以安装各种插件扩展功能。
-7. 友好的后台:CMS提供一个可视化的后台管理界面,降低网站管理难度。
+内容管理系统在物品或文案或数据的存储、掌管、修订（盘存）、语用充实、文档发布等方面有着广泛的应用。现在流行的开源CMS系统有WordPress、Joomla!、Drupal、Xoops、CmsTop等。
 
-目前主流的CMS系统有WordPress、Drupal、Joomla等。使用CMS可以大大简化网站的建设和管理,特别适合内容更新比较频繁的网站,比如博客、新闻站点等。
-总的来说,CMS让普通人也可以轻松建设和管理一个网站,极大地降低了网站管理的难度。它是建站的一大趋势,被越来越多的网站采用。
+> 参考：
+> https://zh.wikipedia.org/wiki/%E5%86%85%E5%AE%B9%E7%AE%A1%E7%90%86%E7%B3%BB%E7%BB%9F
+
+### DTS 了解过吗？
+数字剧院系统（DTS，Digital Theater Systems）由DTS公司（DTS Inc.，NASDAQ：DTSI）开发，为多声道音频格式中的一种，广泛应用于DVD音效上。其最普遍的格式为5.1声道。与杜比数字为主要竞争对手。要实现DTS音效输出，需在硬件上及软件上符合DTS的规格，多数会在产品上标示DTS的商标。
+
+> 参考：
+> https://zh.wikipedia.org/wiki/DTS
 
 ## 💦 算法汇总
 
