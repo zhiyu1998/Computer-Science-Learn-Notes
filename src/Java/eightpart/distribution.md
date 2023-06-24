@@ -468,7 +468,74 @@ Dubbo 也是 Spring Cloud Alibaba 里面的一个组件。
 
 综上，如果是 Java 后端技术栈，并且你在纠结选择哪一种 RPC 框架的话，我推荐你考虑一下 Dubbo
 
+### GateWay和Nginx的相同点和不同点在那里？
+Nginx 可以被配置成一个 API Gateway（比如，Amazon API Gateway, Kong, Apigee, Azure API Gateway 等等）。然而，API Gateway 和 Nginx 还是有一些不同的。以下是 Nginx 和 API Gateway 的一些相同和不同点：
 
+相同点：
+1. 转发请求：两者都能作为反向代理服务器，将来自客户端的请求转发到相应的服务。
+2. 负载均衡：两者都可以对到达的请求进行负载均衡，以便在多个服务器间均匀分配负载。
+3. 安全性：两者都可以提供一些安全性特性，比如SSL终结、访问控制等。
+
+不同点：
+1. 功能的全面性：API Gateway 通常提供了比 Nginx 更为全面的功能，包括请求路由、API版本控制、API密钥管理、OAuth 令牌分发、速率限制、访问授权等等。
+2. 扩展性：API Gateway 通常更具有扩展性，可以通过插件系统增加更多功能。
+3. 维护和配置：由于 Nginx 更简单，因此其维护和配置通常比 API Gateway 要容易些。
+
+### GateWay需要注册到Nacos中吗？如何注册的？
+Nacos是阿里巴巴开源的一个更现代、更动态、更易于使用的服务发现、配置和服务管理平台。使用Nacos，你可以轻松实现服务的自动发现、自动配置、自动负载平衡。
+
+在微服务架构中，API Gateway 也被视为一个服务，它可以注册到服务发现组件（如Nacos）中。注册后，其它服务可以通过服务发现来找到 Gateway，同时 Gateway 也可以发现其它服务。注册 Gateway 到 Nacos 可以使得服务之间的发现和通信更加容易和高效。
+
+以下是一个基于Spring Cloud Gateway 和 Nacos 的示例，展示如何将 Gateway 注册到 Nacos 中：
+1. 首先，你需要在你的pom.xml或者build.gradle中加入相应的依赖。这通常包括Spring Cloud Starter Gateway 和 Spring Cloud Starter Alibaba Nacos Discovery。
+2. 在你的application.properties或application.yml文件中，配置 Nacos 服务器的地址，以及 Gateway 服务的名称：
+```yaml
+spring:
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848 # 这是 Nacos 服务器的地址
+  application:
+    name: gateway-service # 这是你的 Gateway 服务的名称
+```
+3. 在你的主类上添加 @EnableDiscoveryClient 注解，这将使得你的 Gateway 服务成为一个 Nacos 客户端，可以被 Nacos 服务器发现。
+```java
+@SpringBootApplication
+@EnableDiscoveryClient
+public class GatewayApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(GatewayApplication.class, args);
+    }
+}
+```
+
+### 如果要对feign的头部统一加一些字段，怎么实现？
+要对 Feign 的头部统一添加一些字段，可以创建一个自定义的RequestInterceptor，然后在applicationContext.xml 或者其他的 Spring Boot 配置文件中注册这个拦截器。下面是一个基本的示例：
+```java
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+
+public class CustomFeignInterceptor implements RequestInterceptor {
+    @Override
+    public void apply(RequestTemplate template) {
+        template.header("Header-Name", "Header-Value"); // 你的自定义字段
+    }
+}
+```
+然后，你需要在 Spring Boot 配置文件中注册这个拦截器，如下所示：
+```java
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class FeignConfiguration {
+    @Bean
+    public RequestInterceptor customFeignInterceptor() {
+        return new CustomFeignInterceptor();
+    }
+}
+```
+在上述代码中，我们创建了一个拦截器，该拦截器将在每个请求发送之前运行，并添加一个自定义的 HTTP 头字段。需要注意的是，这里的 "Header-Name" 和 "Header-Value" 需要替换为你想要的实际头部键和值。
 
 ### 了解分布式事务吗？
 

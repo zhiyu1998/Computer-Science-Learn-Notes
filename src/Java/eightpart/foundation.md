@@ -1563,82 +1563,255 @@ static int hash(int h) {
 > 出的 hash 值相同时，我们称之为 hash 冲突，HashMap 的做法是用链表和红黑树存储相同 hash 值的value。当 hash 冲突的个数少于等于8个时，使用链表否则使用红黑树。
 
 ### ⭐HashMap源码分析
+> 这里提供的是open jdk11的源码，但是图没变还是entry（没找到合适的），但是原理都差不多，暂时先用着这个图！
 
-#### get()
+
+#### 计算哈希值：hash
+```java
+static final int hash(Object key) {
+	int h;
+	return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+```
+`(h = key.hashCode()) ^ (h >>> 16) `是Java中的一种哈希值计算策略，目的是减少哈希碰撞并更好地分布数据。
+具体来说：
+- `(h = key.hashCode())`：这一步调用键（key）的hashCode方法以获取原始的哈希值。
+- `(h >>> 16)`：这是一个无符号右移操作，将哈希值的二进制表示形式向右移动16位。由于Java的int类型是32位的，这实际上是将哈希值的高16位移动到低16位。
+- `(h = key.hashCode()) ^ (h >>> 16)`：这是一个异或操作，它将原始的哈希值和右移16位后的哈希值进行异或操作。这样可以保证原哈希值的高位和低位都能参与到最终的哈希值计算中
+
+这样处理的主要目的是在不增加计算复杂度的前提下，尽可能减少哈希碰撞并更好地分布数据。因为HashMap中的bucket选择主要是通过哈希值的低位进行的，如果原始哈希值的高位和低位相似，那么进行这样的处理能够将高位的信息带入到低位，从而提高bucket的选择范围，减少碰撞。
+
+#### getNode()
 
 `get(Object key)`方法根据指定的 `key`值返回对应的 `value`，该方法调用了 `getEntry(Object key)`得到相应的 `entry`，然后返回 `entry.getValue()`。因此 `getEntry()`是算法的核心。 **算法思想**是首先通过 `hash()`函数得到对应 `bucket`的下标，然后依次遍历冲突链表，通过 `key.equals(k)`方法来判断是否是要找的那个 `entry`。
 
+> getNode方法的算法思想和getEntry类似，它们都是根据键来寻找对应的节点。主要区别在于，Java 8及以后的版本中，如果一个桶位中的节点数目超过了一定的阈值，那么这个桶位的存储结构会从链表转变为红黑树，以提高查找的效率。这就是为什么在Java 11中，这个方法被命名为getNode，而不再是getEntry，因为现在不仅有Entry，还可能是TreeNode。
+
+总结一下：
+1. 根据键的哈希值找到对应的桶位。这个过程和getEntry方法是一样的，都是通过(n - 1) & hash计算索引，其中n是哈希表的长度，hash是键的哈希值。
+2. 在找到的桶位中查找节点。如果这个桶位的存储结构是链表，那么会像getEntry方法一样，通过遍历链表的方式找到对应的节点。如果桶位的存储结构是红黑树，那么会通过红黑树的查找算法找到对应的节点。
+3. 对于找到的节点，检查节点的键是否与输入的键相同。如果相同，那么就找到了对应的节点，将其返回。
+
+所以，getNode方法的主要思想是根据键的哈希值定位桶位，然后在桶位中根据存储结构的不同，采用不同的查找算法找到对应的节点。这种方法既保证了数据的快速查找，又能够处理哈希冲突的情况。
+
 ![image-20220616161400630](./personal_images/image-20220616161400630.png)
 
-上图中 `hash(k)&(table.length-1)`等价于 `hash(k)%table.length`，原因是*HashMap*要求 `table.length`必须是2的指数，因此 `table.length-1`就是二进制低位全是1，跟 `hash(k)`相与会将哈希值的高位全抹掉，剩下的就是余数了。
-
+**定位桶位：**
 ```java
-//getEntry()方法
-final Entry<K,V> getEntry(Object key) {
-	......
-	int hash = (key == null) ? 0 : hash(key);
-    for (Entry<K,V> e = table[hash&(table.length-1)];//得到冲突链表
-         e != null; e = e.next) {//依次遍历冲突链表中的每个entry
-        Object k;
-        //依据equals()方法判断是否相等
-        if (e.hash == hash &&
-            ((k = e.key) == key || (key != null && key.equals(k))))
-            return e;
-    }
-    return null;
+Node<K,V> p;
+if ((p = tab[i = (n - 1) & hash]) == null)
+    tab[i] = newNode(hash, key, value, null);
+```
+`n`是哈希表的长度，它总是2的幂。`(n - 1) & hash` 是计算**键值应该存放在哪个桶（即数组的索引）** 的公式。这里利用了哈希表长度是2的幂的特性，将哈希值与`n-1`进行位与运算，等价于对哈希表长度取模，结果就是该键值应该放在的位置
+
+在此，`(n - 1) & hash` 这个操作可以看作是将哈希值映射到哈希表的长度范围内。由于`n` 是2的幂，`n - 1` 的二进制表示形式中所有的位都是1（比如，假设table.length为8（即1000 in binary），那么table.length - 1就是7，即111 in binary）。因此，`(n - 1) & hash` 的结果就相当于保留了哈希值的低位，这样可以将哈希值均匀地分布在数组的长度范围内，也就是说，哈希值的每个可能值都有均等的机会被映射到数组的任何位置。
+
+如果这个位置已经有值（即不为null），那么这个键值对会以链表或者红黑树的方式存储在该位置。如果这个位置没有值（即为null），那么直接存储在该位置。
+
+这里的 `p = tab[i = (n - 1) & hash]` 首先计算索引 i，然后尝试从表中获取该索引位置的节点 p。如果 p 为 null，那就意味着此位置还没有存放任何键值对，所以可以直接放置新的键值对。
+
+---
+
+这部分检查桶位的第一个节点（Node）的哈希值是否与输入的哈希值相同，同时比较节点的键是否与输入的键相等。如果都相同，那么它就找到了对应的节点，并将其返回
+```java
+if (first.hash == hash && ((k = first.key) == key || (key != null && key.equals(k))))
+	return first;
+```
+
+---
+
+这部分首先检查第一个节点的下一个节点（next）是否存在。如果存在，再检查第一个节点是否是一个树节点（TreeNode），也就是检查这个桶位是否是红黑树的结构。如果是，那么它将通过红黑树的方式获取对应的节点。
+```java
+if ((e = first.next) != null) {
+    if (first instanceof TreeNode)
+        return ((TreeNode<K,V>)first).getTreeNode(hash, key);
+```
+
+---
+
+这部分是对链表进行遍历。如果桶位是链表的结构，那么会通过循环遍历链表中的每个节点，检查每个节点的哈希值和键是否与输入的相同。如果找到相同的，那么就返回对应的节点。如果遍历完链表都没有找到相同的，那么就意味着HashMap中不存在对应的节点。
+```java
+do {
+    if (e.hash == hash &&
+        ((k = e.key) == key || (key != null && key.equals(k))))
+        return e;
+} while ((e = e.next) != null);
+```
+
+---
+
+**代码总览**：
+```java
+final Node<K,V> getNode(int hash, Object key) {
+	Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
+	if ((tab = table) != null && (n = tab.length) > 0 &&
+		(first = tab[(n - 1) & hash]) != null) {
+		if (first.hash == hash && // always check first node
+			((k = first.key) == key || (key != null && key.equals(k))))
+			return first;
+		if ((e = first.next) != null) {
+			if (first instanceof TreeNode)
+				return ((TreeNode<K,V>)first).getTreeNode(hash, key);
+			do {
+				if (e.hash == hash &&
+					((k = e.key) == key || (key != null && key.equals(k))))
+					return e;
+			} while ((e = e.next) != null);
+		}
+	}
+	return null;
 }
 ```
 
-#### put()
+#### putVal()
 
 `put(K key, V value)`方法是将指定的 `key, value`对添加到 `map`里。该方法首先会对 `map`做一次查找，看是否包含该元组，如果已经包含则直接返回，查找过程类似于 `getEntry()`方法；如果没有找到，则会通过 `addEntry(int hash, K key, V value, int bucketIndex)`方法插入新的 `entry`，插入方式为**头插法**。
 
+算法思路：
+1. **哈希计算与定位桶位**： 首先，计算键（key）的哈希值，然后根据哈希值在哈希表中找到对应的桶位。计算桶位的索引是通过 (n - 1) & hash，这样可以使得哈希值均匀地分布在数组的长度范围内。
+2. **处理桶位为空的情况**： 如果找到的桶位是空的，那么就直接在这个位置上创建一个新的节点来存储键值对。
+3. **处理桶位不为空的情况**： 如果桶位不为空，那么需要处理哈希冲突。根据该桶位的数据结构（链表或者红黑树）采用不同的处理方式。
+	1. **链表**： 遍历链表，如果找到了键值相同的节点，则替换其值。如果遍历完链表没有找到相同的键，那么就在链表的尾部添加一个新的节点。
+	2. **红黑树**： 在红黑树中找到正确的位置，如果找到了键值相同的节点，则替换其值。如果没有找到相同的键，那么就在正确的位置添加一个新的节点。
+4. **处理扩容**： 插入键值对之后，需要检查哈希表是否需要扩容。如果当前的节点数量超过了阈值，那么就需要将哈希表的容量扩大一倍，并重新计算每个键值对在哈希表中的位置。
+
 ![image-20220616161439305](./personal_images/image-20220616161439305.png)
 
+**插入或更新节点**：该部分有点复杂，处理各种情况，如链表和红黑树。例如，如果存在相同的键，那么它将替换旧值。
 ```java
-//addEntry()
-void addEntry(int hash, K key, V value, int bucketIndex) {
-    if ((size >= threshold) && (null != table[bucketIndex])) {
-        resize(2 * table.length);//自动扩容，并重新哈希
-        hash = (null != key) ? hash(key) : 0;
-        bucketIndex = hash & (table.length-1);//hash%table.length
-    }
-    //在冲突链表头部插入新的entry
-    Entry<K,V> e = table[bucketIndex];
-    table[bucketIndex] = new Entry<>(hash, key, value, e);
-    size++;
-}
-
-
+Node<K,V> e; K k;
+if (p.hash == hash &&
+    ((k = p.key) == key || (key != null && key.equals(k))))
+    e = p;
 ```
 
-#### remove()
+**处理不同情况：**
+- else if (p instanceof TreeNode)这段代码是处理当前桶位数据已经转变为红黑树的情况。在这种情况下，使用红黑树的方式将键值对插入到树中。
+- 而else后面的代码则处理链表的情况。它会遍历链表，查找是否存在和当前插入键相同的节点。如果存在，那么就直接替换节点的值。如果不存在，那么就在链表的尾部添加新的节点。
+- 在添加新节点的过程中，会检查当前的链表长度是否达到了树化阈值（TREEIFY_THRESHOLD）。如果达到了，那么会将链表转化为红黑树，这是为了提高后续的查找效率。因为链表的查找效率是O(n)，而红黑树的查找效率是O(log n)。在元素数量较多的情况下，红黑树的效率会比链表更高。
+
+```java
+static final int TREEIFY_THRESHOLD = 8;
+```
+
+```java
+else if (p instanceof TreeNode)
+    e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+else {
+    for (int binCount = 0; ; ++binCount) {
+        if ((e = p.next) == null) {
+            p.next = newNode(hash, key, value, null);
+            if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                treeifyBin(tab, hash);
+            break;
+        }
+        if (e.hash == hash &&
+            ((k = e.key) == key || (key != null && key.equals(k))))
+            break;
+        p = e;
+    }
+}
+```
+
+**扩容**：在添加元素后，如果HashMap的大小超过了阈值，那么HashMap会进行扩容
+```java
+if (++size > threshold)
+    resize();
+```
+
+**代码总览**：
+```java
+final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+	Node<K,V>[] tab; Node<K,V> p; int n, i;
+	if ((tab = table) == null || (n = tab.length) == 0)
+		n = (tab = resize()).length;
+	if ((p = tab[i = (n - 1) & hash]) == null)
+		tab[i] = newNode(hash, key, value, null);
+	else {
+		Node<K,V> e; K k;
+		if (p.hash == hash &&
+			((k = p.key) == key || (key != null && key.equals(k))))
+			e = p;
+		else if (p instanceof TreeNode)
+			e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+		else {
+			for (int binCount = 0; ; ++binCount) {
+				if ((e = p.next) == null) {
+					p.next = newNode(hash, key, value, null);
+					if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+						treeifyBin(tab, hash);
+					break;
+				}
+				if (e.hash == hash &&
+					((k = e.key) == key || (key != null && key.equals(k))))
+					break;
+				p = e;
+			}
+		}
+		if (e != null) { // existing mapping for key
+			V oldValue = e.value;
+			if (!onlyIfAbsent || oldValue == null)
+				e.value = value;
+			afterNodeAccess(e);
+			return oldValue;
+		}
+	}
+	++modCount;
+	if (++size > threshold)
+		resize();
+	afterNodeInsertion(evict);
+	return null;
+}
+```
+
+#### removeNode()
 
 `remove(Object key)`的作用是删除 `key`值对应的 `entry`，该方法的具体逻辑是在 `removeEntryForKey(Object key)`里实现的。`removeEntryForKey()`方法会首先找到 `key`值对应的 `entry`，然后删除该 `entry`(修改链表的相应引用)。查找过程跟 `getEntry()`过程类似。
 
 ![image-20220616161551183](./personal_images/image-20220616161551183.png)
 
+**代码总览**：
 ```java
-//removeEntryForKey()
-final Entry<K,V> removeEntryForKey(Object key) {
-	......
-	int hash = (key == null) ? 0 : hash(key);
-    int i = indexFor(hash, table.length);//hash&(table.length-1)
-    Entry<K,V> prev = table[i];//得到冲突链表
-    Entry<K,V> e = prev;
-    while (e != null) {//遍历冲突链表
-        Entry<K,V> next = e.next;
-        Object k;
-        if (e.hash == hash &&
-            ((k = e.key) == key || (key != null && key.equals(k)))) {//找到要删除的entry
-            modCount++; size--;
-            if (prev == e) table[i] = next;//删除的是冲突链表的第一个entry
-            else prev.next = next;
-            return e;
-        }
-        prev = e; e = next;
-    }
-    return e;
+final Node<K,V> removeNode(int hash, Object key, Object value,
+                               boolean matchValue, boolean movable) {
+	Node<K,V>[] tab; Node<K,V> p; int n, index;
+	if ((tab = table) != null && (n = tab.length) > 0 &&
+		(p = tab[index = (n - 1) & hash]) != null) {
+		Node<K,V> node = null, e; K k; V v;
+		if (p.hash == hash &&
+			((k = p.key) == key || (key != null && key.equals(k))))
+			node = p;
+		else if ((e = p.next) != null) {
+			if (p instanceof TreeNode)
+				node = ((TreeNode<K,V>)p).getTreeNode(hash, key);
+			else {
+				do {
+					if (e.hash == hash &&
+						((k = e.key) == key ||
+						 (key != null && key.equals(k)))) {
+						node = e;
+						break;
+					}
+					p = e;
+				} while ((e = e.next) != null);
+			}
+		}
+		if (node != null && (!matchValue || (v = node.value) == value ||
+							 (value != null && value.equals(v)))) {
+			if (node instanceof TreeNode)
+				((TreeNode<K,V>)node).removeTreeNode(this, tab, movable);
+			else if (node == p)
+				tab[index] = node.next;
+			else
+				p.next = node.next;
+			++modCount;
+			--size;
+			afterNodeRemoval(node);
+			return node;
+		}
+	}
+	return null;
 }
 ```
 
@@ -1735,6 +1908,13 @@ public static int f(int value) {
 ### 有哪些常见的 IO 模型?
 
 UNIX 系统下， IO 模型一共有 5 种： 同步阻塞 I/O、同步非阻塞 I/O、I/O 多路复用、信号驱动 I/O 和异步 I/O。
+
+> 这里进行一些区分，方便理解：
+> 1. **同步阻塞 I/O**：要一个一个处理
+> 2. **同步非阻塞 I/O**：进程需要不断地**轮询（polling）查询 I/O** 是否完成
+> 3. **I/O 多路复用**：同时监视多个 I/O 请求，会被**挂起**，当任何一个 I/O 请求就绪（即数据已准备好），进程会被**唤醒**开始处理就绪的 I/O 请求
+> 4. **信号驱动 I/O**：内核会向进程发送一个**信号**，进程接收到信号后开始处理 I/O
+> 5. **异步 I/O**：就类似平时写的异步函数
 
 #### 阻塞式 I/O
 

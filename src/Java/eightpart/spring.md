@@ -322,8 +322,6 @@ Spring Bean 是 Spring 框架中的一个基本组成部分，它们是由 Sprin
 	- 如果 Bean 实现了 `DisposableBean` 接口，容器会调用 `destroy()` 方法。
 	- 如果 Bean 配置了自定义的销毁方法，容器会调用该方法。
 
-实际意义：了解 Spring Bean 生命周期有助于更好地理解和使用 Spring 框架。通过实现不同的接口或配置自定义方法，开发者可以在 Bean 生命周期的各个阶段执行特定操作，如添加日志、资源释放等。这有助于实现更高效、可维护的代码。
-
 ### @Autowired 和 @Resource 的区别是什么？
 
 Spring 内置的 `@Autowired` 以及 JDK 内置的 `@Resource` 和 `@Inject` 都可以用于注入 Bean。
@@ -399,22 +397,50 @@ private SmsService smsService;
 - 当一个接口存在多个实现类的情况下，`@Autowired` 和 `@Resource`都需要通过名称才能正确匹配到对应的 Bean。`Autowired` 可以通过 `@Qualifier` 注解来显示指定名称，`@Resource`可以通过 `name` 属性来显示指定名称。
 
 ### 🌟 请描述Spring MVC的工作流程？描述一下 DispatcherServlet 的工作流程？
-
-1. 用户发送request请求到前端控制器DispatcherServlet。
-2. 前端控制器DispatcherServlet通过request请求的url地址，向映射器HandlerMapping请求调用对应的处理器handler。
-3. 映射器HandlerMapping通过url地址生产处理器执行链并返回。
-4. DispatcherServlet根据处理器Handler获取处理器适配器HandlerAdapter执行HandlerAdapter处理一系列的操作，如：参数封装，数据格式转换，数据验证等操作。
-5. 适配器执行处理器，即执行Controller中的方法。
-6. 处理器完成业务逻辑后返回ModelAndView。
-7. 适配器将处理器的处理结果返回给前端控制器DispatcherServlet。
-8. 将ModelAndView中的view名称传给viewReslover。
-9. viewReslover通过view名称返回具体的view。
-10. 将ModelAndView中的model注入到view。
-11. 将最终经过视图渲染的view页面响应给用户。
-
-![image-20220711133221313](./personal_images/image-20220711133221313.png)
+![](./personal_images/de6d2b213f112297298f3e223bf08f28.png)
+1. 客户端（浏览器）发送请求， `DispatcherServlet`拦截请求。
+2. `DispatcherServlet` 根据请求信息调用 `HandlerMapping` 。`HandlerMapping` 根据 uri 去匹配查找能处理的 `Handler`（也就是我们平常说的 `Controller` 控制器） ，并会将请求涉及到的拦截器和 `Handler` 一起封装。
+3. `DispatcherServlet` 调用 `HandlerAdapter`适配器执行 `Handler` 。
+4. `Handler` 完成对用户请求的处理后，会返回一个 `ModelAndView` 对象给`DispatcherServlet`，`ModelAndView` 顾名思义，包含了数据模型以及相应的视图的信息。`Model` 是返回的数据对象，`View` 是个逻辑上的 `View`。
+5. `ViewResolver` 会根据逻辑 `View` 查找实际的 `View`。
+6. `DispaterServlet` 把返回的 `Model` 传给 `View`（视图渲染）。
+7. 把 `View` 返回给请求者（浏览器）
 
 
+### 用户提交一个空字段，返回一个错误，在mvc哪里处理
+在Spring MVC中，你可以在控制器（Controller）中处理用户提交的空字段。通常来说，我们会使用表单验证（Form Validation）来处理这类问题。Spring MVC内置了很多对于表单验证的支持，如Hibernate Validator。
+
+下面是一个简单的例子来说明如何在Spring MVC中处理用户提交的空字段：
+
+首先，你需要在你的模型（Model）类中使用注解（Annotations）来指定验证规则。例如，假设你有一个User类，你可以这样做：
+```java
+public class User {
+
+    @NotBlank(message = "Name may not be blank")
+    private String name;
+
+    // getters and setters
+}
+```
+在上面的例子中，@NotBlank注解指定了"name"字段不得为空，如果为空，将返回指定的错误消息。
+
+然后，在你的控制器中，你需要对你的模型进行验证：
+```java
+@PostMapping("/addUser")
+public String addUser(@Valid User user, BindingResult result) {
+
+    if (result.hasErrors()) {
+        // handle error. For example, return error message or view
+    }
+
+    // save user
+
+    return "successView";
+}
+```
+在上面的例子中，@Valid注解告诉Spring MVC去验证user对象，**如果验证失败（比如"name"字段为空），错误信息会被添加到BindingResult对象中。然后你可以检查BindingResult来看是否有错误，并按需要进行处理。**
+
+注意，为了使表单验证工作，你需要在你的Spring MVC配置中启用对应的注解驱动的验证。如果你使用Java Config，你可以添加@EnableWebMvc注解。如果你使用XML配置，你需要包含<mvc:annotation-driven />。
 
 ### Spring中构造方法注入和设值注入有什么区别
 
