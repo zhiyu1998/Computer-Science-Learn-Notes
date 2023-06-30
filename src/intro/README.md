@@ -67,5 +67,4 @@ category:
 
 ## 🍒 好用推荐
 
-2023：
-@todo
+- [SoftWareRecommend](/recommend/software.md)

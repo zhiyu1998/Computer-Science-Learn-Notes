@@ -560,11 +560,15 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 ##### Remember Set (RSet)
 为什么要把堆空间分成 Region 呢？其主要目的是让各个 Region 相对独立，可以分别进行 GC，而不是一次性地把所有垃圾收集掉。我们知道现代 GC 算法都是基于可达性标记，而这个过程必须遍历所有 Live Objects 才能完成。那问题来了，如果为了收集一个 Region 的垃圾，却完整的遍历所有 Live Objects，这也太浪费了！
 
-所以，我们需要一个机制来让各个 Region 能独立地进行垃圾收集，这也就是 Remember Set 存在的意义。每个 Region 会有一个对应的 Remember Set，它记录了哪些内存区域中存在对当前 Region 中对象的引用。（all locations that might contain pointers to (live) objects within the region）
+所以，我们需要一个机制来让各个 Region 能独立地进行垃圾收集，这也就是 Remember Set 存在的意义。`每个 Region 会有一个对应的 Remember Set`，它记录了哪些内存区域中存在对当前 Region 中对象的引用（all locations that might contain pointers to (live) objects within the region）。当一个Region被标记为收集目标时，G1会扫描其对应的RSet，而不是整个Java堆。这样，G1可以在局部（部分Region）执行回收，而不需要停止整个应用（stop-the-world）。
+
+`卡表（Card Table）`，它是RSet实现的一个重要组成部分。Java堆被分割成一定大小（通常为512字节）的块，称为"cards"。每个card对应于堆中的一部分区域。卡表是一个字节数组，数组的每个元素（字节）对应一个card。当一个对象引用发生改变时（比如新的跨区域引用被创建），对应的card就被标记为"dirty"。在并发标记阶段，G1会处理dirty cards，更新RSet。
 ![](./personal_images/g1-remember-sets.png)
 注意 Remember Set 不是直接记录对象地址，而是记录了那些对象所在的 Card 编号。所谓 Card 就是表示一小块（512 bytes）的内存空间，这里面很可能存在不止一个对象。但是这已经足够了：当我们需要确定当前 Region 有哪些对象存在外部引用时（这些对象是可达的，不能被回收），只要扫描一下这块 Card 中的所有对象即可，这比扫描所有 live objects 要容易的多。
 
 实现上，Remember Set 的实现就是一个 Card 的 Hash Set，并且为每个 GC 线程都有一个本地的 Hash Set，最后的 Remember Set 实际上是这些 Hash Set 的并集。当 Card 数量特别多的时候会退化到 Region 粒度，这时候就要扫描更多的区域来寻找引用，时间换空间。
+
+>"dirty"这个术语主要用来表达“该区域有东西被改动了，可能需要注意或处理”。这里的“脏”并不是指“不需要的”或者“应该被清除的”，而是指在该区域中有引用关系发生了变化。这是一种常见的在计算机科学中使用"dirty"的方式，例如在缓存(coherent cache)系统中也存在类似的用法。所以，在G1中，当一个Card被标记为"dirty"时，它表示该Card对应的内存区域有新的或者被修改的对象引用，需要在并发标记阶段进行扫描和处理。（在并发标记阶段，G1会扫描所有dirty的Cards，将新的引用关系（标记为dirty的）添加到对应的Remembered Set中。）
 
 ##### Remember Set 的维护
 维护上面所说的 Remember Set 势必需要记录对象的引用，通常的做法是在 set 一个引用的时候插入一段代码，这称为 Write Barrier。为了尽可能降低对 Mutator 线程的影响，Write Barrier 的代码应当尽可能简化。G1 的 Write Barrier 实际上只是一个“通知”：将当前 set 引用的事件放到 Remember Set Log 队列中，交给后台专门的 GC 线程处理。

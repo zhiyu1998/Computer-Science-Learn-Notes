@@ -2,7 +2,7 @@
 
 order: 15
 author: zhiyu1998
-title: 操作系统
+title: 面试题的一些思考
 category:
   - 八股文
 ---

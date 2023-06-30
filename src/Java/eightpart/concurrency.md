@@ -942,7 +942,21 @@ public ThreadPoolExecutor(int corePoolSize, //线程池的核心线程数量
 ```
 
 ---
+Java 的 ThreadPoolExecutor 提供了几种 **BlockingQueue** 实现作为参数:
+1. **ArrayBlockingQueue**:基于数组的先进先出队列, FIFO 规则。有界队列,满时会阻塞添加操作。
+2. **LinkedBlockingQueue**:基于链表的先进先出队列,FIFO 规则。可选的有界队列,但默认是无界的。
+3. **SynchronousQueue**:不存储元素的阻塞队列。每个插入操作都必须等待一个移除操作,反之亦然。
+4. **PriorityBlockingQueue**:具有优先级的无界阻塞队列。优先级采用自然顺序或 Comparator 顺序。
+5. **LinkedTransferQueue**:由链表结构组成的无界阻塞 FIFO 队列。
+6. **DelayQueue**:一个无界的阻塞队列,用于放置实现 Delayed 接口的元素。
+7. **LinkedBlockingDeque**:基于链表的双向阻塞队列,可以用作阻塞队列的 FIFO 和 LIFO。
 
+常见的场景：
+1. **LinkedBlockingQueue**:高吞吐量且公平的阻塞队列,一般作为 ThreadPoolExecutor 的任务队列使用。
+2. **ArrayBlockingQueue**:有界阻塞队列,可以指定最大容量,超过容量时阻塞添加操作,保证不会内存溢出。
+3. **SynchronousQueue**:没有存储空间的阻塞队列,用于传递性场景,比如一个线程提交任务,另一个线程立即消费的场景。
+
+---
 <details>
     <summary>ThreadPoolExecutor 3 个最重要的参数：</summary>
 <p>
@@ -983,6 +997,56 @@ public ThreadPoolExecutor(int corePoolSize, //线程池的核心线程数量
     </p>
 </details>
 
+---
+>这里RejectedExecutionHandler面试官可能还会问一个问题：是否可以实现自定义拒绝策略？
+
+Java中的ThreadPoolExecutor允许你自定义拒绝策略。RejectedExecutionHandler是一个接口，你可以实现这个接口来定义自己的拒绝策略。下面是一个简单的自定义拒绝策略示例：
+
+首先，我们创建一个实现RejectedExecutionHandler接口的类：
+```java
+import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadPoolExecutor;
+
+public class CustomRejectedExecutionHandler implements RejectedExecutionHandler {
+    @Override
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+        // 在这里实现你的自定义拒绝策略
+        System.out.println("自定义拒绝策略：任务 " + r.toString() + " 被拒绝");
+    }
+}
+```
+接下来，我们创建一个ThreadPoolExecutor实例，并将自定义的拒绝策略作为参数传递：
+```java
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+public class CustomRejectedExecutionHandlerExample {
+    public static void main(String[] args) {
+        int corePoolSize = 2;
+        int maximumPoolSize = 4;
+        long keepAliveTime = 10;
+        TimeUnit unit = TimeUnit.SECONDS;
+        ArrayBlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(2);
+
+        CustomRejectedExecutionHandler rejectionHandler = new CustomRejectedExecutionHandler();
+
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, rejectionHandler);
+
+        // 添加任务到线程池
+        for (int i = 0; i < 10; i++) {
+            Runnable task = () -> {
+                System.out.println("执行任务: " + Thread.currentThread().getName());
+            };
+            executor.execute(task);
+        }
+
+        // 关闭线程池
+        executor.shutdown();
+    }
+}
+```
+在这个例子中，我们创建了一个具有自定义拒绝策略的ThreadPoolExecutor。当线程池无法处理更多任务时，它将执行我们在CustomRejectedExecutionHandler类中定义的拒绝策略。在这个例子里，我们只是简单地打印出了被拒绝的任务信息。你可以根据需要实现更复杂的拒绝策略。
 
 ### JUC 包中的原子类是哪 4 类?
 

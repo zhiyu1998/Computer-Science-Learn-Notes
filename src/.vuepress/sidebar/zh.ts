@@ -94,5 +94,12 @@ export const zhSidebar = sidebar({
       children: "structure",
       collapsible: true,
     },
+    {
+      icon: "autumn",
+      text: "好物推荐",
+      prefix: "recommend",
+      children: "structure",
+      collapsible: true,
+    },
   ],
 });

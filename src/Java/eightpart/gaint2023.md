@@ -122,14 +122,81 @@ try {
 	- finalize(): 在对象被垃圾回收器回收之前调用。
 
 ### 如果让你自己实现一个 map 你会怎么做（2023百度）
-我认为这个问题可以转换一个思路：设计一个Map这样的数据结构时，需要考虑以下因素？
-- **哈希函数**：哈希函数用于将键转化为数组索引。好的哈希函数应尽量使得每个键都映射到不同的索引上，以减少冲突。
-- **冲突处理**：如果两个不同的键哈希到相同的索引上，就会产生冲突。常见的冲突处理方法有链地址法和开放地址法。
-- **动态扩容**：如果Map中的元素数量超过了当前数组的大小，就需要对数组进行扩容。扩容的过程通常会重新哈希所有元素，因此需要考虑何时进行扩容以及如何高效地进行扩容。
-- **数据类型**：需要考虑存储的数据类型，是基础类型还是自定义类型。如果是自定义类型，需要考虑如何定义哈希函数和相等性判断。
-- **线程安全**：是否需要支持多线程环境？如果需要，如何保证线程安全？
-- **API设计**：如何设计API使得使用者容易理解和使用？
-- **性能考虑**：需要考虑Map的主要操作（插入，删除，查找）的时间复杂性。对于Java的HashMap，这些操作的平均时间复杂性为O(1)。
+1. 定义Map接口,包括get,put,remove,size,isEmpty等方法
+```java
+public interface MyMap {
+    public Object get(Object key);
+    public void put(Object key, Object value);
+    public Object remove(Object key);
+    public int size();
+    public boolean isEmpty();
+}
+```
+
+2. 实现HashMap,使用哈希表和链表解决hash冲突
+```java
+public class MyHashMap implements MyMap {
+    private int size;
+    private LinkedList[] buckets;
+    
+    public MyHashMap() {
+        buckets = new LinkedList[16];
+    }
+    
+    public Object get(Object key) {
+        int hash = key.hashCode();
+        int index = hash % buckets.length;
+        LinkedList list = buckets[index];
+        if (list != null) {
+            for (Node node : list) {
+                if (node.key.equals(key)) {
+                    return node.value;
+                }
+            }
+        }
+        return null;
+    }
+    
+    public void put(Object key, Object value) {
+        // 省略实现...
+    }
+    
+    // 其他方法省略...
+}
+```
+
+3. 实现TreeMap,使用红黑树排序并存储key-value
+```java
+public class MyTreeMap implements MyMap {
+    private Node root;
+    
+    private class Node {
+        Object key;
+        Object value;
+        Node left;
+        Node right;
+        // 省略构造方法...
+    }
+    
+    public Object get(Object key) {
+        Node node = root;
+        while (node != null) {
+            if (key.compareTo(node.key) < 0) {
+                node = node.left;
+            } else if (key.compareTo(node.key) > 0) {
+                node = node.right;
+            } else {
+                return node.value;
+            }
+        }
+        return null;
+    }
+    
+    public void put(Object key, Object value) {
+        // 省略实现...
+    }
+}
+```
 
 ### 作为 map 的 key 需要重写哪些方法？（2023完美世界）
 首先，先理解面试题的意思，可以理解为：**如果你要用自己的类的对象作为Map的键，你需要重写这个类的哪些方法？**
@@ -173,6 +240,57 @@ Set（集合）适用于以下场景：
 2. 无需关心元素顺序：集合中的元素没有固定顺序，适用于元素顺序无关紧要的场景。
 3. 快速判断元素是否存在：集合提供了高效率的查找算法，适用于需要快速判断某个元素是否存在于数据集中的场景。
 4. 集合运算：集合支持交集、并集、差集等运算，适用于需要进行这些运算的场景。
+
+### Java创建对象的几种方式，除了new和反射还有其他吗？（2023 阿里实习）
+1. 使用 new 关键字: 这是创建对象最常见的方式。例如：
+```java
+MyClass obj = new MyClass();
+```
+
+2. 使用 Java 反射 (Reflection) API，主要是 java.lang.Class 类中的 newInstance() 方法或者 java.lang.reflect.Constructor 类中的 newInstance() 方法。例如：
+```java
+Class<?> clazz = Class.forName("com.example.MyClass");
+MyClass obj = (MyClass) clazz.newInstance();
+```
+
+3. 使用 java.lang.Cloneable 接口和 clone() 方法：这种方法用于创建现有对象的复制品。对象需要实现 Cloneable 接口，并重写 clone() 方法。
+```java
+MyClass obj1 = new MyClass();
+MyClass obj2 = (MyClass) obj1.clone();
+```
+
+4. 使用 Java 序列化 (java.io.Serializable 接口) 和反序列化：这种方法通常用于创建现有对象的复制品，但它不调用构造器。对象需要实现 Serializable 接口。
+```java
+ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("data.obj"));
+out.writeObject(obj1);
+out.close();
+
+ObjectInputStream in = new ObjectInputStream(new FileInputStream("data.obj"));
+MyClass obj2 = (MyClass) in.readObject();
+in.close();
+```
+
+5. 使用 java.lang.ClassLoader 或者 java.lang.Class 的 defineClass() 方法：这种方法用于从一个类的二进制名称或者字节码创建一个新的类和对象。
+```java
+ClassLoader classLoader = MyClass.class.getClassLoader();
+Class<?> clazz = classLoader.loadClass("com.example.MyClass");
+MyClass obj = (MyClass) clazz.newInstance();
+```
+
+### hashmap，为什么要转成红黑树，不是一开始就用？（2023 阿里实习）
+在Java中，HashMap使用了链表和红黑树两种数据结构来存储数据。原因是，这两种数据结构在不同的情况下各有优缺点。让我们了解一下HashMap在何时以及为什么会将链表转换为红黑树。
+
+**链表**
+- 优点：相比于红黑树，链表结构更简单，占用空间较少，且在哈希冲突较少的情况下具有良好的性能。
+- 缺点：链表在哈希冲突较多的情况下（即链表长度较长时），查找性能会明显下降，因为需要遍历链表。
+
+**红黑树**
+- 优点：红黑树是一种自平衡的二叉查找树，它能保证查找、插入和删除的时间复杂度为O(log n)，在哈希冲突较多的情况下性能更优。
+- 缺点：相比于链表，红黑树结构更复杂，占用空间较多，且在哈希冲突较少的情况下性能优势不明显。
+
+为了在空间和时间上达到一个平衡，Java的HashMap采用了一种折中的策略。它在初始化时使用链表结构来存储数据，但当链表长度达到一定阈值时（默认为8），会将链表转换为红黑树结构。这样，当哈希冲突较少时，HashMap可以利用链表的空间优势；而在哈希冲突较多时，HashMap则能从红黑树的时间性能上受益。
+
+因此，在Java中，HashMap不是一开始就使用红黑树，而是根据实际情况动态地选择并转换数据结构，以达到最佳性能。
 
 ## 🕝 并发编程
 
@@ -219,6 +337,121 @@ ThreadPoolExecutor executor = new ThreadPoolExecutor(
 6. **事务（Transactions）**：在数据库和某些支持事务的系统中，可以通过事务来保证数据的一致性。Java中的JPA和Spring等框架提供了对事务的支持。
 
 以上就是在Java中保证数据一致性的一些常用方案，选择哪种方案取决于具体的应用场景和需求。
+
+### 怎么获取子线程的返回值？（2023 阿里实习）
+在Java中，若要获取子线程的返回值，可以使用Callable接口和Future类。Callable接口允许你定义一个返回值的任务，而Future类则代表这个任务的结果。为了获取子线程的返回值，首先创建一个实现Callable接口的类，并重写call()方法。然后，将这个Callable对象提交给ExecutorService，它会返回一个Future对象。通过调用Future对象的get()方法，主线程可以等待并获取子线程的返回值。
+
+```java
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public class Main {
+    public static void main(String[] args) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        Callable<Integer> task = new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                // 这里写你的子线程逻辑，并返回结果
+                int result = 0;
+                for (int i = 1; i <= 10; i++) {
+                    result += i;
+                }
+                return result;
+            }
+        };
+
+        Future<Integer> future = executor.submit(task);
+
+        try {
+            // 主线程等待并获取子线程的返回值
+            Integer result = future.get();
+            System.out.println("子线程的返回值: " + result);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            executor.shutdown();
+        }
+    }
+}
+```
+
+### 子线程抛异常，主线程 try-catch 是否可以获取到异常？（2023 阿里实习）
+答案：可以。
+
+当使用 Callable 和 Future 时，如果子线程在执行过程中抛出异常，主线程可以通过调用 Future.get() 方法时捕获异常来获取它。Future.get() 方法可以抛出一个 ExecutionException，这个异常包装了子线程抛出的真实异常。要获取子线程的异常，你可以在主线程的 try-catch 语句中捕获 ExecutionException，然后调用 getCause() 方法来获取子线程的异常。
+
+```java
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public class Main {
+    public static void main(String[] args) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+
+        Callable<Integer> task = new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                // 这里故意抛出一个异常
+                throw new RuntimeException("子线程抛出异常");
+            }
+        };
+
+        Future<Integer> future = executor.submit(task);
+
+        try {
+            // 主线程等待并获取子线程的返回值
+            Integer result = future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            // 获取并处理子线程抛出的异常
+            Throwable cause = e.getCause();
+            System.out.println("子线程抛出的异常: " + cause.getMessage());
+        } finally {
+            executor.shutdown();
+        }
+    }
+}
+```
+
+### AtomicInteger是怎么更新保证原子性的？（2023 小红书）
+AtomicInteger 是 Java 并发包 java.util.concurrent.atomic 中的一个类，它用于执行原子操作。原子操作是一种不可中断的操作，无论在任何情况下，只要这个操作开始，就会运行到结束，不会出现中间态。这是一种避免多线程并发问题的常用手段。
+
+AtomicInteger 在内部通过很低级的原子硬件指令直接支持原子性。主要使用了一种名为“Compare and Swap”（CAS，比较并交换）的算法来实现原子性。这种算法使用三个参数：一个内存位置 V、预期的原始值 A 和新值 B。该算法仅当内存位置 V 的当前值与预期的原始值 A 相匹配时，才会将内存位置 V 的值更新为新值 B。如果内存位置 V 的当前值与预期值 A 不匹配，那么操作会失败，通常这个操作会在一个循环中进行，直到操作成功。
+
+```java
+public final boolean compareAndSet(int expect, int update) {
+    return unsafe.compareAndSwapInt(this, valueOffset, expect, update);
+}
+```
+
+AtomicInteger 的源码中,使用 Unsafe 类的 CAS 操作来实现:
+```java
+private static final Unsafe unsafe = Unsafe.getUnsafe();
+private static final long valueOffset;
+
+static {
+    try {
+        valueOffset = unsafe.objectFieldOffset
+            (AtomicInteger.class.getDeclaredField("value"));
+    } catch (Exception ex) { throw new Error(ex); }
+}
+
+public final int getAndIncrement() {
+  return unsafe.getAndAddInt(this, valueOffset, 1);
+}
+```
+
+unsafe.getAndAddInt() 方法实现了 CAS,它会获取当前值,加 1,并比较当前值是否改变,如果没有改变则更新,否则重新获取值。
+
+所以 AtomicInteger 通过 CAS 无锁操作实现了线程安全的递增操作。
 
 ## 🍃 常用框架
 ### MyBatis运用了哪些常见的设计模式？（2023美团）
@@ -660,7 +893,9 @@ noslave-lazy-flush no
 > 3. https://www.dragonflydb.io/error-solutions/redis-big-key-problem
 > 4. https://xiaolincoding.com/redis/base/redis_interview.html#redis-的大-key-如何处理
 
-### 什么是热key？如何解决热key问题（2023 滴滴）
+### 什么是热key？如何解决热key问题（2023 滴滴，2023 小红书）
+>小红书的问法是：Redis中，如果单key过热怎么处理？
+
 热key是指在Redis中被频繁访问的key。当大量的请求都集中在一小部分key上时，就会形成热key。这可能导致Redis服务器负载不均，甚至可能导致部分业务瘫痪。
 1. **热点key分拆**：将热点key拆分成多个小key，均匀分散到多个Redis实例上，从而避免单个Redis实例的瓶颈。
 2. **读写分离**：对于读多写少的热key，可以考虑使用Redis的主从复制功能，所有的读操作都发送到从服务器，写操作发送到主服务器，从而分散读取压力。
@@ -701,6 +936,169 @@ Redis的ZSet范围查询的时间复杂度是O(log N + M)，其中N是ZSet中的
 然后，Redis会从找到的节点开始向后遍历，并收集在范围内的元素，直到遍历完所有符合条件的元素或达到范围内的元素数量上限。这个过程的时间复杂度是O(M)，其中M是范围内的元素数量。
 
 综上所述，Redis的ZSet范围查询的时间复杂度是O(log N + M)，其中N是ZSet中的元素数量，M是范围内的元素数量。请注意，这是一种平均情况下的时间复杂度，具体的性能还受到硬件环境和实际数据分布的影响。
+
+### MySQL中delete 和 truncate 的区别？（2023 阿里实习）
+1. **命令类型**：DELETE是一个DML（数据操作语言）命令，而TRUNCATE是一个DDL（数据定义语言）命令。
+2. **删除的数据范围**：DELETE可以删除表中的一行或多行，TRUNCATE则会删除表中的所有行。
+3. **是否可以撤销**：DELETE命令执行后，你可以使用ROLLBACK命令撤销更改，而TRUNCATE执行后无法撤销。
+4. **日志记录**：DELETE命令在删除行时会记录行的日志，而TRUNCATE命令在删除数据时不记录任何日志。
+5. **性能**：TRUNCATE命令比DELETE命令快，因为它不记录任何日志。
+6. **触发器行为**：如果你在表上设置了触发器，那么DELETE命令会触发它，而TRUNCATE命令不会。
+7. **参照完整性约束**：TRUNCATE是不能在参照完整性约束存在的情况下使用的，即，如果存在外键约束，不能使用TRUNCATE。
+
+### 什么是联合索引，为什么要建联合索引？（2023 阿里实习）
+联合索引是数据库中一种特殊类型的索引，它基于两个或多个列的值进行创建。简单来说，如果你经常在WHERE子句中同时使用多个列进行查询，那么可能需要使用联合索引。
+
+联合索引的主要优势在于它可以极大地提高查询速度。如果你的查询通常会涉及到多个列，那么使用联合索引可能会比使用多个单列索引更高效。同时，因为索引本身会占用存储空间，联合索引比多个单列索引需要更少的存储空间。
+
+例如：假设你有一个人员表，它有两个字段：名字（FirstName）和姓氏（LastName）。你经常运行如下查询来查找特定的全名：
+```sql
+SELECT * FROM People WHERE FirstName = 'John' AND LastName = 'Doe';
+```
+在这种情况下，如果你分别为 FirstName 和 LastName 创建索引，MySQL 需要首先在 FirstName 索引中找到所有名为 'John' 的人，然后在 LastName 索引中找到所有姓为 'Doe' 的人，最后对这两个结果集进行交集操作。这可能需要大量的时间和计算资源，特别是在表非常大的时候。
+
+但是，如果你为这两列创建一个联合索引，那么 MySQL 可以直接使用这个索引来找到所有名为 'John' 并且姓为 'Doe' 的人，无需额外的交集操作。这样查询的效率就会大大提高。
+
+创建联合索引的SQL命令可能如下：
+```sql
+CREATE INDEX idx_firstname_lastname ON People (FirstName, LastName);
+```
+然后，你的查询可以直接利用这个联合索引，大大提高查询效率。
+
+### redis 批处理？（2023 阿里实习）
+
+Redis 批处理通常指的是通过使用 Redis 的管道 (pipeline) 功能来一次性执行多个命令。这样做可以提高效率，因为它减少了客户端与服务器之间的通信开销。在 Redis 的管道中，客户端会一次性发送多个命令，然后 Redis 服务器依次执行这些命令并返回结果。
+
+使用 Redis 批处理时，请注意以下几点：
+1. 批处理并不保证原子性，这意味着如果管道中的某个命令失败，其他命令仍可能执行成功。如果你需要原子性，可以考虑使用 Redis 的事务功能。
+2. 由于管道中的命令是按顺序执行的，因此命令之间可能存在依赖关系。在这种情况下，可以通过在添加命令时检查前一个命令的结果来处理这些依赖关系。
+3. 在添加大量命令到管道时，要注意内存使用情况。如果可能的话，可以分批执行管道，以避免一次性执行过多的命令。
+
+在 Java 中，可以使用 Jedis 库来进行 Redis 批处理操作。Jedis 是一个用于操作 Redis 的 Java 客户端库。请先确保已将 Jedis 添加到项目的依赖中。如果使用 Maven，可以在 pom.xml 文件中添加以下依赖：
+```xml
+<dependency>
+    <groupId>redis.clients</groupId>
+    <artifactId>jedis</artifactId>
+    <version>3.7.0</version>
+</dependency>
+```
+示例
+```java
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
+
+public class RedisBatchExample {
+    public static void main(String[] args) {
+        // 连接到 Redis 服务器
+        Jedis jedis = new Jedis("localhost", 6379);
+
+        // 创建一个管道
+        Pipeline pipeline = jedis.pipelined();
+
+        // 向管道中添加命令
+        pipeline.set("key1", "value1");
+        pipeline.set("key2", "value2");
+        pipeline.set("key3", "value3");
+
+        // 执行管道中的命令
+        pipeline.sync();
+
+        // 获取执行结果
+        String value1 = jedis.get("key1");
+        String value2 = jedis.get("key2");
+        String value3 = jedis.get("key3");
+
+        // 输出结果
+        System.out.println("key1: " + value1);
+        System.out.println("key2: " + value2);
+        System.out.println("key3: " + value3);
+
+        // 关闭连接
+        jedis.close();
+    }
+}
+```
+
+### SQL explain 会输出哪些信息？（2023 阿里实习）
+- ID：表示查询执行计划中每个操作的唯一标识符。
+- Select Type：表示查询中的子查询或者表的类型，如 SIMPLE（无子查询或者 UNION）、PRIMARY（最外层查询）、SUBQUERY、DERIVED 等。
+- Table：表示正在访问的表的名称。
+- Type：表示连接类型，如 ALL（全表扫描）、index（全索引扫描）、range（范围扫描）、ref（使用非唯一索引键或者唯一索引键的一部分进行查找等）。
+- Possible Keys：表示查询可能使用的索引。
+- Key：表示实际使用的索引。
+- Key Length：表示使用的索引的长度。
+- Ref：表示哪些列或者常量被用于查找索引列上的值。
+- Rows：估计要检查的行数。
+- Filtered：表示返回的行数占扫描行数的百分比（基于条件过滤）。
+- Extra：包含有关查询执行计划的其他信息，如 Using filesort、Using temporary、Using index 等。
+
+>参考：
+>1. https://dev.mysql.com/doc/refman/8.0/en/explain-output.html
+>2. https://stackoverflow.com/questions/44629837/understanding-output-of-explain-mysql-command
+
+
+### sql 怎么手动加锁（2023 阿里实习）
+在 SQL 中手动加锁通常是通过使用显式锁定语句来实现的。在 MySQL 中，你可以使用 LOCK TABLES 和 UNLOCK TABLES 语句来手动加锁和解锁。以下是一些示例：
+1. 读锁（Read Lock）：给一个表加读锁，可以防止其他事务对该表进行写操作，但允许其他事务进行读操作。要给一个表加读锁，可以使用以下语句：
+```sql
+LOCK TABLES table_name READ;
+```
+其中，`table_name` 是你要加锁的表的名称。
+
+2. 写锁（Write Lock）：给一个表加写锁，可以防止其他事务对该表进行读、写操作。要给一个表加写锁，可以使用以下语句：
+```sql
+LOCK TABLES table_name WRITE;
+```
+
+在使用 LOCK TABLES 对表进行显式锁定后，你需要使用 UNLOCK TABLES 语句来释放锁。示例如下：
+```sql
+UNLOCK TABLES;
+```
+
+请注意，这种手动加锁方式主要适用于 MyISAM 存储引擎，因为 MyISAM 不支持事务。对于支持事务的存储引擎（如 InnoDB），你通常应该使用事务来实现并发控制和锁定。
+
+在 InnoDB 存储引擎中，你可以使用 SELECT ... FOR UPDATE 或 SELECT ... LOCK IN SHARE MODE 语句来锁定行。例如：
+1. 行锁 - FOR UPDATE：给一个或多个行加排他锁，防止其他事务对这些行进行读、写操作。
+
+```sql
+START TRANSACTION;
+SELECT * FROM table_name WHERE condition FOR UPDATE;
+-- 进行其他操作
+COMMIT;
+```
+
+2. 行锁 - LOCK IN SHARE MODE：给一个或多个行加共享锁，允许其他事务对这些行进行读操作，但阻止其他事务进行写操作。
+```sql
+START TRANSACTION;
+SELECT * FROM table_name WHERE condition LOCK IN SHARE MODE;
+-- 进行其他操作
+COMMIT;
+```
+在使用行锁时，请确保你的操作在事务中进行，并在完成操作后提交事务。这将释放锁并保持数据一致性。
+
+### 介绍一些 mysql 底层结构？（2023 蚂蚁金服）
+1. **存储引擎（Storage Engines）**：MySQL 支持多种存储引擎，每种引擎都有其特定的特性和用途。例如，InnoDB 是支持事务和行级锁定的存储引擎，而 MyISAM 则是一个简单、高性能的引擎，适用于只读或读写比较低的场景。选择合适的存储引擎对于数据库性能和可靠性至关重要。
+2. **服务器层（Server Layer）**：服务器层负责处理客户端连接、查询缓存、查询分析、查询优化和执行等任务。它提供了许多功能，如存储过程、触发器、视图等，以帮助用户更高效地管理和使用数据库。
+3. **缓冲池（Buffer Pool）**：缓冲池是 InnoDB 存储引擎用于缓存数据和索引的内存区域。缓冲池的大小和管理对于数据库性能至关重要，因为它可以减少磁盘 I/O，从而提高查询速度。
+4. **日志（Logs）**：MySQL 使用多种日志来记录数据库活动和辅助恢复。例如，二进制日志（Binary Log）记录了数据库更改的历史，可以用于数据复制和恢复。而 InnoDB 的重做日志（Redo Log）则记录了对数据的修改操作，用于确保事务的持久性和数据库在崩溃后的恢复。
+5. **索引（Indexes）**：索引是数据库中用于加速查询的数据结构。MySQL 支持多种索引类型，如 B-Tree、哈希索引、全文索引等。合理地使用索引可以大幅提高查询性能，但过多的索引可能会导致更新操作变慢。
+6. **锁定（Locking）**：为了保证数据一致性和并发控制，MySQL 使用各种锁定机制，如表锁、行锁、元数据锁等。锁定策略的选择和实现对于数据库性能和并发处理能力至关重要。
+7. **事务（Transactions）**：事务是一组原子性的数据库操作，它们要么全部成功执行，要么完全不执行。事务可以帮助确保数据一致性和并发控制。InnoDB 存储引擎提供了对事务的支持，包括提交、回滚、隔离级别等功能。
+
+>参考：
+>1. https://dev.mysql.com/doc/refman/8.0/en/system-schema.html
+
+### RDB fork子进程去写日志的时候，如果宕机了是不是有数据就丢失了（2023 小红书）
+是的，当Redis使用RDB持久化策略时，如果Redis服务在RDB进程fork出子进程写RDB文件的时候宕机，那么此时还没有写到RDB文件的数据将会丢失。
+
+Redis RDB的工作原理是：
+1. Redis主进程fork出一个子进程
+2. 子进程负责将数据库快照写入到硬盘上的RDB文件中
+3. 如果在此期间Redis主进程被kill，那么正在被子进程写入RDB文件的那部分数据将丢失
+4. RDB文件写入完成后，子进程退出，Redis主进程继续服务客户端请求
+
+所以，RDB持久化最大的问题就是可能导致数据丢失，虽然概率很小，但数据依然存在一定风险。
 
 ## ♻️ JVM
 
@@ -816,6 +1214,90 @@ Java虚拟机（JVM）的堆区（Heap）是JVM所管理的最大的一块内存
 
 这种内存划分和管理方式能够提高垃圾收集的效率，同时也减轻了Full GC的压力，提高了系统的性能和稳定性。
 
+### 怎么释放一个用完的大对象的内存空间？（2023 阿里实习）
+1. 消除对象引用：首先，你需要确保没有任何活动的引用指向这个对象。这可能涉及将任何变量指向该对象的引用设置为null。
+```java
+BigObject bigObject = new BigObject();
+// Use bigObject
+bigObject = null;  // Helps to make bigObject eligible for GC
+```
+
+2. 请求系统进行垃圾收集：虽然JVM会自动进行垃圾收集，但是在处理大对象时，你可能希望尽早地释放内存。为此，你可以使用System.gc()方法来请求JVM进行垃圾收集。但是，这只是一个建议，JVM可能不会立即响应。
+
+```java
+System.gc();  // Suggests JVM to run the garbage collector
+```
+
+对于大对象，特别注意的是，频繁创建和销毁大对象可能导致内存碎片，这会影响垃圾收集的效率和程序的性能。如果可能，你可以尽量复用这些大对象，或者使用池化等技术来管理这些资源。
+
+### 写查询语句的时候应该从哪些方面考虑来注意性能？（2023 阿里实习）
+1. 使用索引：索引可以极大地提升查询速度。理解你的查询是如何使用索引的，并且尽可能地使你的查询能够使用索引。
+2. 避免全表扫描：尽可能地避免全表扫描。这通常意味着你需要为经常用于查询的列创建索引。
+3. 减少返回的数据量：只查询你真正需要的数据。例如，使用 SELECT * 会返回所有列，这可能会浪费大量的I/O资源。尽可能只返回你需要的列。
+4. 过滤结果：在数据库层面过滤结果，而不是在应用层面过滤。例如，使用 WHERE 子句而不是在应用代码中过滤数据。
+5. 优化联接：如果需要联接多个表，确保你正确地创建了索引，并尽可能地减少联接的数量。
+6. 使用 LIMIT：如果可能，使用 LIMIT 语句来限制返回的数据量，特别是在只需要一部分结果的情况下。
+7. 避免复杂的子查询：尽可能避免复杂的子查询，因为它们可能导致性能问题。有时候，可以使用 JOIN 来代替子查询。
+8. 分析查询：使用 EXPLAIN 语句分析你的查询，看看它是如何在数据库中运行的。这可以帮助你找到可能的性能瓶颈。
+
+以上只是一些基本的指南，每个具体的情况可能会有不同的优化策略。
+
+### 怎么手动让 JAVA 虚拟机 OOM（2023 阿里实习）
+为了手动让Java虚拟机（JVM）内存溢出（OutOfMemoryError），可以尝试在代码中创建一个很大的对象数组，以尽快耗尽JVM的可用内存。下面是一个简单的例子：
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class OOMExample {
+    public static void main(String[] args) {
+        List<byte[]> list = new ArrayList<>();
+
+        while (true) {
+            // 每次分配1MB的内存
+            byte[] memoryChunk = new byte[1024 * 1024];
+            list.add(memoryChunk);
+            System.out.println("Memory allocated: " + (list.size() * memoryChunk.length / (1024 * 1024)) + " MB");
+        }
+    }
+}
+```
+程序会不断分配1MB的内存块直到JVM耗尽内存。不过请注意，这种方法并不是高效地触发OOM，因为JVM的垃圾回收器可能会在某个时刻释放部分内存。但这个例子通常足以触发一个内存溢出错误。
+
+在运行这个程序时，可能需要根据您的机器限制JVM的内存。例如，若要将最大内存限制为256MB，可以使用以下命令：
+```shell
+java -Xmx256m OOMExample
+```
+
+### 如果频繁出现Full GC该怎么排查（2023 小红书）
+
+频繁出现Full GC的原因有以下几个：
+1. 内存溢出：应用程序申请的内存超过了JVM的最大可用内存，导致GC线程频繁执行Full GC来回收内存。可以通过检查JVM启动参数中-Xmx的值来确认是否内存溢出，如果是的话可以适当增加该值。
+2. 老年代空间不足：应用中大量对象存活时间较长，使得老年代空间占满，触发Full GC。可以通过-Xms和-Xmx参数调大年老代大小(-XX：PermSize和-XX：MaxPermSize)。
+3. 年轻代和老年代空间不平衡：如果年轻代空间过小，存活对象过早晋升到老年代，导致老年代空间饱和，触发Full GC。可以适当增加年轻代大小(-Xmn)和减小老年代空间(-XX：PermSize)。
+4. 垃圾循环引用：应用中存在对象之间相互引用，形成闭环，使得GC无法回收它们。需要排查代码，发现并打破循环引用。
+5. 代码缺陷：应用代码中存在资源未关闭、 memcache连接泄露等资源泄露问题，应检查代码并修复这些问题。
+
+### Full GC会收集的是哪些对象（2023 小红书）
+1. 年轻代中的对象：年轻代中晋升不到老年代的对象和刚创建的新对象。
+2. 老年代中的对象：存活时间长的对象。
+3. 永久代(JDK8以下)或元空间(JDK8及以上)中的对象：类信息、常量、方法等。
+4. 虚拟机栈中的对象：虚拟机栈中引用的对象。
+5. 本地方法栈中的对象：本地方法栈中引用的对象。
+
+### 解决Full GC，我们可以减少对象的频繁创建，那么有一个我们接请求需求创建对象的场景，可以怎么优化？（2023 小红书）
+1. 对象池技术：重复利用对象，避免过度创建。比如字符串常量池，线程池等。
+2. 适当增加年轻代空间：-Xmn参数调大，让更多对象在Minor GC中就被回收，减少进入老年代的对象。
+3. 避免短期object churn：避免对象的频繁创建和消亡，尽量重复使用对象，这可以减少GC累积的工作。
+4. 避免finalize()方法：finalize()方法会增加GC的工作量，可以在代码中避免重写finalize()方法。
+5. 适当增加老年代空间：-Xms和-Xmx参数调大，增加老年代的空间，减少Full GC的触发频率。
+6. JDK8中使用Metaspace代替永久代：-XX：MetaspaceSize和-XX：MaxMetaspaceSize参数控制，避免永久代溢出。
+7. 分代收集器：-XX：+UseParallelGC和-XX：+UseParallelOldGC等参数选择分代收集器，Minor GC和Major GC可以并行进行，提高效率。
+8. 替换Full GC收集器：-XX：+UseG1GC等参数选择G1等收集器，避免出现Stop The World的Full GC。
+9. 减少垃圾循环引用： reviewing your code to reduce circular references can decrease the number of live objects and therefore Full GCs。
+10. 避免代码缺陷：如关闭数据库连接、文件流等，避免资源泄露导致Full GC。
+
+这些优化措施可以从JVM参数调优、代码层面上防止对象过度创建和减少GC工作量，有效减少Full GC的频率。
+
 ## 🦸‍♀️中间件
 ### 请求很多，消息堆积处理不过来了如何应对（2023滴滴）
 如果发现消息中间件中的消息正在堆积，这可能意味着生产者生产的消息速度大于消费者的消费速度。有几种可能的策略可以缓解这个问题：
@@ -837,15 +1319,47 @@ RPC的序列化是将数据结构或对象转换成可以通过网络传输的�
 
 
 ### dubbo 的请求处理流程（2023完美世界）
-Dubbo 是一个分布式服务框架，它采用了 RPC 远程调用的方式进行服务间的通信。下面是一个简单的 Dubbo 的请求处理流程：
-1. **服务提供者启动**：在服务提供者应用启动的时候，Dubbo 会自动检查所有 Spring 容器中定义的 Service Bean，自动识别出 Dubbo 服务并进行发布。
-2. **服务注册**：服务提供者启动后，Dubbo 会将提供的服务信息注册到注册中心（例如 ZooKeeper、Nacos）。这些信息通常包括服务提供者的 IP 地址、端口号、服务名称等。
-3. **服务发现**：服务消费者在启动的时候，会从注册中心获取到所有相关的服务信息，并保存在本地。同时，消费者还会向注册中心注册一个监听器，用来监听服务的变化。
-4. **服务调用**：当服务消费者需要调用某个服务的时候，首先会从本地的服务列表中选择一个服务提供者。选择的策略有很多种，例如轮询、随机等。选择好后，消费者就会通过 RPC 的方式调用服务提供者的方法。
-5. **负载均衡**：在服务调用的过程中，如果一个服务有多个服务提供者，那么就需要使用负载均衡策略来选择一个最合适的服务提供者。Dubbo 内置了多种负载均衡策略，例如随机、最小活跃数、一致性 Hash 等。
-6. **容错处理**：在服务调用的过程中，如果发生错误，Dubbo 会根据预先配置的容错策略进行处理。例如失败重试、失败忽略等。
-7. **结果返回**：服务提供者处理完消费者的请求后，会将结果返回给消费者。消费者收到结果后，就完成了一次服务调用。
+Dubbo 的请求处理流程如下：
+1. 服务消费方(客户端)调用远程服务的代理对象(Proxy)发起 RPC 调用。
+2. Proxy 接收到调用后,将调用信息转换成 Request 对象,然后发送到 Dubbo 的核心线程池 Executor 中。
+3. Executor 在线程池中选取一个线程,把 Request 发给 Dubbo 的 NIO 服务器 NettyServer。
+4. NettyServer 收到 Request 后,通过数据库查询找到服务提供方地址,然后将 Request 编码成 Netty 的 Buffer 对象。
+5. NettyServer 通过Netty Client 连接远程服务提供方,并将编码后的 Buffer 对象发送过去。
+6. 服务提供方 NettyServer 收到 Buffer 后,解码成 Request 对象。然后查找本地的服务实现并调用服务方法。
+7. 服务方法执行完成后,将返回结果封装成 Response 对象,并编码成 Buffer。
+8. 服务提供方 NettyServer 将 Buffer 通过 Netty Client 连接发送给服务消费方 NettyServer。
+9. 服务消费方 NettyServer 收到Buffer后,解码成 Response。然后发送给 Executor 线程池。
+10. Executor 将 Response 返回给最初的 Proxy 调用处。Proxy 得到响应结果后,返回给客户端。
+11. 整个 Dubbo RPC 调用过程完成。
 
+所以 Dubbo 的请求处理主要分为四部分:
+1. 客户端 Proxy 发送请求
+2. 服务消费方收到请求,经过线程池转发给 Netty 服务器
+3. 服务器之间的网络通信,将请求转发给服务提供方
+4. 服务提供方执行服务并返回响应,将响应返回给服务消费方和客户端。
+5. 整个过程中,Netty 负责服务器网络通信,Executor 负责线程池和请求调度,Proxy 负责与客户端交互。
+
+>参考：
+>1. https://cn.dubbo.apache.org/zh-cn/docsv2.7/dev/source/service-invoking-process/
+
+### 分布式系统的一致性怎么保证的？（2023 蚂蚁金服）
+1. **Paxos**：Paxos 是一个分布式系统中的一致性算法，它解决了在一个不可靠的网络中达成共识的问题。Paxos 核心思想是通过选举一个提案的领导者（proposer）并在提案的大多数接受者（accepter）之间达成共识。
+2. **Raft**：Raft 算法是一种更易于理解和实现的一致性算法，用于管理分布式系统中的复制日志。Raft 通过选举领导者并确保日志数据在集群中的节点达成一致来实现一致性。Raft 通常用于实现分布式数据库、文件系统等。
+3. **两阶段提交（2PC）**：两阶段提交是一种事务管理协议，用于保证分布式系统中的事务一致性。在第一阶段，事务协调者请求所有参与者预备提交；在第二阶段，事务协调者根据所有参与者的反馈提交或回滚事务。此协议存在阻塞问题，因为如果协调者宕机，参与者可能会一直等待。
+4. **三阶段提交（3PC）**：三阶段提交是两阶段提交的改进版本，通过添加一个“预提交”阶段来减少阻塞问题。然而，这种协议在网络分区的情况下仍可能会遇到问题。
+5. **分布式快照算法**：分布式快照算法用于捕捉分布式系统中的全局状态，以评估一致性或检测死锁等问题。Chandy-Lamport 分布式快照算法是一个常用的实现。
+6. **向量时钟和版本向量**：向量时钟和版本向量是用于跟踪分布式系统中事件之间的因果关系的数据结构。它们可以帮助检测冲突和保持一致性。
+7. **Read Repair 和 Hinted Handoff**：这些技术用于最终一致性系统（如 Apache Cassandra），在节点故障后进行数据修复以保持一致性。
+
+实际应用中，通常会根据系统的需求和场景选择合适的一致性协议和算法。在选择时，需要权衡一致性、可用性和分区容错性之间的关系（CAP 理论）
+
+### gRPC，diRPC（滴滴自研）、Thrift和Dubbo各有什么优缺点，如何选型（2023 小红书）
+优缺点：略，看看博客随便答吧
+
+高性能、低延迟，可以选择 gRPC 或 diRPC。
+服务治理功能，推荐 Dubbo。
+简单、易用，可以选择 Thrift 或 Dubbo。
+跨语言，可以选择 gRPC 或 Thrift。
 
 ## 🌐 计算机网络
 ### http协议的报文的格式有了解吗？
@@ -865,7 +1379,7 @@ HTTP/2是对万维网使用的HTTP网络协议的重大修订。它源自较早�
 > 3. https://web.dev/performance-http2/
 > 4. https://www.digitalocean.com/community/tutorials/http-1-1-vs-http-2-what-s-the-difference
 
-### 建立 TCP 连接后，客户端下线了会发生什么（2023百度）
+### 建立 TCP 连接后，客户端下线了会发生什么（2023 百度）
 
 TCP（传输控制协议）连接建立后，如果客户端下线或断开，那么这个TCP连接就会被中断。
 
@@ -877,8 +1391,46 @@ TCP（传输控制协议）连接建立后，如果客户端下线或断开，�
 
 需要注意的是，TCP协议提供的是一种“可靠”的传输服务。即使在网络环境不稳定、丢包率高的情况下，TCP也能确保数据的完整性和有序性。但是，这种可靠性是通过复杂的错误检测和修复机制、以及重传机制来实现的，这也使得TCP在处理断开连接和重连的情况时相对复杂。
 
+### 讲讲 ARP，ICMP? 什么时候不用查 ARP 表? ICMP 是哪个路由器回复的，什么地方用了 icmp，traceroute 怎么做的? （2023 阿里实习）
+**ARP（地址解析协议）** 和**ICMP（公网控制消息协议）** 都是计算机网络中使用的协议，ARP用于将网络地址（如IP地址）映射到物理地址（如MAC地址），而ICMP用于错误报告和诊断目的，ping命令也使用ICMP来测试两个设备之间的网络连通性。
+
+> 地址解析协议（英语：Address Resolution Protocol，缩写：ARP）是一个通过解析网络层地址来找寻数据链路层地址的网络传输协议，它在IPv4中极其重要。ARP最初在1982年的RFC 826（征求意见稿）中提出并纳入互联网标准STD 37。ARP也可能指是在多数操作系统中管理其相关地址的一个进程。
+
+>互联网控制消息协议（英语：Internet Control Message Protocol，缩写：ICMP）是互联网协议族的核心协议之一。它用于网际协议（IP）中发送控制消息，提供可能发生在通信环境中的各种问题反馈。通过这些信息，使管理者可以对所发生的问题作出诊断，然后采取适当的措施解决。
+
+---
+在计算机网络中，通常在以下几种情况下不需要查ARP（地址解析协议）表：
+1. 跨网段通信：当通信双方位于不同的网络子网中时，ARP表不起作用。此时，数据包需要经过路由器进行转发，通信双方只需查找默认网关的MAC地址，而不需要查找对方的IP地址和MAC地址的映射关系。
+2. 非以太网链路层协议：ARP主要用于解析IPv4地址和以太网MAC地址之间的映射关系。对于其他链路层协议（如帧中继、ATM等）或其他网络层协议（如IPv6），ARP表可能无法使用或使用不同的机制。例如，IPv6使用邻居发现协议（NDP）而非ARP。
+3. 已知目标MAC地址：在某些特殊情况下，发送方可能已知目标设备的MAC地址，此时无需查找ARP表。例如，某些特定的网络管理或监控应用可能直接处理MAC地址。
+4. 广播与多播：对于广播（例如IPv4的全局广播地址255.255.255.255）或多播（例如IPv6的多播地址），数据包将发送给一组设备而非单个目标。这种情况下，发送方无需查找ARP表，而是将数据包发送到一个特定的广播或多播MAC地址上。
+
+总结：在跨网络子网通信、使用非以太网链路层协议、已知目标MAC地址、或进行广播和多播通信的情况下，通常不需要查找ARP表。
+
+---
+当数据包在传输过程中遇到问题，如无法到达目的地或超时等，通常是路由器或目标主机回复ICMP报文。例如，当数据包无法到达目标地址时，路由器可能会发送ICMP“目标不可达”（Destination Unreachable）报文；当数据包在网络中传输时间过长时，路由器可能会发送ICMP“超时”（Time Exceeded）报文。
+
+**traceroute**（Windows系统中的tracert）是一个网络诊断工具，用于显示数据包从源主机到目标主机所经过的路由器。traceroute的工作原理如下：
+1. 发送方生成一个特殊的数据包（通常是UDP或ICMP ECHO请求报文），并将其生存时间（TTL，Time to Live）设置为1。
+2. 当第一个路由器收到该数据包时，它会将TTL减1。由于TTL变为0，路由器会丢弃该数据包，并向发送方发送一个ICMP“超时”（Time Exceeded）报文。
+3. 发送方收到ICMP“超时”报文后，记录报文中的路由器地址，然后再生成一个相同的数据包，但将TTL设置为2。
+4. 重复上述过程，逐步增加TTL值，直到发送方收到目标主机的ICMP“端口不可达”（Port Unreachable）报文（对于UDP数据包）或ICMP ECHO响应（对于ICMP ECHO请求报文）。
+5. 通过分析收到的ICMP报文，traceroute可以显示数据包从源主机到目标主机所经过的所有路由器的地址，以及数据包在每个路由器上的往返时间（RTT，Round-Trip Time）。
+
+>参考：
+>1. https://www.linux.com/news/ping-icmp-vs-arp/
+>2. https://nmap.org/book/host-discovery-techniques.html
+>3. https://zh.wikipedia.org/wiki/%E4%BA%92%E8%81%94%E7%BD%91%E6%8E%A7%E5%88%B6%E6%B6%88%E6%81%AF%E5%8D%8F%E8%AE%AE
+>4. https://zh.wikipedia.org/wiki/%E5%9C%B0%E5%9D%80%E8%A7%A3%E6%9E%90%E5%8D%8F%E8%AE%AE
+>5. https://www.fortinet.com/resources/cyberglossary/what-is-arp
+>6. https://www.tutorialspoint.com/arp-table
+>7. https://superuser.com/questions/894557/is-there-a-way-to-get-arp-to-list-devices-on-all-subnets-of-a-network
+>8. https://obkio.com/blog/traceroutes-what-are-they-and-how-do-they-work/
+>9. https://www.howtogeek.com/134132/how-to-use-traceroute-to-identify-network-problems/
+>10. https://www.fortinet.com/resources/cyberglossary/traceroutes
+
 ## 🖥️操作系统
-### linux有几种IO模型（2023阿里）
+### linux有几种IO模型（2023 阿里）
 > 参考：https://linyunwen.github.io/2022/01/02/linux-io-model/
 
 
@@ -890,6 +1442,34 @@ TCP（传输控制协议）连接建立后，如果客户端下线或断开，�
 5. **网络**：进程可能需要通过网络来进行数据传输和通信，操作系统负责管理和调度进程对网络资源的访问。
 6. **各种软件和库资源**：例如数据库系统、图形处理库等。这些都是进程可能需要使用的资源，由操作系统进行管理和分配。
 
+
+### 操作系统是怎么做内存管理的？（2023 小红书）
+操作系统的内存管理确实是一个复杂而有趣的话题。一般来说，操作系统需要在保护、共享、虚拟化和物理内存管理四个方面进行平衡。以下是这四个方面的详细解释：
+1. 保护：操作系统需要保证每个进程都在其自己的内存空间中运行，以防止它们相互干扰。这通常通过硬件支持的内存保护机制来实现。
+2. 共享：虽然内存保护很重要，但有时候，不同的进程需要能够访问共享的内存区域。操作系统提供了一种机制，允许进程在需要的时候共享内存。
+3. 虚拟化：操作系统为每个进程提供了一种看似有很大的、连续的内存空间的幻象。这实际上是通过一种叫做内存虚拟化的技术实现的，这使得每个进程都认为它有自己的私有内存，尽管实际上物理内存被所有进程共享。
+4. 物理内存管理：操作系统需要管理物理内存，这包括哪些内存被使用，哪些内存是空闲的，以及如何分配和回收内存。
+
+如果非要说一种管理策略，有一种叫做“jemalloc”的内存分配策略。这种策略是一种用于处理动态内存分配的技术。在这种策略中，内存被分成不同大小的块，例如16KB，32KB，64KB等。这些块是2的幂，因此可以通过位操作快速分配和释放。这种策略的好处是它可以减少内存碎片，同时还可以提高内存的分配速度。
+
+当进程需要更多的内存时，jemalloc会尝试找到比所需内存大的第一个2的幂的内存块。如果这样的块不存在，它会尝试找到一个更大的块，然后将这个块分割成两个更小的块。如果这个更大的块仍然不足以满足需求，它就会向操作系统请求更多的内存。
+
+这种策略允许jemalloc在需要的时候快速找到合适大小的内存块，而不需要遍历所有的空闲内存块。这使得jemalloc在面对大量小型内存分配请求时表现出色。
+
+### 怎么向操作系统申请内存空间？（2023 小红书）
+brk和mmap系统调用，brk申请堆内存，mmap分配文件映射区和匿名映射区
+
+进程确实是通过系统调用，如 brk 和 mmap 向操作系统申请内存的。以下是这两个系统调用的一些详细信息：
+1. brk：这是一个用于改变进程堆大小的系统调用。堆是用于动态内存分配的内存区域（如通过 malloc、calloc、realloc 和 free 这样的C库函数）。当进程调用 brk 来改变堆的结束地址时，操作系统可以根据需要分配更多的物理内存给进程，或者回收未使用的内存。值得注意的是，brk 只能用于改变堆的大小，而不能用于改变栈的大小。
+2. mmap：这是一种更通用的内存管理系统调用，可以用于实现内存映射。内存映射可以有多种用途，如文件映射和创建共享内存。mmap 还可以创建匿名映射，这是一种没有与文件系统关联的内存区域，可以用于进程间通信或者替代 malloc 和 free 进行内存管理。mmap 调用允许进程显式地控制内存的分页行为，包括页错误处理、预取、同步和保护等。
+
+这两个系统调用是操作系统提供的基本内存管理工具，可以直接由进程使用，也可以被更高级的内存管理库，如 jemalloc 或C库的 malloc 和 free 函数所使用。
+
+### jvm分代内存管理和操作系统内存管理的区别（2023 小红书）
+1. 操作系统的内存管理的主要目标是提供一个抽象的、连续的地址空间给每个进程，保护进程之间的内存，确保进程不会相互干扰，并在物理内存有限的情况下尽可能有效地分配和回收内存。另一方面，JVM的内存管理的目标更关注于对象的生命周期管理。Java具有自动垃圾收集（GC）的特性，其目标是自动识别并回收不再使用的对象，从而简化程序员的工作。
+2. 操作系统通常使用一种称为虚拟内存的技术，将物理内存抽象为连续的虚拟地址空间，并通过页表和硬件支持实现对虚拟地址到物理地址的映射。另一方面，JVM采用了分代收集策略，将内存分为新生代（Young Generation）、老年代（Old Generation）和永久代（Permanent Generation，Java 8以后被Metaspace替代）。这种策略基于两个观察结果：大部分对象的生命周期都很短，少数生命周期长的对象可能会存活很长时间。因此，JVM通过使用不同的垃圾收集算法和策略来处理这些不同的内存区域。
+
+在这两个层次的内存管理之间还有一层：Java运行时环境（JRE）会从操作系统申请内存，然后将这些内存分配给JVM使用。在JVM内部，内存会被进一步划分为用于不同目的的各种区域，如Java堆（用于存储对象）、方法区（用于存储类的元数据）以及各种线程栈（用于存储局部变量和方法调用的上下文）等。
 
 ## 🎨 设计模式
 ### 适配器模式、装饰器模式、代理模式有什么区别？（2023小红书）
@@ -922,16 +1502,28 @@ TCP（传输控制协议）连接建立后，如果客户端下线或断开，�
 > 5. https://juejin.cn/post/6844903734300901390#heading-6
 
 ### Java 程序运行了一周，发现老年代内存溢出，分析一下？（2023美团）
-Java程序的内存溢出常常意味着在Java堆中没有足够的空间分配新的对象。通常，这意味着程序创建了太多的对象并且没有及时的清理，或者是这些对象占用了太大的内存。
+老年代内存溢出表现为java.lang.OutOfMemoryError: Java heap space，通常是因为Java堆内存中长期存活的对象占用的空间过大，导致内存无法分配。下面从浅入深分析可能的原因和解决方法
 
-Java的垃圾回收机制会自动清理不再使用的对象，释放内存空间。在HotSpot虚拟机中，内存被划分为年轻代和老年代。年轻代主要用于存放生命周期较短的对象，而老年代则用于存放生命周期较长的对象。如果老年代的内存溢出，这通常意味着存在以下可能的问题：
-1. **内存泄漏**：这是最常见的问题，程序可能在持续的创建对象，而这些对象没有被及时的清理，比如长生命周期的对象持有短生命周期对象的引用，或者在集合类中添加了对象但是忘记移除等。
-2. **配置问题**：JVM的堆大小是可以配置的，如果配置的老年代的大小不合理，也可能会导致内存溢出。例如，如果将堆的大部分空间都分配给了年轻代，那么老年代可能会因为空间不足而导致内存溢出。
-3. **程序逻辑问题**：如果程序的某部分代码创建了大量的长生命周期的对象，或者创建了大量的短生命周期的对象但没有足够的时间进行垃圾回收，那么也可能会导致老年代的内存溢出。
+1. **堆内存设置不合理**
+首先检查Java堆内存的配置是否合适。通过-Xmx和-Xms参数设置堆内存的最大值和初始值。如果没有设置或设置过小，可能导致内存溢出。可以根据实际需求和硬件条件适当调整这两个参数的大小。
+2. **长期存活对象过多**
+检查程序中是否存在大量的长期存活对象。这些对象会导致老年代空间不足。可以通过以下方法解决：
+- 优化代码，减少长期存活对象的数量。
+- 使用缓存策略，如LRU算法，限制缓存对象的数量。
+- 使用弱引用（WeakReference），使得在内存不足时，可以被垃圾回收器回收。
+3. **内存泄漏**
+内存泄漏是指程序中错误地持有了不再需要的对象引用，导致这些对象无法被垃圾回收器回收。需要检查代码，排查可能的内存泄漏问题。以下几种场景容易出现内存泄漏：
+- 静态集合类（如HashMap、ArrayList等）中的对象没有被移除。
+- 监听器或回调没有被正确注销。
+- 线程池或数据库连接池没有正确关闭。
+4. **使用内存分析工具**
+使用内存分析工具（如VisualVM、MAT等）对程序进行内存分析，找出内存占用的瓶颈和内存泄漏的地方。具体操作步骤如下：
+- 获取堆内存快照（Heap Dump）。
+- 分析快照，找出内存占用最大的对象。
+- 分析对象的引用链，找出持有这些对象引用的地方。
+- 根据分析结果，修改代码，解决内存问题。
 
-分析这个问题，通常需要用到一些工具，比如JVisualVM，MAT，jmap等，通过这些工具我们可以看到堆的使用情况，以及哪些对象占用了大部分的内存，还可以分析对象的引用链，找出可能的内存泄漏点。
-
-要解决这个问题，你需要首先确定问题的根源。如果是内存泄漏，需要修改程序逻辑以确保不再创建不必要的对象或及时地清理不再使用的对象。如果是配置问题，需要调整JVM的参数以合理地分配堆空间。如果是程序逻辑问题，可能需要优化代码以减少对象的创建或提高垃圾回收的效率。
+综上所述，发生老年代内存溢出时，可以从设置合理的堆内存大小、优化代码减少长期存活对象、排查内存泄漏、使用内存分析工具和垃圾回收器调优等方面入手，全面分析和解决问题。
 
 ### 如果核心线程数是 5，已经启动 4 个任务，后面又进来 1 个，是优先复用前面四个任务中的空闲线程还是重新创建新线程（2023完美世界）
 > 线程池是为了限制系统中执行线程的数量。根据系统的任务负载和资源容量，线程池可以灵活地调整线程的数量，优化线程的管理，这样可以减少线程创建和销毁带来的额外开销。
@@ -1045,6 +1637,7 @@ public String test() {
 
 ### 秒杀场景下扣减库存太慢了怎么办？（2023 滴滴）
 如果在秒杀场景下扣减库存的过程太慢，那么可能会导致系统的响应时间变长，用户体验下降，甚至系统过载。以下是一些优化扣减库存过程的建议：
+
 1. **使用内存数据库**：相比于传统的关系型数据库，内存数据库如Redis的读写速度更快，适合处理高并发请求。你可以在活动开始前将库存信息预加载到Redis中，用户抢购时直接在Redis中扣减库存，活动结束后再将Redis中的数据同步回数据库。
 2. **异步处理**：用户的抢购请求可以先进入消息队列，由后台服务异步处理。这样用户的请求就可以立即得到响应，提高了用户体验，同时也减轻了服务器的压力。
 3. **数据库优化**：如果仍然使用关系型数据库，可以通过数据库层面的优化来提高效率，例如选择合适的索引、调整事务的隔离级别、使用批处理等。
@@ -1052,6 +1645,7 @@ public String test() {
 5. **使用分布式系统**：如果你的系统规模较大，可以考虑使用分布式系统来分担压力。例如，可以使用分布式数据库、分布式缓存、分布式计算等技术。
 
 ### 短信登录的短信怎么发送的（2023 滴滴）
+
 短信登录的过程通常如下：
 1. 用户在应用程序或网站上输入手机号码。
 2. 系统验证该手机号码的格式是否正确。
@@ -1122,6 +1716,16 @@ public String test() {
 7. **容错和备份**：系统需要有足够的容错和备份机制，以便在出现问题时快速恢复。
 8. **监控和报警**：设置监控和报警机制，对系统的运行状态进行实时监控，一旦发现异常，立即触发报警，便于及时处理。
 
+### 有一个程序占用大量 cpu，并且一直运行，怎么排查？（2023 阿里实习）
+1. 识别问题进程：使用top或htop命令（Linux/macOS）或任务管理器（Windows）检查系统状态，找到占用大量CPU的Java进程。记下进程ID（PID）。
+2. 获取线程信息：对于找到的Java进程，我们可以使用jstack工具获取线程信息。jstack是Java Development Kit（JDK）中的一个实用程序，用于生成Java线程转储。运行以下命令：
+```shell
+jstack <PID> > thread_dump.txt
+```
+3. 分析线程转储：打开thread_dump.txt文件，查找具有高CPU使用率的线程。线程转储中的每个线程都有一个16进制的线程ID（nid）。找到状态为RUNNABLE且堆栈跟踪表明可能在执行密集任务的线程。
+4. 关联操作系统线程：要确定哪些线程正在使用大量CPU资源，我们需要将Java线程与操作系统线程关联起来。在Linux上，可以使用`top -H -p <PID>`命令查看特定进程的线程CPU使用情况。在Windows上，可以使用Process Explorer或Process Monitor等工具查看线程CPU使用情况。将操作系统线程ID转换为16进制，然后与thread_dump.txt中的线程进行匹配。
+5. 定位问题代码
+
 ## 其他
 ### 讲一讲cms？
 内容管理系统（英语：content management system，缩写为 CMS）是指在一个合作模式下，用于管理工作流程的一套制度。该系统可应用于手工操作中，也可以应用到电脑或网络里。作为一种中央储存器（central repository），内容管理系统可将相关内容集中储存并具有群组管理、版本控制等功能。版本控制是内容管理系统的一个主要优势。
@@ -1136,6 +1740,14 @@ public String test() {
 
 > 参考：
 > https://zh.wikipedia.org/wiki/DTS
+
+### 了解过蚂蚁的 oceanbase 吗？（2023 蚂蚁金服）
+OceanBase是一个开源的分布式关系型数据库，完全兼容MySQL。它完全由蚂蚁集团开发，并建立在一个公共服务器集群上。基于Paxos协议及其分布式结构，OceanBase提供高可用性和线性可扩展性。
+
+> 参考：
+> 1. https://www.oceanbase.com/
+> 2. http://www.oceanbase.wiki/concept/introduction-to-oceanbase-database/1.learn-about-oceanbase-database/
+> 3. https://dbdb.io/db/oceanbase
 
 ## 💦 算法汇总
 

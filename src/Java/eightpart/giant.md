@@ -763,7 +763,6 @@ void addEntry(int hash, K key, V value, int bucketIndex) {
 
 ![image-20220616155140634](./giant_images/image-20220616155140634.png)
 
-著作权归https://pdai.tech所有。 链接：https://www.pdai.tech/md/java/collection/java-map-HashMap&HashSet.html
 
 上图中 `hash(k)&(table.length-1)`等价于 `hash(k)%table.length`，原因是*HashMap*要求 `table.length`必须是2的指数，因此 `table.length-1`就是二进制低位全是1，跟 `hash(k)`相与会将哈希值的高位全抹掉，剩下的就是余数了。
 
@@ -3301,7 +3300,7 @@ ReentrantLock 比 synchronized 增加了一些高级功能
 
 https://blog.csdn.net/it_lihongmin/article/details/109230696
 
-    等待唤醒机制使用场景比较多，`一个完整的等待唤醒机制过程：线程首先获取互斥锁，当线程要求的条件不满足时释放互斥锁，进入等待状态；当要求的条件满足时，通知等待的线程，重新获取互斥锁`。直接在并发编程模式 - Guarded Suspension设计模式中使用ReentrantLock+Condition实现了一个版本，并且也分析了 Dubbo的异步请求Api的异步转同步的过程。`Object的 wait、notify、notifyAll`方法需要配合synchronized使用，即在其内部使用，并且写法基本固定。如果在synchronized外部调用 wait方法等，则会报 java.lang.IllegalMonitorStateException。
+>等待唤醒机制使用场景比较多，`一个完整的等待唤醒机制过程：线程首先获取互斥锁，当线程要求的条件不满足时释放互斥锁，进入等待状态；当要求的条件满足时，通知等待的线程，重新获取互斥锁`。直接在并发编程模式 - Guarded Suspension设计模式中使用ReentrantLock+Condition实现了一个版本，并且也分析了 Dubbo的异步请求Api的异步转同步的过程。`Object的 wait、notify、notifyAll`方法需要配合synchronized使用，即在其内部使用，并且写法基本固定。如果在synchronized外部调用 wait方法等，则会报 java.lang.IllegalMonitorStateException。
 
 ![image-20220610095635066](./giant_images/image-20220610095635066.png)
 
@@ -3906,7 +3905,6 @@ replicaof 172.16.19.3 6379
 
 ![image-20220404205423809](./giant_images/image-20220404205423809.png)
 
-著作权归https://pdai.tech所有。 链接：https://www.pdai.tech/md/db/nosql-redis/db-redis-x-copy.html
 
 **第一阶段是主从库间建立连接、协商同步的过程**，主要是为全量复制做准备。在这一步，从库和主库建立起连接，并告诉主库即将进行同步，主库确认回复后，主从库间就可以开始同步了。
 

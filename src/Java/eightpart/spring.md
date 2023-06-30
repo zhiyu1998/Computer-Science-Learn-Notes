@@ -12,50 +12,20 @@ category:
 
 ### ⭐️ spring中都有哪些设计模式？（2022热门问题）
 
-1、**简单工厂模式**：`BeanFactory`就是简单工厂模式的体现，根据传入一个唯一标识来获得 Bean 对象。
+> 概述
 
-```java
-@Override
-public Object getBean(String name) throws BeansException {
-    assertBeanFactoryActive();
-    return getBeanFactory().getBean(name);
-} 
-```
+1、**简单工厂模式**：`BeanFactory`就是简单工厂模式的体现，根据传入一个唯一标识来获得 Bean 对象。在Spring Boot中具体实现的类是`AnnotationConfigApplicationContext`。
 
 2、**工厂方法模式**：`FactoryBean`就是典型的工厂方法模式。spring在使用`getBean()`调用获得该bean时，会自动调用该bean的`getObject()`方法。每个 Bean 都会对应一个 `FactoryBean`，如 `SqlSessionFactory` 对应 `SqlSessionFactoryBean`。
 
 3、**单例模式**：一个类仅有一个实例，提供一个访问它的全局访问点。Spring 创建 Bean 实例默认是单例的。
 
-4、**适配器模式**：SpringMVC中的适配器`HandlerAdatper`。由于应用会有多个Controller实现，如果需要直接调用Controller方法，那么需要先判断是由哪一个Controller处理请求，然后调用相应的方法。当增加新的 Controller，需要修改原来的逻辑，违反了开闭原则（对修改关闭，对扩展开放）。
-
-为此，Spring提供了一个适配器接口，每一种 Controller 对应一种 `HandlerAdapter` 实现类，当请求过来，SpringMVC会调用`getHandler()`获取相应的Controller，然后获取该Controller对应的 `HandlerAdapter`，最后调用`HandlerAdapter`的`handle()`方法处理请求，实际上调用的是Controller的`handleRequest()`。每次添加新的 Controller 时，只需要增加一个适配器类就可以，无需修改原有的逻辑。
-
-常用的处理器适配器：`SimpleControllerHandlerAdapter`，`HttpRequestHandlerAdapter`，`AnnotationMethodHandlerAdapter`。
+4、**适配器模式**：SpringMVC中的适配器`HandlerAdatper`。这个`HandlerAdatper`的理解有点复杂，具体来说是将不同的Handler(比如Controller)适配转换为DispatcherServlet可以调用的handle方法。比如现在有一个controller叫作SimpleController，就可以通过SimpleControllerHandlerAdapter的handle方法将它转换成可以被DispatcherServlet识别的方法，这样就可以请求来了 -> DispatcherServlet找适配器 -> 找到SimpleControllerHandlerAdapter -> 调用它的handle方法 -> handle方法内部调用SimpleController的handleRequest方法 -> 最后将结果返回给DispatcherServlet。同样的，如果有一个PigController，就使用PigControllerHandlerAdapter将其转换成DispatcherServlet可以调用的接口。
 
 ```java
-// Determine handler for the current request.
-mappedHandler = getHandler(processedRequest);
-
-HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
-
-// Actually invoke the handler.
-mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-
-public class HttpRequestHandlerAdapter implements HandlerAdapter {
-
-    @Override
-    public boolean supports(Object handler) {//handler是被适配的对象，这里使用的是对象的适配器模式
-        return (handler instanceof HttpRequestHandler);
-    }
-
-    @Override
-    @Nullable
-    public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler)
-        throws Exception {
-
-        ((HttpRequestHandler) handler).handleRequest(request, response);
-        return null;
-    }
+public ModelAndView handle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    ((SimpleController) handler).handleRequest(request, response);
+    // 返回ModelAndView
 }
 ```
 
@@ -209,7 +179,75 @@ Spring 中 `jdbcTemplate`、`hibernateTemplate` 等以 Template 结尾的对数�
 
 #### 观察者模式
 
-观察者模式是一种对象行为型模式。它表示的是一种对象与对象之间具有依赖关系，当一个对象发生改变的时候，这个对象所依赖的对象也会做出反应。Spring 事件驱动模型就是观察者模式很经典的一个应用。Spring  事件驱动模型非常有用，在很多场景都可以解耦我们的代码。比如我们每次添加商品的时候都需要重新更新商品索引，这个时候就可以利用观察者模式来解决这个问题。
+Spring框架中的观察者模式主要体现在事件监听和发布机制上。Spring提供了ApplicationEvent和ApplicationListener接口，通过这些接口，我们可以在Spring容器中实现观察者模式
+
+1. 首先，我们创建一个自定义的事件，继承自ApplicationEvent：
+```java
+import org.springframework.context.ApplicationEvent;
+
+public class CustomEvent extends ApplicationEvent {
+    private String message;
+
+    public CustomEvent(Object source, String message) {
+        super(source);
+        this.message = message;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}
+```
+
+2. 然后，我们创建一个事件监听器，实现ApplicationListener接口，并指定监听的事件类型为CustomEvent：
+```java
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomEventListener implements ApplicationListener<CustomEvent> {
+    @Override
+    public void onApplicationEvent(CustomEvent event) {
+        System.out.println("Received custom event: " + event.getMessage());
+    }
+}
+```
+
+3. 接下来，我们需要在Spring容器中发布这个事件。为了实现这一点，我们可以使用ApplicationEventPublisher：
+```java
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomEventPublisher {
+    @Autowired
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    public void publishEvent(String message) {
+        CustomEvent customEvent = new CustomEvent(this, message);
+        applicationEventPublisher.publishEvent(customEvent);
+    }
+}
+```
+
+4. 最后，我们在主程序中使用CustomEventPublisher发布一个自定义事件：
+```java
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
+
+@SpringBootApplication
+public class ObserverPatternExampleApplication {
+    public static void main(String[] args) {
+        ConfigurableApplicationContext context = SpringApplication.run(ObserverPatternExampleApplication.class, args);
+
+        CustomEventPublisher publisher = context.getBean(CustomEventPublisher.class);
+        publisher.publishEvent("Hello, Observer Pattern in Spring!");
+    }
+}
+```
+运行这个程序，你会看到在控制台输出 Received custom event: Hello, Observer Pattern in Spring!，这说明观察者模式在Spring中已经成功实现了。
 
 ##### Spring 事件驱动模型中的三种角色
 
@@ -290,15 +328,192 @@ if(mappedHandler.getHandler() instanceof MultiActionController){
 
 Spring 中配置 DataSource 的时候，DataSource  可能是不同的数据库和数据源。我们能否根据客户的需求在少修改原有类的代码下动态切换不同的数据源？这个时候就要用到装饰者模式(这一点我自己还没太理解具体原理)。Spring 中用到的包装器模式在类名上含有 `Wrapper`或者 `Decorator`。这些类基本上都是动态地给一个对象添加一些额外的职责
 
-### SpringBoot启动流程
+### SpringBoot 自动装配
+我们现在提到自动装配的时候，一般会和 Spring Boot 联系在一起。但是，实际上 Spring Framework 早就实现了这个功能。Spring Boot 只是在其基础上，通过 SPI 的方式，做了进一步优化。
+>SpringBoot 定义了一套接口规范，这套规范规定：SpringBoot 在启动时会扫描外部引用 jar 包中的META-INF/spring.factories文件，将文件中配置的类型信息加载到 Spring 容器（此处涉及到 JVM 类加载机制与 Spring 的容器知识），并执行类中定义的各种操作。对于外部 jar 来说，只需要按照 SpringBoot 定义的标准，就能将自己的功能装置进 SpringBoot。
 
-1. **初始化**：Spring Boot应用程序首先初始化SpringApplication对象，该对象负责管理应用程序的启动和运行。在这个阶段，Spring Boot会加载应用程序的配置文件和命令行参数。
-2. **创建Spring应用上下文**：Spring Boot会创建一个Spring应用上下文（ApplicationContext），它是Spring容器的核心，负责管理应用程序中的所有Bean。在这个阶段，Spring Boot会扫描应用程序中的所有组件（如@Service、@Controller等），并将它们注册到Spring容器中。
-3. **自动配置**：Spring Boot会自动配置应用程序，根据应用程序的依赖关系和配置文件，自动创建和配置Bean。这使得开发人员可以专注于业务逻辑的实现，而不需要手动配置大量的Bean。
-4. **启动嵌入式Web服务器**（如果有的话）：如果应用程序是一个Web应用程序，Spring Boot会启动一个嵌入式的Web服务器（如Tomcat、Jetty等），并将应用程序部署到该服务器上。
-5. **应用程序启动完成**：在这个阶段，Spring Boot会触发ApplicationReadyEvent事件，表示应用程序已经启动并准备好接受请求。你可以在这个阶段执行一些自定义的初始化逻辑，例如设置数据库、启动定时任务等。
+没有 Spring Boot 的情况下，如果我们需要引入第三方依赖，需要手动配置，非常麻烦。但是，Spring Boot 中，我们直接引入一个 starter 即可。比如你想要在项目中使用 redis 的话，直接在项目中引入对应的 starter 即可。
 
-![image-20220627213051378](./personal_images/image-20220627213051378.png)
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+</dependency>
+```
+
+引入 starter 之后，我们通过少量注解和一些简单的配置就能使用第三方组件提供的功能了。
+
+在我看来，自动装配可以简单理解为：通过注解或者一些简单的配置就能在 Spring Boot 的帮助下实现某块功能。
+
+我们先看一下 SpringBoot 的核心注解 `SpringBootApplication` （当前代码spring boot版本：`2.5.6`）。
+```java
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@SpringBootConfiguration
+@EnableAutoConfiguration
+@ComponentScan(
+    excludeFilters = {@Filter(
+    type = FilterType.CUSTOM,
+    classes = {TypeExcludeFilter.class}
+), @Filter(
+    type = FilterType.CUSTOM,
+    classes = {AutoConfigurationExcludeFilter.class}
+)}
+)
+public @interface SpringBootApplication {
+```
+大概可以把 @SpringBootApplication看作是 @Configuration、@EnableAutoConfiguration、@ComponentScan 注解的集合。根据 SpringBoot 官网，这三个注解的作用分别是：
+- @EnableAutoConfiguration：启用 SpringBoot 的自动配置机制
+- @Configuration：允许在上下文中注册额外的 bean 或导入其他配置类
+- @ComponentScan：扫描被@Component (@Service,@Controller)注解的 bean，注解默认会扫描启动类所在的包下所有的类 ，可以自定义不扫描某些 bean。如下图所示，容器中将排除TypeExcludeFilter和AutoConfigurationExcludeFilter。
+- @EnableAutoConfiguration 是实现自动装配的重要注解，我们以这个注解入手。
+
+EnableAutoConfiguration 只是一个简单地注解，自动装配核心功能的实现实际是通过 AutoConfigurationImportSelector类。
+```java
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+@AutoConfigurationPackage
+@Import({AutoConfigurationImportSelector.class})
+public @interface EnableAutoConfiguration {
+    String ENABLED_OVERRIDE_PROPERTY = "spring.boot.enableautoconfiguration";
+
+    Class<?>[] exclude() default {};
+
+    String[] excludeName() default {};
+}
+```
+
+我们现在重点分析下AutoConfigurationImportSelector 类到底做了什么？
+AutoConfigurationImportSelector类的继承体系如下：
+![](./personal_images/QQ截图20230626164313.png)
+可以看出，AutoConfigurationImportSelector 类实现了 ImportSelector接口，也就实现了这个接口中的 selectImports方法，该方法主要用于获取所有符合条件的类的全限定类名，这些类需要被加载到 IoC 容器中。
+```java
+public interface ImportSelector {
+    String[] selectImports(AnnotationMetadata importingClassMetadata);
+
+    @Nullable
+    default Predicate<String> getExclusionFilter() {
+        return null;
+    }
+}
+```
+AutoConfigurationImportSelector的实现如下：
+```java
+public String[] selectImports(AnnotationMetadata annotationMetadata) {
+        if (!this.isEnabled(annotationMetadata)) {
+            return NO_IMPORTS;
+        } else {
+            AutoConfigurationEntry autoConfigurationEntry = this.getAutoConfigurationEntry(annotationMetadata);
+            return StringUtils.toStringArray(autoConfigurationEntry.getConfigurations());
+        }
+    }
+```
+现在我们结合getAutoConfigurationEntry()的源码来详细分析一下：
+```java
+protected AutoConfigurationEntry getAutoConfigurationEntry(AnnotationMetadata annotationMetadata) {
+	if (!this.isEnabled(annotationMetadata)) {
+		return EMPTY_ENTRY;
+	} else {
+		AnnotationAttributes attributes = this.getAttributes(annotationMetadata);
+		List<String> configurations = this.getCandidateConfigurations(annotationMetadata, attributes);
+		configurations = this.removeDuplicates(configurations);
+		Set<String> exclusions = this.getExclusions(annotationMetadata, attributes);
+		this.checkExcludedClasses(configurations, exclusions);
+		configurations.removeAll(exclusions);
+		configurations = this.getConfigurationClassFilter().filter(configurations);
+		this.fireAutoConfigurationImportEvents(configurations, exclusions);
+		return new AutoConfigurationEntry(configurations, exclusions);
+	}
+}
+```
+
+首先是第一句：
+```java
+if (!this.isEnabled(annotationMetadata)) {
+	return EMPTY_ENTRY;
+} 
+```
+这里的`this.isEnabled(annotationMetadata)`内容（AutoConfigurationImportSelector 99行）是：
+```java
+protected boolean isEnabled(AnnotationMetadata metadata) {
+	return this.getClass() == AutoConfigurationImportSelector.class ? (Boolean)this.getEnvironment().getProperty("spring.boot.enableautoconfiguration", Boolean.class, true) : true;
+}
+```
+这段代码会判断当前类是否为AutoConfigurationImportSelector类，如果是，则会从Spring环境中获取名为spring.boot.enableautoconfiguration的属性值，如果该属性存在且为false，则不启用自动配置，否则启用自动配置。如果当前类不是AutoConfigurationImportSelector类，则始终返回true，表示启用自动配置。
+
+1. 在getAutoConfigurationEntry()的源码中的一段第一段逻辑是：
+```java
+AnnotationAttributes attributes = this.getAttributes(annotationMetadata);
+```
+
+![](./personal_images/QQ截图20230626171112.png)
+在这段代码中，`AnnotationAttributes attributes = this.getAttributes(annotationMetadata)`用于获取@EnableAutoConfiguration注解中的exclude和excludeName属性。这些属性用于指定要排除的自动配置类，如果存在这些属性，则需要在处理自动配置时将这些自动配置类排除在外（有些情况下，开发者可能不希望使用某些自动配置，默认情况下这些自动配置会被启用。因此，Spring Boot提供了@EnableAutoConfiguration注解的exclude和excludeName属性，以允许开发者排除不需要的自动配置。）
+
+2. 第二段逻辑是：`List<String> configurations = this.getCandidateConfigurations(annotationMetadata, attributes);` 获取需要自动装配的所有配置类，读取META-INF/spring.factories
+![](./personal_images/QQ截图20230626172008.png)
+
+通过在 Spring Boot 中，自动配置类是用于简化应用配置的一种方式。通过在类路径中提供 spring.factories 文件，框架可以自动发现并应用这些配置。spring.factories 文件通常位于 META-INF 目录下，它包含了一系列以键值对形式定义的配置项，示例中是刚刚截图的`第99个配置项（org.springframework.boot.autoconfigure.session.SessionAutoConfiguration）`
+![](./personal_images/Snipaste_2023-06-26_17-29-34.png)
+
+3. 第3个逻辑是：`configurations = this.removeDuplicates(configurations);` 去除重复的自动配置类。
+```java
+protected Set<String> getExclusions(AnnotationMetadata metadata, AnnotationAttributes attributes) {
+	Set<String> excluded = new LinkedHashSet();
+	// 从 attributes 参数中的 "exclude" 键获取排除的自动配置类。这些类通常在 @EnableAutoConfiguration 注解中通过 exclude 属性指定。
+	excluded.addAll(this.asList(attributes, "exclude"));
+	// 从 attributes 参数中的 "excludeName" 键获取排除的自动配置类名称。这些类名通常在 @EnableAutoConfiguration 注解中通过 excludeName 属性指定。
+	excluded.addAll(Arrays.asList(attributes.getStringArray("excludeName")));
+	// 通过调用 getExcludeAutoConfigurationsProperty() 方法获取 spring.autoconfigure.exclude 属性定义的自动配置类。这个属性通常在 application.properties 或 application.yml 文件中设置。
+	excluded.addAll(this.getExcludeAutoConfigurationsProperty());
+	return excluded;
+}
+```
+
+4. 第4个逻辑是`this.checkExcludedClasses(configurations, exclusions);` 和 `configurations.removeAll(exclusions);` 获取需要排除的自动配置类、检查 exclusions 中的类是否存在于 configurations 列表中、从 configurations 列表中移除 exclusions 中的类。
+
+5. 第5个逻辑是`configurations = this.getConfigurationClassFilter().filter(configurations);` 对配置类进行过滤（例如，可能会根据条件过滤掉部分配置类）。到这里，配置类只剩下108个，之前240个（是因为我加了其他的包）
+![](./personal_images/Snipaste_2023-06-26_17-40-39.png)
+
+7. 第6个逻辑是`this.fireAutoConfigurationImportEvents(configurations, exclusions);`触发自动配置导入事件。fireAutoConfigurationImportEvents 方法负责触发自动配置导入事件。这个方法的主要目的是通知所有注册的 AutoConfigurationImportListener 实例关于自动配置类的导入情况。这可以让开发者在导入自动配置类时执行一些自定义操作，例如记录日志、处理依赖关系等。
+```java
+private void fireAutoConfigurationImportEvents(List<String> configurations, Set<String> exclusions) {
+	// 调用 getAutoConfigurationImportListeners() 获取所有注册的 AutoConfigurationImportListener 实例。AutoConfigurationImportListener 是一个接口，用于监听自动配置导入事件。
+	List<AutoConfigurationImportListener> listeners = this.getAutoConfigurationImportListeners();
+	// 检查获取到的监听器列表是否为空。如果为空，则不执行后续步骤，因为没有监听器需要通知。
+	if (!listeners.isEmpty()) {
+		// 创建一个新的 AutoConfigurationImportEvent 实例，将当前的自动配置类列表（configurations）和排除的自动配置类集合（exclusions）作为参数传递。AutoConfigurationImportEvent 类包含了自动配置导入过程中的相关信息，供监听器处理。
+		AutoConfigurationImportEvent event = new AutoConfigurationImportEvent(this, configurations, exclusions);
+		Iterator var5 = listeners.iterator();
+		// 遍历所有 AutoConfigurationImportListener 实例。对于每个监听器：
+		while(var5.hasNext()) {
+			AutoConfigurationImportListener listener = (AutoConfigurationImportListener)var5.next();
+			// 调用 invokeAwareMethods(listener) 方法，确保监听器实现了 Aware 接口的任何方法（例如 ApplicationContextAware、BeanFactoryAware 等）。
+			this.invokeAwareMethods(listener);
+			// 调用监听器的 onAutoConfigurationImportEvent(event) 方法，将 AutoConfigurationImportEvent 实例传递给监听器。此时监听器可以处理事件，根据需要执行自定义操作。
+			listener.onAutoConfigurationImportEvent(event);
+		}
+	}
+
+}
+```
+8. 最后返回一个包含自动配置类和排除的自动配置类的 AutoConfigurationEntry 对象：`return new AutoConfigurationEntry(configurations, exclusions);`
+```java
+AutoConfigurationEntry(Collection<String> configurations, Collection<String> exclusions) {
+	this.configurations = new ArrayList(configurations);
+	this.exclusions = new HashSet(exclusions);
+}
+```
+
+**总结**
+- 原理：Spring Boot 在启动时扫描类路径中的 spring.factories 文件，查找与 org.springframework.boot.autoconfigure.EnableAutoConfiguration 关联的自动配置类。
+- 条件装配：使用 @Conditional 注解及其派生注解（如 @ConditionalOnClass, @ConditionalOnBean 等）来控制自动配置类是否应用，以满足特定条件。
+- 自定义自动配置：开发者可以通过创建 spring.factories 文件并指定自己的自动配置类来实现自定义自动配置。
+- 排除自动配置：使用 @EnableAutoConfiguration 注解的 exclude 或 excludeName 属性，或在配置文件中设置 spring.autoconfigure.exclude 属性来排除不需要的自动配置类。
+- 事件监听：通过实现 AutoConfigurationImportListener 接口，开发者可以在自动配置类导入时执行自定义操作。
 
 ### 🌟 Spring Bean生命周期
 
@@ -332,69 +547,82 @@ Spring 内置的 `@Autowired` 以及 JDK 内置的 `@Resource` 和 `@Inject` 都
 | `@Resource`  | `javax.annotation`                 | Java JSR-250 |
 | `@Inject`    | `javax.inject`                     | Java JSR-330 |
 
-`@Autowired` 和 `@Resource`使用的比较多一些。
-
-`Autowired` 属于 Spring 内置的注解，默认的注入方式为 `byType`（根据类型进行匹配），也就是说会优先根据接口类型去匹配并注入 Bean （接口的实现类）。
-
-**这会有什么问题呢？** 当一个接口存在多个实现类的话，`byType`这种方式就无法正确注入对象了，因为这个时候 Spring 会同时找到多个满足条件的选择，默认情况下它自己不知道选择哪一个。
-
-这种情况下，注入方式会变为 `byName`（根据名称进行匹配），这个名称通常就是类名（首字母小写）。就比如说下面代码中的 `smsService` 就是我这里所说的名称，这样应该比较好理解了吧。
-
-```java
-// smsService 就是我们上面所说的名称
-@Autowired
-private SmsService smsService;
-```
-
-举个例子，`SmsService` 接口有两个实现类: `SmsServiceImpl1`和 `SmsServiceImpl2`，且它们都已经被 Spring 容器所管理。
-
-```java
-// 报错，byName 和 byType 都无法匹配到 bean
-@Autowired
-private SmsService smsService;
-// 正确注入 SmsServiceImpl1 对象对应的 bean
-@Autowired
-private SmsService smsServiceImpl1;
-// 正确注入  SmsServiceImpl1 对象对应的 bean
-// smsServiceImpl1 就是我们上面所说的名称
-@Autowired
-@Qualifier(value = "smsServiceImpl1")
-private SmsService smsService;
-```
-
-我们还是建议通过 `@Qualifier` 注解来显示指定名称而不是依赖变量的名称。
-
-`@Resource`属于 JDK 提供的注解，默认注入方式为 `byName`。如果无法通过名称匹配到对应的实现类的话，注入方式会变为 `byType`。
-
-`@Resource` 有两个比较重要且日常开发常用的属性：`name`（名称）、`type`（类型）。
-
-```java
-public @interface Resource {
-    String name() default "";
-    Class<?> type() default Object.class;
-}
-```
-
-如果仅指定 `name` 属性则注入方式为 `byName`，如果仅指定 `type`属性则注入方式为 `byType`，如果同时指定 `name` 和 `type`属性（不建议这么做）则注入方式为 `byType`+`byName`。
-
-```java
-// 报错，byName 和 byType 都无法匹配到 bean
-@Resource
-private SmsService smsService;
-// 正确注入 SmsServiceImpl1 对象对应的 bean
-@Resource
-private SmsService smsServiceImpl1;
-// 正确注入 SmsServiceImpl1 对象对应的 bean（比较推荐这种方式）
-
-@Resource(name = "smsServiceImpl1")
-private SmsService smsService;
-```
-
-简单总结一下：
+>概述
 
 - `@Autowired` 是 Spring 提供的注解，`@Resource` 是 JDK 提供的注解。
 - `Autowired` 默认的注入方式为 `byType`（根据类型进行匹配），`@Resource`默认注入方式为 `byName`（根据名称进行匹配）。
 - 当一个接口存在多个实现类的情况下，`@Autowired` 和 `@Resource`都需要通过名称才能正确匹配到对应的 Bean。`Autowired` 可以通过 `@Qualifier` 注解来显示指定名称，`@Resource`可以通过 `name` 属性来显示指定名称。
+
+> byType和byName的区别
+
+在Spring框架中，@Autowired注解的默认注入方式是按类型（byType）进行注入的。这意味着Spring会查看你的应用上下文中是否有与你想要注入的属性相同类型的bean，如果有，它就会自动将这个bean注入到属性中。
+
+另一方面，按名称（byName）的注入方式，是根据bean的名称进行注入。在这种情况下，Spring会查看你的应用上下文中是否有与你想要注入的属性同名的bean，如果有，就会将这个bean注入到属性中。
+
+举个例子，假设你有一个属性名为myService的类型为MyService的属性，如果你使用按类型注入，Spring会寻找类型为MyService的bean进行注入，而不关心这个bean的名称是什么；如果你使用按名称注入，Spring会寻找名称为myService的bean进行注入，而不关心这个bean的类型是什么。
+
+> byType和byName出现重复如何解决？
+
+使用 @Autowired注解，并且你的Spring上下文中存在多个相同类型的bean，那么Spring在尝试注入时会抛出异常，因为它不知道应该注入哪一个。
+
+在这种情况下，你可以使用 @Qualifier 注解来指定你想要注入的具体的bean。@Qualifier 注解接受一个字符串参数，这个参数是你想要注入的bean的名称。例如，你可以这样做：
+```java
+@Autowired
+@Qualifier("myService1")
+private MyService myService;
+```
+在这个例子中，Spring会注入名称为 "myService1" 的 MyService bean。
+
+另一方面，@Resource 注解的默认行为是按名称（byName）注入。你可以通过设置它的 name 属性来指定你想要注入的bean的名称。例如，你可以这样做：
+```java
+@Resource(name="myService1")
+private MyService myService;
+```
+
+> Spring上下文保存Bean的范围
+
+Spring的上下文（Application Context）是全局的，包含整个应用中所有的bean，而不仅仅是某个包或者类。所以，如果在Spring上下文中存在多个相同类型的bean，无论这些bean定义在哪个包或者类中，使用@Autowired注解进行类型注入都有可能出现问题。
+
+具体来说，如果你在同一个Spring上下文中的任何地方尝试使用@Autowired注解注入MyService类型的bean，并且上下文中存在多个MyService类型的bean，那么Spring将无法确定应该注入哪个bean，因此会抛出异常。即使这些MyService类型的bean分别定义在不同的类或者包中，问题依然存在。
+
+所以，你需要确保在使用@Autowired进行类型注入时，Spring上下文中只有一个与需要注入属性类型相同的bean，或者你可以使用@Qualifier注解来指定需要注入的具体的bean。
+
+> 具体是什么样的情况才会出现需要@Qualifier来解决的？
+
+Spring Boot允许你在其他服务中注入已经创建的服务，这是Spring控制反转（Inversion of Control, IoC）和依赖注入（Dependency Injection, DI）核心理念的一部分。
+
+问题主要出现在当你有多个同一类型的bean实例时。比如，你创建了两个MyService的实现类，并且都被Spring管理（被标记为@Service, @Component, @Repository, @Controller等），那么当你尝试用@Autowired来注入MyService时，Spring就会迷茫，因为它不确定应该注入哪一个实现。
+
+这就是为什么你可能需要使用@Qualifier来显式地告诉Spring你希望注入哪个特定的bean。
+
+例如：
+```java
+@Service
+public class MyServiceImpl1 implements MyService {
+    //...
+}
+
+@Service
+public class MyServiceImpl2 implements MyService {
+    //...
+}
+
+@Component
+public class MyComponent {
+    private final MyService myService;
+
+    @Autowired
+    public MyComponent(@Qualifier("myServiceImpl1") MyService myService) {
+        this.myService = myService;
+    }
+}
+```
+
+`MyServiceImpl1和MyServiceImpl2都是MyService类型的bean（MyServiceImpl1和MyServiceImpl2在spring上下文都是MyService）`，并且它们都在Spring的上下文中。当你尝试使用@Autowired注解来注入MyService类型的bean时，由于存在两个这样的bean，Spring无法确定应该注入哪一个，这就是为什么需要使用@Qualifier注解来指定你希望注入的特定bean。
+
+@Qualifier注解的参数应该是你想要注入的bean的名称。在我的例子中，myServiceImpl1和myServiceImpl2就是bean的名称，这些名称默认是类名的首字母小写的形式。当然，你也可以在@Service注解中指定自定义的bean名称，如@Service("myCustomName")，然后你可以在@Qualifier注解中使用这个自定义的名称
+
+
 
 ### 🌟 请描述Spring MVC的工作流程？描述一下 DispatcherServlet 的工作流程？
 ![](./personal_images/de6d2b213f112297298f3e223bf08f28.png)
@@ -553,9 +781,12 @@ private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<Str
 2. 接下来，Spring开始处理A的属性，发现A依赖B。因此，Spring开始实例化B。
 3. 跟A类似，B的实例首先被放入`singletonFactories`缓存。
 4. 当处理B的属性时，发现B依赖A。这时，Spring会尝试从`singletonObjects`缓存中获取A的实例。但是，由于A尚未完全初始化，所以获取不到。
-5. 接着，Spring会尝试从earlySingletonObjects缓存中获取A的实例。由于A已经被实例化，所以这个时候可以从这个缓存中获取到A的实例。
+5. 接着，Spring会尝试从`earlySingletonObjects`缓存中获取A的实例。由于A已经被实例化，所以这个时候可以从这个缓存中获取到A的实例。
 6. 由于已经获取到了A的实例，Spring可以继续完成B的属性注入。完成后，将B的实例从`singletonFactories`移除，同时将B的实例放入`earlySingletonObjects`和`singletonObjects`缓存。
 7. 此时，Spring回到处理A的属性，由于已经获取到了B的实例，可以完成A的属性注入。完成后，将A的实例从`singletonFactories`移除，同时将A的实例放入`earlySingletonObjects`和`singletonObjects`缓存。
+
+小结过程：A 缓存到singletonFactories，但发现依赖B -> B缓存到singletonFactories，发现B依赖A -> 在singletonObjects找A，但A未初始化 -> earlySingletonObjects找A，找到 -> B可以注入，删除singletonFactories，放入singletonObjects、earlySingletonObjects -> A可以注入，删除singletonFactories，放入singletonObjects、earlySingletonObjects
+
 > 这个解决方案只适用于单例作用域的bean（默认作用域）。对于其他作用域的bean，例如原型作用域，Spring不会解决循环依赖问题。
 
 #### 使用@Lazy
