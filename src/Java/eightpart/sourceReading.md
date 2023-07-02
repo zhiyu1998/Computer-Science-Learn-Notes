@@ -950,7 +950,7 @@ HashMap 只提供了 put 用于添加元素，putVal 方法只是给 put 方法�
 对 putVal 方法添加元素的分析如下：
 1. 如果定位到的数组位置没有元素 就直接插入。
 2. 如果定位到的数组位置有元素就和要插入的 key 比较，如果 key 相同就直接覆盖，如果 key 不相同，就判断 p 是否是一个树节点，如果是就调用`e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value)`将元素添加进入。如果不是就遍历链表插入(插入的是链表尾部)。
-![put方法](./personal_images/put方法.png)
+![put方法](./personal_images/put方法.webp)
 说明:上图有两个小问题：
 * 直接覆盖之后应该就会 return，不会有后续操作。参考 JDK8 HashMap.java 658 行
 * 当链表长度大于阈值（默认为 8）并且 HashMap 数组长度超过 64 的时候才会执行链表转红黑树的操作，否则就只是对数组扩容。参考 HashMap 的 treeifyBin() 方法
@@ -1265,10 +1265,10 @@ public class HashMapDemo {
 > 源码：https://github.com/wupeixuan/JDKSourceCode1.8/blob/master/src/java/util/concurrent/ConcurrentHashMap.java
 
 ### 存储结构
-![](./personal_images/java7_concurrenthashmap.png)
+![](./personal_images/java7_concurrenthashmap.webp)
 
 Java 7 中 ConcurrentHashMap 的存储结构如上图，ConcurrnetHashMap 由很多个 Segment 组合，而每一个 Segment 是一个类似于 HashMap 的结构，所以每一个 HashMap 的内部可以进行扩容。但是 Segment 的个数一旦初始化就不能改变，默认 Segment 的个数是 16 个，你也可以认为 ConcurrentHashMap 默认支持最多 16 个线程并发。
-![](./personal_images/java8_concurrenthashmap.png)
+![](./personal_images/java8_concurrenthashmap.webp)
 可以发现 Java8 的 ConcurrentHashMap 相对于 Java7 来说变化比较大，不再是之前的 Segment 数组 + HashEntry 数组 + 链表，而是 Node 数组 + 链表 / 红黑树。当冲突链表达到一定长度时，链表会转换成红黑树。
 
 ### 初始化 initTable

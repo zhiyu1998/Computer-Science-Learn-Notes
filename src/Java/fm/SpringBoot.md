@@ -158,7 +158,7 @@ java -jar 包名既可以运行
 </build>
 ```
 
-![1](./img/1.png)
+![1](./img/1.webp)
 
 一些场景启动器：
 
@@ -291,11 +291,11 @@ static class Registrar implements ImportBeanDefinitionRegistrar, DeterminableImp
 
 通过调试可以看出
 
-![2](./img/2.png)
+![2](./img/2.webp)
 
 再次调试这段：*register(registry, new PackageImports(metadata).getPackageNames().toArray(new String[0]));*
 
-![3](./img/3.png)
+![3](./img/3.webp)
 
 可得出结论：将**主配置类（@SpringBootApplication标注的类）的所在包及下面所有子包里面的所有组件扫描到Spring容器**
 
@@ -316,7 +316,7 @@ public String[] selectImports(AnnotationMetadata annotationMetadata) {
 
 通过单步调试可以看到，这个会给容器中导入非常多的自动配置类（xxxAutoConfiguration）；就是给容器中导入这个场景需要的所有组件，并配置好这些组件；自动配置类
 
-![4](./img/4.png)
+![4](./img/4.webp)
 
 
 
@@ -353,7 +353,7 @@ protected List<String> getCandidateConfigurations(AnnotationMetadata metadata, A
 
 这个方法中：loadFactoryNames就是对这个SpringBoot依赖包进行加载（把得到的properties添加到容器中进行加载）
 
-![5](./img/5.png)
+![5](./img/5.webp)
 
 
 
@@ -365,7 +365,7 @@ public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factor
 
 仔细看，还真是。SpringBoot将这些值作为自动配置类导入到容器中，自动配置类就生效
 
-![6](./img/6.png)
+![6](./img/6.webp)
 
 **小结**
 
@@ -375,7 +375,7 @@ public static final String FACTORIES_RESOURCE_LOCATION = "META-INF/spring.factor
 
 ## IDEA 快速构建
 
-![7](./img/7.png)
+![7](./img/7.webp)
 
 默认生成的Spring Boot项目结果
 
@@ -457,7 +457,7 @@ public class Person {
 
 如果使用ConfigurationProperties出现以下错误：
 
-![8](./img/8.png)
+![8](./img/8.webp)
 
 解决方案：导入配置文件处理器
 
@@ -483,7 +483,7 @@ Person{lastName='张三', age=18, isBoss=null, birthday=Sun Feb 02 00:00:00 CST 
 
 注：测试类和主类要包名要统一才能启动
 
-![9](./img/9.png)
+![9](./img/9.webp)
 
 **使用SSM和使用SpringBoot的Test功能的对比**
 
@@ -714,7 +714,7 @@ Person{lastName='20b50b74-4721-4d80-a786-f0e726b195f3', age=-790018533, isBoss=n
 
 两种激活方式：创建两个环境 -- 开发/生产
 
-![10](./img/10.png)
+![10](./img/10.webp)
 
 application中写激活哪个：
 
@@ -761,7 +761,7 @@ java -jar 包名 --spring.profiles.active=dev/pro
 
 还可以使用IDEA的虚拟环境激活
 
-![11](./img/11.png)
+![11](./img/11.webp)
 
 
 
@@ -769,25 +769,25 @@ java -jar 包名 --spring.profiles.active=dev/pro
 
 测试**类路径下**（port:8080）和**类路径的config**文件夹下（port:8081）：
 
-![12](./img/12.png)
+![12](./img/12.webp)
 
-![12.1](./img/12.1.png)
+![12.1](./img/12.1.webp)
 
 
 
 前两个同时存在，再把一个端口为8083的文件放在**根目录下**：
 
-![13](./img/13.png)
+![13](./img/13.webp)
 
-![13.1](./img/13.1.png)
+![13.1](./img/13.1.webp)
 
 
 
 前三个同时存在，把这个文件放到**根目录下的config**（端口为8084）：
 
-![14](./img/14.png)
+![14](./img/14.webp)
 
-![14.1](./img/14.1.png)
+![14.1](./img/14.1.webp)
 
 **小结**:优先级由高到低
 -file:./config > -file:./ > -classpath:/config/ > -classpath:/
@@ -802,9 +802,9 @@ server:
     context-path: /admin
 ```
 
-![15](./img/15.png)
+![15](./img/15.webp)
 
-![16](./img/16.png)
+![16](./img/16.webp)
 
 **运维配置**
 还可以使用命令行：
@@ -896,11 +896,11 @@ public CharacterEncodingFilter characterEncodingFilter() {
 
 这个方法在**ServerProperties**中，而自动配置实现了**@EnableConfigurationProperties(ServerProperties.class)**
 
-![17](./img/17.png)
+![17](./img/17.webp)
 
 主配置文件就可以写
 
-![18](./img/18.png)
+![18](./img/18.webp)
 
 ### 小结
 
@@ -930,11 +930,11 @@ SpringBoot 启动的时候加载主配置类，开启了自动配置功能 @Enab
 
 开启SpringBoot debug查看使用了哪些配置类
 
-![19](./img/19.png)
+![19](./img/19.webp)
 
 以及没有启动的
 
-![20](./img/20.png)
+![20](./img/20.webp)
 
 
 
@@ -944,7 +944,7 @@ SpringBoot 启动的时候加载主配置类，开启了自动配置功能 @Enab
 
 SL4J的几种实现方式：
 
-![21](./img/21.png)
+![21](./img/21.webp)
 
 
 
@@ -958,17 +958,17 @@ Hibernate（jboss-logging）
 
 转换方式如下：
 
-![22](./img/22.png)
+![22](./img/22.webp)
 
 
 
 ### SpringBoot和日志关系
 
-![23](./img/23.png)
+![23](./img/23.webp)
 
 SpringBoot使用spring-boot-starter-logging来记录日志
 
-![24](./img/24.png)
+![24](./img/24.webp)
 
 ### 日志的配置
 
@@ -981,7 +981,7 @@ SpringBoot使用spring-boot-starter-logging来记录日志
 logging.file.path=/springLog/log
 ```
 
-![25](./img/25.png)
+![25](./img/25.webp)
 
 日志输出格式控制：
 
@@ -1018,7 +1018,7 @@ logging.pattern.file=%d{yyyy-MM-dd} === [%thread] === %-5level === %logger{50} =
 
 在类路径下直接指定：logback.xml logback-spring.xml log4j2-spring.xml log4j2.xml
 
-![26](./img/26.png)
+![26](./img/26.webp)
 
 logback.xml：直接被日志框架识别
 
@@ -1082,12 +1082,12 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 </dependency>
 ```
 
-![27](./img/27.png)
+![27](./img/27.webp)
 
 路径是在：org\webjars\jquery\3.5.1\jquery-3.5.1.jar!\META-INF\resources\webjars\jquery\3.5.1\jquery.js
 网页访问路径：http://localhost:8080/webjars/jquery/3.5.1/jquery.js
 
-![28](./img/28.png)
+![28](./img/28.webp)
 
 2. 可以设置静态资源的有关参数：（ResourceProperties.class）
 
@@ -1112,7 +1112,7 @@ public class ResourceProperties {
 
 例如添加一个资源包：
 
-![29](./img/29.png)
+![29](./img/29.webp)
 
 **网页访问路径：http://localhost:8080/asserts/js/Chart.min.js**
 
@@ -1168,7 +1168,7 @@ public class ThymeleafProperties {
 
 **注：**Controller中的@RequestMapping("/su")不能和return"xx"重复
 
-![30](./img/30.png)
+![30](./img/30.webp)
 
 
 
@@ -1288,7 +1288,7 @@ public class SpringbootCrudApplication {
 
 在doDispatch进行调试：即可看见
 
-![31](./img/31.png)
+![31](./img/31.webp)
 
 ### HttpMessageConverters
 
@@ -1397,7 +1397,7 @@ public OrderedHiddenHttpMethodFilter hiddenHttpMethodFilter() {
 public class MyMvcConfig implements WebMvcConfigurer {
 ```
 
-![32](./img/32.png)
+![32](./img/32.webp)
 
 比如使用SpringMVC的Controller：
 
@@ -1442,7 +1442,7 @@ public void setConfigurers(List<WebMvcConfigurer> configurers) {
 
 当然，下面也有很多方法：
 
-![33](./img/33.png)
+![33](./img/33.webp)
 
 
 
@@ -1525,19 +1525,19 @@ public class WebMvcAutoConfiguration {
 中文：xxx_zh_CN.properties
 English：xxx_en_US.properties
 
-![34](./img/34.png)
+![34](./img/34.webp)
 
 IDEA快速创建国际化文件：
 
-![35](./img/35.png)
+![35](./img/35.webp)
 
 可以切换视图快速开发国际化
 
-![36](./img/36.png)
+![36](./img/36.webp)
 
 然后就可以多个文件开发：
 
-![37](./img/37.png)
+![37](./img/37.webp)
 
 SpringBoot使用MessageSourceAutoConfiguration自动配置了管理国际化的组件：
 
@@ -1581,7 +1581,7 @@ spring.messages.basename=i18n/login
 
 ### 使用thymeleaf国际化
 
-![38](./img/38.png)
+![38](./img/38.webp)
 
 ### SpringBoot区域信息解析器
 
@@ -1740,7 +1740,7 @@ public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
 如果访问了没有的路径网页会：
 
-![39](./img/39.png)
+![39](./img/39.webp)
 
 其他客户端会发送json数据：
 
@@ -1807,7 +1807,7 @@ public class BasicErrorController extends AbstractErrorController {
 
 产生HTML类型的数据
 
-![40](./img/40.png)
+![40](./img/40.webp)
 
 ```java
 @RequestMapping(produces = MediaType.TEXT_HTML_VALUE)
@@ -1824,7 +1824,7 @@ public ModelAndView errorHtml(HttpServletRequest request, HttpServletResponse re
 
 产生JSON数据
 
-![41](./img/41.png)
+![41](./img/41.webp)
 
 ```java
 @RequestMapping
@@ -1898,7 +1898,7 @@ private ModelAndView resolve(String viewName, Map<String, Object> model) {
 定制错误页面
 直接把文件放到error文件夹下，名字为4xx，5xx即可
 
-![42](./img/42.png)
+![42](./img/42.webp)
 
 当发生错误页面的时候可以获取错误页面的信息（有模板引擎情况下）：
 timestamp 时间戳
@@ -1908,7 +1908,7 @@ exception 异常对象
 message 异常消息
 errors JSR303 数据校验的错误
 
-![43](./img/43.png)
+![43](./img/43.webp)
 
 
 
@@ -2007,7 +2007,7 @@ public interface RequestAttributes {
     int SCOPE_SESSION = 1;
 ```
 
-![44](./img/44.png)
+![44](./img/44.webp)
 
 
 
@@ -2169,11 +2169,11 @@ public class MyServerConfig {
 - Undertow（不支持JSP）
 - Tomcat（默认）
 
-![45](./img/45.png)
+![45](./img/45.webp)
 
 切换容器的方式：
 
-![46](./img/46.png)
+![46](./img/46.webp)
 
 
 
@@ -2245,7 +2245,7 @@ class ServletWebServerFactoryConfiguration {
 
 三个实现类都继承自抽象基类AbstractServletWebServerFactory：
 
-![47](./img/47.png)
+![47](./img/47.webp)
 
 
 
@@ -2287,7 +2287,7 @@ protected TomcatWebServer getTomcatWebServer(Tomcat tomcat) {
 
 通过进入TomcatWebServer的initialize方法就可以看到启动容器
 
-![48](./img/48.png)
+![48](./img/48.webp)
 
 
 
@@ -2387,19 +2387,19 @@ private Collection<WebServerFactoryCustomizer<?>> getCustomizers() {
 
 断点声明：
 
-![49](./img/49.png)
+![49](./img/49.webp)
 
 首先启动SpringBoot
 
-![50](./img/50.png)
+![50](./img/50.webp)
 
 然后调用run方法：
 
-![51](./img/51.png)
+![51](./img/51.webp)
 
 创建和刷新容器
 
-![52](./img/52.png)
+![52](./img/52.webp)
 
 查看是如何创建容器的：
 
@@ -2440,27 +2440,27 @@ protected ConfigurableApplicationContext createApplicationContext() {
 
 主要是刷新IOC容器
 
-![53](./img/53.png)
+![53](./img/53.webp)
 
 刷新IOC容器
 
-![54](./img/54.png)
+![54](./img/54.webp)
 
 以此类推
 
-![55](./img/55.png)
+![55](./img/55.webp)
 
-![56](./img/56.png)
+![56](./img/56.webp)
 
-![57](./img/57.png)
+![57](./img/57.webp)
 
 然后就创建嵌入式的servlet容器：
 
-![58](./img/58.png)
+![58](./img/58.webp)
 
 然后就获取到了嵌入式servlet容器
 
-![59](./img/59.png)
+![59](./img/59.webp)
 
 **小结**：IOC容器启动创建嵌入式的servlet容器
 
@@ -2641,7 +2641,7 @@ public class DruidConfig {
 
 然后就可以看见查询的信息：
 
-![60](./img/60.png)
+![60](./img/60.webp)
 
 
 
@@ -2678,7 +2678,7 @@ spring:
       web-stat-filter:
         enabled: true
         url-pattern: /*
-        exclusions: /druid/*,*.js,*.gif,*.jpg,*.bmp,*.png,*.css,*.ico
+        exclusions: /druid/*,*.js,*.gif,*.webp,*.bmp,*.webp,*.css,*.ico
         session-stat-enable: true
         session-stat-max-count: 10
       stat-view-servlet:
@@ -2799,7 +2799,7 @@ public class SpringbootMybatis01Application {
 
 创建Mybatis目录结构：
 
-![61](./img/61.png)
+![61](./img/61.webp)
 
 Mybatis主配置environment可以什么都不写：
 
@@ -2993,7 +2993,7 @@ private ConfigurableEnvironment prepareEnvironment(SpringApplicationRunListeners
 
 可以看到放行Banner后出现：
 
-![63](./img/63.png)
+![63](./img/63.webp)
 
 然后看**createApplicationContext**：决定创建
 
@@ -3251,17 +3251,17 @@ org.springframework.boot.autoconfigure.
 
 推荐命名：xxx-spring-boot-starter
 
-![64](./img/64.jpg)
+![64](./img/64.webp)
 
 创建一个空工程
 
 创建一个model
 
-![65](./img/65.png)
+![65](./img/65.webp)
 
 创建一个springbootInitialize
 
-![66](./img/66.png)
+![66](./img/66.webp)
 
 
 
@@ -3269,7 +3269,7 @@ org.springframework.boot.autoconfigure.
 
 应用--缓存--数据库的关系
 
-![67](./img/67.png)
+![67](./img/67.webp)
 
 几个重要的缓存注解：
 
@@ -3428,7 +3428,7 @@ static class CacheConfigurationImportSelector implements ImportSelector {
 
 主要是导入了这几个组件：默认使用的是 -- SimpleCacheConfiguration
 
-![68](./img/68.png)
+![68](./img/68.webp)
 
 **SimpleCacheConfiguration**：给容器中注册了一个cacheManager
 
@@ -3494,7 +3494,7 @@ protected Object lookup(Object key) {
 public Cache getCache(String name) {
 ```
 
-![69](./img/69.png)
+![69](./img/69.webp)
 
 2. Cache查找缓存的内容，使用一个key -- 默认是方法的参数，
 
@@ -3530,7 +3530,7 @@ protected Object generateKey(@Nullable Object result) {
 }
 ```
 
-![70](./img/70.png)
+![70](./img/70.webp)
 
 查询缓存的方法：（AbstractValueAdaptingCache.class）
 
@@ -3551,7 +3551,7 @@ protected Object lookup(Object key) {
 }
 ```
 
-![71](./img/71.png)
+![71](./img/71.webp)
 
 4. 将目标方法返回的结果，放进缓存中
 
@@ -3562,7 +3562,7 @@ public void put(Object key, @Nullable Object value) {
 }
 ```
 
-![72](./img/72.png)
+![72](./img/72.webp)
 
 第二次再访问时：lookup和getCache都会被访问到
 
@@ -3596,7 +3596,7 @@ public class SimpleKeyGenerator implements KeyGenerator {
     }
 ```
 
-![73](./img/73.png)
+![73](./img/73.webp)
 
 
 
@@ -3610,7 +3610,7 @@ createConcurrentMapCache -> lookup根据key(key有生成策略)查找缓存的�
 
 2. 第二次访问
 
-![74](./img/74.png)
+![74](./img/74.webp)
 
 Cache cache = this.cacheMap.get(name);调回缓存的数据-> 返回方法
 
@@ -3646,9 +3646,9 @@ Cache cache = this.cacheMap.get(name);调回缓存的数据-> 返回方法
 public Employee getEmp(Integer id) {
 ```
 
-![75](./img/75.png)
+![75](./img/75.webp)
 
-![76](./img/76.png)
+![76](./img/76.webp)
 
 
 
@@ -3786,7 +3786,7 @@ public void test02() {
 }
 ```
 
-![77](./img/77.png)
+![77](./img/77.webp)
 
 
 
@@ -3815,7 +3815,7 @@ public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) 
 }
 ```
 
-![78](./img/78.png)
+![78](./img/78.webp)
 
 有两种调用方式：
 
@@ -3844,7 +3844,7 @@ public Department getDeptById(Integer id) {
 }
 ```
 
-![79](./img/79.png)
+![79](./img/79.webp)
 
 
 
@@ -4007,7 +4007,7 @@ http.formLogin().usernameParameter("user").passwordParameter("pwd")
 
 Shiro的功能框架图：
 
-![80](./img/80.png)
+![80](./img/80.webp)
 
 导包：
 
@@ -4021,7 +4021,7 @@ Shiro的功能框架图：
 
 测试环境设置（省略跳转网页的controller）：
 
-![81](./img/81.png)
+![81](./img/81.webp)
 
 注：使用Thymeleaf模板的时候需要用到跳转页面@{}注意，如：th:href="@{/alogin}"，里面内容需要是controller的内容
 
@@ -4180,7 +4180,7 @@ public ResultMap logout() {
 
 项目结构：和security测试的时候一致
 
-![82](./img/82.png)
+![82](./img/82.webp)
 
 同样的配置类：（加入了MD5盐值加密算法）
 

@@ -602,7 +602,7 @@ com.yourpackage.YourAutoConfigurationClass
 我们每创建一个 database（数据库） 都会在 /var/lib/mysql/ 目录里面创建一个以 database 为名的目录，然后保存表结构和表数据的文件都会存放在这个目录里。
 
 比如，我这里有一个名为 my_test 的 database，该 database 里有一张名为 t_order 数据库表。
-![](./giant_images/641.png)
+![](./giant_images/641.webp)
 然后，我们进入 /var/lib/mysql/my_test 目录，看看里面有什么文件？
 ```java
 [root ~]#ls /var/lib/mysql/my_test
@@ -685,10 +685,10 @@ SELECT `name`, `age`, `address` FROM `tbl_user` WHERE `name` = 'John' AND `age` 
 
 图示：
 在没有使用覆盖索引，数据库查询数据是这样：
-![](./giant_images/n1ql-query-workflow.png)
+![](./giant_images/n1ql-query-workflow.webp)
 
 使用了覆盖索引避免了从数据服务中获取数据的额外步骤。这导致了相当大的性能改进。
-![](./giant_images/n1ql-query-workflow-cover-idx.png)
+![](./giant_images/n1ql-query-workflow-cover-idx.webp)
 
 > 参考文献：
 > - https://stackoverflow.com/questions/62137/what-is-a-covered-index 什么是覆盖索引？
@@ -1119,7 +1119,7 @@ Redis RDB的工作原理是：
 > - 其中`&old_obj`是现在有一个年轻代指针的对象的地址（它已经在寄存器中，因为它刚刚被确定引用旧对象）。 在次要GC期间，垃圾收集器查看卡表以确定要扫描哪些堆区域以查找年轻指针。
 > 	- for i from 0 to (heap_size >> K):
 > 	- if card_table[i]: scan heap[i << K .. (i + 1) << K] for young pointers
-> ![card-table](./giant_images/v2-8cec22d735be76cd4a140ac30513ca49_b.jpg)
+> 	![card-table](./giant_images/v2-8cec22d735be76cd4a140ac30513ca49_b.webp)
 
 卡表将老年代的内存分为多个小块（通常为512字节），每个小块对应卡表中的一项，当老年代中的某个小块内存**被修改时**（例如年轻代的对象引用了该小块中的某个对象），对应的卡表项就被标记为 **"脏（dirty）"** 。
 
@@ -1363,7 +1363,7 @@ Dubbo 的请求处理流程如下：
 
 ## 🌐 计算机网络
 ### http协议的报文的格式有了解吗？
-![](./giant_images/640.png)
+![](./giant_images/640.webp)
 HTTP 的请求报文分为三个部分：
 
 请求行、首部行、实体主体。
@@ -1667,13 +1667,13 @@ public String test() {
 写：
 - 先更新DB。
 - 然后直接删除cache。
-![](./personal_images/91.jpg)
+![](./personal_images/91.webp)
 
 读：
 - 从cache中读取数据，读取到就直接返回。
 - cache中读取不到的话，就从DB读取返回。
 - 再把数据写到cache中。
-![](./personal_images/92.jpg)
+![](./personal_images/92.webp)
 
 > **如果在写数据的过程中，可以先删除cache，再更新DB吗？**
 > 在写入数据时，采用“先删除缓存，再更新数据库”的策略是一种常见的做法。这种策略被称为"Cache-Aside"模式或"先删后写"策略。

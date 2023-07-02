@@ -39,7 +39,7 @@ category:
 
 常见的内部排序算法有：**插入排序**、**希尔排序**、**选择排序**、**冒泡排序**、**归并排序**、**快速排序**、**堆排序**、**基数排序**等，本文只讲解内部排序算法。用一张图概括：
 
-![十大排序算法](./personal_images/sort1.png)
+![十大排序算法](./personal_images/sort1.webp)
 
 **图片名词解释：**
 
@@ -61,7 +61,7 @@ category:
 
 十种常见排序算法可以分类两大类别：**比较类排序**和**非比较类排序**。
 
-![1658302145982](./personal_images/1658302145982.png)
+![1658302145982](./personal_images/1658302145982.webp)
 
 常见的**快速排序**、**归并排序**、**堆排序**以及**冒泡排序**等都属于**比较类排序算法**。比较类排序是通过比较来决定元素间的相对次序，由于其时间复杂度不能突破 `O(nlogn)`，因此也称为非线性时间比较类排序。在冒泡排序之类的排序中，问题规模为 `n`，又因为需要比较 `n` 次，所以平均时间复杂度为 `O(n²)`。在**归并排序**、**快速排序**之类的排序中，问题规模通过**分治法**消减为 `logn` 次，所以时间复杂度平均 `O(nlogn)`。
 
@@ -237,7 +237,7 @@ public static int[] insertionSort(int[] arr) {
 - 按增量序列个数 k，对序列进行 k 趟排序；
 - 每趟排序，根据对应的增量 `t`，将待排序列分割成若干长度为 `m` 的子序列，分别对各子表进行直接插入排序。仅增量因子为 1 时，整个序列作为一个表来处理，表长度即为整个序列的长度。
 
-![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/shell_sort.png)
+![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/shell_sort.webp)
 
 ###### 代码实现
 

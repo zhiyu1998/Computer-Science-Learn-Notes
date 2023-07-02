@@ -61,19 +61,19 @@ category:
 
 **SpringData只需写接口就可以完成增删改查、分页操作等**
 
-![](./JpaImg/56.png)
+![](./JpaImg/56.webp)
 
 ## Hibernate JPA
 
 要求必须在类路径下创建META-INF文件夹下的xml文件：
 
-![](./JpaImg/57.png)
+![](./JpaImg/57.webp)
 
 查看JPA的XML写法：
 
-![](./JpaImg/58.png)
+![](./JpaImg/58.webp)
 
-![](./JpaImg/59.png)
+![](./JpaImg/59.webp)
 
 编写XML的配置：
 
@@ -121,7 +121,7 @@ category:
 
 编写实体类:
 
-![](./JpaImg/60.png)
+![](./JpaImg/60.webp)
 
 
 
@@ -132,7 +132,7 @@ category:
 * @Table: 配置实体类和表的映射关系
 *      name: 配置数据库表的名称
 
-![](./JpaImg/61.png)
+![](./JpaImg/61.webp)
 
 2. 实体类中属性和表中字段的映射关系
  * @Id 声明主键的配置
@@ -147,7 +147,7 @@ category:
  * @Column 配置属性和字段的映射关系
    * name：数据库表中字段的名称
 
-![](./JpaImg/62.png)
+![](./JpaImg/62.webp)
 
  **JPA的操作步骤：**
 
@@ -193,13 +193,13 @@ category:
 
 6. 释放资源
 
-![](./JpaImg/63.png)
+![](./JpaImg/63.webp)
 
 注意：
 
 解决中文乱码问题：更改URL
 
-![](./JpaImg/64.png)
+![](./JpaImg/64.webp)
 
 ### Hibernate JPA的CRUD
 
@@ -207,15 +207,15 @@ category:
 
 使用EntityManager 的 find 和 getReference 对比
 
-![](./JpaImg/65.png)
+![](./JpaImg/65.webp)
 
 #### 删除操作
 
-![](./JpaImg/66.png)
+![](./JpaImg/66.webp)
 
 #### 更新操作
 
-![](./JpaImg/68.png)
+![](./JpaImg/68.webp)
 
 #### JPQL查询
 
@@ -229,27 +229,27 @@ category:
 
 *3.* 查询，并得到返回结果
 
-![](./JpaImg/67.png)
+![](./JpaImg/67.webp)
 
 ##### 查询全部
 
-![](./JpaImg/69.png)
+![](./JpaImg/69.webp)
 
 ##### 倒叙查询
 
-![](./JpaImg/70.png)
+![](./JpaImg/70.webp)
 
 ##### 统计查询
 
-![](./JpaImg/71.png)
+![](./JpaImg/71.webp)
 
 ##### 分页查询
 
-![](./JpaImg/72.png)
+![](./JpaImg/72.webp)
 
 ##### 条件查询
 
-![](./JpaImg/73.png)
+![](./JpaImg/73.webp)
 
 
 
@@ -487,7 +487,7 @@ pom.xml
 
 创建一个实现类：
 
-![](./JpaImg/49.png)
+![](./JpaImg/49.webp)
 
 * 符合SpringJpa的dao层接口规范
   * JpaRepository <操作的实体类类型, 实体类的主键属性的类型>
@@ -500,15 +500,15 @@ public interface CustomerDao extends JpaRepository<Customer, Long>, JpaSpecifica
 }
 ```
 
-![](./JpaImg/50.png)
+![](./JpaImg/50.webp)
 
-![](./JpaImg/51.png)
+![](./JpaImg/51.webp)
 
 ### 功能测试
 
 根据ID查询一个
 
-![](./JpaImg/52.png)
+![](./JpaImg/52.webp)
 
 **save保存或更新**
 
@@ -516,15 +516,15 @@ public interface CustomerDao extends JpaRepository<Customer, Long>, JpaSpecifica
 * 如果没有id主键属性，保存
 * 存在id主键属性，根据id查询数据，更新数据
 
-![](./JpaImg/53.png)
+![](./JpaImg/53.webp)
 
 删除：
 
-![](./JpaImg/54.png)
+![](./JpaImg/54.webp)
 
 查询所有：
 
-![](./JpaImg/55.png)
+![](./JpaImg/55.webp)
 
 小结：
 
@@ -551,24 +551,24 @@ public interface CustomerDao extends JpaRepository<Customer, Long>, JpaSpecifica
 
 以findOne为例分析：
 
-![](./JpaImg/44.png)
+![](./JpaImg/44.webp)
 
 继承了动态代理：InvocationHandler
 生成的代理对象是：SimpleJpaRepository
 
-![](./JpaImg/45.png)
+![](./JpaImg/45.webp)
 
 SimpleJpaRepository 对基本的JPA增删改查进行了封装
 
-![](./JpaImg/46.png)
+![](./JpaImg/46.webp)
 
 通过EntityManager进行查询（em）
 
-![](./JpaImg/47.png)
+![](./JpaImg/47.webp)
 
 basepackage：对此包下的DAO接口进行动态代理增强
 
-![](./JpaImg/48.png)
+![](./JpaImg/48.webp)
 
 **小结：**
 
@@ -582,17 +582,17 @@ basepackage：对此包下的DAO接口进行动态代理增强
 
 统计查询：
 
-![](./JpaImg/41.png)
+![](./JpaImg/41.webp)
 
 判断是否存在：
 
-![](./JpaImg/42.png)
+![](./JpaImg/42.webp)
 
 延迟加载getOne
 
 注：需要加上@Transactional注解
 
-![](./JpaImg/43.png)
+![](./JpaImg/43.webp)
 
 
 
@@ -606,11 +606,11 @@ basepackage：对此包下的DAO接口进行动态代理增强
 
 3. 注解 ： @Query
 
-![](./JpaImg/37.png)
+![](./JpaImg/37.webp)
 
-![](./JpaImg/38.png)
+![](./JpaImg/38.webp)
 
-![](./JpaImg/39.png)
+![](./JpaImg/39.webp)
 
 注意：
 
@@ -619,7 +619,7 @@ basepackage：对此包下的DAO接口进行动态代理增强
 * **@Rollback** *设置自动回滚*
   * true | false
 
-![](./JpaImg/40.png)
+![](./JpaImg/40.webp)
 
 
 
@@ -631,13 +631,13 @@ basepackage：对此包下的DAO接口进行动态代理增强
    1. value ：jpql语句 | sql语句
    2. **nativeQuery** ：false（使用jpql查询） | true（使用本地查询：sql查询）是否使用本地查询
 
-![](./JpaImg/34.png)
+![](./JpaImg/34.webp)
 
-![](./JpaImg/35.png)
+![](./JpaImg/35.webp)
 
 ### 条件查询
 
-![](./JpaImg/36.png)
+![](./JpaImg/36.webp)
 
 
 
@@ -650,18 +650,18 @@ findBy+对象中属性的名称（首字母大写）：代表查询
 *      findByCustName -> 根据客户名称查询
 *      在SpingDataJPA的运行阶段：会根据名称进行解析: find from xxx(实体类) 属性名称 where custName = ？
 
-![](./JpaImg/30.png)
+![](./JpaImg/30.webp)
 
-![](./JpaImg/31.png)
+![](./JpaImg/31.webp)
 
 **findBy + 属性名称（根据属性名称进行完成匹配的查询=） + 查询方式（Like | isnull）**：条件查询
 findByCustNameLike
 
-![](./JpaImg/32.png)
+![](./JpaImg/32.webp)
 
 **findBy + 属性名 + 多条件连接符(and | or) + 属性名 + 查询方式**：多条件查询
 
-![](./JpaImg/33.png)
+![](./JpaImg/33.webp)
 
 
 
@@ -811,7 +811,7 @@ list1.forEach(System.out::println);
 
 用法及三个比较重要的方法：
 
-![](./JpaImg/29.png)
+![](./JpaImg/29.webp)
 
 
 
@@ -867,7 +867,7 @@ list1.forEach(System.out::println);
 
 在客户实体类上（一的一方）添加了外键配置,所以对于客户而言,也具备了维护外键的作用
 
-![](./JpaImg/12.png)
+![](./JpaImg/12.webp)
 
 
 
@@ -882,7 +882,7 @@ list1.forEach(System.out::println);
 
 配置外键的过程中，配置到多的一方,就会在多的一方维护外键
 
-![](./JpaImg/13.png)
+![](./JpaImg/13.webp)
 
 (**注**：设置getter和setter)
 
@@ -896,19 +896,19 @@ list1.forEach(System.out::println);
   * create:每次都会创建数据库表
   * pdate:有表不会重新创建,没有表才会重新创建
 
-![](./JpaImg/14.png)
+![](./JpaImg/14.webp)
 
 **测试**
 
-![](./JpaImg/15.png)
+![](./JpaImg/15.webp)
 
 配置客户到联系人：
 
-![](./JpaImg/16.png)
+![](./JpaImg/16.webp)
 
 配置联系人到客户：
 
-![](./JpaImg/17.png)
+![](./JpaImg/17.webp)
 
 多了一条update语句：
 
@@ -916,15 +916,15 @@ list1.forEach(System.out::println);
 
 * 解决：只需要在一的一方放弃维护权即可
 
-![](./JpaImg/18.png)
+![](./JpaImg/18.webp)
 
 **级联删除**
 
-![](./JpaImg/19.png)
+![](./JpaImg/19.webp)
 
-![](./JpaImg/20.png)
+![](./JpaImg/20.webp)
 
-![](./JpaImg/21.png)
+![](./JpaImg/21.webp)
 
 ### 多对多案例
 
@@ -958,29 +958,29 @@ list1.forEach(System.out::println);
       3. inverseJoinColumns 对方对象在中间表的外键
    3. @JoinColumn
 
-![](./JpaImg/22.png)
+![](./JpaImg/22.webp)
 
-![](./JpaImg/23.png)
+![](./JpaImg/23.webp)
 
 放弃维护：
 
-![](./JpaImg/24.png)
+![](./JpaImg/24.webp)
 
 这个roles来源于另外一张表：
 
-![](./JpaImg/25.png)
+![](./JpaImg/25.webp)
 
 **级联操作**
 
-![](./JpaImg/26.png)
+![](./JpaImg/26.webp)
 
 级联添加
 
-![](./JpaImg/27.png)
+![](./JpaImg/27.webp)
 
 级联删除
 
-![](./JpaImg/28.png)
+![](./JpaImg/28.webp)
 
 
 
@@ -1002,46 +1002,46 @@ list1.forEach(System.out::println);
 
 一方查多方：默认延迟加载
 
-![](./JpaImg/8.png)
+![](./JpaImg/8.webp)
 
 更改加载方式：（不推荐使用）
 
-![](./JpaImg/9.png)
+![](./JpaImg/9.webp)
 
-![](./JpaImg/10.png)
+![](./JpaImg/10.webp)
 
 **从多方查询一方（默认立即加载）**
 
-![](./JpaImg/11.png)
+![](./JpaImg/11.webp)
 
 
 
 ## 解决中文乱码问题
 
-![](./JpaImg/1.png)
+![](./JpaImg/1.webp)
 
 ### 数据库检测
 
 使用：**show variables like 'character%';** 检查数据库是否是UTF-8
 如果是：
 
-![](./JpaImg/2.png)
+![](./JpaImg/2.webp)
 
 解决：
 
-![](./JpaImg/3.png)
+![](./JpaImg/3.webp)
 
 设置：
 
-![](./JpaImg/5.png)
+![](./JpaImg/5.webp)
 
-![](./JpaImg/5.png)
+![](./JpaImg/5.webp)
 
-![](./JpaImg/6.png)
+![](./JpaImg/6.webp)
 
 更改完后：
 
-![](./JpaImg/7.png)
+![](./JpaImg/7.webp)
 
 
 

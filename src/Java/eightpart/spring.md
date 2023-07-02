@@ -133,7 +133,7 @@ AOP(Aspect-Oriented Programming:面向切面编程)能够将那些与业务无�
 
 **Spring AOP 就是基于动态代理的**，如果要代理的对象，实现了某个接口，那么Spring AOP会使用**JDK Proxy**，去创建代理对象，而对于没有实现接口的对象，就无法使用 JDK Proxy 去进行代理了，这时候Spring AOP会使用 **Cglib** 生成一个被代理对象的子类来作为代理，如下图所示：
 
-![image-20220616162330096](./personal_images/image-20220616162330096.png)
+![image-20220616162330096](./personal_images/image-20220616162330096.webp)
 
 当然你也可以使用 AspectJ ,Spring AOP 已经集成了AspectJ ，AspectJ 应该算的上是 Java 生态系统中最完整的 AOP 框架了。
 
@@ -262,7 +262,7 @@ Spring 中默认存在以下事件，他们都是对 `ApplicationContextEvent` �
 - `ContextRefreshedEvent`：`ApplicationContext` 初始化或刷新完成后触发的事件;
 - `ContextClosedEvent`：`ApplicationContext` 关闭后触发的事件。
 
-![image-20220616162504520](./personal_images/image-20220616162504520.png)
+![image-20220616162504520](./personal_images/image-20220616162504520.webp)
 
 ###### 事件监听者角色
 
@@ -324,7 +324,7 @@ if(mappedHandler.getHandler() instanceof MultiActionController){
 
 装饰者模式可以动态地给对象添加一些额外的属性或行为。相比于使用继承，装饰者模式更加灵活。简单点儿说就是当我们需要修改原有的功能，但我们又不愿直接去修改原有的代码时，设计一个Decorator套在原有代码外面。其实在 JDK 中就有很多地方用到了装饰者模式，比如 `InputStream`家族，`InputStream` 类下有 `FileInputStream` (读取文件)、`BufferedInputStream` (增加缓存,使读取文件速度大大提升)等子类都在不修改 `InputStream` 代码的情况下扩展了它的功能。
 
-![image-20220616162704781](./personal_images/image-20220616162704781.png)
+![image-20220616162704781](./personal_images/image-20220616162704781.webp)
 
 Spring 中配置 DataSource 的时候，DataSource  可能是不同的数据库和数据源。我们能否根据客户的需求在少修改原有类的代码下动态切换不同的数据源？这个时候就要用到装饰者模式(这一点我自己还没太理解具体原理)。Spring 中用到的包装器模式在类名上含有 `Wrapper`或者 `Decorator`。这些类基本上都是动态地给一个对象添加一些额外的职责
 
@@ -389,7 +389,7 @@ public @interface EnableAutoConfiguration {
 
 我们现在重点分析下AutoConfigurationImportSelector 类到底做了什么？
 AutoConfigurationImportSelector类的继承体系如下：
-![](./personal_images/QQ截图20230626164313.png)
+![](./personal_images/QQ截图20230626164313.webp)
 可以看出，AutoConfigurationImportSelector 类实现了 ImportSelector接口，也就实现了这个接口中的 selectImports方法，该方法主要用于获取所有符合条件的类的全限定类名，这些类需要被加载到 IoC 容器中。
 ```java
 public interface ImportSelector {
@@ -450,14 +450,14 @@ protected boolean isEnabled(AnnotationMetadata metadata) {
 AnnotationAttributes attributes = this.getAttributes(annotationMetadata);
 ```
 
-![](./personal_images/QQ截图20230626171112.png)
+![](./personal_images/QQ截图20230626171112.webp)
 在这段代码中，`AnnotationAttributes attributes = this.getAttributes(annotationMetadata)`用于获取@EnableAutoConfiguration注解中的exclude和excludeName属性。这些属性用于指定要排除的自动配置类，如果存在这些属性，则需要在处理自动配置时将这些自动配置类排除在外（有些情况下，开发者可能不希望使用某些自动配置，默认情况下这些自动配置会被启用。因此，Spring Boot提供了@EnableAutoConfiguration注解的exclude和excludeName属性，以允许开发者排除不需要的自动配置。）
 
 2. 第二段逻辑是：`List<String> configurations = this.getCandidateConfigurations(annotationMetadata, attributes);` 获取需要自动装配的所有配置类，读取META-INF/spring.factories
-![](./personal_images/QQ截图20230626172008.png)
+![](./personal_images/QQ截图20230626172008.webp)
 
 通过在 Spring Boot 中，自动配置类是用于简化应用配置的一种方式。通过在类路径中提供 spring.factories 文件，框架可以自动发现并应用这些配置。spring.factories 文件通常位于 META-INF 目录下，它包含了一系列以键值对形式定义的配置项，示例中是刚刚截图的`第99个配置项（org.springframework.boot.autoconfigure.session.SessionAutoConfiguration）`
-![](./personal_images/Snipaste_2023-06-26_17-29-34.png)
+![](./personal_images/Snipaste_2023-06-26_17-29-34.webp)
 
 3. 第3个逻辑是：`configurations = this.removeDuplicates(configurations);` 去除重复的自动配置类。
 ```java
@@ -476,7 +476,7 @@ protected Set<String> getExclusions(AnnotationMetadata metadata, AnnotationAttri
 4. 第4个逻辑是`this.checkExcludedClasses(configurations, exclusions);` 和 `configurations.removeAll(exclusions);` 获取需要排除的自动配置类、检查 exclusions 中的类是否存在于 configurations 列表中、从 configurations 列表中移除 exclusions 中的类。
 
 5. 第5个逻辑是`configurations = this.getConfigurationClassFilter().filter(configurations);` 对配置类进行过滤（例如，可能会根据条件过滤掉部分配置类）。到这里，配置类只剩下108个，之前240个（是因为我加了其他的包）
-![](./personal_images/Snipaste_2023-06-26_17-40-39.png)
+![](./personal_images/Snipaste_2023-06-26_17-40-39.webp)
 
 7. 第6个逻辑是`this.fireAutoConfigurationImportEvents(configurations, exclusions);`触发自动配置导入事件。fireAutoConfigurationImportEvents 方法负责触发自动配置导入事件。这个方法的主要目的是通知所有注册的 AutoConfigurationImportListener 实例关于自动配置类的导入情况。这可以让开发者在导入自动配置类时执行一些自定义操作，例如记录日志、处理依赖关系等。
 ```java
@@ -517,7 +517,7 @@ AutoConfigurationEntry(Collection<String> configurations, Collection<String> exc
 
 ### 🌟 Spring Bean生命周期
 
-![img](./personal_images/20220709213529.png)
+![img](./personal_images/20220709213529.webp)
 
 首先简要介绍 Spring Bean 和 Spring IoC（控制反转）容器的基本概念。
 
@@ -625,7 +625,7 @@ public class MyComponent {
 
 
 ### 🌟 请描述Spring MVC的工作流程？描述一下 DispatcherServlet 的工作流程？
-![](./personal_images/de6d2b213f112297298f3e223bf08f28.png)
+![](./personal_images/de6d2b213f112297298f3e223bf08f28.webp)
 1. 客户端（浏览器）发送请求， `DispatcherServlet`拦截请求。
 2. `DispatcherServlet` 根据请求信息调用 `HandlerMapping` 。`HandlerMapping` 根据 uri 去匹配查找能处理的 `Handler`（也就是我们平常说的 `Controller` 控制器） ，并会将请求涉及到的拦截器和 `Handler` 一起封装。
 3. `DispatcherServlet` 调用 `HandlerAdapter`适配器执行 `Handler` 。

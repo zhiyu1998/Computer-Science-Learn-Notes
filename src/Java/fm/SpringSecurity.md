@@ -131,11 +131,11 @@ spring:
 
 其中YWRtaW46YWRtaW4=通过Base64解密后可以看出
 
-![](./img/base64.png)
+![](./img/base64.webp)
 
 #### HttpBasic模式的原理说明
 
-![](./img/httpbasic mode.png)
+![](./img/httpbasic mode.webp)
 
 ## Hash算法
 
@@ -294,11 +294,11 @@ public void configure(WebSecurity web) {
 
 登录认证的执行流程
 
-![](./img/authentication_flowpng.png)
+![](./img/authentication_flowpng.webp)
 
 登录认证的细节
 
-![](./img/authentication_detail.png)
+![](./img/authentication_detail.webp)
 
 ### 自定义验证登录处理【重要】
 
@@ -598,7 +598,7 @@ RBAC权限模型核心授权逻辑如下：
 - 某角色具有什么权限？
 - 通过角色的权限推导用户的权限
 
-![image-20210527230359492](https://gitee.com/kyrzy0416/imagebed/raw/master/img/image-20210527230359492.png)
+![image-20210527230359492](https://gitee.com/kyrzy0416/imagebed/raw/master/img/image-20210527230359492.webp)
 
 
 
@@ -882,7 +882,7 @@ public boolean hasPermission(HttpServletRequest request, Authentication authenti
 
 原先在配置类中配置写死的方法就可以去除：
 
-![image-20210529162007567](https://gitee.com/kyrzy0416/imagebed/raw/master/img/image-20210529162007567.png)
+![image-20210529162007567](https://gitee.com/kyrzy0416/imagebed/raw/master/img/image-20210529162007567.webp)
 
 将antMatchers().hasAuthority换为这个SPEL表达式即可：
 
@@ -1026,7 +1026,7 @@ signatureValue = username、expirationTime和passwod和一个预定义的key，�
 
 它有这样的执行流程：
 
-![img](https://gitee.com/kyrzy0416/imagebed/raw/master/img/e97c1601ac0850797df5683349d486ce_1501x327.png)
+![img](https://gitee.com/kyrzy0416/imagebed/raw/master/img/e97c1601ac0850797df5683349d486ce_1501x327.webp)
 
 - 第一次登录请求的时候，用户使用其他验证方式进行登录（如用户名密码），勾选remember-me，并生成RememberMeToken 令牌。
 - 第二次登陆的时候使用RememberMeToken令牌（就不用输入用户名密码了），RememberMeAuthenticationFilter在Spring Security过滤器链中处于整体偏后的位置，所以只有当各种传统的登录方式都无法完成验证的情况下，才走RememberMeAuthenticationFilter，这也是符合实际需求的。
@@ -1050,7 +1050,7 @@ signatureValue = username、expirationTime和passwod和一个预定义的key，�
 
 流程执行图：
 
-![img](https://gitee.com/kyrzy0416/imagebed/raw/master/img/52bfd1be308b140ce4f45df5ad95e23c_1344x517.png)
+![img](https://gitee.com/kyrzy0416/imagebed/raw/master/img/52bfd1be308b140ce4f45df5ad95e23c_1344x517.webp)
 
 1. 首先，我们需要键一张数据库表**persistent_logins**:
 
@@ -1317,7 +1317,7 @@ public class KaptchaController {
         session.setAttribute(MyContent.KAPTCHA_SESSION_KEY, new KaptchaForm(kaptchaText, 2*60));
         try(ServletOutputStream out = response.getOutputStream()) {
             BufferedImage defaultKaptchaImage = kaptchaProducer.createImage(kaptchaText);
-            ImageIO.write(defaultKaptchaImage, "jpg", out);
+            ImageIO.write(defaultKaptchaImage, .webp", out);
             out.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -1343,7 +1343,7 @@ public class KaptchaController {
 
 执行流程图如下：
 
-![img](https://gitee.com/kyrzy0416/imagebed/raw/master/img/e247197a4faf4269d8fb61e914538acf_741x180.png)
+![img](https://gitee.com/kyrzy0416/imagebed/raw/master/img/e247197a4faf4269d8fb61e914538acf_741x180.webp)
 
 - 编写我们的自定义图片验证码过滤器KaptchaCodeFilter，过滤器中拦截登录请求
 - KaptchaCodeFilter过滤器中从seesion获取验证码文字与用户输入比对，比对通过执行其他过滤器链
@@ -1612,7 +1612,7 @@ public class JWTUtil {
 
 * SecurityContextHolder：SecurityContextHolder是Spring Security存储已认证身份的细节。Spring Security 不关心 SecurityContextHolder 是如何填充的。如果它包含一个值，则将其用作当前经过身份验证的用户。指定用户已通过身份验证的最简单方法是直接设置 SecurityContextHolder。
 
-![securitycontextholder](https://gitee.com/kyrzy0416/imagebed/raw/master/img/securitycontextholder.png)
+![securitycontextholder](https://gitee.com/kyrzy0416/imagebed/raw/master/img/securitycontextholder.webp)
 
 * SecurityContext：SecurityContext 是从 SecurityContextHolder 获得的。 SecurityContext 包含一个 Authentication 对象（包含如下信息）
   * 主体（principal） - 标识用户。当使用用户名/密码进行身份验证时，这通常是 UserDetails 的一个实例。 
@@ -1621,7 +1621,7 @@ public class JWTUtil {
 
 认证拦截的流程如下：
 
-![abstractauthenticationprocessingfilter](https://gitee.com/kyrzy0416/imagebed/raw/master/img/abstractauthenticationprocessingfilter.png)
+![abstractauthenticationprocessingfilter](https://gitee.com/kyrzy0416/imagebed/raw/master/img/abstractauthenticationprocessingfilter.webp)
 
 有了这些先行知识，我们就可以在全局配置类中创建一个AuthenticationManager：
 

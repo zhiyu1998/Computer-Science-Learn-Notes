@@ -217,7 +217,7 @@ mybatis的CRUD一般不需要resultType，它自己会自动封装结果
 
 在原来的测试基础上，如果插入要加入SqlSession的commit()，如果要选择自动commit可以把opensession的参数传入true
 
-![347d7348-131c-4cdf-88b2-c168755d3a5c](./images/347d7348-131c-4cdf-88b2-c168755d3a5c.png)
+![347d7348-131c-4cdf-88b2-c168755d3a5c](./images/347d7348-131c-4cdf-88b2-c168755d3a5c.webp)
 
 
 
@@ -225,7 +225,7 @@ mybatis的CRUD一般不需要resultType，它自己会自动封装结果
 
 创建一个properties
 
-![a816b909-abe7-4b77-b8d3-790ccf309654](./images/a816b909-abe7-4b77-b8d3-790ccf309654.png)
+![a816b909-abe7-4b77-b8d3-790ccf309654](./images/a816b909-abe7-4b77-b8d3-790ccf309654.webp)
 
 在主配置文件下加入properties属性，属性名可以使用${}引用
 
@@ -538,7 +538,7 @@ properties?, settings?, typeAliases?, typeHandlers?, objectFactory?, objectWrapp
 
 注意：SQL映射文件名最好和Dao的接口**名字一致**，这样在使用class属性和package标签的时候就不会发生错误。
 
-![bddb3003-8732-43ab-afda-f5bc7f91a340](./images/bddb3003-8732-43ab-afda-f5bc7f91a340.png)
+![bddb3003-8732-43ab-afda-f5bc7f91a340](./images/bddb3003-8732-43ab-afda-f5bc7f91a340.webp)
 
 ## SQL映射 获取自增ID
 
@@ -844,7 +844,7 @@ public class Cat {
 
 数据库中的属性名：
 
-![51b28d1e-dc26-41a1-ad42-818e26e30bd2](./images/51b28d1e-dc26-41a1-ad42-818e26e30bd2.png)
+![51b28d1e-dc26-41a1-ad42-818e26e30bd2](./images/51b28d1e-dc26-41a1-ad42-818e26e30bd2.webp)
 
 在SQL映射中自定义规则：
 
@@ -911,15 +911,15 @@ public class Lock {
 
 两个类的数据库属性：
 
-![f161d369-3eea-48af-bf04-11d9fe4d0c2e](./images/f161d369-3eea-48af-bf04-11d9fe4d0c2e.png)
+![f161d369-3eea-48af-bf04-11d9fe4d0c2e](./images/f161d369-3eea-48af-bf04-11d9fe4d0c2e.webp)
 
 同时映射了外键lockid
 
-![13e6e1c7-f56c-449e-a97d-fe46e6acfd17](./images/13e6e1c7-f56c-449e-a97d-fe46e6acfd17.png)
+![13e6e1c7-f56c-449e-a97d-fe46e6acfd17](./images/13e6e1c7-f56c-449e-a97d-fe46e6acfd17.webp)
 
 
 
-![568320a5-c6af-408f-83f4-d975a17b0799](./images/568320a5-c6af-408f-83f4-d975a17b0799.png)
+![568320a5-c6af-408f-83f4-d975a17b0799](./images/568320a5-c6af-408f-83f4-d975a17b0799.webp)
 
 在SQL映射文件配置
 
@@ -1174,7 +1174,7 @@ DEBUG 07-15 13:19:17,478 <==      Total: 3  (BaseJdbcLogger.java:137)
 
 局部开启：fetchType
 
-![c27b8eb0-8eef-4365-a59d-45217c07602e](./images/c27b8eb0-8eef-4365-a59d-45217c07602e.png)
+![c27b8eb0-8eef-4365-a59d-45217c07602e](./images/c27b8eb0-8eef-4365-a59d-45217c07602e.webp)
 
 
 
@@ -1182,7 +1182,7 @@ DEBUG 07-15 13:19:17,478 <==      Total: 3  (BaseJdbcLogger.java:137)
 
 数据库数据的列：
 
-![998e86f8-661b-4f9f-b1b7-25159c1569fa](./images/998e86f8-661b-4f9f-b1b7-25159c1569fa.png)
+![998e86f8-661b-4f9f-b1b7-25159c1569fa](./images/998e86f8-661b-4f9f-b1b7-25159c1569fa.webp)
 
 实体类的定义：
 
@@ -1530,7 +1530,7 @@ DEBUG 07-15 18:36:46,992 <==      Total: 3  (BaseJdbcLogger.java:137)
 
 一级缓存默认是存在的，只要之前查过的数据，mybatis会保存在一个缓存中（Map），下次获取直接从缓存中拿
 
-![3744fb32-713a-4d73-af86-eff6a47c8266](./images/3744fb32-713a-4d73-af86-eff6a47c8266.png)
+![3744fb32-713a-4d73-af86-eff6a47c8266](./images/3744fb32-713a-4d73-af86-eff6a47c8266.webp)
 
 ### 一级缓存的失效情况
 
@@ -1542,19 +1542,19 @@ DEBUG 07-15 18:36:46,992 <==      Total: 3  (BaseJdbcLogger.java:137)
 
   只有在同一个SqlSession期间查询的数据会保存到这个SqlSession缓存中。
 
-![82f5f462-37ab-48fe-a5c6-f1bcf8547f9b](./images/82f5f462-37ab-48fe-a5c6-f1bcf8547f9b.png)
+![82f5f462-37ab-48fe-a5c6-f1bcf8547f9b](./images/82f5f462-37ab-48fe-a5c6-f1bcf8547f9b.webp)
 
 2. 同一个方法不同的参数
 
-![bd07806c-61c4-424c-99db-0aa5f3d28166](./images/bd07806c-61c4-424c-99db-0aa5f3d28166.png)
+![bd07806c-61c4-424c-99db-0aa5f3d28166](./images/bd07806c-61c4-424c-99db-0aa5f3d28166.webp)
 
 3. 只要在SqlSession期间执行了一次CRUD，就会清空一级缓存
 
-![a9eab4da-e579-415b-aff6-19c3a9c89314](./images/a9eab4da-e579-415b-aff6-19c3a9c89314.png)
+![a9eab4da-e579-415b-aff6-19c3a9c89314](./images/a9eab4da-e579-415b-aff6-19c3a9c89314.webp)
 
 4. 手动清空缓存：使用SqlSession.clearCache();
 
-![6a8cc7cf-39f4-4189-b28d-3f17b968ab13](./images/6a8cc7cf-39f4-4189-b28d-3f17b968ab13.png)
+![6a8cc7cf-39f4-4189-b28d-3f17b968ab13](./images/6a8cc7cf-39f4-4189-b28d-3f17b968ab13.webp)
 
 
 
@@ -1566,19 +1566,19 @@ DEBUG 07-15 18:36:46,992 <==      Total: 3  (BaseJdbcLogger.java:137)
 
 1. 全局配置：开启全局缓存
 
-![24f72b72-160b-471f-89b1-367fad2b21df](./images/24f72b72-160b-471f-89b1-367fad2b21df.png)
+![24f72b72-160b-471f-89b1-367fad2b21df](./images/24f72b72-160b-471f-89b1-367fad2b21df.webp)
 
 2. 哪一个SQL映射要用到二级缓存加入`<cache>` 即可
 
-![55f6f3aa-4ec9-4584-96d8-8128db5bd541](./images/55f6f3aa-4ec9-4584-96d8-8128db5bd541.png)
+![55f6f3aa-4ec9-4584-96d8-8128db5bd541](./images/55f6f3aa-4ec9-4584-96d8-8128db5bd541.webp)
 
 实体类需要序列号：
 
-![a29cc3bf-65db-4ec3-91c2-8c890eaaadfe](./images/a29cc3bf-65db-4ec3-91c2-8c890eaaadfe.png)
+![a29cc3bf-65db-4ec3-91c2-8c890eaaadfe](./images/a29cc3bf-65db-4ec3-91c2-8c890eaaadfe.webp)
 
 测试结果：
 
-![7b49ac50-2710-47c9-a64b-87ec97593dce](./images/7b49ac50-2710-47c9-a64b-87ec97593dce.png)
+![7b49ac50-2710-47c9-a64b-87ec97593dce](./images/7b49ac50-2710-47c9-a64b-87ec97593dce.webp)
 
 
 
@@ -1599,14 +1599,14 @@ DEBUG 07-15 18:36:46,992 <==      Total: 3  (BaseJdbcLogger.java:137)
 
 二级缓存只要一级缓存关闭就能使用
 
-![dc0a195a-51c1-4df7-870d-097c35f1189b](./images/dc0a195a-51c1-4df7-870d-097c35f1189b.jpg)
+![dc0a195a-51c1-4df7-870d-097c35f1189b](./images/dc0a195a-51c1-4df7-870d-097c35f1189b.webp)
 
 
 
 ## 缓存的属性
 
-局部使用二级缓存的属性**useCache**![f5de420f-5c18-4cb4-b049-ea9c4083ad27](./images/f5de420f-5c18-4cb4-b049-ea9c4083ad27.png)
+局部使用二级缓存的属性**useCache**![f5de420f-5c18-4cb4-b049-ea9c4083ad27](./images/f5de420f-5c18-4cb4-b049-ea9c4083ad27.webp)
 
 增删改的**flushCache** 默认是true，会清空一级缓存和二级缓存
 
-查询默认是false![8d60fb00-9212-4f2c-89a8-8ac092b4ca56](./images/8d60fb00-9212-4f2c-89a8-8ac092b4ca56.png)
+查询默认是false![8d60fb00-9212-4f2c-89a8-8ac092b4ca56](./images/8d60fb00-9212-4f2c-89a8-8ac092b4ca56.webp)

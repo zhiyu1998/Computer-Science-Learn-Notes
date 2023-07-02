@@ -67,7 +67,7 @@ val f:Long = e.toLong()
 
 Java没有，但是kotlin有
 
-![image-20220809110526087](./images/image-20220809110526087.png)
+![image-20220809110526087](./images/image-20220809110526087.webp)
 
 
 
@@ -102,7 +102,7 @@ println(k==m)
 
 ### 数组
 
-![image-20220809171520308](./images/image-20220809171520308.png)
+![image-20220809171520308](./images/image-20220809171520308.webp)
 
 
 
@@ -275,7 +275,7 @@ for(i in array.indices) {
 
 ### 集合
 
-![image-20220810163454521](./images/image-20220810163454521.png)
+![image-20220810163454521](./images/image-20220810163454521.webp)
 
 #### List
 
@@ -300,7 +300,7 @@ val stringList = ArrayList<String>()
 
 那么它是如何实现创建集合和Java一样的呢？**类型别名**
 
-![image-20220810194304356](./images/image-20220810194304356.png)
+![image-20220810194304356](./images/image-20220810194304356.webp)
 
 
 
@@ -400,7 +400,7 @@ val (x, y) = pair
 
 结构如下：
 
-![image-20220810235032740](./images/image-20220810235032740.png)
+![image-20220810235032740](./images/image-20220810235032740.webp)
 
 
 
@@ -1063,7 +1063,7 @@ nonLocalReturn{
 
 #### 几个有用的高阶函数
 
-![image-20220919172117338](./images/image-20220919172117338.png)
+![image-20220919172117338](./images/image-20220919172117338.webp)
 
 
 
@@ -1109,7 +1109,7 @@ list.filter { it * 2 + 1 }
 
 ##### flatMap
 
-![image-20220919174842822](./images/image-20220919174842822.png)
+![image-20220919174842822](./images/image-20220919174842822.webp)
 
 Java
 
@@ -1135,7 +1135,7 @@ list.flatMap { 0 until it }.forEach(::print)
 
 ##### fold
 
-![image-20220919175051480](./images/image-20220919175051480.png)
+![image-20220919175051480](./images/image-20220919175051480.webp)
 
 
 
@@ -1151,7 +1151,7 @@ Kotlin
 
 - 一个参数类型为只有一个方法的Java接口的Java方法调用时可用Lambda表达式做转换作为参数
 
-![image-20220920091657937](./images/image-20220920091657937.png)
+![image-20220920091657937](./images/image-20220920091657937.webp)
 
 
 
@@ -1493,7 +1493,7 @@ data class Pair<out A, out B> (
 
 Java Bean & data class
 
-![image-20220924133546730](./images/image-20220924133546730.png)
+![image-20220924133546730](./images/image-20220924133546730.webp)
 
 
 
@@ -1666,7 +1666,7 @@ sealed class PlayerState {
 
 #### 密封类&枚举类区别
 
-![image-20220924135345615](./images/image-20220924135345615.png)
+![image-20220924135345615](./images/image-20220924135345615.webp)
 
 
 
@@ -1788,7 +1788,7 @@ inline class State(val ordinal: Int) {
 
 #### 对比typealias
 
-![image-20220924141434215](./images/image-20220924141434215.png)
+![image-20220924141434215](./images/image-20220924141434215.webp)
 
 
 
@@ -1929,7 +1929,7 @@ public interface Function2<in P1, in P2, out R> : Function<R> {
 
 Java、kotlin使用类型擦除
 
-![QQ截图20220924192536](./images/QQ%E6%88%AA%E5%9B%BE20220924192536.png)
+![QQ截图20220924192536](./images/QQ%E6%88%AA%E5%9B%BE20220924192536.webp)
 
 
 
@@ -1939,7 +1939,7 @@ Java、kotlin使用类型擦除
 
 ### 反射
 
-![image-20220925112803220](./images/image-20220925112803220.png)
+![image-20220925112803220](./images/image-20220925112803220.webp)
 
 Gradle引入
 
@@ -1960,7 +1960,7 @@ Maven引入
 
 与Java对比反射
 
-![image-20220925113035776](./images/image-20220925113035776.png)
+![image-20220925113035776](./images/image-20220925113035776.webp)
 
 Java反射
 

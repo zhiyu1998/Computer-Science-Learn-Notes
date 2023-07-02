@@ -165,7 +165,7 @@ public class MyFirstController {
 
 如果**不用 ` <init-param> </init-param>`** 指定配置文件，它会在WEB-INF下找到**`<servlet-name>springmvc</servlet-name>`**的springmvc-servlet：
 
-![d02c1842-8ae0-48fa-969d-046b41e75649](./images/d02c1842-8ae0-48fa-969d-046b41e75649.png)
+![d02c1842-8ae0-48fa-969d-046b41e75649](./images/d02c1842-8ae0-48fa-969d-046b41e75649.webp)
 
 ### **细节补充：**
 
@@ -400,7 +400,7 @@ public class Book {
 
 **注意：**这个字符过滤器的配置必须在之前：
 
-![60a719d2-b67c-473a-9250-cdd72fe9ed7f](./images/60a719d2-b67c-473a-9250-cdd72fe9ed7f.png)
+![60a719d2-b67c-473a-9250-cdd72fe9ed7f](./images/60a719d2-b67c-473a-9250-cdd72fe9ed7f.webp)
 
 
 
@@ -481,9 +481,9 @@ Map、Model、ModelMap最终都是绑定在类**BindingAwareModelMap**工作
 
 BindingAwareModelMap保存的数据都会放在**请求域**中
 
-![dcaf2c6b-62e3-4ad3-aea9-023b5fa4e2f9](./images/dcaf2c6b-62e3-4ad3-aea9-023b5fa4e2f9.png)
+![dcaf2c6b-62e3-4ad3-aea9-023b5fa4e2f9](./images/dcaf2c6b-62e3-4ad3-aea9-023b5fa4e2f9.webp)
 
-![c7d7120d-838d-407a-bbdd-b8bd10f973e1](./images/c7d7120d-838d-407a-bbdd-b8bd10f973e1.png)
+![c7d7120d-838d-407a-bbdd-b8bd10f973e1](./images/c7d7120d-838d-407a-bbdd-b8bd10f973e1.webp)
 
 
 
@@ -566,11 +566,11 @@ JSP：
 
 结果：
 
-![bedf1aaf-1c86-4752-89e6-f34aa9e676a7](./images/bedf1aaf-1c86-4752-89e6-f34aa9e676a7.png)
+![bedf1aaf-1c86-4752-89e6-f34aa9e676a7](./images/bedf1aaf-1c86-4752-89e6-f34aa9e676a7.webp)
 
 示例及大致流程：
 
-![58e5812e-ea1a-4f60-ac50-c32ded039116](./images/58e5812e-ea1a-4f60-ac50-c32ded039116.jpg)
+![58e5812e-ea1a-4f60-ac50-c32ded039116](./images/58e5812e-ea1a-4f60-ac50-c32ded039116.webp)
 
 ```java
 @Controller
@@ -625,11 +625,11 @@ public class Hello2ModelController {
 
 整个DispatcherServlet的继承关系
 
-![c5dcc2fc-399c-498d-a90a-3b2410e77ad0](./images/c5dcc2fc-399c-498d-a90a-3b2410e77ad0.png)
+![c5dcc2fc-399c-498d-a90a-3b2410e77ad0](./images/c5dcc2fc-399c-498d-a90a-3b2410e77ad0.webp)
 
 FrameworkServlet有两个核心方法：
 
-![d8cbf0f3-1499-4346-9bc4-785715c6c9bf](./images/d8cbf0f3-1499-4346-9bc4-785715c6c9bf.png)
+![d8cbf0f3-1499-4346-9bc4-785715c6c9bf](./images/d8cbf0f3-1499-4346-9bc4-785715c6c9bf.webp)
 
 核心使用了同一个函数：**processRequest(request, response);**
 
@@ -641,7 +641,7 @@ FrameworkServlet有两个核心方法：
 protected abstract void doService(HttpServletRequest request, HttpServletResponse response)
 ```
 
-![2cc5c063-a656-43b5-9010-c6169a701315](./images/2cc5c063-a656-43b5-9010-c6169a701315.png)
+![2cc5c063-a656-43b5-9010-c6169a701315](./images/2cc5c063-a656-43b5-9010-c6169a701315.webp)
 
 然后可以根据继承关系找到DispatcherServlet的doService：
 
@@ -658,7 +658,7 @@ protected void doDispatch(HttpServletRequest request, HttpServletResponse respon
 
 整理路线：
 
-![62719fbd-be8a-4cd9-b2e0-214e5ea6713a](./images/62719fbd-be8a-4cd9-b2e0-214e5ea6713a.jpg)
+![62719fbd-be8a-4cd9-b2e0-214e5ea6713a](./images/62719fbd-be8a-4cd9-b2e0-214e5ea6713a.webp)
 
 ### doDispatch的详细细节
 
@@ -770,7 +770,7 @@ protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Ex
 
 **handlerMap**：IOC容器启动Controller对象的时候扫描每个处理器能处理什么请求，保存在handlerMappings的handlerMap属性（**spring5封装到了mappingRegistry -- mappingLookup**）
 
-![f336e49d-82de-40ff-b436-9c99be23911e](./images/f336e49d-82de-40ff-b436-9c99be23911e.png)
+![f336e49d-82de-40ff-b436-9c99be23911e](./images/f336e49d-82de-40ff-b436-9c99be23911e.webp)
 
 ### getHandlerAdapter
 
@@ -778,7 +778,7 @@ protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Ex
 
 这是通过调用IndexController里的“/success”得到的：
 
-![2d3fe640-021a-433f-bfae-e87d80be5282](./images/2d3fe640-021a-433f-bfae-e87d80be5282.png)
+![2d3fe640-021a-433f-bfae-e87d80be5282](./images/2d3fe640-021a-433f-bfae-e87d80be5282.webp)
 
 可知返回的resultHandler就是这个
 
@@ -800,11 +800,11 @@ protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletExcepti
 
 调试时只有RequestMappingHandlerAdapter：
 
-![3139a90f-126a-4f1f-8f9e-be791104d915](./images/3139a90f-126a-4f1f-8f9e-be791104d915.png)
+![3139a90f-126a-4f1f-8f9e-be791104d915](./images/3139a90f-126a-4f1f-8f9e-be791104d915.webp)
 
 判断该适配器是否有方法：
 
-![e161f130-f694-493d-b88c-d5edd5c60d74](./images/e161f130-f694-493d-b88c-d5edd5c60d74.png)
+![e161f130-f694-493d-b88c-d5edd5c60d74](./images/e161f130-f694-493d-b88c-d5edd5c60d74.webp)
 
 ```java
 // Process last-modified header, if supported by the handler.
@@ -815,7 +815,7 @@ String method = request.getMethod();
 
 HandlerMapping的实现类：
 
-![5c5d0e95-e1e9-4aec-951e-8ee90a9b9ab1](./images/5c5d0e95-e1e9-4aec-951e-8ee90a9b9ab1.png)
+![5c5d0e95-e1e9-4aec-951e-8ee90a9b9ab1](./images/5c5d0e95-e1e9-4aec-951e-8ee90a9b9ab1.webp)
 
 
 
@@ -877,7 +877,7 @@ protected void initStrategies(ApplicationContext context) {
     }
 ```
 
-![4d99f2f0-fa40-407e-a576-b964fbd6f2ec](./images/4d99f2f0-fa40-407e-a576-b964fbd6f2ec.png)
+![4d99f2f0-fa40-407e-a576-b964fbd6f2ec](./images/4d99f2f0-fa40-407e-a576-b964fbd6f2ec.webp)
 
 
 
@@ -972,7 +972,7 @@ View view;
 
 resolveViewName实现的是ViewResolver的接口：得到View对象
 
-![470324c1-604a-451e-90d8-a3a85e3cb924](./images/470324c1-604a-451e-90d8-a3a85e3cb924.png)
+![470324c1-604a-451e-90d8-a3a85e3cb924](./images/470324c1-604a-451e-90d8-a3a85e3cb924.webp)
 
 视图解析名字：ViewResolver属于SpringMVC九大组件
 
@@ -1109,7 +1109,7 @@ protected void renderMergedOutputModel(
 
 视图解析器只是为了得到视图对象，视图对象才能真正的转发（将模型数据放在请求域中）或者重定向到页面，视图对象才能真正的渲染视图
 
-![84be0a06-b3b9-4f4c-9a18-d8b07a1cd1fd](./images/84be0a06-b3b9-4f4c-9a18-d8b07a1cd1fd.jpg)
+![84be0a06-b3b9-4f4c-9a18-d8b07a1cd1fd](./images/84be0a06-b3b9-4f4c-9a18-d8b07a1cd1fd.webp)
 
 
 
@@ -1142,9 +1142,9 @@ protected void renderMergedOutputModel(
 
 创建国际化的配置文件
 
-![527be244-1b29-431e-b444-27acbd4662aa](./images/527be244-1b29-431e-b444-27acbd4662aa.png)
+![527be244-1b29-431e-b444-27acbd4662aa](./images/527be244-1b29-431e-b444-27acbd4662aa.webp)
 
-![4b8d1354-0a77-4cfe-b783-74e2100c9557](./images/4b8d1354-0a77-4cfe-b783-74e2100c9557.png)
+![4b8d1354-0a77-4cfe-b783-74e2100c9557](./images/4b8d1354-0a77-4cfe-b783-74e2100c9557.webp)
 
 使用JSP的jstl的fmt编写国际化：
 
@@ -1380,7 +1380,7 @@ Email
 
 新建国际化文件：
 
-![758ff831-10ad-4957-82bb-ff5e366b12a0](./images/758ff831-10ad-4957-82bb-ff5e366b12a0.png)
+![758ff831-10ad-4957-82bb-ff5e366b12a0](./images/758ff831-10ad-4957-82bb-ff5e366b12a0.webp)
 
 写入配置：
 
@@ -1527,7 +1527,7 @@ public String testRequestBody(@RequestBody(required = false)String content) {
 
 前端：
 
-![043ddbf5-3646-479d-9ee8-cd393241a2b5](./images/043ddbf5-3646-479d-9ee8-cd393241a2b5.png)
+![043ddbf5-3646-479d-9ee8-cd393241a2b5](./images/043ddbf5-3646-479d-9ee8-cd393241a2b5.webp)
 
 控制层：
 
@@ -1650,7 +1650,7 @@ public ResponseEntity<byte[]> download(HttpServletRequest req) throws Exception 
 
 #### HttpMessageConverter
 
-![1cae080e-52fc-484d-90a5-00545933d902](./images/1cae080e-52fc-484d-90a5-00545933d902.png)
+![1cae080e-52fc-484d-90a5-00545933d902](./images/1cae080e-52fc-484d-90a5-00545933d902.webp)
 
 上传表单：
 
@@ -1756,7 +1756,7 @@ public String upload(@RequestParam("username") String username,@RequestParam("pa
 
 拦截器的基本方法：
 
-![915c108f-6487-4d72-bf33-9f6fb18d64b3](./images/915c108f-6487-4d72-bf33-9f6fb18d64b3.png)
+![915c108f-6487-4d72-bf33-9f6fb18d64b3](./images/915c108f-6487-4d72-bf33-9f6fb18d64b3.webp)
 
 preHandle：在目标方法之前调用，返回boolean，return true目标方法放行
 
@@ -1859,7 +1859,7 @@ if (!mappedHandler.applyPreHandle(processedRequest, response)) {
 
 因为在前面的getHander可以获取到三个拦截器（自己写了2个）
 
-![b98ad1e2-9da6-4243-abb3-6e85bd945503](./images/b98ad1e2-9da6-4243-abb3-6e85bd945503.png)
+![b98ad1e2-9da6-4243-abb3-6e85bd945503](./images/b98ad1e2-9da6-4243-abb3-6e85bd945503.webp)
 
 applyPreHandle分析：
 
@@ -1902,7 +1902,7 @@ void applyPostHandle(HttpServletRequest request, HttpServletResponse response, @
 }
 ```
 
-![b43f1b9a-5fd6-41ec-8093-1bfc3ae780c2](./images/b43f1b9a-5fd6-41ec-8093-1bfc3ae780c2.png)
+![b43f1b9a-5fd6-41ec-8093-1bfc3ae780c2](./images/b43f1b9a-5fd6-41ec-8093-1bfc3ae780c2.webp)
 
 processDispatchResult方法：这就是afterCompletion总会执行的原因
 
@@ -1938,15 +1938,15 @@ void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse resp
 
 第一次执行的拦截器是：conversionService interceptorIndex=0
 
-![fc95161b-76f7-4362-aa71-9226b89dba95](./images/fc95161b-76f7-4362-aa71-9226b89dba95.png)
+![fc95161b-76f7-4362-aa71-9226b89dba95](./images/fc95161b-76f7-4362-aa71-9226b89dba95.webp)
 
 第二次执行 FirstInterceptor interceptorIndex =1
 
- ![25a77df8-1bbf-43d4-9cf7-8ee646074596](./images/25a77df8-1bbf-43d4-9cf7-8ee646074596.png)
+ ![25a77df8-1bbf-43d4-9cf7-8ee646074596](./images/25a77df8-1bbf-43d4-9cf7-8ee646074596.webp)
 
 第三次执行：SecondInterceptor interceptorIndex = 2
 
-![fd7b87a8-5706-4a29-bbb0-b44fccd84901](./images/fd7b87a8-5706-4a29-bbb0-b44fccd84901.png)
+![fd7b87a8-5706-4a29-bbb0-b44fccd84901](./images/fd7b87a8-5706-4a29-bbb0-b44fccd84901.webp)
 
 全部执行完，会返回true：
 
@@ -1983,7 +1983,7 @@ public String login(Locale locale) {
 
 ### 自定义国际化文件
 
-![af10972e-aa23-4eae-aaec-40d8de0bd9cb](./images/af10972e-aa23-4eae-aaec-40d8de0bd9cb.png)
+![af10972e-aa23-4eae-aaec-40d8de0bd9cb](./images/af10972e-aa23-4eae-aaec-40d8de0bd9cb.webp)
 
 1. 实现LocaleResolver接口
 
@@ -2075,7 +2075,7 @@ public String login(@RequestParam(value = "locale", defaultValue = "zh_CN") Stri
 
 SessionLocaleResolver & LocaleChangeInterceptor 工作原理
 
-![f135df2d-8df3-4660-8b18-e6918bd9af36](./images/f135df2d-8df3-4660-8b18-e6918bd9af36.png)
+![f135df2d-8df3-4660-8b18-e6918bd9af36](./images/f135df2d-8df3-4660-8b18-e6918bd9af36.webp)
 
 
 
@@ -2123,7 +2123,7 @@ public ModelAndView handleException01(Exception e) {
 
 当访问参数i = 0时，就会处理这个异常
 
-![15acf3ed-c8e8-4cc4-82d6-d45e8026af63](./images/15acf3ed-c8e8-4cc4-82d6-d45e8026af63.png)
+![15acf3ed-c8e8-4cc4-82d6-d45e8026af63](./images/15acf3ed-c8e8-4cc4-82d6-d45e8026af63.webp)
 
 
 
@@ -2155,7 +2155,7 @@ public String handler02(@RequestParam("username")String username) {
 
 当发送一个错误参数就会报出错误：
 
-![615f5bf6-23b0-4bcb-8f58-025bb4064b70](./images/615f5bf6-23b0-4bcb-8f58-025bb4064b70.png)
+![615f5bf6-23b0-4bcb-8f58-025bb4064b70](./images/615f5bf6-23b0-4bcb-8f58-025bb4064b70.webp)
 
 #### 错误的请求方式
 
@@ -2205,7 +2205,7 @@ if (this.handlerExceptionResolvers != null) {
 - **ResponseStatusExceptionResolver**
 - **DefaultHandlerExceptionResolver**
 
-![0ed22c29-9bc2-4ee5-99e8-be9492fc9686](./images/0ed22c29-9bc2-4ee5-99e8-be9492fc9686.png)
+![0ed22c29-9bc2-4ee5-99e8-be9492fc9686](./images/0ed22c29-9bc2-4ee5-99e8-be9492fc9686.webp)
 
 在DefaultHandlerExceptionResolver中就有一些默认的处理机制
 
@@ -2273,7 +2273,7 @@ else if (ex instanceof AsyncRequestTimeoutException) {
 
 ### HandlerExceptionResolver的实现类
 
-![e7578ded-3cdb-4d6c-94d8-788e39ab6845](./images/e7578ded-3cdb-4d6c-94d8-788e39ab6845.png)
+![e7578ded-3cdb-4d6c-94d8-788e39ab6845](./images/e7578ded-3cdb-4d6c-94d8-788e39ab6845.webp)
 
 使用SimpleMappingExceptionResolver进行配置异常
 
@@ -2304,7 +2304,7 @@ else if (ex instanceof AsyncRequestTimeoutException) {
 
 同样的调试位置，最后处理的是SimpleMappingExceptionResolver
 
-![d897564b-ad6a-40ec-95d1-91d1fabe74ac](./images/d897564b-ad6a-40ec-95d1-91d1fabe74ac.png)
+![d897564b-ad6a-40ec-95d1-91d1fabe74ac](./images/d897564b-ad6a-40ec-95d1-91d1fabe74ac.webp)
 
 
 
@@ -2368,7 +2368,7 @@ mv = processHandlerException(request, response, handler, exception);
 render(mv, request, response);
 ```
 
-![43de9505-cdc5-4593-9f65-94086766ed1a](./images/43de9505-cdc5-4593-9f65-94086766ed1a.jpg)
+![43de9505-cdc5-4593-9f65-94086766ed1a](./images/43de9505-cdc5-4593-9f65-94086766ed1a.webp)
 
 
 

@@ -12,7 +12,7 @@ category:
 
 ### MySql 基础架构 | 一条 SQL 查询语句是如何执行的
 
-![image-20220613104147805](./personal_images/image-20220613104147805.png)
+![image-20220613104147805](./personal_images/image-20220613104147805.webp)
 
 - **连接器：** 身份认证和权限相关(登录 MySQL 的时候)。
 - **查询缓存：** 执行查询语句的时候，会先查询缓存（MySQL 8.0 版本后移除，因为这个功能不太实用）。
@@ -67,7 +67,7 @@ category:
 
 每一种存储引擎支持的索引类型不一定相同，我在表中总结了 MySQL 常见的存储引擎 InnoDB、MyISAM 和 Memory 分别支持的索引类型。
 
-![image-20220712154456833](./personal_images/image-20220712154456833.png)
+![image-20220712154456833](./personal_images/image-20220712154456833.webp)
 
 InnoDB 是在 MySQL 5.5 之后成为默认的 MySQL 存储引擎，B+Tree 索引类型也是 MySQL 存储引擎采用最多的索引类型。
 
@@ -81,7 +81,7 @@ InnoDB 是在 MySQL 5.5 之后成为默认的 MySQL 存储引擎，B+Tree 索引
 
 举个🌰，有这样一个表
 
-![image-20220712154548420](./personal_images/image-20220712154548420.png)
+![image-20220712154548420](./personal_images/image-20220712154548420.webp)
 
 这些行数据，存储在 B+Tree 索引时是长什么样子的？
 
@@ -89,7 +89,7 @@ B+Tree 是一种多叉树，叶子节点才存放数据，非叶子节点只存�
 
 主键索引的 B+Tree 如图所示：
 
-![image-20220712154624540](./personal_images/image-20220712154624540.png)
+![image-20220712154624540](./personal_images/image-20220712154624540.webp)
 
 ##### 通过主键查询商品数据的过程
 
@@ -112,7 +112,7 @@ B+Tree 存储千万级的数据只需要 3-4 层高度就可以满足，这意�
 
 我这里将前面的商品表中的 product_no （商品编码）字段设置为二级索引，那么二级索引的 B+Tree 如下图，其中非叶子的 key 值是 product_no（图中橙色部分），叶子节点存储的数据是主键值（图中绿色部分）。
 
-![image-20220712154658288](./personal_images/image-20220712154658288.png)
+![image-20220712154658288](./personal_images/image-20220712154658288.webp)
 
 如果我用 product_no 二级索引查询商品，如下查询语句：
 
@@ -122,7 +122,7 @@ select * from product where product_no = '0002';
 
 会先检二级索引中的 B+Tree 的索引值（商品编码，product_no），找到对应的叶子节点，然后获取主键值，然后再通过主键索引中的 B+Tree 树查询到对应的叶子节点，然后获取整行数据。**这个过程叫「回表」，也就是说要查两个 B+Tree 才能查到数据**。如下图：
 
-![image-20220712154711271](./personal_images/image-20220712154711271.png)
+![image-20220712154711271](./personal_images/image-20220712154711271.webp)
 
 不过，当查询的数据是能在二级索引的 B+Tree 的叶子节点里查询到，这时就不用再查主键索引查，比如下面这条查询语句：
 
@@ -168,7 +168,7 @@ CREATE INDEX index_product_no_name ON product(product_no, name);
 
 联合索引 `(product_no, name)` 的 B+Tree 示意图如下：
 
-![image-20220712155601299](./personal_images/image-20220712155601299.png)
+![image-20220712155601299](./personal_images/image-20220712155601299.webp)
 
 ### ⭐️聚簇索引和非聚簇索引
 
@@ -197,7 +197,7 @@ InnoDB 在创建聚簇索引时，会根据不同的场景选择不同的列作�
 
 二级索引的 B+ 树如下图，数据部分为主键值：
 
-![image-20220718134133927](./personal_images/image-20220718134133927.png)
+![image-20220718134133927](./personal_images/image-20220718134133927.webp)
 
 因此，**如果某个查询语句使用了二级索引，但是查询的数据不是主键值，这时在二级索引找到主键值后，需要去聚簇索引中获得数据行，这个过程就叫作「回表」，也就是说要查两个 B+  树才能查到数据。不过，当查询的数据是主键值时，因为只在二级索引就能查询到，不用再去聚簇索引查，这个过程就叫作「索引覆盖」，也就是只需要查一个  B+ 树就能找到数据。**
 
@@ -214,11 +214,11 @@ SQL1,SQL2...
 COMMIT;
 ```
 
-![image-20220613143832546](./personal_images/image-20220613143832546.png)
+![image-20220613143832546](./personal_images/image-20220613143832546.webp)
 
 另外，关系型数据库（例如：`MySQL`、`SQL Server`、`Oracle` 等）事务都有 **ACID** 特性：
 
-![image-20220613143851071](./personal_images/image-20220613143851071.png)
+![image-20220613143851071](./personal_images/image-20220613143851071.webp)
 
 1. **原子性**（`Atomicity`） ： 事务是最小的执行单位，不允许分割。事务的原子性确保动作要么全部完成，要么完全不起作用；
 2. **一致性**（`Consistency`）： 执行事务前后，数据保持一致，例如转账业务中，无论事务是否成功，转账者和收款人的总额应该是不变的；
@@ -227,7 +227,7 @@ COMMIT;
 
 🌈 这里要额外补充一点：**只有保证了事务的持久性、原子性、隔离性之后，一致性才能得到保障。也就是说 A、I、D 是手段，C 是目的！** 想必大家也和我一样，被 ACID 这个概念被误导了很久!
 
-![image-20220613144017540](./personal_images/image-20220613144017540.png)
+![image-20220613144017540](./personal_images/image-20220613144017540.webp)
 
 另外，DDIA 也就是 [《Designing Data-Intensive Application（数据密集型应用系统设计）》](https://book.douban.com/subject/30329536/)
 
@@ -245,27 +245,27 @@ COMMIT;
 
 - **脏读（Dirty read）:** 当一个事务正在访问数据并且对数据进行了修改，而这种修改还没有提交到数据库中，这时另外一个事务也访问了这个数据，然后使用了这个数据。因为这个数据是还没有提交的数据，那么另外一个事务读到的这个数据是“脏数据”，依据“脏数据”所做的操作可能是不正确的。
 
-![img](./personal_images/v2-404a11c565a99a9382aa3ed1d8e05e9a_r.jpg)
+![img](./personal_images/v2-404a11c565a99a9382aa3ed1d8e05e9a_r.webp)
 
-![image-20220706223058381](./personal_images/image-20220706223058381.png)
+![image-20220706223058381](./personal_images/image-20220706223058381.webp)
 
 - **丢失修改（Lost to modify）/ 脏写:**  指在一个事务读取一个数据时，另外一个事务也访问了该数据，那么在第一个事务中修改了这个数据后，第二个事务也修改了这个数据。这样第一个事务内的修改结果就被丢失，因此称为丢失修改。 例如：事务 1 读取某表中的数据 A=20，事务 2 也读取 A=20，事务 1 修改 A=A-1，事务 2 也修改 A=A-1，最终结果  A=19，事务 1 的修改被丢失。
 
-![img](./personal_images/v2-0b5257fd270ef7e6e619e2eec293ec37_r.jpg)
+![img](./personal_images/v2-0b5257fd270ef7e6e619e2eec293ec37_r.webp)
 
-![image-20220706223114814](./personal_images/image-20220706223114814.png)
+![image-20220706223114814](./personal_images/image-20220706223114814.webp)
 
 - **不可重复读（Unrepeatable read）:** 指在一个事务内多次读同一数据。在这个事务还没有结束时，另一个事务也访问该数据。那么，在第一个事务中的两次读数据之间，由于第二个事务的修改导致第一个事务两次读取的数据可能不太一样。这就发生了在一个事务内两次读到的数据是不一样的情况，因此称为不可重复读。
 
-![img](./personal_images/v2-f470fb471caacb70acf65bc2a597b0c5_r.jpg)
+![img](./personal_images/v2-f470fb471caacb70acf65bc2a597b0c5_r.webp)
 
-![image-20220706222414240](./personal_images/image-20220706222414240.png)
+![image-20220706222414240](./personal_images/image-20220706222414240.webp)
 
 - **幻读（Phantom read）:** 幻读与不可重复读类似。它发生在一个事务（T1）读取了几行数据，接着另一个并发事务（T2）插入了一些数据时。在随后的查询中，第一个事务（T1）就会发现多了一些原本不存在的记录，就好像发生了幻觉一样，所以称为幻读。
 
-![img](./personal_images/v2-c698e64414f7cb1428e3025e133d9592_r.jpg)
+![img](./personal_images/v2-c698e64414f7cb1428e3025e133d9592_r.webp)
 
-![image-20220706222426455](./personal_images/image-20220706222426455.png)
+![image-20220706222426455](./personal_images/image-20220706222426455.webp)
 
 **不可重复读和幻读区别** ：`<u>`不可重复读的重点是修改`</u>`比如多次读取一条记录发现其中某些列的值被修改，`<u>`幻读的重点在于新增或者删除`</u>`比如多次查询同一条查询语句（DQL）时，记录发现记录增多或减少了。
 
@@ -444,7 +444,7 @@ InnoDB 引擎中，其数据文件本身就是索引文件。相比 MyISAM，索
 
 B+ 树就是对 B 树做了一个升级，MySQL 中索引的数据结构就是采用了 B+ 树，B+ 树结构如下图：
 
-![image-20220718133551150](./personal_images/image-20220718133551150.png)
+![image-20220718133551150](./personal_images/image-20220718133551150.webp)
 
 B+ 树与 B 树差异的点，主要是以下这几点：
 
@@ -465,7 +465,7 @@ B+ 树与 B 树差异的点，主要是以下这几点：
 
 InnoDB 里的 B+ 树中的**每个节点都是一个数据页**，结构示意图如下：
 
-![image-20220718134312198](./personal_images/image-20220718134312198.png)
+![image-20220718134312198](./personal_images/image-20220718134312198.webp)
 
 通过上图，我们看出  B+ 树的特点：
 
@@ -531,7 +531,7 @@ MySQL 的存储方式根据存储引擎的不同而不同，我们最常用的�
 
 下图就是 Innodb 里的 B+ 树：
 
-![image-20220718133843334](./personal_images/image-20220718133843334.png)
+![image-20220718133843334](./personal_images/image-20220718133843334.webp)
 
 但是 Innodb 使用的  B+ 树有一些特别的点，比如：
 
@@ -556,7 +556,7 @@ Innodb 根据索引类型不同，分为聚集和二级索引。他们区别在�
 
 `MySQL` 日志 主要包括错误日志、查询日志、慢查询日志、事务日志、二进制日志几大类。其中，比较重要的还要属二进制日志 `binlog`（归档日志）和事务日志 `redo log`（重做日志）和 `undo log`（回滚日志）
 
-![image-20220613210057735](./personal_images/image-20220613210057735.png)
+![image-20220613210057735](./personal_images/image-20220613210057735.webp)
 
 #### redo log
 
@@ -564,7 +564,7 @@ Innodb 根据索引类型不同，分为聚集和二级索引。他们区别在�
 
 比如 `MySQL` 实例挂了或宕机了，重启时，`InnoDB`存储引擎会使用 `redo log`恢复数据，保证数据的持久性与完整性。
 
-![image-20220706212928940](./personal_images/image-20220706212928940.png)
+![image-20220706212928940](./personal_images/image-20220706212928940.webp)
 
 `MySQL` 中数据是以页为单位，你查询一条记录，会从硬盘把一页的数据加载出来，加载出来的数据叫数据页，会放入到 `Buffer Pool` 中。
 
@@ -574,7 +574,7 @@ Innodb 根据索引类型不同，分为聚集和二级索引。他们区别在�
 
 然后会把“在某个数据页上做了什么修改”记录到重做日志缓存（`redo log buffer`）里，接着刷盘到 `redo log` 文件里。
 
-![image-20220706212937926](./personal_images/image-20220706212937926.png)
+![image-20220706212937926](./personal_images/image-20220706212937926.webp)
 
 > 图片笔误提示：第 4 步 “清空 redo log buffe 刷盘到 redo 日志中”这句话中的 buffe 应该是 buffer。
 
@@ -596,7 +596,7 @@ Innodb 根据索引类型不同，分为聚集和二级索引。他们区别在�
 
 为了提升对文件的读写效率，Linux 内核会以页大小（4KB）为单位，将文件划分为多数据块。当用户对文件中的某个数据块进行读写操作时，内核首先会申请一个内存页（称为 `页缓存`）与文件中的数据块进行绑定。如下图所示：
 
-![image-20220725150519009](./personal_images/image-20220725150519009.png)
+![image-20220725150519009](./personal_images/image-20220725150519009.webp)
 
 如上图所示，当用户对文件进行读写时，实际上是对文件的 `页缓存` 进行读写。所以对文件进行读写操作时，会分以下两种情况进行处理：
 
@@ -641,7 +641,7 @@ struct address_space {
 
 下图展示了上述各个结构之间的关系：
 
-![image-20220725150553230](./personal_images/image-20220725150553230.png)
+![image-20220725150553230](./personal_images/image-20220725150553230.webp)
 
 如果对 `radix树` 不太了解，可以简单将其看成可以通过文件偏移量快速找到其所在 `页缓存` 的结构，有机会我会另外写一篇关于 `radix树` 的文章。
 
@@ -772,7 +772,7 @@ out:
 
 另外，`InnoDB` 存储引擎有一个后台线程，每隔 `1` 秒，就会把 `redo log buffer` 中的内容写到文件系统缓存（`page cache`），然后调用 `fsync` 刷盘。
 
-![image-20220706213001613](./personal_images/image-20220706213001613.png)
+![image-20220706213001613](./personal_images/image-20220706213001613.webp)
 
 也就是说，一个没有提交事务的 `redo log` 记录，也可能会刷盘。
 
@@ -780,7 +780,7 @@ out:
 
 因为在事务执行过程 `redo log` 记录是会写入 `redo log buffer` 中，这些 `redo log` 记录会被后台线程刷盘。
 
-![image-20220706213009977](./personal_images/image-20220706213009977.png)
+![image-20220706213009977](./personal_images/image-20220706213009977.webp)
 
 除了后台线程每秒 `1`次的轮询操作，还有一种情况，当 `redo log buffer` 占用的空间即将达到 `innodb_log_buffer_size` 一半的时候，后台线程会主动刷盘。
 
@@ -788,13 +788,13 @@ out:
 
 innodb_flush_log_at_trx_commit=0
 
-![image-20220706213032809](./personal_images/image-20220706213032809.png)
+![image-20220706213032809](./personal_images/image-20220706213032809.webp)
 
 为 `0`时，如果 `MySQL`挂了或宕机可能会有 `1`秒数据的丢失。
 
 innodb_flush_log_at_trx_commit=1
 
-![image-20220706213045311](./personal_images/image-20220706213045311.png)
+![image-20220706213045311](./personal_images/image-20220706213045311.webp)
 
 为 `1`时， 只要事务提交成功，`redo log`记录就一定在硬盘里，不会有任何数据丢失。
 
@@ -802,7 +802,7 @@ innodb_flush_log_at_trx_commit=1
 
 innodb_flush_log_at_trx_commit=2
 
-![image-20220706213100010](./personal_images/image-20220706213100010.png)
+![image-20220706213100010](./personal_images/image-20220706213100010.webp)
 
 为 `2`时， 只要事务提交成功，`redo log buffer`中的内容只写入文件系统缓存（`page cache`）。
 
@@ -816,7 +816,7 @@ innodb_flush_log_at_trx_commit=2
 
 它采用的是环形数组形式，从头开始写，写到末尾又回到头循环写，如下图所示。
 
-![image-20220706213128010](./personal_images/image-20220706213128010.png)
+![image-20220706213128010](./personal_images/image-20220706213128010.webp)
 
 在个**日志文件组**中还有两个重要的属性，分别是 `write pos、checkpoint`
 
@@ -829,11 +829,11 @@ innodb_flush_log_at_trx_commit=2
 
 `write pos` 和 `checkpoint` 之间的还空着的部分可以用来写入新的 `redo log` 记录。
 
-![image-20220706213147439](./personal_images/image-20220706213147439.png)
+![image-20220706213147439](./personal_images/image-20220706213147439.webp)
 
 如果 `write pos` 追上 `checkpoint` ，表示**日志文件组**满了，这时候不能再写入新的 `redo log` 记录，`MySQL` 得停下来，清空一些记录，把 `checkpoint` 推进一下。
 
-![image-20220706213155597](./personal_images/image-20220706213155597.png)
+![image-20220706213155597](./personal_images/image-20220706213155597.webp)
 
 ##### redo log 小结
 
@@ -883,7 +883,7 @@ innodb_flush_log_at_trx_commit=2
 
 指定 `statement`，记录的内容是 `SQL`语句原文，比如执行一条 `update T set update_time=now() where id=1`，记录的内容如下
 
-![image-20220706213326407](./personal_images/image-20220706213326407.png)
+![image-20220706213326407](./personal_images/image-20220706213326407.webp)
 
 同步数据时，会执行记录的 `SQL`语句，但是
 
@@ -891,7 +891,7 @@ innodb_flush_log_at_trx_commit=2
 
 为了解决这种问题，我们需要指定为 `row`，记录的内容不再是简单的 `SQL`语句了，还包含操作的具体数据，记录内容如下
 
-![image-20220706213333425](./personal_images/image-20220706213333425.png)
+![image-20220706213333425](./personal_images/image-20220706213333425.webp)
 
 `row`格式记录的内容看不到详细信息，要通过 `mysqlbinlog`工具解析出来。
 
@@ -915,7 +915,7 @@ innodb_flush_log_at_trx_commit=2
 
 `binlog`日志刷盘流程如下
 
-![image-20220706213409674](./personal_images/image-20220706213409674.png)
+![image-20220706213409674](./personal_images/image-20220706213409674.webp)
 
 - **上图的 write，是指把日志写入到文件系统的 page cache，并没有把数据持久化到磁盘，所以速度比较快**
 - **上图的 fsync，才是将数据持久化到磁盘的操作**
@@ -924,7 +924,7 @@ innodb_flush_log_at_trx_commit=2
 
 为 `0`的时候，表示每次提交事务都只 `write`，由系统自行判断什么时候执行 `fsync`。
 
-![image-20220706213418556](./personal_images/image-20220706213418556.png)
+![image-20220706213418556](./personal_images/image-20220706213418556.webp)
 
 虽然性能得到提升，但是机器宕机，`page cache`里面的 binlog 会丢失。
 
@@ -932,7 +932,7 @@ innodb_flush_log_at_trx_commit=2
 
 最后还有一种折中方式，可以设置为 `N(N>1)`，表示每次提交事务都 `write`，但累积 `N`个事务后才 `fsync`
 
-![image-20220706213426711](./personal_images/image-20220706213426711.png)
+![image-20220706213426711](./personal_images/image-20220706213426711.webp)
 
 在出现 `IO`瓶颈的场景里，将 `sync_binlog`设置成一个比较大的值，可以提升性能。
 
@@ -948,7 +948,7 @@ innodb_flush_log_at_trx_commit=2
 
 在执行更新语句过程，会记录 `redo log`与 `binlog`两块日志，以基本的事务为单位，`redo log`在事务执行过程中可以不断写入，而 `binlog`只有在提交事务时才写入，所以 `redo log`与 `binlog`的写入时机不一样。
 
-![image-20220706213448142](./personal_images/image-20220706213448142.png)
+![image-20220706213448142](./personal_images/image-20220706213448142.webp)
 
 回到正题，`redo log`与 `binlog`两份日志之间的逻辑不一致，会出现什么问题？
 
@@ -956,23 +956,23 @@ innodb_flush_log_at_trx_commit=2
 
 假设执行过程中写完 `redo log`日志后，`binlog`日志写期间发生了异常，会出现什么情况呢？
 
-![image-20220706213523943](./personal_images/image-20220706213523943.png)
+![image-20220706213523943](./personal_images/image-20220706213523943.webp)
 
 由于 `binlog`没写完就异常，这时候 `binlog`里面没有对应的修改记录。因此，之后用 `binlog`日志恢复数据时，就会少这一次更新，恢复出来的这一行 `c`值是 `0`，而原库因为 `redo log`日志恢复，这一行 `c`值是 `1`，最终数据不一致。
 
-![image-20220706213531140](./personal_images/image-20220706213531140.png)
+![image-20220706213531140](./personal_images/image-20220706213531140.webp)
 
 为了解决两份日志之间的逻辑一致问题，`InnoDB`存储引擎使用**两阶段提交**方案。
 
 原理很简单，将 `redo log`的写入拆成了两个步骤 `prepare`和 `commit`，这就是**两阶段提交**。
 
-![image-20220706213538608](./personal_images/image-20220706213538608.png)
+![image-20220706213538608](./personal_images/image-20220706213538608.webp)
 
-使用**两阶段提交**后，写入 `binlog`时发生异常也不会有影响，因为 `MySQL`根据 `redo log`日志恢复数据时，发现 `redo log`还处于 `prepare`阶段，并且没有对应 `binlog`日志，就会回滚该事务。![image-20220706213548852](./personal_images/image-20220706213548852.png)
+使用**两阶段提交**后，写入 `binlog`时发生异常也不会有影响，因为 `MySQL`根据 `redo log`日志恢复数据时，发现 `redo log`还处于 `prepare`阶段，并且没有对应 `binlog`日志，就会回滚该事务。![image-20220706213548852](./personal_images/image-20220706213548852.webp)
 
 再看一个场景，`redo log`设置 `commit`阶段发生异常，那会不会回滚事务呢？
 
-![image-20220706213556183](./personal_images/image-20220706213556183.png)
+![image-20220706213556183](./personal_images/image-20220706213556183.webp)
 
 并不会回滚事务，它会执行上图框住的逻辑，虽然 `redo log`是处于 `prepare`阶段，但是能通过事务 `id`找到对应的 `binlog`日志，所以 `MySQL`认为是完整的，就会提交事务恢复数据
 
@@ -990,7 +990,7 @@ innodb_flush_log_at_trx_commit=2
 
 undo log 是一种用于撤销回退的日志。在事务没提交之前，MySQL 会先记录更新前的数据到 undo log 日志文件里面，当事务回滚时，可以利用 undo log 来进行回滚。如下图：
 
-![image-20220706213728255](./personal_images/image-20220706213728255.png)
+![image-20220706213728255](./personal_images/image-20220706213728255.webp)
 
 每当 InnoDB 引擎对一条记录进行操作（修改、删除、新增）时，要把回滚时需要的信息都记录到 undo log 里，比如：
 
@@ -1009,7 +1009,7 @@ undo log 是一种用于撤销回退的日志。在事务没提交之前，MySQL
 
 版本链如下图：
 
-![image-20220706213736248](./personal_images/image-20220706213736248.png)
+![image-20220706213736248](./personal_images/image-20220706213736248.webp)
 
 另外，**undo log 还有一个作用，通过 ReadView + undo log 实现 MVCC（多版本并发控制）**。
 
@@ -1043,11 +1043,11 @@ undo log 是一种用于撤销回退的日志。在事务没提交之前，MySQL
   * 版本链
   * 读视图（读已提交和可重复读）
 
-![image-20220706231641283](./personal_images/image-20220706231641283.png)
+![image-20220706231641283](./personal_images/image-20220706231641283.webp)
 
 * 当理解了上述概念可以对此例子进行加深理解
 
-![image-20220706220605710](./personal_images/image-20220706220605710.png)
+![image-20220706220605710](./personal_images/image-20220706220605710.webp)
 
 > **个人理解**：**MVCC（多版本并发控制）** 可以在某种程度上看作是实现了乐观锁的一种手段。乐观锁假定大多数事务在执行时并不会发生冲突，即对于读操作而言，大多数情况下并不需要等待写操作。因此，读操作可以立即进行，而不需要获得锁。只有在实际进行写操作时，才会检查是否存在版本冲突，如果存在，则需要进行相应的处理。
 > 在MVCC的实现中，**read view（读视图）** 用于确定哪个版本的数据可以被当前事务看到，保证了读一致性和非阻塞性读。undolog（回滚日志）则用于存储每个事务对数据的修改操作，在事务失败或并发冲突时，可以根据undolog进行回滚，恢复数据到事务开始之前的状态。
@@ -1100,7 +1100,7 @@ Read View主要是用来做可见性判断，里面保存了 “当前对本事�
 
 **事务可见性示意图**
 
-![image-20220711215228405](./personal_images/image-20220711215228405.png)
+![image-20220711215228405](./personal_images/image-20220711215228405.webp)
 
 #### undo-log
 
@@ -1115,17 +1115,17 @@ Read View主要是用来做可见性判断，里面保存了 “当前对本事�
 
 **`insert` 时的数据初始状态：**
 
-![image-20220711215325716](./personal_images/image-20220711215325716.png)
+![image-20220711215325716](./personal_images/image-20220711215325716.webp)
 
 2. **`update undo log`** ：`update` 或 `delete` 操作中产生的 `undo log`。该 `undo log`可能需要提供 `MVCC` 机制，因此不能在事务提交时就进行删除。提交时放入 `undo log` 链表，等待 `purge线程` 进行最后的删除
 
 **数据第一次被修改时：**
 
-![image-20220711215339796](./personal_images/image-20220711215339796.png)
+![image-20220711215339796](./personal_images/image-20220711215339796.webp)
 
 **数据第二次被修改时：**
 
-![image-20220711215345905](./personal_images/image-20220711215345905.png)
+![image-20220711215345905](./personal_images/image-20220711215345905.webp)
 
 不同事务或者相同事务的对同一记录行的修改，会使该记录行的 `undo log` 成为一条链表，链首就是最新的记录，链尾就是最早的旧记录
 
@@ -1135,7 +1135,7 @@ Read View主要是用来做可见性判断，里面保存了 “当前对本事�
 
 具体的比较算法如下
 
-![image-20220711215410118](./personal_images/image-20220711215410118.png)
+![image-20220711215410118](./personal_images/image-20220711215410118.webp)
 
 1. 如果记录 DB_TRX_ID < m_up_limit_id，那么表明最新修改该行的事务（DB_TRX_ID）在当前事务创建快照之前就提交了，所以该记录行的值对当前事务是可见的
 2. 如果 DB_TRX_ID >= m_low_limit_id，那么表明最新修改该行的事务（DB_TRX_ID）在当前事务创建快照之后才修改该行，所以该记录行的值对当前事务不可见。跳到步骤 5
@@ -1159,7 +1159,7 @@ Read View主要是用来做可见性判断，里面保存了 “当前对本事�
 
 用双节点数据库，搭建单向或者双向的半同步复制。架构如下：
 
-![image-20220801004733873](./personal_images/image-20220801004733873.png)
+![image-20220801004733873](./personal_images/image-20220801004733873.webp)
 
 通常会和proxy、keepalived等第三方软件同时使用，即可以用来监控数据库的健康，又可以执行一系列管理命令。如果主库发生故障，切换到备库后仍然可以继续使用数据库。
 
@@ -1169,7 +1169,7 @@ Read View主要是用来做可见性判断，里面保存了 “当前对本事�
 
 半同步复制机制是可靠的，可以保证数据一致性的。但是如果网络发生波动，半同步复制发生超时会切换为异步复制，异复制是无法保证数据的一致性的。因此，可以在半同复制的基础上优化一下，尽可能保证半同复制。如**双通道复制**方案
 
-![image-20220801004755753](./personal_images/image-20220801004755753.png)
+![image-20220801004755753](./personal_images/image-20220801004755753.webp)
 
 - 优点：这种方案架构、部署也比较简单，主机宕机也是直接切换即可。比方案1的半同步复制，更能保证数据的一致性。
 - 缺点：需要修改内核源码或者使用mysql通信协议，没有从根本上解决数据一致性问题
@@ -1178,7 +1178,7 @@ Read View主要是用来做可见性判断，里面保存了 “当前对本事�
 
 保证高可用，可以把主从双节点数据库扩展为数据库集群。Zookeeper可以作为集群管理，它使用分布式算法保证集群数据的一致性，可以较好的避免网络分区现象的产生。
 
-![image-20220801004842095](./personal_images/image-20220801004842095.png)
+![image-20220801004842095](./personal_images/image-20220801004842095.webp)
 
 - 优点：保证了整个系统的高可用性，扩展性也较好，可以扩展为大规模集群。
 - 缺点：数据一致性**仍然依赖于原生的mysql半同步复制**；引入Zookeeper使系统逻辑更复杂。
@@ -1191,7 +1191,7 @@ Read View主要是用来做可见性判断，里面保存了 “当前对本事�
 
 DRBD是一个用软件实现的、无共享的、服务器之间镜像块设备内容的存储复制解决方案。主要用于对服务器之间的磁盘、分区、逻辑卷等进行数据镜像，当用户将数据写入本地磁盘时，还会将数据发送到网络中另一台主机的磁盘上，这样的本地主机(主节点)与远程主机(备节点)的数据就可以保证实时同步。常用架构如下：
 
-![image-20220801004923275](./personal_images/image-20220801004923275.png)
+![image-20220801004923275](./personal_images/image-20220801004923275.webp)
 
 当本地主机出现问题，远程主机上还保留着一份相同的数据，即可以继续使用，保证了数据的安全。
 
@@ -1202,7 +1202,7 @@ DRBD是一个用软件实现的、无共享的、服务器之间镜像块设备�
 
 分布式协议可以很好解决数据一致性问题。常见的部署方案就是**MySQL cluster**，它是官方集群的部署方案，通过使用NDB存储引擎实时备份冗余数据，实现数据库的高可用性和数据一致性。如下：
 
-![image-20220801004942686](./personal_images/image-20220801004942686.png)
+![image-20220801004942686](./personal_images/image-20220801004942686.webp)
 
 - 优点：不依赖于第三方软件，可以实现数据的强一致性；
 - 缺点：配置较复杂；需要使用NDB储存引擎；至少三节点；
@@ -1213,7 +1213,7 @@ DRBD是一个用软件实现的、无共享的、服务器之间镜像块设备�
 
 见名思意，根据读写分离的名字，我们就可以知道：**读写分离主要是为了将对数据库的读写操作分散到不同的数据库节点上。** 这样的话，就能够小幅提升写性能，大幅提升读性能。
 
-![image-20220617163230641](./personal_images/image-20220617163230641.png)
+![image-20220617163230641](./personal_images/image-20220617163230641.webp)
 
 不论是使用哪一种读写分离具体的实现方案，想要实现读写分离一般包含如下几步：
 
@@ -1225,7 +1225,7 @@ DRBD是一个用软件实现的、无共享的、服务器之间镜像块设备�
 
 **1.代理方式**
 
-![image-20220617163247933](./personal_images/image-20220617163247933.png)
+![image-20220617163247933](./personal_images/image-20220617163247933.webp)
 
 我们可以在应用和数据中间加了一个代理层。应用程序所有的数据请求都交给代理层处理，代理层负责分离读写请求，将它们路由到对应的数据库中。
 
@@ -1282,7 +1282,7 @@ DRBD是一个用软件实现的、无共享的、服务器之间镜像块设备�
 
 MySQL binlog(binary log 即二进制日志文件) 主要记录了 MySQL 数据库中数据的所有变化(数据库执行的所有 DDL 和 DML 语句)。因此，我们根据主库的 MySQL binlog 日志就能够将主库的数据同步到从库中。
 
-![image-20220617163123694](./personal_images/image-20220617163123694.png)
+![image-20220617163123694](./personal_images/image-20220617163123694.webp)
 
 1. 主库将数据库中数据的变化写入到 binlog
 2. 从库连接主库

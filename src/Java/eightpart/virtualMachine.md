@@ -15,7 +15,7 @@ category:
 
 #### 整体架构图：建议默写
 
-![image-20220629110459744](./personal_images/image-20220629110459744.png)
+![image-20220629110459744](./personal_images/image-20220629110459744.webp)
 
 #### 程序计数器
 
@@ -44,7 +44,7 @@ category:
 - **方法返回地址**（Return Address）：方法正常退出或异常退出的地址
 - **一些附加信息**
 
-![image-20220628171657570](./personal_images/image-20220628171657570.png)
+![image-20220628171657570](./personal_images/image-20220628171657570.webp)
 
 简单总结一下程序运行中栈可能会出现两种错误：
 - `StackOverFlowError`： 若栈的内存大小不允许动态扩展，那么当线程请求栈的深度超过当前 Java 虚拟机栈的最大深度的时候，就抛出 StackOverFlowError 错误。
@@ -84,16 +84,16 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 > 如果在堆中没有内存来完成对象实例的分配，并且堆也无法再扩展时，JVM 就会抛出 OutOfMemoryError 异常
 
-![image-20220628162509521](./personal_images/image-20220628162509521.png)
+![image-20220628162509521](./personal_images/image-20220628162509521.webp)
 
-![image-20220628164028744](./personal_images/image-20220628164028744.png)
+![image-20220628164028744](./personal_images/image-20220628164028744.webp)
 
 
 
 #### 方法区 
 
 **方法区和永久代以及元空间是什么关系呢？** 方法区和永久代以及元空间的关系很像 Java 中接口和类的关系，类实现了接口，这里的类就可以看作是永久代和元空间，接口可以看作是方法区，也就是说永久代以及元空间是 HotSpot 虚拟机对虚拟机规范中方法区的两种实现方式。并且，永久代是 JDK 1.8 之前的方法区实现，JDK 1.8 及以后方法区的实现变成了元空间。
-![](./personal_images/method-area-implementation.png)
+![](./personal_images/method-area-implementation.webp)
 
 > 周志明老师在《深入理解 Java 虚拟机（第 3 版）》：**运行时常量池、方法区、字符串常量池**这些都是不随虚拟机实现而改变的逻辑概念，是公共且**抽象的**，**Metaspace、Heap** 是与具体某种虚拟机实现相关的物理概念，是私有且**具体的**。
 > 扯皮——这符合马克思主义哲学，马克思主义中的抽象和具体是指从抽象的规定上升到具体的再现，是一种研究方法。在研究方法上，马克思归纳出两条道路，“在第一条道路上，完整的表象蒸发为抽象的规定；在第二条道路上，抽象的规定在思维行程中导致具体的再现。”
@@ -104,7 +104,7 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 举个简单的小例子：
 
-![image-20220725144553583](./personal_images/image-20220725144553583.png)
+![image-20220725144553583](./personal_images/image-20220725144553583.webp)
 
 方法区其实本身很好理解，但是《Java 虚拟机规范》/ 《深入理解 Java 虚拟机》提到的一句话：**方法区是堆的一个逻辑部分**，真的是让我困惑了很长时间。
 
@@ -112,7 +112,7 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 先来看 JDK 8 之前:
 
-![image-20220725144601249](./personal_images/image-20220725144601249.png)
+![image-20220725144601249](./personal_images/image-20220725144601249.webp)
 
 可以看到，**JDK 8 之前，堆和方法区其实是连在一起的，或者说，方法区就是堆的一部分**。
 
@@ -122,7 +122,7 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 永久代是 HotSpot 虚拟机给出的实现，但是对于其他虚拟机实现，譬如 BEA JRockit、IBM J9 等来说，是不存在永久代的概念的。
 
-![image-20220725144641131](./personal_images/image-20220725144641131.png)
+![image-20220725144641131](./personal_images/image-20220725144641131.webp)
 
 **永久代是一段连续的内存空间**，我们在 JVM 启动之前可以通过设置 `-XX:MaxPermSize` 的值来控制永久代的大小，32 位机器默认的永久代的大小为 64M，64 位的机器则为 85M。
 
@@ -141,11 +141,11 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 **元空间与永久代之间最大的区别在于：元空间不再与堆连续，并且是存在于本地内存（Native memory）中的**。
 
-![image-20220725144655251](./personal_images/image-20220725144655251.png)
+![image-20220725144655251](./personal_images/image-20220725144655251.webp)
 
 运行时数据区域的对比如下图：
 
-![image-20220725144703356](./personal_images/image-20220725144703356.png)
+![image-20220725144703356](./personal_images/image-20220725144703356.webp)
 
 > **元空间存在于本地内存，意味着只要本地内存足够，它就不会 OOM**，不会出现像永久代中的 `java.lang.OutOfMemoryError: PermGenspace`
 
@@ -189,7 +189,7 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 需要注意的是，字符串常量池的位置在 JDK 1.7 前后有所变化，可以参考下面这张表：
 
-![image-20220725144724148](./personal_images/image-20220725144724148.png)
+![image-20220725144724148](./personal_images/image-20220725144724148.webp)
 
 > 具体来说，JDK 1.8中的**字符串常量池**和**运行时常量池**被存储在堆中的"永久代"（PermGen）中，而JDK 1.8之后的版本则将永久代移除，将字符串常量池和运行时常量池存储在了堆中的"元空间"（Metaspace）中。
 > 在JDK 1.8及之后的版本中，**字符串常量池和运行时常量池的存储位置仍然是堆**，只是具体的存储实现方式有所不同。
@@ -198,23 +198,23 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 #### 类的生命周期
 
-![image-20220628160331611](./personal_images/image-20220628160331611.png)
+![image-20220628160331611](./personal_images/image-20220628160331611.webp)
 
 #### 类的加载过程
 
 粗略
 
-![image-20220628160442776](./personal_images/image-20220628160442776.png)
+![image-20220628160442776](./personal_images/image-20220628160442776.webp)
 
 详细过程
 
-![image-20220628160739969](./personal_images/image-20220628160739969.png)
+![image-20220628160739969](./personal_images/image-20220628160739969.webp)
 
 ### JDK 中有哪些默认的类加载器
 
 > 这里参考了[JVM 底层原理最全知识总结](https://doocs.github.io/jvm/)
 
-![image-20220628161228908](./personal_images/image-20220628161228908.png)
+![image-20220628161228908](./personal_images/image-20220628161228908.webp)
 
 系统提供了 3 种类加载器：
 
@@ -231,7 +231,7 @@ Java 堆既可以被实现成固定大小的，也可以是可扩展的，当前
 
 方法区和永久代以及元空间的关系很像 Java  中接口和类的关系，类实现了接口，这里的类就可以看作是永久代和元空间，接口可以看作是方法区，也就是说永久代以及元空间是 HotSpot  虚拟机对虚拟机规范中方法区的两种实现方式。并且，永久代是 JDK 1.8 之前的方法区实现，JDK 1.8 及以后方法区的实现变成了元空间。
 
-![image-20220628171430898](./personal_images/image-20220628171430898.png)
+![image-20220628171430898](./personal_images/image-20220628171430898.webp)
 
 ### 如何判断对象是否死亡
 
@@ -254,7 +254,7 @@ GC Roots 是指：
 
 GC Roots 并不包括堆中对象所引用的对象，这样就不会有循环引用的问题。
 
-![image-20220624223650067](./personal_images/image-20220624223650067.png)
+![image-20220624223650067](./personal_images/image-20220624223650067.webp)
 
 ☠️要真正宣告一个对象死亡，需要经过至少✌️次标记过程：
 
@@ -305,7 +305,7 @@ GC Roots 并不包括堆中对象所引用的对象，这样就不会有循环�
 4. 现在，扩展类加载器会尝试加载类A。如果找到了类A，它就会加载类A并结束请求。如果没有找到，加载请求会返回到应用类加载器。
 5. 最后，如果前面的所有父加载器都没有加载类A，应用类加载器才会自己尝试加载类A。
 
-![image-20220628172850425](./personal_images/image-20220628172850425.png)
+![image-20220628172850425](./personal_images/image-20220628172850425.webp)
 
 **如果我们不想用双亲委派模型怎么办 ？**
 > 不得不说能问出这种问题的面试官是真的变态
@@ -374,14 +374,14 @@ Class<?> clazz = classLoader.loadClass("com.example.MyClass");
 
 它是最基础的垃圾收集算法，收集过程分为两个阶段：首先标记出所有需要回收的对象，在标记完成后，统一回收掉所有被标记的对象；也可以反过来，标记存活对象，统一回收所有未被标记的对象。
 
-![image-20220628153301516](./personal_images/image-20220628153301516.png)
+![image-20220628153301516](./personal_images/image-20220628153301516.webp)
 
 它主要有以下两个缺点：
 
 - 执行效率不稳定：如果 Java 堆上包含大量需要回收的对象，则需要进行大量标记和清除动作；
 - 内存空间碎片化：标记清除后会产生大量不连续的空间，从而可能导致无法为大对象分配足够的连续内存。
 
-![image-20220629095233918](./personal_images/image-20220629095233918.png)
+![image-20220629095233918](./personal_images/image-20220629095233918.webp)
 
 #### 标记-复制算法，Mark-Copy
 
@@ -390,19 +390,19 @@ Class<?> clazz = classLoader.loadClass("com.example.MyClass");
 - 如果内存中多数对象都是存活的，这种算法将产生大量的复制开销；
 - 浪费内存空间，内存空间变为了原有的一半。
 
-![image-20220628153316648](./personal_images/image-20220628153316648.png)
+![image-20220628153316648](./personal_images/image-20220628153316648.webp)
 
 基于新生代 “朝生夕灭” 的特点，大多数虚拟机都不会按照 1:1 的比例来进行内存划分，例如 HotSpot 虚拟机会将内存空间划分为一块较大的 `Eden` 和 两块较小的 `Survivor` 空间，它们之间的比例是 8:1:1 。 每次分配时只会使用 `Eden` 和其中的一块 `Survivor` ，发生垃圾回收时，只需要将存活的对象一次性复制到另外一块 `Survivor` 上，这样只有 10% 的内存空间会被浪费掉。当 `Survivor` 空间不足以容纳一次 `Minor GC` 时，此时由其他内存区域（通常是老年代）来进行分配担保。
 
-![image-20220629095353992](./personal_images/image-20220629095353992.png)
+![image-20220629095353992](./personal_images/image-20220629095353992.webp)
 
 #### 标记-整理算法，Mark-Compact
 
 标记-整理算法是在标记完成后，让所有存活对象都向内存的一端移动，然后直接清理掉边界以外的内存。其优点在于可以避免内存空间碎片化的问题，也可以充分利用内存空间；其缺点在于根据所使用的收集器的不同，在移动存活对象时可能要全程暂停用户程序：
 
-![image-20220628153332879](./personal_images/image-20220628153332879.png)
+![image-20220628153332879](./personal_images/image-20220628153332879.webp)
 
-![image-20220629095251304](./personal_images/image-20220629095251304.png)
+![image-20220629095251304](./personal_images/image-20220629095251304.webp)
 
 缺点（中小厂会问到所以加入）：
 1. **停顿时间长**：标记-整理算法在进行垃圾回收时，需要首先标记所有可达对象，然后再进行移动和清理。在这个过程中，应用程序的所有线程都需要暂停，这将导致较长的暂停时间，尤其是在处理大量对象或大型堆内存时。
@@ -454,7 +454,7 @@ Serial（串行）收集器是JVM最古老的收集器，也是单线程收集�
 
 👶**新生代采用标记-复制算法，👴老年代采用标记-整理算法。**
 
-![image-20220628153037233](./personal_images/image-20220628153037233.png)
+![image-20220628153037233](./personal_images/image-20220628153037233.webp)
 
 #### ParNew 收集器
 
@@ -462,7 +462,7 @@ Serial（串行）收集器是JVM最古老的收集器，也是单线程收集�
 
 👶**新生代采用标记-复制算法，👴老年代可以选择使用“标记-整理”算法或者“标记-清除”算法。**
 
-![image-20220628153046946](./personal_images/image-20220628153046946.png)
+![image-20220628153046946](./personal_images/image-20220628153046946.webp)
 
 #### Parallel Scavenge 收集器
 
@@ -482,7 +482,7 @@ Parallel Scavenge 收集器也是使用标记-复制算法的多线程收集器�
 
 **👶新生代采用[标记-复制算法](#标记-复制算法，Mark-Copy)，👴老年代采用[标记-整理算法](#标记-整理算法，Mark-Compact)。**
 
-![image-20220628153114059](./personal_images/image-20220628153114059.png)
+![image-20220628153114059](./personal_images/image-20220628153114059.webp)
 
 **这是 JDK1.8 默认收集器**
 
@@ -501,13 +501,13 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 
 **Serial 收集器的👴老年代版本**，它同样是一个单线程收集器。它主要有两大用途：一种用途是在 JDK1.5 以及以前的版本中与 Parallel Scavenge 收集器搭配使用，另一种用途是作为 CMS 收集器的后备方案。
 
-![image-20220628153028054](./personal_images/image-20220628153028054.png)
+![image-20220628153028054](./personal_images/image-20220628153028054.webp)
 
 #### Paralled Old 收集器
 
 **Parallel Scavenge 收集器的👴老年代版本**。使用多线程和“标记-整理”算法。在注重吞吐量以及 CPU 资源的场合，都可以优先考虑 Parallel Scavenge 收集器和 Parallel Old 收集器。
 
-![image-20220628153107883](./personal_images/image-20220628153107883.png)
+![image-20220628153107883](./personal_images/image-20220628153107883.webp)
 
 #### CMS 收集器
 
@@ -522,7 +522,7 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 
 > 需要注意的是，CMS收集器由于其“标记-清除”算法的特性，会导致内存碎片问题，可能会触发一次Full GC以进行内存整理。而G1收集器则通过“标记-整理”算法有效解决了这个问题。
 
-![image-20220628153004557](./personal_images/image-20220628153004557.png)
+![image-20220628153004557](./personal_images/image-20220628153004557.webp)
 
 从它的名字就可以看出它是一款优秀的垃圾收集器，主要优点：**并发收集、低停顿**。但是它有下面三个明显的缺点：
 
@@ -552,7 +552,7 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 首先，我们介绍 G1 种最核心的两个概念：Region 和 Remember Set。
 ##### Heap Regions
 如下图所示，G1 垃圾收集器将堆内存空间分成等分的 Regions，物理上不一定连续，逻辑上构成连续的堆地址空间。各个 Mutator 线程（即用户应用的线程）拥有各自的 Thread-Local Allocation Buffer (TLAB），用于降低各个线程分配内存的冲突。
-![](./personal_images/g1-heap-regions.png)
+![](./personal_images/g1-heap-regions.webp)
 要特别注意的是，**巨型对象（Humongous Object）**，即大小超过 3/4 的 Region 大小的对象会作特殊处理，分配到由一个或多个连续 Region 构成的区域。巨型对象会引起其他一些问题，不过这些已经超出了本文的范畴，总之记得尽量别用就好了。
 
 默认配置下，在满足 Region Size 是 2 的整数幂的前提下，G1 将总内存尽量划分成大约 2048 个 Region。
@@ -563,7 +563,7 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 所以，我们需要一个机制来让各个 Region 能独立地进行垃圾收集，这也就是 Remember Set 存在的意义。`每个 Region 会有一个对应的 Remember Set`，它记录了哪些内存区域中存在对当前 Region 中对象的引用（all locations that might contain pointers to (live) objects within the region）。当一个Region被标记为收集目标时，G1会扫描其对应的RSet，而不是整个Java堆。这样，G1可以在局部（部分Region）执行回收，而不需要停止整个应用（stop-the-world）。
 
 `卡表（Card Table）`，它是RSet实现的一个重要组成部分。Java堆被分割成一定大小（通常为512字节）的块，称为"cards"。每个card对应于堆中的一部分区域。卡表是一个字节数组，数组的每个元素（字节）对应一个card。当一个对象引用发生改变时（比如新的跨区域引用被创建），对应的card就被标记为"dirty"。在并发标记阶段，G1会处理dirty cards，更新RSet。
-![](./personal_images/g1-remember-sets.png)
+![](./personal_images/g1-remember-sets.webp)
 注意 Remember Set 不是直接记录对象地址，而是记录了那些对象所在的 Card 编号。所谓 Card 就是表示一小块（512 bytes）的内存空间，这里面很可能存在不止一个对象。但是这已经足够了：当我们需要确定当前 Region 有哪些对象存在外部引用时（这些对象是可达的，不能被回收），只要扫描一下这块 Card 中的所有对象即可，这比扫描所有 live objects 要容易的多。
 
 实现上，Remember Set 的实现就是一个 Card 的 Hash Set，并且为每个 GC 线程都有一个本地的 Hash Set，最后的 Remember Set 实际上是这些 Hash Set 的并集。当 Card 数量特别多的时候会退化到 Region 粒度，这时候就要扫描更多的区域来寻找引用，时间换空间。
@@ -572,7 +572,7 @@ JDK1.8  默认使用的是 Parallel Scavenge + Parallel Old，如果指定了-XX
 
 ##### Remember Set 的维护
 维护上面所说的 Remember Set 势必需要记录对象的引用，通常的做法是在 set 一个引用的时候插入一段代码，这称为 Write Barrier。为了尽可能降低对 Mutator 线程的影响，Write Barrier 的代码应当尽可能简化。G1 的 Write Barrier 实际上只是一个“通知”：将当前 set 引用的事件放到 Remember Set Log 队列中，交给后台专门的 GC 线程处理。
-![](./personal_images/g1-remember-set-maintenance.png)
+![](./personal_images/g1-remember-set-maintenance.webp)
 Write Barrier 具体实现如下。当发生 X.f = Y 时，假设 rX 为 X 对象的地址，rY 为 Y 对象的地址，则 Write 的同时还会执行以下逻辑：
 
 
@@ -598,7 +598,7 @@ G1 论文中提到它有一个 Pure Garbage-First 的模式，但在现在的资
 
 经典的内存布局中，各代的内存区域是完全分开的，而 G1 中的 Generation 只是 Region 的一个动态标志，下图是一个标记了 Generation 的例子。各个 Region 的 Generation 是随着 GC 的进行而不断变化的，甚至各个代有多少 Region 这个比例也是随时调整的。
 
-![](./personal_images/g1-generation-regions-example.png)
+![](./personal_images/g1-generation-regions-example.webp)
 
 
 ##### 总结 面试用：清除阶段
@@ -607,17 +607,17 @@ G1 论文中提到它有一个 Pure Garbage-First 的模式，但在现在的资
 2. **并发标记 (Concurrent Marking)**：从 GC Roots 能直接关联到的对象开始遍历整个对象图。遍历完成后，还需要处理 SATB 记录中变动的对象。SATB（snapshot-at-the-beginning，开始阶段快照）能够有效的解决并发标记阶段因为用户线程运行而导致的对象变动，其效率比 CMS 重新标记阶段所使用的增量更新算法效率更高；
 3. **最终标记 (Final Marking)**：对用户线程做一个短暂的暂停，用于处理并发阶段结束后仍遗留下来的少量的 STAB 记录。虽然并发标记阶段会处理 SATB 记录，但由于处理时用户线程依然是运行中的，因此依然会有少量的变动，所以需要最终标记来处理；
 4. **筛选回收 (Live Data Counting and Evacuation)**：负责更新 Regin 统计数据，按照各个 Regin 的回收价值和成本进行排序，在根据用户期望的停顿时间进行来指定回收计划，可以选择任意多个 Regin 构成回收集。然后将回收集中 Regin 的存活对象复制到空的 Regin 中，再清理掉整个旧的 Regin 。此时因为涉及到存活对象的移动，所以需要暂停用户线程，并由多个收集线程并行执行。
-![](./personal_images/image-20220628152953093-7e268260.png)
+![](./personal_images/image-20220628152953093-7e268260.webp)
 
 ##### 详解垃圾回收（Evacuation）
 Generational 模式下 G1 的垃圾收集分为两种：Young GC 和 Mixed GC。Young GC 只会涉及到 Young Regions，它将 Eden Region 中存活的对象移动到一个或多个新分配的 Survivor Region，之前的 Eden Region 就被归还到 Free list，供以后的新对象分配使用。
-![](./personal_images/g1-generation-regions-young-gc-1.png)
+![](./personal_images/g1-generation-regions-young-gc-1.webp)
 当区域中对象的 Survive 次数超过阈值（TenuringThreshold）时，Survivor Regions 的对象被移动到 Old Regions；否则和 Eden 的对象一样，继续留在 Survivor Regions 里。
-![](./personal_images/g1-generation-regions-young-gc-2.png)
+![](./personal_images/g1-generation-regions-young-gc-2.webp)
 多次 Young GC 之后，Old Regions 慢慢累积，直到到达阈值（InitiatingHeapOccupancyPercent，简称 IHOP），我们不得不对 Old Regions 做收集。这个阈值在 G1 中是根据用户设定的 GC 停顿时间动态调整的，也可以人为干预。
 
 对 Old Regions 的收集会同时涉及若干个 Young 和 Old Regions，因此被称为 Mixed GC。Mixed GC 很多地方都和 Young GC 类似，不同之处是：它还会选择若干最有潜力的 Old Regions（收集垃圾的效率最高的 Regions），这些选出来要被 Evacuate 的 Region 称为本次的 Collection Set (CSet)。
-![](./personal_images/g1-generation-regions-mixed-gc.png)
+![](./personal_images/g1-generation-regions-mixed-gc.webp)
 Mixed GC 的重要性不言而喻：Old Regions 的垃圾就是在这个阶段被收集掉的，也正是因为这样，Mixed GC 是工作量最为繁重的一个环节，如果不加以控制，就会像 CMS 一样发生长时间的 Full GC 停顿。这时候 Region 的设计就发挥出优越性了：只要把每次的 Collection Set 规模控制在一定范围，就能把每次收集的停顿时间软性地控制在 MaxGCPauseMillis 以内。起初这个控制可能不太精准，随着 JVM 的运行估算会越来越准确。
 
 那来不及收集的那些 Region 呢？多来几次就可以了。所以你在 GC 日志中会看到 continue mixed GCs 的字样，代表分批进行的各次收集。这个过程会多次重复，直到垃圾的百分比降到 G1HeapWastePercent 以内，或者到达 G1MixedGCCountTarget 上限。
@@ -631,7 +631,7 @@ Mixed GC 的重要性不言而喻：Old Regions 的垃圾就是在这个阶段�
 在 Evacuation 之前，我们要通过并发标记来确定哪些对象是垃圾、哪些还活着。G1 中的 Concurrent Marking 是以 Region 为单位的，为了保证结果的正确性，这里用到了 Snapshot-at-the-beginning（SATB）算法。
 
 SATB 算法顾名思义是对 Marking 开始时的一个（逻辑上的）Snapshot 进行标记。为什么要用 Snapshot 呢？下面就是一个直接标记导致问题的例子：对象 X 由于没有被标记到而被标记为垃圾，导致 B 引用失效。
-![](./personal_images/illustrate-why-need-satb.png)
+![](./personal_images/illustrate-why-need-satb.webp)
 SATB 算法为了解决这一问题，在修改引用 X.f = B 之前插入了一个 Write Barrier，记录下被覆写之前的引用地址。这些地址最终也会被 Marking 线程处理，从而确保了所有在 Marking 开始时的引用一定会被标记到。这个 Write Barrier 伪代码如下：
 
 
@@ -644,7 +644,7 @@ if (t has been marked && t != NULL)  // 如果地址 t 还没来的及标记，�
 
 
 标记的过程和 CMS 中是类似的，可以看作一个优化版的 DFS：记当前已经标记到的 offset 为 cur，随着标记的进行 cur 不断向后推进。每当访问到地址 < cur 的对象，就对它做深度扫描，递归标记所有应用；反之，对于地址 > cur 的对象，只标记不扫描，等到 cur 推进到那边的时候再去做扫描。
-![](./personal_images/concurrent-marking.jpg)
+![](./personal_images/concurrent-marking.webp)
 上图中，假设当前 cur 指向对象 c，c有两个引用：a 和 e，其中 a 的地址小于 cur，因而做了扫描；而 e 则仅仅是标记。扫描 a 的过程中又发现了对象 b，b 同样被标记并继续扫描。但是 b 引用的 d 在 cur 之后，所以 d 仅仅是被标记，不再继续扫描。
 
 最后一个问题是：如何处理 Concurrent Marking 中新产生的对象？因为 SATB 算法只保证能标记到开始时 snapshot 的对象，对于新出现的那些对象，我们可以简单地认为它们全都是存活的，毕竟数量不是很多。
@@ -688,7 +688,7 @@ ZGC调优实践：重点分享对ZGC调优的理解，并分析若干个实际�
 转移阶段，即把活跃对象复制到新的内存地址上；
 重定位阶段，因为转移导致对象的地址发生了变化，在重定位阶段，所有指向对象旧地址的指针都要调整到对象新的地址上。
 下面以G1为例，通过G1中标记-复制算法过程（G1的Young GC和Mixed GC均采用该算法），分析G1停顿耗时的主要瓶颈。G1垃圾回收周期如下图所示：
-![](./personal_images/2f56a9a249bc8d74f4f455782abce6be147997.png)
+![](./personal_images/2f56a9a249bc8d74f4f455782abce6be147997.webp)
 G1的混合回收过程可以分为标记阶段、清理阶段和复制阶段。
 
 **标记阶段停顿分析**
@@ -709,7 +709,7 @@ G1的Young GC和CMS的Young GC，其标记-复制全过程STW，这里不再详�
 与CMS中的ParNew和G1类似，ZGC也采用标记-复制算法，不过ZGC对该算法做了重大改进：ZGC在标记、转移和重定位阶段几乎都是并发的，这是ZGC实现停顿时间小于10ms目标的最关键原因。
 
 ZGC垃圾回收周期如下图所示：
-![](./personal_images/40838f01e4c29cfe5423171f08771ef8156393.png)
+![](./personal_images/40838f01e4c29cfe5423171f08771ef8156393.webp)
 ZGC只有三个STW阶段：初始标记，再标记，初始转移。其中，初始标记和初始转移分别都只需要扫描所有GC Roots，其处理时间和GC Roots的数量成正比，一般情况耗时非常短；再标记阶段STW时间很短，最多1ms，超过1ms则再次进入并发标记阶段。即，ZGC几乎所有暂停都只依赖于GC Roots集合大小，停顿时间不会随着堆的大小或者活跃对象的大小而增加。与ZGC对比，G1的转移阶段完全STW的，且停顿时间随存活对象的大小增加而增加。
 
 ##### ZGC关键技术
@@ -719,13 +719,13 @@ ZGC通过着色指针和读屏障技术，解决了转移过程中准确访问�
 > 着色指针是一种将信息存储在指针中的技术。
 
 ZGC仅支持64位系统，它把64位虚拟地址空间划分为多个子空间，如下图所示：
-![](./personal_images/f620aa44eb0a756467889e64e13ee86338446.png)
+![](./personal_images/f620aa44eb0a756467889e64e13ee86338446.webp)
 其中，[0~4TB) 对应Java堆，[4TB ~ 8TB) 称为M0地址空间，[8TB ~ 12TB) 称为M1地址空间，[12TB ~ 16TB) 预留未使用，[16TB ~ 20TB) 称为Remapped空间。
 
 当应用程序创建对象时，首先在堆空间申请一个虚拟地址，但该虚拟地址并不会映射到真正的物理地址。ZGC同时会为该对象在M0、M1和Remapped地址空间分别申请一个虚拟地址，且这三个虚拟地址对应同一个物理地址，但这三个空间在同一时间有且只有一个空间有效。ZGC之所以设置三个虚拟地址空间，是因为它使用“空间换时间”思想，去降低GC停顿时间。“空间换时间”中的空间是虚拟空间，而不是真正的物理空间。后续章节将详细介绍这三个空间的切换过程。
 
 与上述地址空间划分相对应，ZGC实际仅使用64位地址空间的第0~41位，而第42~45位存储元数据，第47~63位固定为0。
-![](./personal_images/507f599016eafffa0b98de7585a1c80b338346.png)
+![](./personal_images/507f599016eafffa0b98de7585a1c80b338346.webp)
 ZGC将对象存活信息存储在42~45位中，这与传统的垃圾回收并将对象存活信息放在对象头中完全不同。
 
 **读屏障**
@@ -751,12 +751,12 @@ ZGC中读屏障的代码作用：在对象标记和转移过程中，用于确�
 其实，在标记阶段存在两个地址视图M0和M1，上面的过程显示只用了一个地址视图。之所以设计成两个，是为了区别前一次标记和当前标记。也即，第二次进入并发标记阶段后，地址视图调整为M1，而非M0。
 
 着色指针和读屏障技术不仅应用在并发转移阶段，还应用在并发标记阶段：将对象设置为已标记，传统的垃圾回收器需要进行一次内存访问，并将对象存活信息放在对象头中；而在ZGC中，只需要设置指针地址的第42~45位即可，并且因为是寄存器访问，所以速度比访问内存更快。
-![](./personal_images/a621733099b8fda2a0f38a8859e6a114213563.png)
+![](./personal_images/a621733099b8fda2a0f38a8859e6a114213563.webp)
 
 
 #### 其他
 
-![image-20220612165223576](./personal_images/image-20220612165223576.png)
+![image-20220612165223576](./personal_images/image-20220612165223576.webp)
 
 - 两个收集器间有连线，表明它们可以搭配使用：Serial/Serial Old、Serial/CMS、ParNew/Serial  Old、ParNew/CMS、Parallel Scavenge/Serial Old、Parallel Scavenge/Parallel  Old、G1。
 - 其中 Serial Old 作为 CMS 出现"Concurrent Mode Failure"失败的后备预案。
@@ -777,7 +777,7 @@ ZGC中读屏障的代码作用：在对象标记和转移过程中，用于确�
 
 在卡表中，被标记为dirty的卡页被称为脏卡（Dirty Card）。这意味着该卡页中的某个对象引用发生了更改。在进行垃圾收集时，只需要扫描这些脏卡，而不是整个老年代，从而大大提高了垃圾收集的效率。
 
-![card-table](./giant_images/v2-8cec22d735be76cd4a140ac30513ca49_b.jpg)
+![card-table](./giant_images/v2-8cec22d735be76cd4a140ac30513ca49_b.webp)
 
 
 #### 卡表在垃圾收集中的作用
@@ -800,9 +800,9 @@ CMS（Concurrent Mark Sweep）和G1（Garbage-First）是HotSpot JVM中的两种
 > 关于TLAB的基本理解，它是一个专用于单个线程的小块Eden区域。这种设计可以实现无锁并发快速分配，因为每个线程都有自己的专用区域，所以在对象分配时无需担心其他线程的争用。TLAB的使用提高了在多线程环境中对象分配的性能。
 
 在Java中，所有新的对象分配都应该发生在Eden Space中。将整个堆的子区域用于新的分配是JVM中新分配如此之快的原因之一。为了更快地分配，JVM将Eden空间划分为更多的子区域，每个子区域专用于特定的线程。每个专用区域都称为线程本地分配缓冲区或简称**TLAB（Thread Local Allocation Buffer）**。该机制允许每个线程有一个自己可以使用的TLAB区域，并且只有该线程可以使用该区域。因此，TLAB是每个线程独立的。只要对象在TLAB区域内进行分配，就不需要进行任何类型的同步。在TLAB区域内部进行分配只需要简单的指针碰撞操作。
-![](./personal_images/tlab-gens.png)
+![](./personal_images/tlab-gens.webp)
 
-![](./personal_images/tlab-regions.png)
+![](./personal_images/tlab-regions.webp)
 
 **分配满的情况**：
 然而，TLAB并非无限的，某些时刻，它会变满。如果某个线程需要分配一个新对象，但当前的TLAB几乎已满，可能会发生以下两件事情：
@@ -810,9 +810,9 @@ CMS（Concurrent Mark Sweep）和G1（Garbage-First）是HotSpot JVM中的两种
 - 创建一个新的TLAB并在新的TLAB中分配该对象。从技术上讲，JVM淘汰了旧的TLAB。
 
 如果对象较大（大于TLAB的大小），那么对象将被分配到Eden的非TLAB区域，即直接在Eden区分配，这被称为慢速分配（Slow Allocation）。由于这种情况下可能会有多个线程尝试在Eden区域分配对象，因此需要同步处理：
-![](./personal_images/tlab-empty.png)
+![](./personal_images/tlab-empty.webp)
 如果对象较小，可能会为该线程分配新的TLAB，并在新的TLAB中分配对象。旧的TLAB将被视为已满，并在下次Minor GC时清理：
-![](./personal_images/tlab-full.png)
+![](./personal_images/tlab-full.webp)
 
 默认情况下，TLAB会为每个线程单独动态调整大小。TLAB的大小会根据Eden的大小、线程数量及分配率等参数重新计算。如果某个线程需要分配一个超出TLAB大小限制的大对象（比如大数组），那么它将被分配到Eden中的共享区域。这样一来，就会需要同步操作。在我的应用程序中，某些对象因其尺寸过大，从未在TLAB中分配过。
 
@@ -944,7 +944,7 @@ public class newObject {
 
 1）**假设 Java 堆中内存是绝对规整的**，所有被使用过的内存都被放在一边，空闲的内存被放在另一边，中间放着一个指针作为分界点的指示器，那所分配内存就仅仅是把这个指针 向 空闲空间方向 挪动一段与对象大小相等的距离，这种分配方式称为 **指针碰撞**（Bump The Pointer）
 
-![image-20220628113523166](./personal_images/image-20220628113523166.png)
+![image-20220628113523166](./personal_images/image-20220628113523166.webp)
 
 2）**如果 Java 堆中的内存并不是规整的**，已被使用的内存和空闲的内存相互交错在一起，那就没有办法简单地进行指针碰撞了，虚拟机就必须维护一个列表，记录哪些内存块是可用的，在分配的时候从列表中找到一块足够大的连续空间划分给这个对象，并更新列表上的记录，这种分配方式称为 **空闲列表**（Free List）。
 
@@ -955,7 +955,7 @@ public class newObject {
 > - 因此，当使用 Serial、ParNew 等带压缩整理过程的收集器时，系统采用的分配算法是指针碰撞，既简单又高效
 > - 而当使用 CMS 这种基于清除（Sweep）算法的收集器时，理论上就只能采用较为复杂的空闲列表来分配内存
 
-![image-20220628113934143](./personal_images/image-20220628113934143.png)
+![image-20220628113934143](./personal_images/image-20220628113934143.webp)
 
 ##### 3️⃣初始化零值
 
@@ -992,7 +992,7 @@ JVM为了实现我们不做赋值操作的对象也可以拿来直接使用在�
 
 > 对象头
 
-![image-20220628152051756](./personal_images/image-20220628152051756.png)
+![image-20220628152051756](./personal_images/image-20220628152051756.webp)
 
 ##### 5️⃣执行init
 
@@ -1059,7 +1059,7 @@ public static void main(java.lang.String[]);
 
 ##### 🤏总览
 
-![image-20220628151926533](./personal_images/image-20220628151926533.png)
+![image-20220628151926533](./personal_images/image-20220628151926533.webp)
 
 > 对象创建时候的并发安全问题
 
@@ -1080,7 +1080,7 @@ public static void main(java.lang.String[]);
 
 如果使用句柄的话，那么Java堆中将会划分出一块内存来作为句柄池，reference 中存储的就是对象的句柄地址，而句柄中包含了对象实例数据与类型数据各自的具体地址信息
 
-![image-20220628152456384](./personal_images/image-20220628152456384.png)
+![image-20220628152456384](./personal_images/image-20220628152456384.webp)
 
 缺点 显然而见 需要单独开辟一块空间记录句柄池存储,并且访问的时候需要中转 访问效率偏低一点
 
@@ -1090,7 +1090,7 @@ public static void main(java.lang.String[]);
 
 如果使用直接指针访问，那么 Java 堆对象的布局中就必须考虑如何放置访问类型数据的相关信息，而reference 中存储的直接就是对象的地址。
 
-![image-20220628152505040](./personal_images/image-20220628152505040.png)
+![image-20220628152505040](./personal_images/image-20220628152505040.webp)
 
 缺点 当对象数据变更引用的时候 需要修改Stack的指针
 
@@ -1149,7 +1149,7 @@ public void testMethod2() {
 
 那么 testMethod1() 和 testMethod2() 的 OopMap 如下图所示：
 
-![image-20220723173000230](./personal_images/image-20220723173000230.png)
+![image-20220723173000230](./personal_images/image-20220723173000230.webp)
 
 
 
@@ -1161,7 +1161,7 @@ public void testMethod2() {
 
 有了安全点的设定，也就决定了用户程序执行时并不是随便哪个时候都能够停顿下来开始 GC 的，而是强制要求**程序必须执行到达安全点后才能够进行 GC**（因为不到达安全点话，没有 OopMap，虚拟机就没法快速知道对象引用的位置呀，没法进行根节点枚举）。
 
-![image-20220628203702554](./personal_images/image-20220628203702554.png)
+![image-20220628203702554](./personal_images/image-20220628203702554.webp)
 
 因此，**安全点的设定既不能太少以至于让垃圾收集器等待时间过长，也不能太多以至于频繁进行垃圾收集从而导致运行时的内存负荷大幅增大**。所以，安全点的选定基本上是以 “**是否具有让程序长时间执行的特征**” 为标准进行选定的，最典型的就是**指令序列的复用**：例如方法调用、循环跳转、异常跳转等，所以只有具有这些功能的指令才会产生安全点。
 
@@ -1245,7 +1245,7 @@ public void testMethod2() {
 
 举个例子，a 引用了 b，此时 b 被扫描为可达，但是用户线程随后又执行了 a.b = null，这个时候其实 b 已经是死亡的垃圾对象了，但是由于**黑色对象不会被重新扫描**，所以在垃圾收集里 b 依然作为存活对象被标记成黑色，因此就成了浮动垃圾。如下图所示：
 
-![image-20220725143217373](./personal_images/image-20220725143217373.png)
+![image-20220725143217373](./personal_images/image-20220725143217373.webp)
 
 浮动垃圾当然不是一件好事，但其实是可以容忍的，因为这只不过产生了一点逃过本次收集的浮动垃圾而已，反正还会有下一次垃圾收集，到时候就会被标记为垃圾被清理掉了
 
@@ -1253,7 +1253,7 @@ public void testMethod2() {
 
 对象消失和浮动垃圾恰恰相反，对象消失是**把原本存活的对象错误标记为已消亡**，这就是非常致命的后果了，程序肯定会因此发生错误，下面表演示了这样的致命错误具体是如何产生的
 
-![image-20220725143235602](./personal_images/image-20220725143235602.png)
+![image-20220725143235602](./personal_images/image-20220725143235602.webp)
 
 如上图所示，b -> c 的引用被切断，但同时用户线程建立了一个新的从 a -> c 的引用，由于已经遍历到了  b，不可能再回去遍历 a（黑色对象不会被重新扫描），再遍历 c，所以这个 c  实际是存活的对象，但由于没有被垃圾收集器扫描到，被错误地标记成了白色。
 
@@ -1316,11 +1316,11 @@ ClassFile {
 
 通过分析 `ClassFile` 的内容，我们便可以知道 class 文件的组成。
 
-![image-20220723173831486](./personal_images/image-20220723173831486.png)
+![image-20220723173831486](./personal_images/image-20220723173831486.webp)
 
 下面这张图是通过 IDEA 插件 `jclasslib` 查看的，你可以更直观看到 Class 文件结构。
 
-![image-20220723173839688](./personal_images/image-20220723173839688.png)
+![image-20220723173839688](./personal_images/image-20220723173839688.webp)
 
 使用 `jclasslib` 不光可以直观地查看某个类对应的字节码文件，还可以查看类的基本信息、常量池、接口、属性、函数等信息。
 
@@ -1391,7 +1391,7 @@ ClassFile {
 
 类访问和属性修饰符:
 
-![image-20220723173943684](./personal_images/image-20220723173943684.png)
+![image-20220723173943684](./personal_images/image-20220723173943684.webp)
 
 我们定义了一个 Employee 类
 
@@ -1404,7 +1404,7 @@ public class Employee {
 
 通过`javap -v class类名` 指令来看一下类的访问标志。
 
-![image-20220723173952132](./personal_images/image-20220723173952132.png)
+![image-20220723173952132](./personal_images/image-20220723173952132.webp)
 
 #### 当前类（This Class）、父类（Super Class）、接口（Interfaces）索引集合
 
@@ -1430,7 +1430,7 @@ public class Employee {
 
 **field info(字段表) 的结构:**
 
-![image-20220723174020945](./personal_images/image-20220723174020945.png)
+![image-20220723174020945](./personal_images/image-20220723174020945.webp)
 
 - **access_flags:** 字段的作用域（`public` ,`private`,`protected`修饰符），是实例变量还是类变量（`static`修饰符）,可否被序列化（transient 修饰符）,可变性（final）,可见性（volatile 修饰符，是否强制从主内存读写）。
 - **name_index:** 对常量池的引用，表示的字段的名称；
@@ -1442,7 +1442,7 @@ public class Employee {
 
 **字段的 access_flag 的取值:**
 
-![image-20220723174028527](./personal_images/image-20220723174028527.png)
+![image-20220723174028527](./personal_images/image-20220723174028527.webp)
 
 #### 方法表集合（Methods）
 
@@ -1457,11 +1457,11 @@ Class 文件存储格式中对方法的描述与对字段的描述几乎采用�
 
 **method_info(方法表的) 结构:**
 
-![image-20220723174041110](./personal_images/image-20220723174041110.png)
+![image-20220723174041110](./personal_images/image-20220723174041110.webp)
 
 方法表的 access_flag 取值：
 
-![image-20220723174047943](./personal_images/image-20220723174047943.png)
+![image-20220723174047943](./personal_images/image-20220723174047943.webp)
 
 注意：因为`volatile`修饰符和`transient`修饰符不可以修饰方法，所以方法表的访问标志中没有这两个对应的标志，但是增加了`synchronized`、`native`、`abstract`等关键字修饰方法，所以也就多了这些关键字对应的标志。
 
@@ -1482,7 +1482,7 @@ Class 文件存储格式中对方法的描述与对字段的描述几乎采用�
 
 当 JVM 内存严重不足时，就会抛出 java.lang.OutOfMemoryError 错误。本文总结了常见的 OOM 原因及其解决方法，如下图所示。如有遗漏或错误，欢迎补充指正。
 
-![image-20220726150913148](./personal_images/image-20220726150913148.png)
+![image-20220726150913148](./personal_images/image-20220726150913148.webp)
 
 #### Java heap space
 
@@ -1605,7 +1605,7 @@ max user processes              (-u) 16384
 
 不同于其他的 OOM 错误，`Kill process or sacrifice child` 错误不是由 JVM 层面触发的，而是由操作系统层面触发的。当系统空闲内存突然大幅被释放，有较大概率触发了 OOM Killer 杀掉了某些进程。
 
-![image-20220726151232866](./personal_images/image-20220726151232866.png)
+![image-20220726151232866](./personal_images/image-20220726151232866.webp)
 
 ##### 原因分析
 

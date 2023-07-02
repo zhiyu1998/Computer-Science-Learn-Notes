@@ -315,7 +315,7 @@ public int maxProfit(int[] prices) {
 
 ### 思维链 Chain of Thought Prompting
 Jason Wei等作者对思维链的定义是一系列的中间推理步骤（ a series of intermediate reasoning steps ）。目的是为了提高大型语言模型（LLM）进行复杂推理的能力。
-![wiki-2](./images/CoT-fb6633dcdf94d4b6874a6d37b4e4909a.png)
+![wiki-2](./images/CoT-fb6633dcdf94d4b6874a6d37b4e4909a.webp)
 思维链通常是伴随着算术，常识和符号推理等复杂推理任务出现的。在解决复杂的推理任务（例如多步骤的数学单词问题）时，典型的做法是将问题分解成多个中间步骤，并逐一解决，然后再给出最后的答案。思维链为模型提供了一个可解释的窗口，引导它如何得出一个特定的答案并提供机会来调试推理过程中的出错点。
 
 个人理解：在图中翻译是这样：
@@ -350,14 +350,14 @@ Jason Wei等作者对思维链的定义是一系列的中间推理步骤（ a se
 这个技巧就是加一个prompt：
 > Let’s think step by step
 
-![wiki-3](./images/zCoT-b3c12322b1c5242e0fcee45480706bfb.png)
+![wiki-3](./images/zCoT-b3c12322b1c5242e0fcee45480706bfb.webp)
 
 ### 知识提示 Knowledge Prompting
 
 纳入外部知识是否能促进常识性推理仍然是一个开放的问题。一系列的工作表明，外部知识的整合可以提高模型的任务表现。知识提示（ Knowledge Prompting ）不需要对知识整合的具体任务进行监督，也不需要访问结构化的知识库。相反，知识提示可以直接从语言模型中产生知识，然后在回答问题时将这些知识作为附加输入。
 
 用作者的一句话来说“我们提出了一种简单但有效的方法，在few-shot的情况下从通用语言模型中获取知识陈述（即以自然语言陈述形式表达的知识）”。
-![wiki-4](./images/know-1c69199653d94f7ac624345d4e6b6da9.png)
+![wiki-4](./images/know-1c69199653d94f7ac624345d4e6b6da9.webp)
 知识提示主要分为两阶段：
 
 - 使用少量示范从语言模型中生成与问题相关的知识陈述
@@ -366,7 +366,7 @@ Jason Wei等作者对思维链的定义是一系列的中间推理步骤（ a se
 #### 第一步：知识生成
 这里我们打算通过 ChatGPT 回复常识性问题；“How many wings does a penguin have?”
 ChatGPT认为企鹅是没有翅膀的。
-![wiki-1](./images/wiki-209a19e269ee228ffa691db6cac386ee.png)
+![wiki-1](./images/wiki-209a19e269ee228ffa691db6cac386ee.webp)
 再打开一个对话框搜索，接着我们让 ChatGPT 生成一些跟企鹅有关的知识：`Generate 5 facts about penguins`
 1. Penguins are flightless birds found mainly in the Southern Hemisphere.
 2. There are 18 species of penguins, ranging in size from the Little Blue Penguin to the Emperor Penguin.

@@ -130,7 +130,7 @@ public void test() {
 
 ### AOP的专业术语和简单使用
 
-![b52f4ad2-0925-49f4-ae9b-13f62bdf31a0](./images/b52f4ad2-0925-49f4-ae9b-13f62bdf31a0.jpg)
+![b52f4ad2-0925-49f4-ae9b-13f62bdf31a0](./images/b52f4ad2-0925-49f4-ae9b-13f62bdf31a0.webp)
 
 ```
 try{
@@ -1147,7 +1147,7 @@ com.mchange.v2.c3p0.impl.NewProxyConnection@157632c9
 
 把IOC的配置提取到单独的文件：
 
-![e793c492-babe-44d7-8335-685c9ff1e526](./images/e793c492-babe-44d7-8335-685c9ff1e526.png)
+![e793c492-babe-44d7-8335-685c9ff1e526](./images/e793c492-babe-44d7-8335-685c9ff1e526.webp)
 
 ```properties
 username=root

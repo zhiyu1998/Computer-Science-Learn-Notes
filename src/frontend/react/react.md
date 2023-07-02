@@ -27,7 +27,7 @@ yarn create is available in Yarn 0.25+
 
 
 
-![image-20220414083224689](./images/image-20220414083224689.png)
+![image-20220414083224689](./images/image-20220414083224689.webp)
 
 
 
@@ -457,7 +457,7 @@ class App extends React.Component {
         super()
         this.state = {
             title: '标题',
-            imgUrl: 'http://p4.music.126.net/-8A5EGZ8hz3byulhycfk2Q==/109951165108319236.jpg',
+            imgUrl: 'http://p4.music.126.net/-8A5EGZ8hz3byulhycfk2Q==/109951165108319236.webp',
             link: 'http://www.baidu.com',
             active: true
         }
@@ -1023,7 +1023,7 @@ part two：
 
 整个生命周期：
 
-![image-20220605230344345](./images/image-20220605230344345.png)
+![image-20220605230344345](./images/image-20220605230344345.webp)
 
 具体可以参考：`https://www.runoob.com/react/react-component-life-cycle.html`
 

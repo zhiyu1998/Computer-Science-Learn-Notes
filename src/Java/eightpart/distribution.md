@@ -22,7 +22,7 @@ CAP 理论/定理起源于 2000年，由加州大学伯克利分校的Eric Brewe
 
 **CAP** 也就是 **Consistency（一致性）**、**Availability（可用性）**、**Partition Tolerance（分区容错性）** 这三个单词首字母组合。
 
-![image-20220726125103940](./personal_images/image-20220726125103940.png)
+![image-20220726125103940](./personal_images/image-20220726125103940.webp)
 
 CAP 理论的提出者布鲁尔在提出 CAP 猜想的时候，并没有详细定义 **Consistency**、**Availability**、**Partition Tolerance** 三个单词的明确定义。
 
@@ -38,7 +38,7 @@ CAP 理论的提出者布鲁尔在提出 CAP 猜想的时候，并没有详细�
 
 > 分布式系统中，多个节点之前的网络本来是连通的，但是因为某些故障（比如部分节点网络出了问题）某些节点之间不连通了，整个网络就分成了几块区域，这就叫网络分区。
 
-![image-20220726132654526](./personal_images/image-20220726132654526.png)
+![image-20220726132654526](./personal_images/image-20220726132654526.webp)
 
 ##### 不是所谓的“3 选 2”
 
@@ -64,7 +64,7 @@ CAP 理论的提出者布鲁尔在提出 CAP 猜想的时候，并没有详细�
 
 注册中心负责服务地址的注册与查找，相当于目录服务，服务提供者和消费者只在启动时与注册中心交互，注册中心不转发请求，压力较小。
 
-![image-20220726132721865](./personal_images/image-20220726132721865.png)
+![image-20220726132721865](./personal_images/image-20220726132721865.webp)
 
 常见的可以作为注册中心的组件有：ZooKeeper、Eureka、Nacos...。
 
@@ -100,7 +100,7 @@ CAP 理论这节我们也说过了：
 
 ##### BASE 理论三要素
 
-![image-20220726133418075](./personal_images/image-20220726133418075.png)
+![image-20220726133418075](./personal_images/image-20220726133418075.webp)
 
 ##### 基本可用
 
@@ -190,7 +190,7 @@ Basic Paxos 中存在 3 个重要的角色：
 2. **接受者（Acceptor）**：也可以叫做投票员（voter），负责对提议者的提议投票，同时需要记住自己的投票历史；
 3. **学习者（Learner）**：如果有超过半数接受者就某个提议达成了共识，那么学习者就需要接受这个提议，并就该提议作出运算，然后将运算结果返回给客户端。
 
-![image-20220726133642419](./personal_images/image-20220726133642419.png)
+![image-20220726133642419](./personal_images/image-20220726133642419.webp)
 
 ##### Multi Paxos 思想
 
@@ -226,7 +226,7 @@ Basic Paxos 中存在 3 个重要的角色：
 
 共识算法允许一组节点像一个整体一样一起工作，即使其中的一些节点出现故障也能够继续工作下去，其正确性主要是源于复制状态机的性质：一组`Server`的状态机计算相同状态的副本，即使有一部分的`Server`宕机了它们仍然能够继续运行。
 
-![image-20220726134912102](./personal_images/image-20220726134912102.png)
+![image-20220726134912102](./personal_images/image-20220726134912102.webp)
 
 一般通过使用复制日志来实现复制状态机。每个`Server`存储着一份包括命令序列的日志文件，状态机会按顺序执行这些命令。因为每个日志包含相同的命令，并且顺序也相同，所以每个状态机处理相同的命令序列。由于状态机是确定性的，所以处理相同的状态，得到相同的输出。
 
@@ -249,11 +249,11 @@ Basic Paxos 中存在 3 个重要的角色：
 
 在正常的情况下，只有一个服务器是 Leader，剩下的服务器是 Follower。Follower 是被动的，它们不会发送任何请求，只是响应来自 Leader 和 Candidate 的请求。
 
-![image-20220726134943719](./personal_images/image-20220726134943719.png)
+![image-20220726134943719](./personal_images/image-20220726134943719.webp)
 
 ##### 任期
 
-![image-20220726134951395](./personal_images/image-20220726134951395.png)
+![image-20220726134951395](./personal_images/image-20220726134951395.webp)
 
 如图 3 所示，raft 算法将时间划分为任意长度的任期（term），任期用连续的数字表示，看作当前 term  号。每一个任期的开始都是一次选举，在选举开始时，一个或多个 Candidate 会尝试成为 Leader。如果一个 Candidate  赢得了选举，它就会在该任期内担任 Leader。如果没有选出 Leader，将会开启另一个任期，并立刻开始下一次选举。raft  算法保证在给定的一个任期最少要有一个 Leader。
 
@@ -362,7 +362,7 @@ broadcastTime << electionTimeout << MTBF
 
 具体原理图如下，后面我会串起来将整个RPC的过程给大家说一下。
 
-![image-20220609151233412](./personal_images/image-20220609151233412.png)
+![image-20220609151233412](./personal_images/image-20220609151233412.webp)
 
 1. 服务消费端（client）以本地调用的方式调用远程服务；
 2. 客户端 Stub（client stub） 接收到调用后负责将方法、参数等组装成能够进行网络传输的消息体（序列化）：`RpcRequest`；
@@ -386,13 +386,13 @@ broadcastTime << electionTimeout << MTBF
 
 #### Dubbo
 
-![image-20220723235648648](./personal_images/image-20220723235648648.png)
+![image-20220723235648648](./personal_images/image-20220723235648648.webp)
 
 Apache Dubbo 是一款微服务框架，为大规模微服务实践提供高性能 RPC 通信、流量治理、可观测性等解决方案， 涵盖 Java、Golang 等多种语言 SDK 实现。
 
 Dubbo 提供了从服务定义、服务发现、服务通信到流量管控等几乎所有的服务治理能力，支持 Triple 协议（基于 HTTP/2 之上定义的下一代 RPC 通信协议）、应用级服务发现、Dubbo Mesh （Dubbo3 赋予了很多云原生友好的新特性）等特性。
 
-![image-20220723235657177](./personal_images/image-20220723235657177.png)
+![image-20220723235657177](./personal_images/image-20220723235657177.webp)
 
 Dubbo 是由阿里开源，后来加入了 Apache 。正式由于 Dubbo 的出现，才使得越来越多的公司开始使用以及接受分布式架构。
 
@@ -418,7 +418,7 @@ Motan 是新浪微博开源的一款 RPC 框架，据说在新浪微博正支撑
 
 #### gRPC
 
-![image-20220723235737977](./personal_images/image-20220723235737977.png)
+![image-20220723235737977](./personal_images/image-20220723235737977.webp)
 
 gRPC 是 Google 开源的一个高性能、通用的开源 RPC 框架。其由主要面向移动应用开发并基于 HTTP/2 协议标准而设计（支持双向流、消息头压缩等功能，更加节省带宽），基于 ProtoBuf 序列化协议开发，并且支持众多开发语言。
 
@@ -426,7 +426,7 @@ gRPC 是 Google 开源的一个高性能、通用的开源 RPC 框架。其由�
 
  是一种更加灵活、高效的数据格式，可用于通讯协议、数据存储等领域，基本支持所有主流编程语言且与平台无关。不过，通过 ProtoBuf 定义接口和数据类型还挺繁琐的，这是一个小问题。
 
-![image-20220723235747598](./personal_images/image-20220723235747598.png)
+![image-20220723235747598](./personal_images/image-20220723235747598.webp)
 
 不得不说，gRPC 的通信层的设计还是非常优秀的，[Dubbo-go 3.0](https://dubbogo.github.io/)
 
@@ -458,11 +458,11 @@ Dubbo 不论是从功能完善程度、生态系统还是社区活跃度来说�
 
 下图展示了 Dubbo 的生态系统。
 
-![image-20220723235849004](./personal_images/image-20220723235849004.png)
+![image-20220723235849004](./personal_images/image-20220723235849004.webp)
 
 Dubbo 也是 Spring Cloud Alibaba 里面的一个组件。
 
-![image-20220723235856647](./personal_images/image-20220723235856647.png)
+![image-20220723235856647](./personal_images/image-20220723235856647.webp)
 
 但是，Dubbo 和 Motan 主要是给 Java 语言使用。虽然，Dubbo 和 Motan 目前也能兼容部分语言，但是不太推荐。如果需要跨多种语言调用的话，可以考虑使用 gRPC。
 
@@ -563,7 +563,7 @@ public class FeignConfiguration {
 
 #### ✔️2pc（两段式提交） 
 
-![image-20220617144013552](./personal_images/image-20220617144013552.png)
+![image-20220617144013552](./personal_images/image-20220617144013552.webp)
 
 **2pc（两段式提交）**可以说是分布式事务的最开始的样子了，像极了**媒婆**，就是通过消息中间件协调多个系统，在两个系统操作事务的时候都锁定资源但是不提交事务，等两者都准备好了，告诉消息中间件，然后再分别提交事务。
 
@@ -587,7 +587,7 @@ public class FeignConfiguration {
 
 提交阶段和 2PC 的一样，让我们来看一下图。
 
-![image-20220725145659669](./personal_images/image-20220725145659669.png)
+![image-20220725145659669](./personal_images/image-20220725145659669.webp)
 
 不管哪一个阶段有参与者返回失败都会宣布事务失败，这和 2PC 是一样的（当然到最后的提交阶段和 2PC 一样只要是提交请求就只能不断重试）。
 
@@ -650,7 +650,7 @@ TCC 指的是`Try - Confirm - Cancel`。
 
 我们来看下流程，TCC模型还有个事务管理者的角色，用来记录TCC全局事务状态并提交或者回滚事务。
 
-![image-20220913115340867](./personal_images/image-20220913115340867.png)
+![image-20220913115340867](./personal_images/image-20220913115340867.webp)
 
 可以看到流程还是很简单的，难点在于业务上的定义，对于每一个操作你都需要定义三个动作分别对应`Try - Confirm - Cancel`。
 
@@ -708,7 +708,7 @@ RocketMQ 就很好的支持了消息事务，让我们来看一下如何通过�
 
 可以看到通过 RocketMQ 还是比较容易实现的，RocketMQ 提供了事务消息的功能，我们只需要定义好事务反查接口即可。
 
-![image-20220725145800448](./personal_images/image-20220725145800448.png)
+![image-20220725145800448](./personal_images/image-20220725145800448.webp)
 
 可以看到消息事务实现的也是最终一致性。
 
@@ -716,7 +716,7 @@ RocketMQ 就很好的支持了消息事务，让我们来看一下如何通过�
 
 #### 最终一致性
 
-![image-20220617144020576](./personal_images/image-20220617144020576.png)
+![image-20220617144020576](./personal_images/image-20220617144020576.webp)
 
 整个流程中，我们能保证是：
 
@@ -748,7 +748,7 @@ RocketMQ 就很好的支持了消息事务，让我们来看一下如何通过�
 
 #### TCC-Transaction框架
 
-![image-20220913170527093](./personal_images/image-20220913170527093.png)
+![image-20220913170527093](./personal_images/image-20220913170527093.webp)
 
 
 
@@ -832,7 +832,7 @@ RocketMQ 就很好的支持了消息事务，让我们来看一下如何通过�
 
 **主要流程：**
 
-![image-20220725150136872](./personal_images/image-20220725150136872.png)
+![image-20220725150136872](./personal_images/image-20220725150136872.webp)
 
 主要流程：
 
@@ -856,7 +856,7 @@ RocketMQ 就很好的支持了消息事务，让我们来看一下如何通过�
 
 **描述示例：**
 
-![image-20220725150153331](./personal_images/image-20220725150153331.png)
+![image-20220725150153331](./personal_images/image-20220725150153331.webp)
 
 例如，存在如下的数据表中：
 
@@ -901,7 +901,7 @@ UPDATE my_table SET price=price+50,version=version+1 WHERE id=1 AND version=5
 
 **主要流程：**
 
-![image-20220725150246041](./personal_images/image-20220725150246041.png)
+![image-20220725150246041](./personal_images/image-20220725150246041.webp)
 
 - ① 服务端提供获取 Token 的接口，该 Token 可以是一个序列号，也可以是一个分布式 ID 或者 UUID 串。
 - ② 客户端调用接口获取 Token，这时候服务端会生成一个 Token 串。
@@ -937,7 +937,7 @@ UPDATE my_table SET price=price+50,version=version+1 WHERE id=1 AND version=5
 
 **主要流程：**
 
-![image-20220725150306807](./personal_images/image-20220725150306807.png)
+![image-20220725150306807](./personal_images/image-20220725150306807.webp)
 
 主要步骤：
 
@@ -1046,7 +1046,7 @@ Snowflake，雪花算法是由Twitter开源的分布式ID生成算法，以划�
 
 算法结构
 
-![image-20220709155254210](./personal_images/image-20220709155254210.png)
+![image-20220709155254210](./personal_images/image-20220709155254210.webp)
 
 优势：
 
@@ -1074,7 +1074,7 @@ snowflake非常依赖系统时间的一致性，如果发生系统时间的回�
 
 算法结构
 
-![image-20220709155341400](./personal_images/image-20220709155341400.png)
+![image-20220709155341400](./personal_images/image-20220709155341400.webp)
 
 ksuid由两部分组成
 
@@ -1131,7 +1131,7 @@ ksuid由两部分组成
 5. 运行期流量调度。
 6. 可视化的服务治理与运维。
 
-![image-20220726154002025](./personal_images/image-20220726154002025.png)
+![image-20220726154002025](./personal_images/image-20220726154002025.webp)
 
 简单来说就是： **Dubbo 不光可以帮助我们调用远程服务，还提供了一些其他开箱即用的功能比如智能负载均衡。**
 
@@ -1164,7 +1164,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
 
 `AbstractLoadBalance` 的实现类有下面这些：
 
-![image-20220726154345877](./personal_images/image-20220726154345877.png)
+![image-20220726154345877](./personal_images/image-20220726154345877.webp)
 
 官方文档对负载均衡这部分的介绍非常详细，推荐小伙伴们看看，地址：https://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/#m-zhdocsv27devsourceloadbalance
 
@@ -1176,7 +1176,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
 
 我们把这些权重值分布在坐标区间会得到：S1->[0, 7) ，S2->[7, 10)。我们生成[0, 10) 之间的随机数，随机数落到对应的区间，我们就选择对应的服务器来处理请求。
 
-![image-20220726154405163](./personal_images/image-20220726154405163.png)
+![image-20220726154405163](./personal_images/image-20220726154405163.webp)
 
 `RandomLoadBalance` 的源码非常简单，简单花几分钟时间看一下。
 
@@ -1321,11 +1321,11 @@ public class RpcStatus {
 
 `ConsistentHashLoadBalance` 即**一致性Hash负载均衡策略**。 `ConsistentHashLoadBalance` 中没有权重的概念，具体是哪个服务提供者处理请求是由你的请求的参数决定的，也就是说相同参数的请求总是发到同一个服务提供者。
 
-![image-20220726154509626](./personal_images/image-20220726154509626.png)
+![image-20220726154509626](./personal_images/image-20220726154509626.webp)
 
 另外，Dubbo 为了避免数据倾斜问题（节点不够分散，大量请求落到同一节点），还引入了虚拟节点的概念。通过虚拟节点可以让节点更加分散，有效均衡各个节点的请求量。
 
-![image-20220726154517156](./personal_images/image-20220726154517156.png)
+![image-20220726154517156](./personal_images/image-20220726154517156.webp)
 
 官方有详细的源码分析：https://dubbo.apache.org/zh/docs/v2.7/dev/source/loadbalance/#23-consistenthashloadbalance 。
 

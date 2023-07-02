@@ -20,65 +20,65 @@ This is the Data Structure mind map written down for the post-graduate examinati
 
 ### 第一章   绪论
 
-![](./img/preorder.png)
+![](./img/preorder.webp)
 
 
 
 ### 第二章  线性表
 
-![](./img/arraylist.png)
+![](./img/arraylist.webp)
 
 
 
 ### 第三章  栈和队列
 
-![](./img/stack&queue.png)
+![](./img/stack&queue.webp)
 
 
 
 ### 第三章 串
 
-![](./img/string.png)
+![](./img/string.webp)
 
 
 
 ### 第四章  数组和广义表
 
-![](./img/array.png)
+![](./img/array.webp)
 
 
 
 ### 第五章  树与二叉树
 
-![](./img/bitree.png)
+![](./img/bitree.webp)
 
 
 
 ### 第六章  图
 
-![](./img/graph.png)
+![](./img/graph.webp)
 
 
 
 ### 第七章 查找
 
-![](./img/search.png)
+![](./img/search.webp)
 
 
 
 ### 第八章  排序
 
-![](./img/sort.png)
+![](./img/sort.webp)
 
 
 
 ### 第九章  文件
 
-![](./img/file.png)
+![](./img/file.webp)
 
 
 
 ### 考前必看题型
 
-![](./img/pre-pratical-questions.png)
+![](./img/pre-pratical-questions.webp)
 
