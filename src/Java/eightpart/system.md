@@ -10,13 +10,90 @@ category:
 
 ## 💻操作系统
 
-### 什么是协程？
+### 协程 & 虚拟线程
 
 协程是一种用户态的轻量级线程。
 
 协程不是由操作系统内核管理，而是完全由用户程序所控制，这样带来的好处就是性能得到了很大的提升，不会像线程切换那样消耗资源。
 
 协程可以理解为可以暂停执行的函数。它拥有自己的寄存器上下文和栈。协程调度切换时，将寄存器上下文和栈保存到其他地方，在切回来的时候，恢复先前保存的寄存器上下文和栈，直接操作栈则基本没有内核切换的开销，可以不加锁的访问全局变量，所以上下文的切换非常快。
+
+**Kotlin 协程**:
+
+Kotlin 提供了 `kotlinx.coroutines` 库来支持协程。以下是一个简单的示例，演示了如何使用协程执行异步任务：
+
+```kotlin
+import kotlinx.coroutines.*
+
+fun main() = runBlocking {
+    launch {
+        delay(1000L)
+        println("World!")
+    }
+    println("Hello,")
+    delay(2000L)
+}
+```
+
+**Go 协程**:
+
+Go 语言内置了对协程的支持，称为 goroutines。以下是一个简单的示例，演示了如何使用 goroutines 执行并发任务：
+
+```go
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	go func() {
+		time.Sleep(1 * time.Second)
+		fmt.Println("World!")
+	}()
+
+	fmt.Println("Hello,")
+	time.Sleep(2 * time.Second)
+}
+```
+
+**虚拟线程**
+
+虚拟线程是 Java 19 引入的一种轻量级线程，它们旨在提高并发性能。虚拟线程在底层使用一种称为**结构化并发**的模型，该模型允许程序更有效地管理资源。虚拟线程允许程序在单个线程中执行多个任务，而不会消耗过多的系统资源。
+
+以下是一个简单的虚拟线程示例，使用 Java 19 编写：
+
+```java
+import java.util.concurrent.*;
+
+public class VirtualThreadExample {
+    public static void main(String[] args) {
+        ExecutorService executor = Executors.newVirtualThreadExecutor();
+
+        Runnable task1 = () -> {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("World!");
+        };
+
+        Runnable task2 = () -> System.out.println("Hello,");
+
+        executor.submit(task1);
+        executor.submit(task2);
+
+        try {
+            executor.shutdown();
+            executor.awaitTermination(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
 
 
 
@@ -34,6 +111,86 @@ category:
 - 线程是进程划分成的更小的运行单位,一个进程在其执行的过程中可以产生多个线程。
 - 线程和进程最大的不同在于基本上各进程是独立的，而各线程则不一定，因为同一进程中的线程极有可能会相互影响。
 - 线程执行开销小，但不利于资源的管理和保护；而进程正相反。
+
+
+
+### Linux 进程的内存分布长什么样？
+
+在 Linux 操作系统中，虚拟地址空间的内部又被分为**内核空间和用户空间**两部分，不同位数的系统，地址空间的范围也不同。比如最常见的 32 位和 64 位系统，如下所示：
+
+![最常见的 32 位和 64 位系统](./personal_images/1db038e1d2e5325b05e2bb80475d962a.webp)
+
+通过这里可以看出：
+
+- `32` 位系统的内核空间占用 `1G`，位于最高处，剩下的 `3G` 是用户空间；
+- `64` 位系统的内核空间和用户空间都是 `128T`，分别占据整个内存空间的最高和最低处，剩下的中间部分是未定义的。
+
+再来说说，内核空间与用户空间的区别：
+
+- 进程在用户态时，只能访问用户空间内存；
+- 只有进入内核态后，才可以访问内核空间的内存；
+
+虽然每个进程都各自有独立的虚拟内存，但是**每个虚拟内存中的内核地址，其实关联的都是相同的物理内存**。这样，进程切换到内核态后，就可以很方便地访问内核空间内存。
+
+![c88bda5db60029f3ea57e4306e7da936](./personal_images/c88bda5db60029f3ea57e4306e7da936.webp)
+
+接下来，进一步了解虚拟空间的划分情况，用户空间和内核空间划分的方式是不同的，内核空间的分布情况就不多说了。
+
+我们看看用户空间分布的情况，以 32 位系统为例，我画了一张图来表示它们的关系：
+
+通过这张图你可以看到，用户空间内存从**低到高**分别是 6 种不同的内存段：
+
+![32位虚拟内存布局](./personal_images/32位虚拟内存布局.webp)
+
+- 代码段，包括二进制可执行代码；
+- 数据段，包括已初始化的静态常量和全局变量；
+- BSS 段，包括未初始化的静态变量和全局变量；
+- 堆段，包括动态分配的内存，从低地址开始向上增长；
+- 文件映射段，包括动态库、共享内存等，从低地址开始向上增长（[跟硬件和内核版本有关 (opens new window)](http://lishiwen4.github.io/linux/linux-process-memory-location)）；
+- 栈段，包括局部变量和函数调用的上下文等。栈的大小是固定的，一般是 `8 MB`。当然系统也提供了参数，以便我们自定义大小；
+
+在这 6 个内存段中，堆和文件映射段的内存是动态分配的。比如说，使用 C 标准库的 `malloc()` 或者 `mmap()` ，就可以分别在堆和文件映射段动态分配内存。
+
+
+
+### 什么是上下文切换？
+
+在多线程编程中，通常线程的数量大于 CPU 核心的数量，尽管在一些特定的环境（例如实时系统）或者为了避免上下文切换的开销，可能会将线程数量限制在和 CPU 核心数相等或者更少。无论何时，一个 CPU 核心只能被一个线程使用。为了保证所有线程得到有效执行，CPU 为每个线程分配时间片并采用轮转的形式进行调度。
+
+当一个线程的时间片用完，CPU 会将该线程的状态（例如寄存器值、程序计数器等）保存到内存中，并从内存中加载另一个线程的状态以进行下一轮的执行。这个过程就是我们所说的"上下文切换"。
+
+- **定义**：当前任务在执行完 CPU 时间片切换到另一个任务之前会先保存自己的状态，以便下次再切换回这个任务时，可以再加载这个任务的状态。从保存到再加载的过程就是一次上下文切换。
+- **消耗**：上下文切换需要消耗一定的处理器时间，虽然每次切换只需要纳秒量级的时间，但在每秒需要进行几十次甚至上百次的切换中，这种消耗是积累的。因此，上下文切换对系统来说意味着消耗大量的 CPU 时间，可能是操作系统中时间消耗最大的一种操作。虽然上下文切换会消耗 CPU 资源，但它实际上是在不同线程之间共享 CPU 时间，从而实现多任务并发执行。
+- **优化**：对于上下文切换，不同的操作系统可能有不同的优化策略。例如，Linux 操作系统相比其他操作系统（包括其他类 Unix 系统）在上下文切换和模式切换（从用户态切换到内核态，或从内核态切换到用户态）的时间消耗上表现出较大的优势。此外，Linux 操作系统还会使用 CFS（完全公平调度算法）进行调度，以降低上下文切换的频率和开销。对于开发者来说，也可以通过避免频繁创建和销毁线程，减少锁的使用，使用线程池复用线程，或者使用更高级的同步机制（如无锁编程，条件变量，信号量等）以及通过优化数据局部性来减少缓存失效等方法，从而减少上下文切换的开销。
+
+
+
+### 什么是文件描述符
+
+> 维基百科：文件描述符在形式上是一个非负整数。实际上，它是一个索引值，指向[内核](https://zh.wikipedia.org/wiki/内核)为每一个[进程](https://zh.wikipedia.org/wiki/进程)所维护的该进程打开文件的记录表。当程序打开一个现有文件或者创建一个新文件时，内核向进程返回一个文件描述符。在[程序设计](https://zh.wikipedia.org/wiki/程序设计)中，一些涉及底层的程序编写往往会围绕着文件描述符展开。但是文件描述符这一概念往往只适用于[UNIX](https://zh.wikipedia.org/wiki/UNIX)、[Linux](https://zh.wikipedia.org/wiki/Linux)这样的操作系统。
+
+简单来说，当你打开一个文件时，操作系统会创建一个条目来表示该文件，并存储有关该打开文件的信息。因此，如果在您的操作系统中打开了100个文件，则操作系统中会有100个条目（在内核的某个地方）。这些条目由整数表示，例如（...100、101、102...）。这个条目号码就是文件描述符。因此，它只是一个整数号码，唯一地表示进程打开的文件。如果您的进程打开了10个文件，则进程表中会有10个文件描述符条目。
+
+同样，当您打开网络套接字时，它也由一个整数表示，称为套接字描述符。
+
+
+
+> 和pid有什么区别？
+
+文件描述符（file descriptor）和进程ID（process ID）是不同的概念。
+
+- 文件描述符是一个整数，用于唯一标识打开的文件或其他I/O资源，例如管道或套接字。它是一种操作系统提供的机制，用于访问文件或其他I/O资源。
+- 进程ID是一个整数，用于唯一标识正在运行的进程。每个进程都有一个唯一的进程ID，它是由操作系统分配的。进程ID是用于操作系统在进程之间进行区分和跟踪的重要标识符。
+
+
+
+> 参考：
+>
+> 1. https://www.computerhope.com/jargon/f/file-descriptor.htm
+> 2. https://zh.wikipedia.org/wiki/%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6
+> 3. https://stackoverflow.com/questions/5256599/what-are-file-descriptors-explained-in-simple-terms
+
+ 
 
 ### 进程有哪几种状态?
 
@@ -62,6 +219,118 @@ category:
 5. **信号量(Semaphores)** ：信号量是一个计数器，用于多进程对共享数据的访问，信号量的意图在于进程间同步。这种通信方式主要用于解决与同步相关的问题并避免竞争条件。
 6. **共享内存(Shared memory)** ：使得多个进程可以访问同一块内存空间，不同进程可以及时看到对方进程中对共享内存中数据的更新。这种方式需要依靠某种同步操作，如互斥锁和信号量等。可以说这是最有用的进程间通信方式。
 7. **套接字(Sockets)** : 此方法主要用于在客户端和服务器之间通过网络进行通信。套接字是支持 TCP/IP 的网络通信的基本操作单元，可以看做是不同主机之间的进程进行双向通信的端点，简单的说就是通信的两方的一种约定，用套接字中的相关函数来完成通信过程。
+
+
+
+🦹 *Java中如何做进程间通讯的？*
+
+**套接字（Socket）通信**
+
+套接字允许两个运行在不同进程或不同计算机上的程序之间进行通信。在Java中，使用`java.net.Socket`类和`java.net.ServerSocket`类来实现客户端和服务器之间的TCP通信。对于UDP通信，可以使用`java.net.DatagramSocket`类。
+
+示例代码:
+
+~~~java
+import java.io.*;
+import java.net.*;
+
+// 服务器端
+public class Server {
+    public static void main(String[] args) throws IOException {
+        ServerSocket serverSocket = new ServerSocket(8888);
+        System.out.println("服务器已启动，等待连接...");
+
+        Socket socket = serverSocket.accept();
+        DataInputStream input = new DataInputStream(socket.getInputStream());
+        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+
+        String message = input.readUTF();
+        System.out.println("收到客户端消息: " + message);
+
+        output.writeUTF("你好，客户端！");
+
+        input.close();
+        output.close();
+        socket.close();
+        serverSocket.close();
+    }
+}
+
+// 客户端
+import java.io.*;
+import java.net.*;
+
+public class Client {
+    public static void main(String[] args) throws IOException {
+        Socket socket = new Socket("localhost", 8888);
+        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+        DataInputStream input = new DataInputStream(socket.getInputStream());
+
+        output.writeUTF("你好，服务器！");
+
+        String message = input.readUTF();
+        System.out.println("收到服务器消息: " + message);
+
+        input.close();
+        output.close();
+        socket.close();
+    }
+}
+```
+~~~
+
+**管道通信（Pipes）**
+
+管道是一种单向通信方式，可以在两个独立的进程或线程之间传输数据。在Java中，可以使用`java.io.PipedInputStream`和`java.io.PipedOutputStream`实现管道通信。
+
+示例代码:
+
+```java
+import java.io.*;
+
+public class PipeExample {
+    public static void main(String[] args) throws IOException, InterruptedException {
+        final PipedOutputStream output = new PipedOutputStream();
+        final PipedInputStream input = new PipedInputStream(output);
+
+        Thread sender = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    output.write("Hello, Receiver!".getBytes());
+                    output.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        Thread receiver = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    int data = input.read();
+                    while (data != -1) {
+                        System.out.print((char) data);
+                        data = input.read();
+                    }
+                    input.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        sender.start();
+        receiver.start();
+
+        sender.join();
+        receiver.join();
+    }
+}
+```
+
+
 
 ### 线程间的同步的方式
 
@@ -121,6 +390,265 @@ category:
 5. **使用定时器**：你可以使用ScheduledExecutorService来设置一个定时器，当线程在特定时间内没有完成任务，那么你可以停止它。
 
 > 使用synchronized关键字不当反而是Java中死锁产生的常见原因。当两个或多个线程各自持有一些资源并同时请求对方持有的资源时，就可能发生死锁。
+
+
+
+### ✨Reactor模型深入浅出
+
+#### 前言
+
+如果要让服务器服务多个客户端，那么最直接的方式就是为每一条连接创建线程。
+
+其实创建进程也是可以的，原理是一样的，进程和线程的区别在于线程比较轻量级些，线程的创建和线程间切换的成本要小些，为了描述简述，后面都以线程为例。
+
+处理完业务逻辑后，随着连接关闭后线程也同样要销毁了，但是这样不停地创建和销毁线程，不仅会带来性能开销，也会造成浪费资源，而且如果要连接几万条连接，创建几万个线程去应对也是不现实的。
+
+要这么解决这个问题呢？我们可以使用「资源复用」的方式。
+
+也就是不用再为每个连接创建线程，而是创建一个「线程池」，将连接分配给线程，然后一个线程可以处理多个连接的业务。
+
+不过，这样又引来一个新的问题，线程怎样才能高效地处理多个连接的业务？
+
+当一个连接对应一个线程时，线程一般采用「read -> 业务处理 -> send」的处理流程，如果当前连接没有数据可读，那么线程会阻塞在 `read` 操作上（ socket 默认情况是阻塞 I/O），不过这种阻塞方式并不影响其他线程。
+
+但是引入了线程池，那么一个线程要处理多个连接的业务，线程在处理某个连接的 `read` 操作时，如果遇到没有数据可读，就会发生阻塞，那么线程就没办法继续处理其他连接的业务。
+
+要解决这一个问题，最简单的方式就是将 socket 改成非阻塞，然后线程不断地轮询调用 `read` 操作来判断是否有数据，这种方式虽然该能够解决阻塞的问题，但是解决的方式比较粗暴，因为轮询是要消耗 CPU 的，而且随着一个 线程处理的连接越多，轮询的效率就会越低。
+
+上面的问题在于，线程并不知道当前连接是否有数据可读，从而需要每次通过 `read` 去试探。
+
+那有没有办法在只有当连接上有数据的时候，线程才去发起读请求呢？答案是有的，实现这一技术的就是 I/O 多路复用。
+
+I/O 多路复用技术会用一个系统调用函数来监听我们所有关心的连接，也就说可以在一个监控线程里面监控很多的连接。
+
+![image-20220725152308276](./personal_images/image-20220725152308276.webp)
+
+我们熟悉的 select/poll/epoll 就是内核提供给用户态的多路复用系统调用，线程可以通过一个系统调用函数从内核中获取多个事件。
+
+select/poll/epoll 是如何获取网络事件的呢？
+
+在获取事件时，先把我们要关心的连接传给内核，再由内核检测：
+
+- 如果没有事件发生，线程只需阻塞在这个系统调用，而无需像前面的线程池方案那样轮训调用 read 操作来判断是否有数据。
+- 如果有事件发生，内核会返回产生了事件的连接，线程就会从阻塞状态返回，然后在用户态中再处理这些连接对应的业务即可。
+
+当下开源软件能做到网络高性能的原因就是 I/O 多路复用吗？
+
+是的，基本是基于 I/O 多路复用，用过 I/O 多路复用接口写网络程序的同学，肯定知道是面向过程的方式写代码的，这样的开发的效率不高。
+
+于是，大佬们基于面向对象的思想，对 I/O 多路复用作了一层封装，让使用者不用考虑底层网络 API 的细节，只需要关注应用代码的编写。
+
+大佬们还为这种模式取了个让人第一时间难以理解的名字：**Reactor 模式**。
+
+Reactor 翻译过来的意思是「反应堆」，可能大家会联想到物理学里的核反应堆，实际上并不是的这个意思。
+
+这里的反应指的是「**对事件反应**」，也就是**来了一个事件，Reactor 就有相对应的反应/响应**。
+
+事实上，Reactor 模式也叫 `Dispatcher` 模式，我觉得这个名字更贴合该模式的含义，即 **I/O 多路复用监听事件，收到事件后，根据事件类型分配（Dispatch）给某个进程 / 线程**。
+
+Reactor 模式主要由 Reactor 和处理资源池这两个核心部分组成，它俩负责的事情如下：
+
+- Reactor 负责监听和分发事件，事件类型包含连接事件、读写事件；
+- 处理资源池负责处理事件，如 read -> 业务逻辑 -> send；
+
+Reactor 模式是灵活多变的，可以应对不同的业务场景，灵活在于：
+
+- Reactor 的数量可以只有一个，也可以有多个；
+- 处理资源池可以是单个进程 / 线程，也可以是多个进程 /线程；
+
+将上面的两个因素排列组设一下，理论上就可以有 4 种方案选择：
+
+- 单 Reactor 单进程 / 线程；
+- 单 Reactor 多进程 / 线程；
+- 多 Reactor 单进程 / 线程；
+- 多 Reactor 多进程 / 线程；
+
+其中，「多 Reactor 单进程 / 线程」实现方案相比「单 Reactor 单进程 / 线程」方案，不仅复杂而且也没有性能优势，因此实际中并没有应用。
+
+剩下的 3 个方案都是比较经典的，且都有应用在实际的项目中：
+
+- 单 Reactor 单进程 / 线程；
+- 单 Reactor 多线程 / 进程；
+- 多 Reactor 多进程 / 线程；
+
+方案具体使用进程还是线程，要看使用的编程语言以及平台有关：
+
+- Java 语言一般使用线程，比如 Netty;
+- C 语言使用进程和线程都可以，例如 Nginx 使用的是进程，Memcache 使用的是线程。
+
+接下来，分别介绍这三个经典的 Reactor 方案。
+
+#### Reactor
+
+##### 单 Reactor 单进程 / 线程
+
+一般来说，C 语言实现的是「**单 Reactor \*单进程\***」的方案，因为 C 语编写完的程序，运行后就是一个独立的进程，不需要在进程中再创建线程。
+
+而 Java 语言实现的是「**单 Reactor \*单线程\***」的方案，因为 Java 程序是跑在 Java 虚拟机这个进程上面的，虚拟机中有很多线程，我们写的 Java 程序只是其中的一个线程而已。
+
+我们来看看「**单 Reactor 单进程**」的方案示意图：
+
+![image-20220725152351105](./personal_images/image-20220725152351105.webp)
+
+可以看到进程里有 **Reactor、Acceptor、Handler** 这三个对象：
+
+- Reactor 对象的作用是监听和分发事件；
+- Acceptor 对象的作用是获取连接；
+- Handler 对象的作用是处理业务；
+
+对象里的 select、accept、read、send 是系统调用函数，dispatch 和 「业务处理」是需要完成的操作，其中 dispatch 是分发事件操作。
+
+接下来，介绍下「单 Reactor 单进程」这个方案：
+
+- Reactor 对象通过 select （IO 多路复用接口） 监听事件，收到事件后通过 dispatch 进行分发，具体分发给 Acceptor 对象还是 Handler 对象，还要看收到的事件类型；
+- 如果是连接建立的事件，则交由 Acceptor 对象进行处理，Acceptor 对象会通过 accept 方法 获取连接，并创建一个 Handler 对象来处理后续的响应事件；
+- 如果不是连接建立事件， 则交由当前连接对应的 Handler 对象来进行响应；
+- Handler 对象通过 read -> 业务处理 -> send 的流程来完成完整的业务流程。
+
+单 Reactor 单进程的方案因为全部工作都在同一个进程内完成，所以实现起来比较简单，不需要考虑进程间通信，也不用担心多进程竞争。
+
+但是，这种方案存在 2 个缺点：
+
+- 第一个缺点，因为只有一个进程，**无法充分利用 多核 CPU 的性能**；
+- 第二个缺点，Handler 对象在业务处理时，整个进程是无法处理其他连接的事件的，**如果业务处理耗时比较长，那么就造成响应的延迟**；
+
+所以，单 Reactor 单进程的方案**不适用计算机密集型的场景，只适用于业务处理非常快速的场景**。
+
+Redis 是由 C 语言实现的，在 Redis 6.0 版本之前采用的正是「单 Reactor 单进程」的方案，因为 Redis 业务处理主要是在内存中完成，操作的速度是很快的，性能瓶颈不在 CPU 上，所以 Redis 对于命令的处理是单进程的方案。
+
+
+
+##### 单 Reactor 多线程 / 多进程
+
+如果要克服「单 Reactor 单线程 / 进程」方案的缺点，那么就需要引入多线程 / 多进程，这样就产生了**单 Reactor 多线程 / 多进程**的方案。
+
+闻其名不如看其图，先来看看「单 Reactor 多线程」方案的示意图如下：
+
+![image-20220725152423113](./personal_images/image-20220725152423113.webp)
+
+详细说一下这个方案：
+
+- Reactor 对象通过 select （IO 多路复用接口） 监听事件，收到事件后通过 dispatch 进行分发，具体分发给 Acceptor 对象还是 Handler 对象，还要看收到的事件类型；
+- 如果是连接建立的事件，则交由 Acceptor 对象进行处理，Acceptor 对象会通过 accept 方法 获取连接，并创建一个 Handler 对象来处理后续的响应事件；
+- 如果不是连接建立事件， 则交由当前连接对应的 Handler 对象来进行响应；
+
+上面的三个步骤和单 Reactor 单线程方案是一样的，接下来的步骤就开始不一样了：
+
+- Handler 对象不再负责业务处理，只负责数据的接收和发送，Handler 对象通过 read 读取到数据后，会将数据发给子线程里的 Processor 对象进行业务处理；
+- 子线程里的 Processor 对象就进行业务处理，处理完后，将结果发给主线程中的 Handler 对象，接着由 Handler 通过 send 方法将响应结果发送给 client；
+
+单 Reator 多线程的方案优势在于**能够充分利用多核 CPU 的能**，那既然引入多线程，那么自然就带来了多线程竞争资源的问题。
+
+例如，子线程完成业务处理后，要把结果传递给主线程的 Handler 进行发送，这里涉及共享数据的竞争。
+
+要避免多线程由于竞争共享资源而导致数据错乱的问题，就需要在操作共享资源前加上互斥锁，以保证任意时间里只有一个线程在操作共享资源，待该线程操作完释放互斥锁后，其他线程才有机会操作共享数据。
+
+聊完单 Reactor 多线程的方案，接着来看看单 Reactor 多进程的方案。
+
+事实上，单 Reactor 多进程相比单 Reactor 多线程实现起来很麻烦，主要因为要考虑子进程 <-> 父进程的双向通信，并且父进程还得知道子进程要将数据发送给哪个客户端。
+
+而多线程间可以共享数据，虽然要额外考虑并发问题，但是这远比进程间通信的复杂度低得多，因此实际应用中也看不到单 Reactor 多进程的模式。
+
+另外，「单 Reactor」的模式还有个问题，**因为一个 Reactor 对象承担所有事件的监听和响应，而且只在主线程中运行，在面对瞬间高并发的场景时，容易成为性能的瓶颈的地方**。
+
+
+
+##### 多 Reactor 多进程 / 线程
+
+要解决「单 Reactor」的问题，就是将「单 Reactor」实现成「多 Reactor」，这样就产生了第 **多 Reactor 多进程 / 线程**的方案。
+
+老规矩，闻其名不如看其图。多 Reactor 多进程 / 线程方案的示意图如下（以线程为例）：
+
+![image-20220725152443546](./personal_images/image-20220725152443546.webp)
+
+方案详细说明如下：
+
+- 主线程中的 MainReactor 对象通过 select 监控连接建立事件，收到事件后通过 Acceptor 对象中的 accept  获取连接，将新的连接分配给某个子线程；
+- 子线程中的 SubReactor 对象将 MainReactor 对象分配的连接加入 select 继续进行监听，并创建一个 Handler 用于处理连接的响应事件。
+- 如果有新的事件发生时，SubReactor 对象会调用当前连接对应的 Handler 对象来进行响应。
+- Handler 对象通过 read -> 业务处理 -> send 的流程来完成完整的业务流程。
+
+多 Reactor 多线程的方案虽然看起来复杂的，但是实际实现时比单 Reactor 多线程的方案要简单的多，原因如下：
+
+- 主线程和子线程分工明确，主线程只负责接收新连接，子线程负责完成后续的业务处理。
+- 主线程和子线程的交互很简单，主线程只需要把新连接传给子线程，子线程无须返回数据，直接就可以在子线程将处理结果发送给客户端。
+
+大名鼎鼎的两个开源软件 Netty 和 Memcache 都采用了「多 Reactor 多线程」的方案。
+
+采用了「多 Reactor 多进程」方案的开源软件是 Nginx，不过方案与标准的多 Reactor 多进程有些差异。
+
+具体差异表现在主进程中仅仅用来初始化 socket，并没有创建 mainReactor 来 accept 连接，而是由子进程的 Reactor 来 accept  连接，通过锁来控制一次只有一个子进程进行 accept（防止出现惊群现象），子进程 accept 新连接后就放到自己的 Reactor  进行处理，不会再分配给其他子进程。
+
+
+
+#### Proactor
+
+前面提到的 Reactor 是非阻塞同步网络模式，而 **Proactor 是异步网络模式**。
+
+这里先给大家复习下阻塞、非阻塞、同步、异步 I/O 的概念。
+
+先来看看**阻塞 I/O**，当用户程序执行 `read` ，线程会被阻塞，一直等到内核数据准备好，并把数据从内核缓冲区拷贝到应用程序的缓冲区中，当拷贝过程完成，`read` 才会返回。
+
+注意，**阻塞等待的是「内核数据准备好」和「数据从内核态拷贝到用户态」这两个过程**。过程如下图：
+
+![image-20220725152513494](./personal_images/image-20220725152513494.webp)
+
+知道了阻塞 I/O ，来看看**非阻塞 I/O**，非阻塞的 read 请求在数据未准备好的情况下立即返回，可以继续往下执行，此时应用程序不断轮询内核，直到数据准备好，内核将数据拷贝到应用程序缓冲区，`read` 调用才可以获取到结果。过程如下图：
+
+![image-20220725152523692](./personal_images/image-20220725152523692.webp)
+
+注意，**这里最后一次 read 调用，获取数据的过程，是一个同步的过程，是需要等待的过程。这里的同步指的是内核态的数据拷贝到用户程序的缓存区这个过程。**
+
+举个例子，如果 socket 设置了 `O_NONBLOCK` 标志，那么就表示使用的是非阻塞 I/O 的方式访问，而不做任何设置的话，默认是阻塞 I/O。
+
+因此，无论 read 和 send 是阻塞 I/O，还是非阻塞 I/O 都是同步调用。因为在 read  调用时，内核将数据从内核空间拷贝到用户空间的过程都是需要等待的，也就是说这个过程是同步的，如果内核实现的拷贝效率不高，read  调用就会在这个同步过程中等待比较长的时间。
+
+而真正的**异步 I/O** 是「内核数据准备好」和「数据从内核态拷贝到用户态」这**两个过程都不用等待**。
+
+当我们发起 `aio_read` （异步 I/O） 之后，就立即返回，内核自动将数据从内核空间拷贝到用户空间，这个拷贝过程同样是异步的，内核自动完成的，和前面的同步操作不一样，**应用程序并不需要主动发起拷贝动作**。过程如下图：
+
+![image-20220725152532905](./personal_images/image-20220725152532905.webp)
+
+举个你去饭堂吃饭的例子，你好比应用程序，饭堂好比操作系统。
+
+阻塞 I/O 好比，你去饭堂吃饭，但是饭堂的菜还没做好，然后你就一直在那里等啊等，等了好长一段时间终于等到饭堂阿姨把菜端了出来（数据准备的过程），但是你还得继续等阿姨把菜（内核空间）打到你的饭盒里（用户空间），经历完这两个过程，你才可以离开。
+
+非阻塞 I/O 好比，你去了饭堂，问阿姨菜做好了没有，阿姨告诉你没，你就离开了，过几十分钟，你又来饭堂问阿姨，阿姨说做好了，于是阿姨帮你把菜打到你的饭盒里，这个过程你是得等待的。
+
+异步 I/O 好比，你让饭堂阿姨将菜做好并把菜打到饭盒里后，把饭盒送到你面前，整个过程你都不需要任何等待。
+
+很明显，异步 I/O 比同步 I/O 性能更好，因为异步 I/O 在「内核数据准备好」和「数据从内核空间拷贝到用户空间」这两个过程都不用等待。
+
+Proactor 正是采用了异步 I/O 技术，所以被称为异步网络模型。
+
+现在我们再来理解 Reactor 和 Proactor 的区别，就比较清晰了。
+
+- **Reactor 是非阻塞同步网络模式，感知的是就绪可读写事件**。在每次感知到有事件发生（比如可读就绪事件）后，就需要应用进程主动调用 read 方法来完成数据的读取，也就是要应用进程主动将 socket 接收缓存中的数据读到应用进程内存中，这个过程是同步的，读取完数据后应用进程才能处理数据。
+- **Proactor 是异步网络模式， 感知的是已完成的读写事件**。在发起异步读写请求时，需要传入数据缓冲区的地址（用来存放结果数据）等信息，这样系统内核才可以自动帮我们把数据的读写工作完成，这里的读写工作全程由操作系统来做，并不需要像 Reactor 那样还需要应用进程主动发起 read/write 来读写数据，操作系统完成读写工作后，就会通知应用进程直接处理数据。
+
+因此，**Reactor 可以理解为「来了事件操作系统通知应用进程，让应用进程来处理」**，而 **Proactor 可以理解为「来了事件操作系统来处理，处理完再通知应用进程」**。这里的「事件」就是有新连接、有数据可读、有数据可写的这些 I/O 事件这里的「处理」包含从驱动读取到内核以及从内核读取到用户空间。
+
+举个实际生活中的例子，Reactor 模式就是快递员在楼下，给你打电话告诉你快递到你家小区了，你需要自己下楼来拿快递。而在 Proactor 模式下，快递员直接将快递送到你家门口，然后通知你。
+
+无论是 Reactor，还是 Proactor，都是一种基于「事件分发」的网络编程模式，区别在于 **Reactor 模式是基于「待完成」的 I/O 事件，而 Proactor 模式则是基于「已完成」的 I/O 事件**。
+
+接下来，一起看看 Proactor 模式的示意图：
+
+![image-20220725152542296](./personal_images/image-20220725152542296.webp)
+
+介绍一下 Proactor 模式的工作流程：
+
+- Proactor Initiator 负责创建 Proactor 和 Handler 对象，并将 Proactor 和 Handler 都通过 Asynchronous Operation Processor 注册到内核；
+- Asynchronous Operation Processor 负责处理注册请求，并处理 I/O 操作；
+- Asynchronous Operation Processor 完成 I/O 操作后通知 Proactor；
+- Proactor 根据不同的事件类型回调不同的 Handler 进行业务处理；
+- Handler 完成业务处理；
+
+可惜的是，在 Linux 下的异步 I/O 是不完善的， `aio` 系列函数是由 POSIX  定义的异步操作接口，不是真正的操作系统级别支持的，而是在用户空间模拟出来的异步，并且仅仅支持基于本地文件的 aio 异步操作，网络编程中的  socket 是不支持的，这也使得基于 Linux 的高性能网络程序都是使用 Reactor 方案。
+
+而 Windows 里实现了一套完整的支持 socket 的异步编程接口，这套接口就是 `IOCP`，是由操作系统级别实现的异步 I/O，真正意义上异步 I/O，因此在 Windows 里实现高性能网络程序可以使用效率更高的 Proactor 方案。
+
+
 
 ### :star:零拷贝深入浅出
 
@@ -488,6 +1016,19 @@ poll 不再用 BitsMap 来存储所关注的文件描述符，取而代之用动
 
 但是 poll 和 select 并没有太大的本质区别，**都是使用「线性结构」存储进程关注的 Socket 集合，因此都需要遍历文件描述符集合来找到可读或可写的 Socket，时间复杂度为 O(n)，而且也需要在用户态与内核态之间拷贝文件描述符集合**，这种方式随着并发数上来，性能的损耗会呈指数级增长。
 
+> select 和 poll 的区别总结
+>
+> - https://www.mo4tech.com/io-multiplexing-in-select-poll-epoll-differences.html
+> - https://notes.shichao.io/unp/ch6/
+> - https://www.techrepublic.com/article/using-the-select-and-poll-methods/
+
+select和poll都是I/O多路复用的机制，都需要轮询来检查哪些文件描述符可以读写或出错。它们的主要区别在于：
+
+1. 可以监视的文件描述符数量不同：select有FD_SETSIZE的限制，一般为1024，而poll没有限制，可以动态添加文件描述符。
+2. 事件触发模式不同：select是水平触发，即只要文件描述符可读写或出错，就会一直通知应用程序；而poll既可以是水平触发，也可以是边缘触发，由应用程序指定。
+3. 对于大量文件描述符的处理效率不同：select每次需要轮询整个文件描述符集合，效率较低，而poll每次只需要遍历当前添加的文件描述符，效率较高。
+4. 平台兼容性不同：select在不同平台上的实现略有差异，而poll是POSIX标准的一部分，更加稳定和可靠。
+
 #### epoll
 
 先复习下 epoll 的用法。如下的代码中，先用epoll_create 创建一个 epoll对象 epfd，再通过 epoll_ctl 将需要监视的 socket 添加到epfd中，最后调用 epoll_wait 等待数据。
@@ -553,10 +1094,8 @@ select/poll 只有水平触发模式，epoll 默认的触发模式是水平触�
 另外，使用 I/O 多路复用时，最好搭配非阻塞 I/O 一起使用，Linux 手册关于 select 的内容中有如下说明：
 
 > Under Linux, select() may report a socket file descriptor as "ready for  reading", while nevertheless a subsequent read blocks. This could for  example happen when data has arrived but upon examination has wrong  checksum and is discarded. There may be other circumstances in which a  file descriptor is spuriously reported as ready. Thus it may be safer to use O_NONBLOCK on sockets that should not block.
-
-我谷歌翻译的结果：
-
-> 在Linux下，select() 可能会将一个 socket 文件描述符报告为  "准备读取"，而后续的读取块却没有。例如，当数据已经到达，但经检查后发现有错误的校验和而被丢弃时，就会发生这种情况。也有可能在其他情况下，文件描述符被错误地报告为就绪。因此，在不应该阻塞的 socket 上使用 O_NONBLOCK 可能更安全。
+>
+> 在Linux下，select（）可能会将套接字文件描述符报告为“准备好读取”，但随后的读取块仍然存在。例如，当数据已到达但检查后校验和错误并被丢弃时，可能会发生这种情况。在其他情况下，文件描述符可能会被虚假地报告为准备就绪。因此，在不应该屏蔽的套接字上使用O_NONBLOCK可能更安全。
 
 简单点理解，就是**多路复用 API 返回的事件并不一定可读写的**，如果使用阻塞 I/O， 那么在调用 read/write 时则会发生程序阻塞，因此最好搭配非阻塞 I/O，以便应对极少数的特殊情况。
 
@@ -580,4 +1119,73 @@ epoll 是解决 C10K 问题的利器，通过两个方面解决了 select/poll �
 - epoll 使用事件驱动的机制，内核里维护了一个「链表」来记录就绪事件，只将有事件发生的 Socket 集合传递给应用程序，不需要像 select/poll 那样轮询扫描整个集合（包含有和无事件的 Socket ），大大提高了检测的效率。
 
 而且，epoll 支持边缘触发和水平触发的方式，而 select/poll 只支持水平触发，一般而言，边缘触发的方式会比水平触发的效率高。
+
+
+
+### Linux内存申请的系统调用是什么？
+
+在Linux系统中，用于申请内存的系统调用主要有两个：`brk`和`sbrk`，以及`mmap`和`mremap`。
+
+1. `brk` 和 `sbrk`：这两个系统调用是用来管理程序数据段（也称为堆）的大小。数据段在程序的地址空间中存储动态分配的内存，例如由`malloc`分配的内存。`brk`设置新的堆末尾的地址，而`sbrk`增加堆的大小。如果成功，系统调用将返回零；如果失败（例如，由于内存不足），则返回非零值。当调用`malloc`或类似的函数来分配内存时，C库可能首先检查是否有足够的已分配但未使用的堆空间来满足请求。如果没有，它将使用`sbrk`或`brk`来增加堆的大小。然后，库将返回新分配的内存块的指针。
+
+![brk申请](./personal_images/brk申请.webp)
+
+2. `mmap`：这个系统调用在程序的虚拟地址空间中创建一个新的映射。`mmap`可以用于多种目的，包括内存分配。实际上，许多现代的C库实现在分配大块内存时使用`mmap`，而不是`brk`或`sbrk`。当调用`mmap`时，必须指定要映射的长度，并且可以选择一个首选的虚拟地址（尽管操作系统可能会忽略这个地址）。如果成功，`mmap`将返回映射的起始地址。这块内存现在可以用于程序使用。对于通过`mmap`分配的内存，可以使用`munmap`来释放。
+
+![mmap申请](./personal_images/mmap申请.webp)
+
+3. `mremap`：这个系统调用用于改变已存在的内存区域的大小，一般在使用realloc函数时可能会调用这个系统调用。
+
+
+
+> 什么场景下 malloc() 会通过 brk() 分配内存？又是什么场景下通过 mmap() 分配内存？
+
+malloc() 源码里默认定义了一个阈值：
+
+- 如果用户分配的内存小于 128 KB，则通过 brk() 申请内存；
+- 如果用户分配的内存大于 128 KB，则通过 mmap() 申请内存；
+
+注意，不同的 glibc 版本定义的阈值也是不同的。
+
+以上提到的这些系统调用都是底层的机制，直接与内核交互，因此一般我们不会直接使用他们，而是使用封装了这些系统调用的库函数，如`malloc`，`calloc`，`realloc`等。
+
+
+
+> 为什么不全部使用 mmap 来分配内存？
+
+因为向操作系统申请内存，是要通过系统调用的，执行系统调用是要进入内核态的，然后在回到用户态，运行态的切换会耗费不少时间。
+
+所以，申请内存的操作应该避免频繁的系统调用，如果都用 mmap 来分配内存，等于每次都要执行系统调用。
+
+另外，因为 mmap 分配的内存每次释放的时候，都会归还给操作系统，于是每次 mmap 分配的虚拟地址都是缺页状态的，然后在第一次访问该虚拟地址的时候，就会触发缺页中断。
+
+也就是说，**频繁通过 mmap 分配的内存话，不仅每次都会发生运行态的切换，还会发生缺页中断（在第一次访问虚拟地址后），这样会导致 CPU 消耗较大**。
+
+为了改进这两个问题，malloc 通过 brk() 系统调用在堆空间申请内存的时候，由于堆空间是连续的，所以直接预分配更大的内存来作为内存池，当内存释放的时候，就缓存在内存池中。
+
+**等下次在申请内存的时候，就直接从内存池取出对应的内存块就行了，而且可能这个内存块的虚拟地址与物理地址的映射关系还存在，这样不仅减少了系统调用的次数，也减少了缺页中断的次数，这将大大降低 CPU 的消耗**。
+
+
+
+> 既然 brk 那么牛逼，为什么不全部使用 brk 来分配？
+
+如果我们连续申请了 10k，20k，30k 这三片内存，如果 10k 和 20k 这两片释放了，变为了空闲内存空间，如果下次申请的内存小于 30k，那么就可以重用这个空闲内存空间。
+
+但是如果下次申请的内存大于 30k，没有可用的空闲内存空间，必须向 OS 申请，实际使用内存继续增大。
+
+因此，随着系统频繁地 malloc 和 free ，尤其对于小块内存，堆内将产生越来越多不可用的碎片，导致“内存泄露”。而这种“泄露”现象使用 valgrind 是无法检测出来的。
+
+所以，malloc 实现中，充分考虑了 brk 和 mmap 行为上的差异及优缺点，默认分配大块内存 (128KB) 才使用 mmap 分配内存空间。
+
+
+
+> 参考：
+>
+> 1. https://xiaolincoding.com/os/3_memory/malloc.html#linux-进程的内存分布长什么样
+> 2. https://profoundadvices.com/what-is-brk-and-sbrk-system-calls/
+> 3. https://linux.die.net/man/2/brk
+> 4. https://stackoverflow.com/questions/31261790/sbrk-system-call-in-unix
+> 5. https://stackoverflow.com/questions/6988487/what-does-the-brk-system-call-do
+> 6. https://www.man7.org/linux/man-pages/man2/brk.2.html
+> 7. https://stackoverflow.com/questions/1754451/memory-mapped-files-system-call-linux
 

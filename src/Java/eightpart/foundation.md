@@ -1883,7 +1883,112 @@ Hash 值的范围值比较大，使用之前需要先对数组的长度取模运
 
 ### 为什么Java只有值传递
 
-个人理解，不管在方法中如何调用都是只拷贝。例如（int a, int b）就是拷贝传入的值到另外一个地址；如果传入的是（int[] arr）或者（Integer a）则就是拷贝这个的地址到另外一个地址，实质上两个（原值和拷贝的地址）都指向同一个地址。
+Java 中的基本数据类型（如 `int`、`double`、`char` 等）和对象引用都是通过值传递的。这意味着当您将变量作为参数传递给方法时，实际上传递的是变量的副本，而不是变量本身。
+
+1. **基本数据类型**：当我们将基本数据类型作为参数传递给方法时，我们传递的是该变量的值。因此，即使方法对这个参数执行了修改操作，原始变量的值也不会改变。
+
+```java
+public static void main(String[] args) {
+    int number = 5;
+    modifyNumber(number);
+    System.out.println(number); // 输出 5，值没有变化
+}
+
+public static void modifyNumber(int number) {
+    number = 10;
+}
+```
+
+2. **对象引用**：当我们将一个对象作为参数传递给方法时，我们传递的是对象引用的副本。这意味着方法中使用的引用和原始引用指向的是同一个对象。因此，如果方法修改了对象的状态，那么在方法外部，我们可以看到这些更改。然而，如果方法让引用指向一个新对象，原始引用不会受到影响。
+
+```java
+public static void main(String[] args) {
+    StringBuilder sb = new StringBuilder("Hello");
+    modifyObject(sb);
+    System.out.println(sb); // 输出 "Hello World"，对象的状态已经发生改变
+
+    assignNewObject(sb);
+    System.out.println(sb); // 输出 "Hello World"，引用没有变化
+}
+
+public static void modifyObject(StringBuilder sb) {
+    sb.append(" World");
+}
+
+public static void assignNewObject(StringBuilder sb) {
+    sb = new StringBuilder("New object");
+}
+```
+
+当将 `sb` 作为参数传递给 `assignNewObject` 方法时，实际上传递的是引用 `sb` 的**副本**。这意味着在 `assignNewObject` 方法内部，操作的是原始引用的一个副本，而不是原始引用本身。因此，即使您在方法内部让引用副本指向一个新的对象，这也不会影响原始引用。
+
+在 `modifyObject` 方法中，虽然传递的也是引用 `sb` 的副本，但由于副本引用和原始引用都指向同一个对象，所以在方法内部对对象进行的修改会影响到对象本身。这里的关键点是，您在 `modifyObject` 方法中对对象的状态进行了修改，而没有修改引用本身。
+
+### Java中的内存泄漏问题
+
+在 Java 中，某些编程实践可能会导致内存泄漏。内存泄漏指的是程序在运行过程中逐渐消耗内存资源，但无法将这些资源释放回操作系统，从而导致内存使用不断增加，直至耗尽可用内存。在 Java 中，内存泄漏通常是由于长时间存活的对象持有对不再需要的对象的引用造成的。
+
+以下是一个简单的内存泄漏示例：
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class MemoryLeakExample {
+
+    private static List<Object> leakStorage = new ArrayList<>();
+
+    public static void main(String[] args) {
+        while (true) {
+            Object data = createData();
+            leakStorage.add(data);
+        }
+    }
+
+    private static Object createData() {
+        // 创建一个大对象，例如一个大数组
+        return new byte[1024 * 1024];
+    }
+}
+```
+
+在这个示例中，我们创建了一个名为 `leakStorage` 的静态 `ArrayList`，用于存储大对象（例如，1MB 大小的字节数组）。`main` 方法中的 `while (true)` 循环不断创建新的大对象并将其添加到 `leakStorage` 列表中。
+
+由于 `leakStorage` 是一个静态变量，它会在整个程序生命周期内保持活动状态。这意味着，即使我们不再需要这些大对象，它们也不会被垃圾回收器回收，从而导致内存泄漏。随着 `leakStorage` 列表中对象数量的增加，程序将不断消耗内存，直至耗尽可用内存。
+
+要避免内存泄漏，我们需要确保及时释放不再需要的对象的引用，以便垃圾回收器可以回收它们。在上述示例中，一种可能的解决方案是在使用完大对象后从 `leakStorage` 列表中删除它们，或者使用弱引用（`java.lang.ref.WeakReference` 类）来存储列表中的对象。
+
+
+
+在 Java 中，您不能像在 C 或 C++ 中那样手动释放对象。相反，Java 使用垃圾回收器（Garbage Collector，GC）机制自动回收不再需要的对象。要确保对象能被垃圾回收器回收，您需要确保没有活动的引用指向该对象。换句话说，您需要将所有指向该对象的引用设置为 `null`，或者让引用超出其作用域。
+
+对于前面提到的内存泄漏示例，一种简单的方法是在使用完大对象后将其从 `leakStorage` 列表中删除。例如，您可以使用一个定时器定期清除列表中的对象：
+
+```java
+// ... 其他代码 ...
+
+public static void main(String[] args) {
+    Timer timer = new Timer();
+    timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+            // 在使用完对象之后，从列表中删除对象
+            if (!leakStorage.isEmpty()) {
+                leakStorage.remove(0);
+            }
+        }
+    }, 0, 1000); // 每隔 1000 毫秒（1 秒）执行一次
+
+    while (true) {
+        Object data = createData();
+        leakStorage.add(data);
+    }
+}
+
+// ... 其他代码 ...
+```
+
+
 
 
 
@@ -1895,22 +2000,26 @@ finally 块不会被执行：
    语句之后， finally 还是会被执行
 2. 程序所在的线程死亡。
 3. 关闭 CPU。
+4. 如果 JVM 发生内部错误，使得程序被迫终止，那么 `finally` 块可能不会执行。
 
 下面这部分内容来自 issue:https://github.com/Snailclimb/JavaGuide/issues/190。
 **注意：** 当 try 语句和 finally 语句中都有 return 语句时，在方法返回之前，finally 语句的内容将被执行，并且 finally 语句的返回值将会覆盖原始的返回值。如下：
 
 ```java
 public static int f(int value) {
-	try {
-		return value * value;
-	} finally {
-	if (value == 2) {
-		return 0;
-	}
+    try {
+        return value * value;
+    } finally {
+        if (value == 2) {
+            return 0;
+        }
+    }
 }
 ```
 
-《java核心技术卷一》中提到过：当finally子句包含return 语句时（当然在设计原则上是不允许在finally块中抛出异常或者 执行return语句的），将会出现一种意想不到的结果。假设利用return语句从try 语句块中退出。在方法返回前，finally子句的内容将被执行。如果finally子句中也有一个return语句，这个返回值将会覆盖原始的返回值。
+《java核心技术卷一》中提到过：当finally子句包含return 语句时（当然在设计原则上是不允许在finally块中抛出异常或者 执行return语句的），将会出现一种意想不到的结果。假设利用return语句从try 语句块中退出。在方法返回前，finally子句的内容将被执行。如果finally子句中也有一个return语句，这个返回值将会覆盖原始的返回值
+
+
 
 ### 有哪些常见的 IO 模型?
 
@@ -2327,17 +2436,85 @@ static class Segment<K,V> extends ReentrantLock implements Serializable {
 
 `ConcurrentHashMap`取消了Segment分段锁，采用 `CAS`和 `synchronized`来保证并发安全。数据结构跟 `HashMap1.8`的结构类似，数组+链表/红黑二叉树。Java 8在链表⻓度超过一定阈值（8）时将链表（寻址时间复杂度为O(N)）转换为红黑树（寻址时间复杂度为O(log(N))）synchronized只锁定当前链表或红黑二叉树的首节点，这样只要hash不冲突，就不会产生并发，效率又提升N倍。
 
-### 说一说Java反射？
+### 反射 & 反射底层
 
-反射是在运行状态中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意一个方法和属性；这种动态获取的信息以及动态调用对象的方法的功能称为 Java 语言的反射机制。
+#### 基本理解
 
-- 优点：能够运行时动态获取类的实例，提高灵活性；可与动态编译结合`Class.forName('com.mysql.jdbc.Driver.class');`，加载[MySQL](https://www.wkcto.com/courses/mysql.html)的驱动类。
-- 缺点：使用反射性能较低，需要解析字节码，将内存中的对象进行解析。其解决方案是：通过setAccessible(true)关闭JDK的安全检查来提升反射速度；多次创建一个类的实例时，有缓存会快很多；ReflflectASM工具类，通过字节码生成的方式加快反射速度。
+首先，我们需要了解`java.lang.Class`类。每个类在加载后都会生成一个`Class`类型的对象，这个对象中包含了与类有关的所有信息。通常，我们可以通过以下方式获取`Class`对象：
 
-> 应用场景
+1. 使用`.class`关键字，例如`Class clazz = String.class;`
+2. 通过对象的`.getClass()`方法，例如`Class clazz = "Hello".getClass();`
+3. 通过类的全名获取，例如`Class clazz = Class.forName("java.lang.String");`
 
-1. JDBC连接数据库时使用`Class.forName()`通过反射加载数据库的驱动程序
-2. Eclispe、IDEA等开发工具利用反射动态解析对象的类型与结构，动态提示对象的属性和方法
-3. Web服务器中利用反射调用了Sevlet的`service`方法
-4. JDK动态代理底层依赖反射实现
+通过反射，我们可以获取类的所有信息，包括构造器、方法、字段等。
+
+
+
+**获取类的所有方法（包括继承和实现的）：**
+
+```java
+Method[] methods = clazz.getMethods();
+for (Method method : methods) {
+    System.out.println(method);
+}
+```
+
+**获取类的所有字段（仅本类）：**
+
+```java
+javaCopy codeField[] fields = clazz.getDeclaredFields();
+for (Field field : fields) {
+    System.out.println(field);
+}
+```
+
+**获取类的所有构造器（仅本类）：**
+
+```java
+javaCopy codeConstructor[] constructors = clazz.getDeclaredConstructors();
+for (Constructor constructor : constructors) {
+    System.out.println(constructor);
+}
+```
+
+在获取类的信息后，我们可以利用反射动态地创建对象、调用方法和修改字段值。
+
+**创建对象：**
+
+```java
+javaCopy codeConstructor constructor = clazz.getConstructor(); // 获取无参构造器
+Object obj = constructor.newInstance(); // 通过构造器创建对象
+```
+
+**调用方法：**
+
+```java
+javaCopy codeMethod method = clazz.getMethod("someMethod", parameterType); // 获取方法
+Object returnValue = method.invoke(obj, arguments); // 调用方法
+```
+
+**修改字段值：**
+
+```java
+javaCopy codeField field = clazz.getDeclaredField("someField"); // 获取字段
+field.setAccessible(true); // 如果字段为私有的，需要先设置可访问
+field.set(obj, value); // 修改字段值
+```
+
+反射的确有性能损耗和安全性问题，需要在适当的地方使用。例如，框架的开发者会使用反射来解析注解和生成代理类，但是在日常的业务代码中，反射并不常用。
+
+
+
+#### 底层问题
+
+反射的底层原理主要依赖于Java的类加载机制和类的元数据。当Java运行程序时，会加载需要的类，并生成类的元数据（MetaData），保存在方法区中。元数据中包含了类的所有信息，包括类的名称、字段、方法、构造器等。`java.lang.Class`对象就是对元数据的一种封装，每个`Class`对象都对应一份元数据。
+
+当我们使用反射API来获取类的信息时，Java会去方法区中查找对应的元数据，并返回相关信息。当我们使用反射API来创建对象、调用方法或者修改字段值时，Java会根据元数据来操作对应的对象。例如，如果我们调用`getMethod()`方法，Java就会在元数据中查找对应的方法，并返回一个`Method`对象。如果我们调用`newInstance()`方法，Java就会根据元数据创建一个新的对象。
+
+1. `Class.forName()`: 此方法用于加载具有给定名称的类。在底层，JVM 会调用类加载器（ClassLoader）的 `loadClass()` 方法加载类。类加载器负责读取字节码文件并将其加载到内存中。在这个过程中，HotSpot 虚拟机使用 C++ 实现类加载器的部分功能。在完成类加载后，`forName()` 方法返回表示该类的 `Class` 对象。
+2. `newInstance()`: 在 Java 9 之后，`newInstance()` 方法已被弃用，建议使用 `Class.getDeclaredConstructor().newInstance()` 替代。这些方法的主要目的是创建一个类的新实例。在底层，JVM 使用 C++ 实现对象实例化的功能。此过程包括为新对象分配内存、调用构造函数以及初始化对象的状态。在成功创建新实例后，`newInstance()` 方法返回新创建的对象。
+
+另外，反射API的实现主要依赖于Java的本地方法（Native Method）。本地方法是用C或C++等本地语言实现的方法，可以直接访问操作系统的资源和底层硬件，从而实现一些Java自身难以实现的功能。例如，`java.lang.Class`的`forName()`方法和`newInstance()`方法，`java.lang.reflect.Field`的`set()`和`get()`方法，`java.lang.reflect.Method`的`invoke()`方法等，都是通过调用本地方法来实现的。
+
+因此，Java的反射机制的实现需要依赖于类加载机制、元数据和本地方法等多个因素。反射机制使得Java可以在运行时动态地操作对象，增加了Java的灵活性和动态性，但同时也带来了一定的性能损耗和安全隐患。
 

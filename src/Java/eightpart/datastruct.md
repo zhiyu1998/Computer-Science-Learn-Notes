@@ -1,6 +1,6 @@
 ---
 
-order: 13
+order: 14
 author: zhiyu1998
 title: 数据结构
 category:
@@ -8,9 +8,9 @@ category:
   - 八股文
 ---
 
-### 🧩数据结构
+## 🧩数据结构
 
-#### 红黑树
+### 红黑树
 
 **红黑树特点** :
 
@@ -28,9 +28,7 @@ category:
 
 
 
-#### 十大经典排序算法
-
-##### 简介
+### 十大经典排序算法
 
 排序算法可以分为：
 
@@ -48,7 +46,7 @@ category:
 - **In-place**：占用常数内存，不占用额外内存
 - **Out-place**：占用额外内存
 
-###### 术语说明
+#### 术语说明
 
 - **稳定**：如果 A 原本在 B 前面，而 A=B，排序之后 A 仍然在 B 的前面。
 - **不稳定**：如果 A 原本在 B 的前面，而 A=B，排序之后 A 可能会出现在 B 的后面。
@@ -57,7 +55,7 @@ category:
 - **时间复杂度**： 定性描述一个算法执行所耗费的时间。
 - **空间复杂度**：定性描述一个算法执行所需内存的大小。
 
-###### 算法分类
+#### 算法分类
 
 十种常见排序算法可以分类两大类别：**比较类排序**和**非比较类排序**。
 
@@ -73,15 +71,15 @@ category:
 
 
 
-##### 冒泡排序 (Bubble Sort)
+### 冒泡排序 (Bubble Sort)
 
 冒泡排序是一种简单的排序算法。它重复地遍历要排序的序列，依次比较两个元素，如果它们的顺序错误就把它们交换过来。遍历序列的工作是重复地进行直到没有再需要交换为止，此时说明该序列已经排序完成。这个算法的名字由来是因为越小的元素会经由交换慢慢 “浮” 到数列的顶端。
 
-###### 算法步骤
+#### 算法步骤
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/bubble_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -113,7 +111,7 @@ public static int[] bubbleSort(int[] arr) {
 
 **此处对代码做了一个小优化，加入了 `is_sorted` Flag，目的是将算法的最佳时间复杂度优化为 `O(n)`，即当原输入序列就是排序好的情况下，该算法的时间复杂度就是 `O(n)`。**
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性**：稳定
 - **时间复杂度** ：最佳：O(n) ，最差：O(n2)， 平均：O(n2)
@@ -122,11 +120,11 @@ public static int[] bubbleSort(int[] arr) {
 
 
 
-##### 选择排序 (Selection Sort)
+### 选择排序 (Selection Sort)
 
 选择排序是一种简单直观的排序算法，无论什么数据进去都是 `O(n²)` 的时间复杂度。所以用到它的时候，数据规模越小越好。唯一的好处可能就是不占用额外的内存空间了吧。它的工作原理：首先在未排序序列中找到最小（大）元素，存放到排序序列的起始位置，然后，再从剩余未排序元素中继续寻找最小（大）元素，然后放到已排序序列的末尾。以此类推，直到所有元素均排序完毕。
 
-###### 算法步骤
+#### 算法步骤
 
 1. 首先在未排序序列中找到最小（大）元素，存放到排序序列的起始位置
 2. 再从剩余未排序元素中继续寻找最小（大）元素，然后放到已排序序列的末尾。
@@ -134,7 +132,7 @@ public static int[] bubbleSort(int[] arr) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/selection_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -160,7 +158,7 @@ public static int[] selectionSort(int[] arr) {
 }
 ```
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性**：不稳定
 - **时间复杂度** ：最佳：O(n2) ，最差：O(n2)， 平均：O(n2)
@@ -169,7 +167,7 @@ public static int[] selectionSort(int[] arr) {
 
 
 
-##### 插入排序 (Insertion Sort)
+### 插入排序 (Insertion Sort)
 
 插入排序是一种简单直观的排序算法。它的工作原理是通过构建有序序列，对于未排序数据，在已排序序列中从后向前扫描，找到相应位置并插入。插入排序在实现上，通常采用 in-place 排序（即只需用到 `O(1)` 的额外空间的排序），因而在从后向前扫描过程中，需要反复把已排序元素逐步向后挪位，为最新元素提供插入空间。
 
@@ -177,7 +175,7 @@ public static int[] selectionSort(int[] arr) {
 
 插入排序和冒泡排序一样，也有一种优化算法，叫做拆半插入。
 
-###### 算法步骤
+#### 算法步骤
 
 1. 从第一个元素开始，该元素可以认为已经被排序；
 2. 取出下一个元素，在已经排序的元素序列中从后向前扫描；
@@ -188,7 +186,7 @@ public static int[] selectionSort(int[] arr) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/insertion_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -212,7 +210,7 @@ public static int[] insertionSort(int[] arr) {
 
 
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性**：稳定
 - **时间复杂度** ：最佳：O(n) ，最差：O(n2)， 平均：O(n2)
@@ -221,13 +219,13 @@ public static int[] insertionSort(int[] arr) {
 
 
 
-##### 希尔排序 (Shell Sort)
+### 希尔排序 (Shell Sort)
 
 希尔排序是希尔 (Donald Shell) 于 1959 年提出的一种排序算法。希尔排序也是一种插入排序，它是简单插入排序经过改进之后的一个更高效的版本，也称为递减增量排序算法，同时该算法是冲破 `O(n²)` 的第一批算法之一。
 
 希尔排序的基本思想是：先将整个待排序的记录序列分割成为若干子序列分别进行直接插入排序，待整个序列中的记录 “基本有序” 时，再对全体记录进行依次直接插入排序。
 
-###### 算法步骤
+#### 算法步骤
 
 我们来看下希尔排序的基本步骤，在此我们选择增量 `gap=length/2`，缩小增量继续以 `gap = gap/2` 的方式，这种增量选择我们可以用一个序列来表示，`{n/2, (n/2)/2, ..., 1}`，称为**增量序列**。希尔排序的增量序列的选择与证明是个数学难题，我们选择的这个增量序列是比较常用的，也是希尔建议的增量，称为希尔增量，但其实这个增量序列不是最优的。此处我们做示例使用希尔增量。
 
@@ -239,7 +237,7 @@ public static int[] insertionSort(int[] arr) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/shell_sort.webp)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -269,7 +267,7 @@ public static int[] shellSort(int[] arr) {
 }
 ```
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性**：稳定
 - **时间复杂度** ：最佳：O(nlogn)， 最差：O(n2) 平均：O(nlogn)
@@ -277,13 +275,13 @@ public static int[] shellSort(int[] arr) {
 
 
 
-##### 归并排序 (Merge Sort)
+### 归并排序 (Merge Sort)
 
 归并排序是建立在归并操作上的一种有效的排序算法。该算法是采用分治法 (Divide and Conquer) 的一个非常典型的应用。归并排序是一种稳定的排序方法。将已有序的子序列合并，得到完全有序的序列；即先使每个子序列有序，再使子序列段间有序。若将两个有序表合并成一个有序表，称为 2 - 路归并。
 
 和选择排序一样，归并排序的性能不受输入数据的影响，但表现比选择排序好的多，因为始终都是 `O(nlogn)` 的时间复杂度。代价是需要额外的内存空间。
 
-###### 算法步骤
+#### 算法步骤
 
 归并排序算法是一个递归过程，边界条件为当输入序列仅有一个元素时，直接返回，具体过程如下：
 
@@ -296,7 +294,7 @@ public static int[] shellSort(int[] arr) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/merge_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -352,7 +350,7 @@ public static int[] merge(int[] arr_1, int[] arr_2) {
 }
 ```
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性**：稳定
 - **时间复杂度** ：最佳：O(nlogn)， 最差：O(nlogn)， 平均：O(nlogn)
@@ -360,13 +358,13 @@ public static int[] merge(int[] arr_1, int[] arr_2) {
 
 
 
-##### 快速排序 (Quick Sort)
+### 快速排序 (Quick Sort)
 
 快速排序用到了分治思想，同样的还有归并排序。乍看起来快速排序和归并排序非常相似，都是将问题变小，先排序子串，最后合并。不同的是快速排序在划分子问题的时候经过多一步处理，将划分的两组数据划分为一大一小，这样在最后合并的时候就不必像归并排序那样再进行比较。但也正因为如此，划分的不定性使得快速排序的时间复杂度并不稳定。
 
 快速排序的基本思想：通过一趟排序将待排序列分隔成独立的两部分，其中一部分记录的元素均比另一部分的元素小，则可分别对这两部分子序列继续进行排序，以达到整个序列有序。
 
-###### 算法步骤
+#### 算法步骤
 
 快速排序使用[分治法](https://zh.wikipedia.org/wiki/分治法)（Divide and conquer）策略来把一个序列分为较小和较大的 2 个子序列，然后递回地排序两个子序列。具体算法描述如下：
 
@@ -378,7 +376,7 @@ public static int[] merge(int[] arr_1, int[] arr_2) {
 
 
 
-###### 代码实现
+#### 代码实现
 
 ```java
 public static int partition(int[] array, int low, int high) {
@@ -409,7 +407,7 @@ public static void quickSort(int[] array, int low, int high) {
 
 
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性** ：不稳定
 - **时间复杂度** ：最佳：O(nlogn)， 最差：O(nlogn)，平均：O(nlogn)
@@ -417,11 +415,11 @@ public static void quickSort(int[] array, int low, int high) {
 
 
 
-##### 堆排序 (Heap Sort)
+### 堆排序 (Heap Sort)
 
 堆排序是指利用堆这种数据结构所设计的一种排序算法。堆是一个近似完全二叉树的结构，并同时满足**堆的性质**：即**子结点的值总是小于（或者大于）它的父节点**。
 
-###### 算法步骤
+#### 算法步骤
 
 1. 将初始待排序列 `(R1, R2, ……, Rn)` 构建成大顶堆，此堆为初始的无序区；
 2. 将堆顶元素 `R[1]` 与最后一个元素 `R[n]` 交换，此时得到新的无序区 `(R1, R2, ……, Rn-1)` 和新的有序区 (Rn), 且满足 `R[1, 2, ……, n-1]<=R[n]`；
@@ -429,7 +427,7 @@ public static void quickSort(int[] array, int low, int high) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/heap_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 // Global variable that records the length of an array;
@@ -498,7 +496,7 @@ public static int[] heapSort(int[] arr) {
 }
 ```
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性** ：不稳定
 - **时间复杂度** ：最佳：O(nlogn)， 最差：O(nlogn)， 平均：O(nlogn)
@@ -506,13 +504,13 @@ public static int[] heapSort(int[] arr) {
 
 
 
-##### 计数排序 (Counting Sort)
+### 计数排序 (Counting Sort)
 
 计数排序的核心在于将输入的数据值转化为键存储在额外开辟的数组空间中。 作为一种线性时间复杂度的排序，**计数排序要求输入的数据必须是有确定范围的整数**。
 
 计数排序 (Counting sort) 是一种稳定的排序算法。计数排序使用一个额外的数组 `C`，其中第 `i` 个元素是待排序数组 `A` 中值等于 `i` 的元素的个数。然后根据数组 `C` 来将 `A` 中的元素排到正确的位置。**它只能对整数进行排序**。
 
-###### 算法步骤
+#### 算法步骤
 
 1. 找出数组中的最大值 `max`、最小值 `min`；
 2. 创建一个新数组 `C`，其长度是 `max-min+1`，其元素默认值都为 0；
@@ -523,7 +521,7 @@ public static int[] heapSort(int[] arr) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/counting_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -576,7 +574,7 @@ public static int[] countingSort(int[] arr) {
 }
 ```
 
-###### 算法分析
+#### 算法分析
 
 当输入的元素是 `n` 个 `0` 到 `k` 之间的整数时，它的运行时间是 `O(n+k)`。计数排序不是比较排序，排序的速度快于任何比较排序算法。由于用来计数的数组 `C` 的长度取决于待排序数组中数据的范围（等于待排序数组的**最大值与最小值的差加上 1**），这使得计数排序对于数据范围很大的数组，需要大量额外内存空间。
 
@@ -586,7 +584,7 @@ public static int[] countingSort(int[] arr) {
 
 
 
-##### 桶排序 (Bucket Sort)
+### 桶排序 (Bucket Sort)
 
 桶排序是计数排序的升级版。它利用了函数的映射关系，高效与否的关键就在于这个映射函数的确定。为了使桶排序更加高效，我们需要做到这两点：
 
@@ -595,7 +593,7 @@ public static int[] countingSort(int[] arr) {
 
 桶排序的工作的原理：假设输入数据服从均匀分布，将数据分到有限数量的桶里，每个桶再分别排序（有可能再使用别的排序算法或是以递归方式继续使用桶排序进行。
 
-###### 算法步骤
+#### 算法步骤
 
 1. 设置一个 BucketSize，作为每个桶所能放置多少个不同数值；
 2. 遍历输入数据，并且把数据依次映射到对应的桶里去；
@@ -604,7 +602,7 @@ public static int[] countingSort(int[] arr) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/bucket_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -661,7 +659,7 @@ public static List<Integer> bucketSort(List<Integer> arr, int bucket_size) {
 }
 ```
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性** ：稳定
 - **时间复杂度** ：最佳：`O(n+k)` 最差：`O(n²)` 平均：`O(n+k)`
@@ -669,13 +667,13 @@ public static List<Integer> bucketSort(List<Integer> arr, int bucket_size) {
 
 
 
-##### 基数排序 (Radix Sort)
+### 基数排序 (Radix Sort)
 
 基数排序也是非比较的排序算法，对元素中的每一位数字进行排序，从最低位开始排序，复杂度为 `O(n×k)`，`n` 为数组长度，`k` 为数组中元素的最大的位数；
 
 基数排序是按照低位先排序，然后收集；再按照高位排序，然后再收集；依次类推，直到最高位。有时候有些属性是有优先级顺序的，先按低优先级排序，再按高优先级排序。最后的次序就是高优先级高的在前，高优先级相同的低优先级高的在前。基数排序基于分别排序，分别收集，所以是稳定的。
 
-###### 算法步骤
+#### 算法步骤
 
 1. 取得数组中的最大数，并取得位数，即为迭代次数 `N`（例如：数组中最大数值为 1000，则 `N=4`）；
 2. `A` 为原始数组，从最低位开始取每个位组成 `radix` 数组；
@@ -685,7 +683,7 @@ public static List<Integer> bucketSort(List<Integer> arr, int bucket_size) {
 
 ![](https://guide-blog-./personal_images.oss-cn-shenzhen.aliyuncs.com/github/javaguide/cs-basics/sorting-algorithms/radix_sort.gif)
 
-###### 代码实现
+#### 代码实现
 
 ```java
 /**
@@ -729,7 +727,7 @@ public static int[] radixSort(int[] arr) {
 }
 ```
 
-###### 算法分析
+#### 算法分析
 
 - **稳定性** ：稳定
 - **时间复杂度** ：最佳：`O(n×k)` 最差：`O(n×k)` 平均：`O(n×k)`

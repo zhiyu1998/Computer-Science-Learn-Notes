@@ -1,6 +1,6 @@
 ---
 
-order: 14
+order: 15
 author: zhiyu1998
 title: 智力题
 category:
