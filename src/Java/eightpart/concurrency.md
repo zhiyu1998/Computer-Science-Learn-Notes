@@ -875,6 +875,82 @@ static class ThreadLocalMap {
 
 `ThreadLocalMap` 中使用的 key 为 `ThreadLocal` 的弱引用,而 value 是强引用。所以，如果 `ThreadLocal` 没有被外部强引用的情况下，在垃圾回收的时候，key 会被清理掉，而 value 不会被清理掉。
 
+**ThreadLocal为什么不用强引用？**
+
+`ThreadLocal`在Java中是一种常用的线程隔离技术，它可以为每一个线程提供一个独立的变量副本，从而实现线程安全。但是，`ThreadLocal`并不使用强引用来存储这些变量副本，而是使用弱引用。这是出于以下几个原因：
+
+1. **内存泄漏问题**：如果`ThreadLocal`使用强引用来存储变量副本，那么只要线程本身不结束，这些副本就不会被垃圾回收机制回收。这可能会导致内存泄漏问题，尤其是在长时间运行的线程和大量使用`ThreadLocal`的情况下。
+2. **线程结束时的清理**：当线程结束时，所有由该线程持有的`ThreadLocal`变量副本应该被清理。如果`ThreadLocal`使用强引用，那么即使线程结束，这些副本仍然可能存在，除非显式地清理它们。而使用弱引用则可以确保线程结束时，这些副本会被自动清理。
+3. **灵活的生命周期管理**：弱引用允许更灵活的生命周期管理。`ThreadLocal`中的变量副本只要不再被线程引用，就可以被垃圾回收机制回收。这可以有效防止内存过载，并允许更高效的资源利用。
+
+虽然`ThreadLocal`使用弱引用可以带来以上好处，但也有一些需要注意的地方。比如，你需要确保在线程生命周期内，持有到`ThreadLocal`对象的强引用，否则这个`ThreadLocal`对象可能会提前被回收。另外，即使`ThreadLocal`使用弱引用，也不能完全防止内存泄漏。如果线程结束后，没有清理`ThreadLocal`的值，那么这些值将会保留在线程的ThreadLocalMap中，导致内存泄漏。所以，使用`ThreadLocal`时，最好的做法是在不再需要使用变量副本时，显式地清理它。
+
+
+
+`ThreadLocal`实现线程本地存储的核心在于每个`Thread`都维护了一个`ThreadLocalMap`，`ThreadLocalMap`实际上是一个特殊设计的哈希映射，其键为`ThreadLocal`对象（使用弱引用）, 值为线程局部变量。
+
+`ThreadLocalMap`的设计使得`ThreadLocal`对象可以在不被线程引用的情况下被垃圾回收器回收。这是因为`ThreadLocalMap`的键使用了`ThreadLocal`的弱引用。弱引用是一种弱度小于强引用但大于软引用和弱引用的引用，只要垃圾回收器发现了弱引用，不论系统内存是否足够，都会回收掉只被弱引用关联的对象。
+
+当`ThreadLocal`对象被回收后，其对应的值在`ThreadLocalMap`中的实体（Entry）会变为null，这是一个空的引用。因此，`ThreadLocalMap`还需要提供一种机制来清理这些没有键的Entry，否则这些Entry的值可能会造成内存泄露。这个机制是在`ThreadLocal`的`get()`, `set()` 和 `remove()` 方法被调用时，通过调用`ThreadLocalMap`的`expungeStaleEntries()`方法来清理无效的Entry。(ps. 这里看源码调用链是这样的：get() -> map.getEntry(*this*) -> getEntryAfterMiss(key, i, e) -> expungeStaleEntry(i))
+
+```java
+// 清理过期的ThreadLocal变量
+private void expungeStaleEntries() {
+  Entry[] tab = table;
+  int len = tab.length;
+	// 遍历数组中的每一个元素
+  for (int j = 0; j < len; j++) {
+    Entry e = tab[j];
+    // 如果该元素存在，但其对应的ThreadLocal变量已经被回收，则进行清理
+    if (e != null && e.get() == null)
+      expungeStaleEntry(j);
+  }
+}
+
+// 清理staleSlot位置上的元素
+private int expungeStaleEntry(int staleSlot) {
+  Entry[] tab = table;
+  int len = tab.length;
+
+  // 清除staleSlot位置上的元素
+  tab[staleSlot].value = null;
+  tab[staleSlot] = null;
+  size--;
+
+  // 重新哈希，直到遇到空元素
+  Entry e;
+  int i;
+  for (i = nextIndex(staleSlot, len);
+       (e = tab[i]) != null;
+       i = nextIndex(i, len)) {
+    // 获取元素对应的ThreadLocal变量
+    ThreadLocal<?> k = e.get();
+    if (k == null) {
+      // 如果ThreadLocal变量已经被回收，则清除该元素
+      e.value = null;
+      tab[i] = null;
+      size--;
+    } else {
+      // 计算新的哈希值
+      int h = k.threadLocalHashCode & (len - 1);
+      if (h != i) {
+        // 如果哈希值不等于当前位置，则将该元素拷贝到新位置
+        tab[i] = null;
+
+        // Unlike Knuth 6.4 Algorithm R, we must scan until
+        // null because multiple entries could have been stale.
+        while (tab[h] != null)
+          h = nextIndex(h, len);
+        tab[h] = e;
+      }
+    }
+  }
+  return i;
+}
+```
+
+然而，尽管`ThreadLocalMap`提供了自动清理无效Entry的机制，但是如果我们不再使用`ThreadLocal`对象，但是又没有显式地调用`ThreadLocal`的`remove()`方法，那么`ThreadLocal`的值是不会被自动清理的，因为`expungeStaleEntries()`方法只有在`ThreadLocal`的`get()`, `set()` 和 `remove()` 方法被调用时才会执行。这就可能导致内存泄露，尤其是在长时间运行的线程中。因此，我们在使用`ThreadLocal`时，通常需要手动调用`ThreadLocal`的`remove()`方法来清理不再使用的值。
+
 ### 实现 Runnable 接口和 Callable 接口的区别
 
 继承Thread类或者实现Runnable接口这两种方式来创建线程类，但是这两种方式有一个共同的缺陷：不能获取异步执行的结果。Callable接口类似于Runnable。不同的是，Runnable的唯一抽象方法run()没有返回值，也没有受检异常的异常声明。比较而言，Callable接口的call()有返回值，并且声明了受检异常，其功能更强大一些。

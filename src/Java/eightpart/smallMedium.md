@@ -53,6 +53,104 @@ public void setData(Object data) {
 
 
 
+### try catch 应该在 for 循环里面还是外面？
+
+1. ##### try  catch  在 for 循环 外面
+
+```java
+public static void tryOutside() {
+    try {
+        for (int count = 1; count <= 5; count++) {
+            if (count == 3) {
+                //故意制造一下异常
+                int num = 1 / 0;
+            } else {
+                System.out.println("count:" + count + " 业务正常执行");
+            }
+        }
+    } catch (Exception e) {
+        System.out.println("try catch  在for 外面的情形， 出现了异常，for循环显然被中断");
+    }
+}
+```
+
+try  catch  在 for 循环 外面 的时候， 如果 for循环过程中出现了异常， 那么for循环会终止。
+
+
+
+2. ##### try  catch  在 for 循环 里面
+
+```java
+public static void tryInside() {
+
+    for (int count = 1; count <= 5; count++) {
+        try {
+            if (count == 3) {
+                //故意制造一下异常
+                int num = 1 / 0;
+            } else {
+                System.out.println("count:" + count + " 业务正常执行");
+            }
+        } catch (Exception e) {
+            System.out.println("try catch  在for 里面的情形， 出现了异常，for循环显然继续执行");
+        }
+    }
+}
+```
+
+try  catch  在 for 循环 里面 的时候， 如果 for循环过程中出现了异常，异常被catch抓掉，不影响for循环 继续执行。
+
+
+
+总结：
+
+如果说代码没出错的话， try catch 在 for 里面 和 外面 ，都是几乎没区别的。
+
+- 其实就是看业务。我需要出现异常就终止循环的，就放外边；
+
+- 不需要终止循环，就搞里边
+
+
+
+### HashMap是否可以存null？
+
+是的，Java的HashMap允许空键和空值。您可以在HashMap中存储一个空键和任意数量的空值。这是一个例子：
+
+```java
+import java.util.HashMap;
+
+public class Main {
+    public static void main(String[] args) {
+        HashMap<String, String> map = new HashMap<>();
+
+        // Storing null key
+        map.put(null, "value for null key");
+
+        // Storing null value
+        map.put("key1", null);
+        map.put("key2", null);
+
+        // Printing the HashMap
+        for(String key: map.keySet()){
+            System.out.println("Key: " + key + ", Value: " + map.get(key));
+        }
+    }
+}
+
+```
+
+输出：
+
+```java
+Key: null, Value: value for null key
+Key: key1, Value: null
+Key: key2, Value: null
+```
+
+注意，当使用null键或值时，如果某些方法不是为处理null而设计的，它们可能会抛出NullPointerException。因此，在将null键或值与HashMap一起使用之前，最好先检查方法。
+
+
+
 ## ♻️JVM
 
 ### 元空间是起到什么作用？
@@ -80,6 +178,29 @@ Java中的内置线程池创建方式（如Executors.newFixedThreadPool()、Exec
 2. Executors.newCachedThreadPool()的问题在于它允许创建无限数量的线程。如果传入的任务过多，会创建大量的线程，可能导致系统过载。
 
 因此，建议使用ThreadPoolExecutor类创建自定义线程池，以便更好地控制线程池的配置。
+
+
+
+### 如何不使用锁来进行重用和保证线程安全
+
+为了在Java中实现线程安全而不使用显式的锁，有几种替代方法：
+
+**不可变性**：第一种方法是创建不可变对象，这些对象在创建后不能被修改。不可变对象从创建到销毁始终保持不变，因此天然线程安全。Java中的String类就是一个不可变类的例子。要创建一个不可变类，需要：
+
+- 确保该类声明为final
+- 确保所有字段都为final和private
+- 不提供“setter”方法——修改字段或对象的方法
+- 如果有任何可变字段（例如，如果您的类具有数组或Collection对象），请确保独占访问。不要提供访问这些对象引用的方法。相反，您可以提供返回这些对象副本的方法。
+
+**原子变量**：Java提供了java.util.concurrent.atomic包，其中包括AtomicInteger、AtomicLong等类。这些类使用高效的机器级指令来确保原子性，而不是使用锁。当执行简单的原子操作（如增加值）时，可以使用这些类。
+
+**ThreadLocal变量**：ThreadLocal变量可以通过为每个线程提供变量的实例来提供线程安全，因此每个线程都将拥有其自己的变量副本。这是一种替代同步的方法，但应谨慎使用，因为如果不小心使用，可能会导致高内存消耗。
+
+**Volatile变量**：Java中的volatile关键字用作指示器，告诉JVM访问变量的线程必须始终将其私有副本与内存中的主副本协调一致。虽然volatile不执行任何互斥，但它是从写线程到读线程的一种通信方式，表示变量的值已被修改。
+
+**并发工具**：java.util.concurrent包提供了几个并发工具，如CountDownLatch、Semaphore、CyclicBarrier、Exchanger等，可以在不使用synchronized关键字的情况下实现线程安全。但是请注意，在底层，这些工具可能仍然使用锁或其他同步机制。
+
+**非阻塞算法**：非阻塞算法旨在避免使用锁，而是使用低级原子机器指令，例如CAS。这种方法非常复杂，只有在绝对必要时才应使用，因为生成的代码可能非常难以理解和维护。
 
 
 
@@ -602,7 +723,7 @@ MVC模式被广泛应用于Web开发、桌面应用程序以及移动应用程�
 - #{}：这是预编译的方式。将参数放入 #{} 中，MyBatis 会在 SQL 执行前将 #{} 替换成占位符 ?，并通过预编译的 SQL 语句进行数据库操作，参数通过 JDBC 驱动的 PreparedStatement 的参数设置方法动态设置进去。这种方式可以防止 SQL 注入攻击。
 - ${}：这是字符串替换的方式。将参数放入 ${} 中，MyBatis 会直接将 SQL 语句中的 ${} 替换成参数值，然后执行 SQL 语句。这种方式可能会引起 SQL 注入攻击，因为参数值在 SQL 语句拼接后，不会再被 JDBC 驱动进行任何的安全检查，而是直接被执行。所以在处理字符串类型的参数时，特别要注意可能引发的 SQL 注入问题。
 
-### mybatis 的一级缓存和二级缓存能不能介绍下？
+### 🌟 mybatis 的一级缓存和二级缓存能不能介绍下？
 
 **一级缓存**：一级缓存是 MyBatis 的默认缓存，当我们开启一个 SqlSession 并执行查询时，MyBatis 会将查询结果放到这个 SqlSession 关联的缓存中，这个缓存就是一级缓存。也就是说，一级缓存是 SqlSession 级别的缓存，只对当前 SqlSession 的多次查询有效。如果我们在同一个 SqlSession 中对同一个查询两次，第二次查询就可以直接从一级缓存中获取结果，而不需要再次访问数据库。但是，如果我们开启了另一个 SqlSession 或者清空了缓存，那么一级缓存就无法使用。
 

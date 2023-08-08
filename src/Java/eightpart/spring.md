@@ -508,12 +508,27 @@ AutoConfigurationEntry(Collection<String> configurations, Collection<String> exc
 }
 ```
 
+
+
 **总结**
-- 原理：Spring Boot 在启动时扫描类路径中的 spring.factories 文件，查找与 org.springframework.boot.autoconfigure.EnableAutoConfiguration 关联的自动配置类。
-- 条件装配：使用 @Conditional 注解及其派生注解（如 @ConditionalOnClass, @ConditionalOnBean 等）来控制自动配置类是否应用，以满足特定条件。
-- 自定义自动配置：开发者可以通过创建 spring.factories 文件并指定自己的自动配置类来实现自定义自动配置。
-- 排除自动配置：使用 @EnableAutoConfiguration 注解的 exclude 或 excludeName 属性，或在配置文件中设置 spring.autoconfigure.exclude 属性来排除不需要的自动配置类。
-- 事件监听：通过实现 AutoConfigurationImportListener 接口，开发者可以在自动配置类导入时执行自定义操作。
+
+1. 启动main方法开始。
+2. **初始化配置**：
+   - **加载工厂配置文件**：使用`SpringFactoriesLoader`加载`META-INF/spring.factories`配置文件。
+   - **创建SpringApplication对象**：解析`spring.factories`中的`SpringApplicationRunListener`，通知监听者应用程序启动开始。
+   - **创建环境对象**：创建`ConfigurableEnvironment`环境对象，用于读取环境配置，如`application.properties`或`application.yml`。
+3. **创建应用程序上下文** (`ApplicationContext`)：
+   - **决定上下文类型**：根据应用类型决定是创建`AnnotationConfigServletWebServerApplicationContext`、`AnnotationConfigReactiveWebServerApplicationContext`还是其他上下文。
+   - **初始化Bean工厂**：初始化`BeanFactory`对象。
+4. **刷新上下文** （启动核心）:
+   - **配置Bean工厂**：为`BeanFactory`设置类加载器、`BeanPostProcessor`等。
+   - **处理配置类**：使用`BeanFactoryPostProcessor`对配置类进行处理，如`@Configuration`类会被`ConfigurationClassPostProcessor`处理。
+   - **注册Bean处理器**：注册`BeanPostProcessor`，如`AutowiredAnnotationBeanPostProcessor`用于处理`@Autowired`。
+   - **初始化特定bean**：初始化特定的bean，如内嵌的Tomcat服务器。
+   - **实例化单例bean**：实例化其他单例bean，这些bean可能是应用程序中的组件、配置或者服务。
+   - **启动Web服务器**：启动内嵌的Web服务器（如Tomcat）并通知`ContextRefreshedEvent`，表示上下文已经刷新。
+5. **通知监听者**：
+   - **通知应用启动完成**：使用`SpringApplicationRunListener`通知所有监听者，表明应用启动完成。
 
 ### 🌟 Spring Bean生命周期
 
