@@ -13,7 +13,7 @@ category:
 2022有的大厂面试题不会在2023再次出现（也有可能会因为粗心加上，欢迎issue或者PR指正和修改），如果想要了解可以先看[2022大厂面试](/Java/eightpart/giant.md)版本。
 
 ## 🐦Java 基础
-### ArrayList线程安全吗？把ArrayList变成线程安全有哪些方法？（2023美团）
+### ArrayList线程安全吗？把ArrayList变成线程安全有哪些方法？（2023 美团）
 将ArrayList变成线程安全有几种方法：
 1. 使用**Collections.synchronizedList()** 方法将ArrayList转换为线程安全的List。该方法会返回一个线程安全的List，使用该List时需要在访问它的方法上添加synchronized关键字，以保证多线程访问的安全性。
 ```java
@@ -76,7 +76,47 @@ try {
 > - https://stackoverflow.com/questions/18983362/how-to-prove-arraylist-is-not-thread-safe-with-a-test 如何用测试证明数组列表不是线程安全的？
 > - https://stackoverflow.com/questions/300519/arraylist-vs-vectors-in-java-if-thread-safety-isnt-a-concern ArrayList与vector，Java如果线程安全不是一个问题
 
+
+
+### Java中有哪些常用的容器呢？（2023 阿里）
+
+![](./giant_images/java-collections-1.webp)
+
+List是有序的Collection，使用此接口能够精确的控制每个元素的插入位置，用户能根据索引访问List中元素。常用的实现List的类有LinkedList，ArrayList，Vector，Stack。
+
+- ArrayList是容量可变的非线程安全列表，其底层使用数组实现。当几何扩容时，会创建更大的数组，并把原数组复制到新数组。ArrayList支持对元素的快速随机访问，但插入与删除速度很慢。
+- LinkedList本质是一个双向链表，与ArrayList相比，，其插入和删除速度更快，但随机访问速度更慢。
+
+Set不允许存在重复的元素，与List不同，set中的元素是无序的。常用的实现有HashSet，LinkedHashSet和TreeSet。
+
+- HashSet通过HashMap实现，HashMap的Key即HashSet存储的元素，所有Key都是用相同的Value，一个名为PRESENT的Object类型常量。使用Key保证元素唯一性，但不保证有序性。由于HashSet是HashMap实现的，因此线程不安全。
+- LinkedHashSet继承自HashSet，通过LinkedHashMap实现，使用双向链表维护元素插入顺序。
+- TreeSet通过TreeMap实现的，添加元素到集合时按照比较规则将其插入合适的位置，保证插入后的集合仍然有序。
+
+Map 是一个键值对集合，存储键、值和之间的映射。Key 无序，唯一；value 不要求有序，允许重复。Map 没有继承于 Collection 接口，从 Map 集合中检索元素时，只要给出键对象，就会返回对应的值对象。主要实现有TreeMap、HashMap、HashTable、LinkedHashMap、ConcurrentHashMap
+
+- HashMap：JDK1.8 之前 HashMap 由数组+链表组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的（“拉链法”解决冲突），JDK1.8 以后在解决哈希冲突时有了较大的变化，当链表长度大于阈值（默认为 8）时，将链表转化为红黑树，以减少搜索时间
+- LinkedHashMap：LinkedHashMap 继承自 HashMap，所以它的底层仍然是基于拉链式散列结构即由数组和链表或红黑树组成。另外，LinkedHashMap 在上面结构的基础上，增加了一条双向链表，使得上面的结构可以保持键值对的插入顺序。同时通过对链表进行相应的操作，实现了访问顺序相关逻辑。
+- HashTable：数组+链表组成的，数组是 HashMap 的主体，链表则是主要为了解决哈希冲突而存在的
+- TreeMap：红黑树（自平衡的排序二叉树）
+- ConcurrentHashMap：Node数组+链表+红黑树实现，线程安全的（jdk1.8以前Segment锁，1.8以后CAS锁）
+
+
+
+### HashMap是线程不安全的，那有什么线程安全的办法吗？（2023 阿里）
+
+HashMap不是线程安全的，Hashtable和ConcurrentHashMap 都是线程安全的。
+
+Hashtable和Collections.synchronizedMap返回的装饰器类SynchronizedMap都是通过synchronized关键字来保证多线程操作的线程安全，但使用synchronized会有一个问题，就是锁的粒度太大，同时只能有一个线程进行操作，导致并发度低下，影响了操作的性能。
+
+比如：Hashtable的get和put方法，都使用了关键字synchronized修饰，这就意味着当一个线程调用put方法添加元素时，其它线程不能再同时执行put添加元素，也不能调用get方法获取数据。
+
+为了解决synchronized并发度低的问题，ConcurrentHashMap使用了cas+synchronized解决共享遍历操作原子性问题，使用volatile保障共享变量的内存可见性问题。
+
+
+
 ### ArrayList的并发修改异常了解吗？单线程情况下会发生吗？（2023小红书）
+
 这种异常通常发生在对ArrayList进行遍历时，同时尝试修改它的结构（例如添加或删除元素）。这种异常被称为ConcurrentModificationException。
 
 在单线程情况下，这种异常也可能发生。当你在使用迭代器遍历ArrayList集合时，如果使用ArrayList的方法（如add()或remove()）修改了集合的结构，就可能触发这个异常。这是因为ArrayList的内部实现使用了一个modCount变量来跟踪结构修改的次数。当迭代器检测到modCount发生变化时，它会抛出ConcurrentModificationException异常。
@@ -91,7 +131,7 @@ try {
 > 1. https://stackoverflow.com/questions/602636/why-is-a-concurrentmodificationexception-thrown-and-how-to-debug-it 为什么会抛出它会抛出ConcurrentModificationException异常以及如何调试它
 > 2. https://www.javatpoint.com/concurrentmodificationexception-in-java
 
-### 面向过程的方法存在哪些问题？（2023美团）
+### 面向过程的方法存在哪些问题？（2023 美团）
 1. 可维护性较差：面向过程编程主要依赖于函数和过程，随着代码规模的增大，可能会导致代码结构复杂，不易维护。
 2. 可复用性较低：面向过程编程难以实现模块化，导致代码难以复用，进一步增加开发时间和成本。
 3. 扩展性不足：面向过程编程在代码逻辑发生变化时，往往需要对程序进行大量的修改，这样的代码扩展性不足。
@@ -99,7 +139,7 @@ try {
 5. 封装性差：面向过程编程没有提供良好的封装机制，程序中的数据和处理过程容易暴露，可能导致数据安全性和程序稳定性问题。
 6. 强耦合：面向过程编程的方法往往导致程序组件之间存在强耦合，当一个组件发生变化时，可能会影响其他组件的正常工作。
 
-### 面向过程好处是什么？（2023美团）
+### 面向过程好处是什么？（2023 美团）
 - 面向过程编程采用自顶向下的编程方式，将问题分解为一个个小的模块，便于理解和编写。
 - 每个模块相对独立，出现问题时可以单独调试，降低了调试难度。
 - 面向过程编程适合解决简单、逻辑性强的问题，对于初学者来说，学习成本较低。
@@ -198,7 +238,7 @@ public class MyTreeMap implements MyMap {
 }
 ```
 
-### 作为 map 的 key 需要重写哪些方法？（2023完美世界）
+### 作为 map 的 key 需要重写哪些方法？（2023 完美世界）
 首先，先理解面试题的意思，可以理解为：**如果你要用自己的类的对象作为Map的键，你需要重写这个类的哪些方法？**
 - 在Java中，Map接口是基于键值对的，每个键都必须是唯一的。Java使用键对象的hashCode()方法来计算哈希值，这个哈希值用于确定在Map内部存储结构中的位置。同时，Java也使用键对象的equals()方法来检查两个键是否相等。
 - 所以，如果你的类的对象要作为Map的键使用，那么通常需要你重写这个类的hashCode()和equals()方法，以确保它们的行为符合预期。
@@ -211,7 +251,7 @@ public class MyTreeMap implements MyMap {
 
 当你创建自定义的类并打算将其实例用作Map的键时，通常需要覆盖这两个方法以确保它们的行为符合预期。如果不这样做，Map可能无法正确地查找、添加或删除键值对。
 
-### List的实现类（2023阿里）
+### List的实现类（2023 阿里）
 Java中的List接口有多个实现类，常用的包括：
 
 - ArrayList：基于动态数组实现，优势在于支持随机访问和快速插入/删除元素，适用于频繁读取和遍历的场景。
@@ -219,7 +259,7 @@ Java中的List接口有多个实现类，常用的包括：
 - Vector：和ArrayList类似，但由于其线程安全性，适用于多线程环境。
 - Stack：基于Vector实现，是一个后进先出（LIFO）的数据结构，适用于需要按照后进先出顺序处理元素的场景。
 
-### List和Set的区别（2023阿里）
+### List和Set的区别（2023 阿里）
 1. 顺序：List是有序的集合，它可以按照元素插入的顺序进行存储和访问。而Set是无序的集合，元素在集合中的位置是不固定的。
 2. 重复元素：List允许存储重复的元素，即可以有多个相同的对象。Set不允许存储重复的元素，即每个对象在集合中只能出现一次。
 3. 实现类：List的常用实现类有ArrayList和LinkedList，分别使用数组和链表作为底层数据结构。Set的常用实现类有HashSet、LinkedHashSet和TreeSet，分别基于哈希表、链表+哈希表和红黑树实现。
@@ -229,7 +269,7 @@ Java中的List接口有多个实现类，常用的包括：
 > Queue(实现排队功能的叫号机): 按特定的排队规则来确定先后顺序，存储的元素是有序的、可重复的。
 > Map(用 key 来搜索的专家): 使用键值对（key-value）存储，类似于数学上的函数 y=f(x)，"x" 代表 key，"y" 代表 value，key 是无序的、不可重复的，value 是无序的、可重复的，每个键最多映射到一个值。
 
-### 针对你说的List和Set的性质，那你会用这两种结构解决哪些问题（2023阿里）
+### 针对你说的List和Set的性质，那你会用这两种结构解决哪些问题（2023 阿里）
 List（列表）适用于以下场景：
 1. 有序数据：列表中的元素按照插入顺序存储，因此适用于需要保持元素顺序的场景。
 2. 允许重复元素：列表允许存储重复的元素，因此适用于需要统计元素出现次数的场景。
@@ -301,9 +341,147 @@ MyClass obj = (MyClass)clazz.getDeclaredConstructor().newInstance();
 
 因此，在Java中，HashMap不是一开始就使用红黑树，而是根据实际情况动态地选择并转换数据结构，以达到最佳性能。
 
+
+
+### Long 的长度和范围，为什么要减 1 ？（2023 快手）
+
+先来复习一下 Java 中的 8 种基本数据类型：
+
+- 6 种数字类型：
+
+- - 4 种整数型：`byte`、`short`、`int`、`long`
+  - 2 种浮点型：`float`、`double`
+
+- 1 种字符类型：`char`
+
+- 1 种布尔型：`boolean`。
+
+这 8 种基本数据类型的默认值以及所占空间的大小如下：
+
+| 基本类型  | 位数 | 字节 | 默认值  | 取值范围                                                     |
+| :-------- | :--- | :--- | :------ | :----------------------------------------------------------- |
+| `byte`    | 8    | 1    | 0       | -128 ~ 127                                                   |
+| `short`   | 16   | 2    | 0       | -32768（-2^15） ~ 32767（2^15 - 1）                          |
+| `int`     | 32   | 4    | 0       | -2147483648 ~ 2147483647                                     |
+| `long`    | 64   | 8    | 0L      | -9223372036854775808（-2^63） ~ 9223372036854775807（2^63 -1） |
+| `char`    | 16   | 2    | 'u0000' | 0 ~ 65535（2^16 - 1）                                        |
+| `float`   | 32   | 4    | 0f      | 1.4E-45 ~ 3.4028235E38                                       |
+| `double`  | 64   | 8    | 0d      | 4.9E-324 ~ 1.7976931348623157E308                            |
+| `boolean` | 1    |      | false   | true、false                                                  |
+
+可以看到，像 `byte`、`short`、`int`、`long`能表示的最大正数都减 1 了。这是为什么呢？这是因为在二进制补码表示法中，最高位是用来表示符号的（0 表示正数，1 表示负数），其余位表示数值部分。所以，如果我们要表示最大的正数，我们需要把除了最高位之外的所有位都设为 1。如果我们再加 1，就会导致溢出，变成一个负数。
+
+对于 `boolean`，官方文档未明确定义，它依赖于 JVM 厂商的具体实现。逻辑上理解是占用 1 位，但是实际中会考虑计算机高效存储因素。
+
+另外，Java 的每种基本类型所占存储空间的大小不会像其他大多数语言那样随机器硬件架构的变化而变化。这种所占存储空间大小的不变性是 Java 程序比用其他大多数语言编写的程序更具可移植性的原因之一（《Java 编程思想》2.2 节有提到）。
+
+
+
+### JAVA 异常的层次结构（2023 快手）
+
+Java 异常类层次结构图概览：
+
+![](./giant_images/throwable-list.webp)
+
+在 Java 中，所有的异常都有一个共同的祖先 `java.lang` 包中的 `Throwable`类。`Throwable` 类有两个重要的子类:
+
+- **`Exception`** :程序本身可以处理的异常，可以通过 `catch` 来进行捕获。`Exception` 又可以分为 Checked Exception (受检查异常，必须处理) 和 Unchecked Exception (不受检查异常，可以不处理)。
+- **`Error`**：`Error` 属于程序无法处理的错误 ，我们没办法通过 `catch` 来进行捕获不建议通过`catch`捕获 。例如 Java 虚拟机运行错误（`Virtual MachineError`）、虚拟机内存不够错误(`OutOfMemoryError`)、类定义错误（`NoClassDefFoundError`）等 。这些异常发生时，Java 虚拟机（JVM）一般会选择线程终止。
+
+
+
+### JAVA 的集合类有了解么？（2023 快手）
+
+Java 集合， 也叫作容器，主要是由两大接口派生而来：一个是 `Collection`接口，主要用于存放单一元素；另一个是 `Map` 接口，主要用于存放键值对。对于`Collection` 接口，下面又有三个主要的子接口：`List`、`Set` 和 `Queue`。
+
+Java 集合框架如下图所示：
+
+![](./giant_images/collections-list.webp)
+
+注：图中只列举了主要的继承派生关系，并没有列举所有关系。比方省略了`AbstractList`, `NavigableSet`等抽象类以及其他的一些辅助类，如想深入了解，可自行查看源码。
+
+- `List`(对付顺序的好帮手): 存储的元素是有序的、可重复的。
+- `Set`(注重独一无二的性质): 存储的元素不可重复的。
+- `Queue`(实现排队功能的叫号机): 按特定的排队规则来确定先后顺序，存储的元素是有序的、可重复的。
+- `Map`(用 key 来搜索的专家): 使用键值对（key-value）存储，类似于数学上的函数 y=f(x)，"x" 代表 key，"y" 代表 value，key 是无序的、不可重复的，value 是无序的、可重复的，每个键最多映射到一个值。
+
+
+
+### try{return “a”} fianlly{return “b”}这条语句返回啥（2023 快手）
+
+finally块中的return语句会覆盖try块中的return返回，因此，该语句将返回"b"。
+
+
+
+### String s = new String（“abc”）执行过程中分别对应哪些内存区域？（2023 快手）
+
+首先，我们看到这个代码中有一个new关键字，我们知道**new**指令是创建一个类的实例对象并完成加载初始化的，因此这个字符串对象是在**运行期**才能确定的，创建的字符串对象是在**堆内存上**。
+
+其次，在String的构造方法中传递了一个字符串abc，由于这里的abc是被final修饰的属性，所以它是一个字符串常量。在首次构建这个对象时，JVM拿字面量"abc"去字符串常量池试图获取其对应String对象的引用。于是在堆中创建了一个"abc"的String对象，并将其引用保存到字符串常量池中，然后返回；
+
+所以，**如果abc这个字符串常量不存在，则创建两个对象，分别是abc这个字符串常量，以及new String这个实例对象。如果abc这字符串常量存在，则只会创建一个对象**。
+
+
+
 ## 🕝 并发编程
 
-### 线程池的拒绝策略能自定义拒绝策略吗？（2023阿里）
+### Java的线程池有哪些？（2023 阿里）
+
+- ScheduledThreadPool：可以设置定期的执行任务，它支持定时或周期性执行任务，比如每隔 10 秒钟执行一次任务，我通过这个实现类设置定期执行任务的策略。
+- FixedThreadPool：它的核心线程数和最大线程数是一样的，所以可以把它看作是固定线程数的线程池，它的特点是线程池中的线程数除了初始阶段需要从 0 开始增加外，之后的线程数量就是固定的，就算任务数超过线程数，线程池也不会再创建更多的线程来处理任务，而是会把超出线程处理能力的任务放到任务队列中进行等待。而且就算任务队列满了，到了本该继续增加线程数的时候，由于它的最大线程数和核心线程数是一样的，所以也无法再增加新的线程了。
+- CachedThreadPool：可以称作可缓存线程池，它的特点在于线程数是几乎可以无限增加的（实际最大可以达到 Integer.MAX_VALUE，为 2^31-1，这个数非常大，所以基本不可能达到），而当线程闲置时还可以对线程进行回收。也就是说该线程池的线程数量不是固定不变的，当然它也有一个用于存储提交任务的队列，但这个队列是 SynchronousQueue，队列的容量为0，实际不存储任何任务，它只负责对任务进行中转和传递，所以效率比较高。
+- SingleThreadExecutor：它会使用唯一的线程去执行任务，原理和 FixedThreadPool 是一样的，只不过这里线程只有一个，如果线程在执行任务的过程中发生异常，线程池也会重新创建一个线程来执行后续的任务。这种线程池由于只有一个线程，所以非常适合用于所有任务都需要按被提交的顺序依次执行的场景，而前几种线程池不一定能够保障任务的执行顺序等于被提交的顺序，因为它们是多线程并行执行的。
+- SingleThreadScheduledExecutor：它实际和 ScheduledThreadPool 线程池非常相似，它只是 ScheduledThreadPool 的一个特例，内部只有一个线程。
+
+
+
+### 线程池队列的底层？（2023 美团）
+
+Java线程池的底层原理主要基于两个核心概念：线程复用和任务队列。
+
+1. **线程复用**: 创建线程是一个昂贵的操作，线程池通过复用已创建的线程来降低资源消耗。这样，多个任务可以在预先创建的线程上执行，而不需要为每个任务都创建一个新线程。
+2. **任务队列**: 当所有线程都在忙碌状态时，新来的任务会被放入一个队列中，等待线程空闲后再执行。
+
+具体操作流程如下：
+
+1. 当一个新任务提交给线程池时，线程池首先会判断是否有空闲线程可用。如果有，直接在空闲线程上执行该任务。
+2. 如果没有空闲线程，但是线程池的线程数还未达到最大值，那么线程池会创建一个新线程来执行该任务。
+3. 如果所有线程都在忙碌状态，并且线程数已达最大值，该任务就会被放入任务队列。
+4. 线程池里的线程完成任务后会检查任务队列，看是否有等待的任务。如果有，它们会从队列中取出任务并执行。
+5. 在一些配置下，如果线程长时间处于空闲状态，它可能会被终止，以释放资源。
+
+这样，线程池既可以复用线程，减少创建和销毁线程的开销，也能有效地管理和调度任务。常用的Java线程池实现有`ExecutorService`接口和其实现类，如`ThreadPoolExecutor`和`ScheduledThreadPoolExecutor`。
+
+
+
+### 线程池的队列又分哪几种呢？（2023 美团）
+
+首先看一下线程池参数：
+```java
+public ThreadPoolExecutor(int corePoolSize, //线程池的核心线程数量
+                      int maximumPoolSize, //线程池的最大线程数
+                      long keepAliveTime, //当线程数大于核心线程数时，多余的空闲线程存活的最长时间
+                      TimeUnit unit, //时间单位
+                      BlockingQueue<Runnable> workQueue, //任务队列，用来储存等待执行任务的队列
+                      ThreadFactory threadFactory, //线程工厂，用来创建线程，一般默认即可
+                      RejectedExecutionHandler handler //拒绝策略，当提交的任务过多而不能及时处理时，我们可以定制策略来处理任务
+                         )
+```
+
+探究的就是`BlockingQueue<Runnable> workQueue`类型：
+
+1. **ArrayBlockingQueue**: 基于数组结构的有界阻塞队列，需要预先设定其容量。
+2. **LinkedBlockingQueue**: 基于链表结构的阻塞队列，可以是有界的，也可以是无界的（理论上，直到内存耗尽）。
+3. **PriorityBlockingQueue**: 一个具有优先级的无界阻塞队列。
+4. **SynchronousQueue**: 一个没有存储空间的阻塞队列，每个插入操作必须等待一个相应的删除操作。
+5. **DelayedQueue**: 一个阻塞队列，只有当任务到达指定的延迟时间时才能从队列中提取。
+
+不同类型的队列有各自的适用场景和优缺点。例如，`ArrayBlockingQueue`和`LinkedBlockingQueue`通常用于存储大量的任务，而`SynchronousQueue`通常用于直接将任务传递给工作线程。
+
+
+
+### 线程池的拒绝策略能自定义拒绝策略吗？（2023 阿里）
+
 Java线程池拒绝策略是可以自定义的。你可以使用`RejecttedExecutionHandler`接口来定义你自己的拒绝策略。该接口只有一个方法拒绝执行（Runnable r，ThreadPoolExecator执行器），当执行器无法执行任务时调用。你可以实现这个方法来定义你自己的拒绝策略。
 
 示例：
@@ -325,7 +503,27 @@ ThreadPoolExecutor executor = new ThreadPoolExecutor(
 );
 ```
 
-### 使用多线程要注意哪些问题？（2023美团）
+
+
+### 线程池配置无界队列了之后，拒绝策略怎么搞，什么时候用到无界对列？（2023 快手）
+
+线程池配置无界队列了之后，拒绝策略其实就失去了意义，因为无论有多少任务提交到线程池，都会被放入队列中等待执行，不会触发拒绝策略。不过，这样可能堆积大量的请求，从而导致 OOM。因此，一般不推荐使用误解队列。
+
+假设不是无界队列的话，如果当前同时运行的线程数量达到最大线程数量并且队列也已经被放满了任务时，`ThreadPoolTaskExecutor` 定义一些拒绝策略:
+
+- `ThreadPoolExecutor.AbortPolicy`：抛出 `RejectedExecutionException`来拒绝新任务的处理。
+- `ThreadPoolExecutor.CallerRunsPolicy`：调用执行自己的线程运行任务，也就是直接在调用`execute`方法的线程中运行(`run`)被拒绝的任务，如果执行程序已关闭，则会丢弃该任务。因此这种策略会降低对于新任务提交速度，影响程序的整体性能。如果您的应用程序可以承受此延迟并且你要求任何一个任务请求都要被执行的话，你可以选择这个策略。
+- `ThreadPoolExecutor.DiscardPolicy`：不处理新任务，直接丢弃掉。
+- `ThreadPoolExecutor.DiscardOldestPolicy`：此策略将丢弃最早的未处理的任务请求。
+
+举个例子：
+
+Spring 通过 `ThreadPoolTaskExecutor` 或者我们直接通过 `ThreadPoolExecutor` 的构造函数创建线程池的时候，当我们不指定 `RejectedExecutionHandler` 饱和策略的话来配置线程池的时候默认使用的是 `ThreadPoolExecutor.AbortPolicy`。在默认情况下，`ThreadPoolExecutor` 将抛出 `RejectedExecutionException` 来拒绝新来的任务 ，这代表你将丢失对这个任务的处理。对于可伸缩的应用程序，建议使用 `ThreadPoolExecutor.CallerRunsPolicy`。当最大池被填满时，此策略为我们提供可伸缩队列（这个直接查看 `ThreadPoolExecutor` 的构造函数源码就可以看出，比较简单的原因，这里就不贴代码了）。
+
+
+
+### 使用多线程要注意哪些问题？（2023 美团）
+
 使用多线程时需要注意以下问题：
 1. **线程安全**：当多个线程同时访问某一数据时，如果不进行正确的同步控制，可能会导致数据的不一致。需要通过使用synchronized，Lock，volatile等机制来保证线程安全。
 2. **死锁**：死锁是指两个或两个以上的线程在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力干涉那他们都将无法推进下去。我们应避免在代码中产生死锁。
@@ -336,7 +534,7 @@ ThreadPoolExecutor executor = new ThreadPoolExecutor(
 7. **线程的生命周期管理**：需要合理的创建、启动、暂停、恢复、终止线程，不合理的管理可能会导致程序错误或者资源泄漏。
 8. **线程异常处理**：线程中的未捕获异常会导致线程终止，而且这个异常不能被外部捕获。需要为线程设置UncaughtExceptionHandler来处理未捕获的异常。
 
-### 保证数据的一致性有哪些方案呢？（2023美团）
+### 保证数据的一致性有哪些方案呢？（2023 美团）
 在Java中，有多种方式可以保证数据的一致性：
 1. **同步语句块(Synchronized Blocks)**：在Java中，你可以使用synchronized关键字对一个对象或者方法进行锁定，来保证在一个时刻只有一个线程可以访问该对象或者方法，从而避免数据的不一致。
 2. **Volatile关键字**：volatile关键字可以保证变量的可见性。当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去主存中读取新值。
@@ -525,8 +723,46 @@ unsafe.getAndAddInt() 方法实现了 CAS,它会获取当前值,加 1,并比较�
 > 3. https://www.baeldung.com/java-future
 > 4. https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/Future.html
 
+
+
+### 线程池任务提交，比如调用execute或submit API之后的流程有了解吗？（2023 影石360）
+
+在Java中，线程池是一个在后台运行的线程集合，可以用来执行并发任务。当我们在线程池中调用`execute`或`submit`方法时，线程池会处理任务的调度和执行。以下是一个简要的流程描述：
+
+1. **任务提交**：当一个新任务通过`execute()`或`submit()`方法提交到线程池时，线程池首先会判断当前活跃的线程数量是否小于`corePoolSize`（核心线程数）。
+2. **任务分配**：
+   - 如果小于`corePoolSize`，线程池会创建一个新的线程来执行这个任务，即使其他线程是空闲的。
+   - 如果大于或等于`corePoolSize`，线程池会尝试将任务添加到工作队列（`workQueue`）。
+   - 如果工作队列已满，且活跃线程数量小于`maximumPoolSize`（最大线程数），线程池会创建一个新的线程来处理这个任务。
+   - 如果工作队列已满，且活跃线程数量等于`maximumPoolSize`，线程池会根据其饱和策略（`RejectedExecutionHandler`）来处理这个任务。
+3. **任务执行**：线程池中的线程从工作队列中取出任务并执行。如果线程在执行任务时发生异常，将会被线程池捕获，并根据具体的情况决定是否需要替换这个线程。
+4. **任务完成**：当一个任务完成时，线程会返回到线程池并保持空闲状态，等待下一个任务的分配。
+
+请注意，`execute()`方法和`submit()`方法有一些区别：
+
+- `execute()`方法用于提交没有返回值的任务，所以它不会返回任何东西。
+- `submit()`方法用于提交需要返回值的任务。它返回一个`Future`对象，通过这个`Future`对象可以获取任务的结果。
+
+
+
+### AQS队列中的任务怎么知道锁被释放了？（2023 美团）
+
+AQS 使用一个 int 成员变量来表示同步状态，并基于一个 FIFO 队列来管理那些尝试获取资源但失败的线程。
+
+当线程尝试获取资源但失败时，它会被包装成一个节点（Node）并加入到 AQS 的等待队列中。每个节点包含一个指向前一个节点的链接（prev）和一个指向后一个节点的链接（next），这形成了一个双向链表。
+
+那么，一个节点（线程）如何知道锁已经被释放了呢？这主要是通过以下方式来实现的：
+
+1. **状态变量**：AQS 中的状态变量是一个核心组件。当一个线程释放锁时，它会尝试将状态变量设为 0 或相应的值。任何尝试获取锁的线程都会首先检查这个状态变量。
+2. **前驱节点**：当一个线程尝试获取锁并失败时，它会被放到等待队列中，并且通常会进入休眠模式。当它前面的节点（它的前驱）成功获取并随后释放锁时，这个节点的线程会被唤醒。这是通过前驱节点直接唤醒其后继节点的线程来实现的。
+3. **LockSupport**：AQS 使用 `LockSupport.park()` 和 `LockSupport.unpark(thread)` 方法来挂起和唤醒线程。当一个线程不能获取锁时，它会被挂起（即调用 `LockSupport.park()`）。当锁被释放时，相应的线程（通常是等待队列中的头部线程）会被唤醒，即调用 `LockSupport.unpark(thread)`。
+
+综上所述，当锁被释放时，正在等待的线程知晓这个变化是通过检查状态变量、前驱节点的通知，以及 `LockSupport` 的挂起/唤醒机制来实现的。
+
+
+
 ## 🍃 常用框架
-### MyBatis运用了哪些常见的设计模式？（2023美团）
+### MyBatis运用了哪些常见的设计模式？（2023 美团）
 - **工厂模式**，工厂模式在 MyBatis 中的典型代表是 SqlSessionFactory
 - **建造者模式**，建造者模式在 MyBatis 中的典型代表是 SqlSessionFactoryBuilder
 - **单例模式**，单例模式在 MyBatis 中的典型代表是 ErrorContext
@@ -541,12 +777,12 @@ unsafe.getAndAddInt() 方法实现了 CAS,它会获取当前值,加 1,并比较�
 > - https://programming.vip/docs/6200e8e7b682c.html 【Mybatis源码解析】Mybatis源码涉及的设计模式总结
 > - https://programming.vip/docs/mybatis-design-pattern.html Mybatis设计模式
 
-### MyBatis中创建了一个Mapper接口，在写一个xml文件，java的接口是要实现的，为什么这没有实现呢？（2023美团）
+### MyBatis中创建了一个Mapper接口，在写一个xml文件，java的接口是要实现的，为什么这没有实现呢？（2023 美团）
 MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签名。MyBatis会根据Mapper接口中的方法名、参数类型和返回值类型，自动生成实现方法。因此，Mapper接口中的方法不需要实现，也不需要在该接口中编写任何方法体。
 
 相反，你需要编写一个与Mapper接口同名的XML文件，来实现这些方法的具体SQL操作。这样，当你在Java代码中调用Mapper接口中的方法时，MyBatis会自动将该方法映射到对应的XML文件中的SQL语句，并执行该语句。
 
-### 与传统的JDBC相比，MyBatis的优点？（2023美团）
+### 与传统的JDBC相比，MyBatis的优点？（2023 美团）
 在面试中，可以按照以下的方式来回答：
 1. 首先，我认为最大的优点是MyBatis提供了更高的**灵活性**。我们可以直接编写SQL，这样可以充分利用数据库的特性并且更好地控制查询。
 2. 其次，MyBatis使我们**无需手动**转换数据，它能自动将结果集映射到Java对象，这大大简化了编程工作。
@@ -555,7 +791,7 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 5. MyBatis也能**更好地处理一对多、多对多**等复杂关系。
 6. 最后，MyBatis提供了**一些JDBC无法提供的特性**，如延迟加载，这对于性能优化是非常有用的。
 
-### JDBC连接数据库的步骤（2023美团）
+### JDBC连接数据库的步骤（2023 美团）
 1. **加载数据库驱动程序**：首先，我们需要加载数据库驱动。这可以通过 Class.forName() 方法实现，例如 Class.forName("com.mysql.jdbc.Driver")。
 2. **建立数据库连接**：使用DriverManager.getConnection()方法建立与数据库的连接，需要指定数据库的URL、用户名和密码，例如：Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/mydatabase", "username", "password");
 3. **创建Statement对象**：使用Connection对象的createStatement()方法创建一个Statement对象，用于执行SQL语句，例如：Statement stmt = conn.createStatement();
@@ -563,7 +799,7 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 5. **处理查询结果**：如果执行的是查询语句，需要使用ResultSet对象来处理查询结果，例如：while (rs.next()) { String name = rs.getString("name"); int age = rs.getInt("age"); }
 6. **关闭数据库连接**：在程序结束时，需要使用Connection对象的close()方法关闭数据库连接，例如：conn.close();
 
-### 怎么理解SpringIoc？（2023美团）
+### 怎么理解SpringIoc？（2023 美团）
 **IoC（Inversion of Control）是“控制反转”** 的缩写，是一种设计思想，也是Spring框架的核心。IoC是将你设计好的对象交给容器控制，而不是传统的在你的对象内部直接控制。如何理解好IoC呢？可以从以下几点来看：
 1. **控制反转**：传统的程序是由我们自己在对象内部通过new进行创建对象，是由程序控制对象的创建。在Spring框架中，对象的创建是由Spring容器来进行的，它负责控制对象的生命周期。所谓“控制反转”就是把传统的有我们自己控制的对象创建过程交给Spring框架来做。
 2. **依赖注入**：IoC的一个重要的具体实现方法是DI（Dependency Injection），也叫作依赖注入。在我们设计好的对象中会有一些其他对象的引用（即依赖），如果没有Spring容器，我们需要使用很多复杂的方法来管理这些依赖。而有了Spring容器，我们只需要告诉Spring这些依赖即可，Spring会自动把这些依赖注入到对象中。
@@ -571,7 +807,7 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 4. **减轻耦合**：通过IoC，对象间的耦合度可以降低，对象只需要关注自身的业务逻辑，而不需要关心其他对象是如何创建和管理的，大大增强了代码的可维护性和可测试性。
 5. **提供配置**：Spring容器可以使用XML、Java注解、Java代码等多种方式来进行配置，提供了非常大的灵活性。
 
-### 如果让你设计一个SpringIoc，你觉得会从哪些方面考虑这个设计？（2023美团）
+### 如果让你设计一个SpringIoc，你觉得会从哪些方面考虑这个设计？（2023 美团）
 - Bean的生命周期管理：需要设计Bean的创建、初始化、销毁等生命周期管理机制，可以考虑使用工厂模式和单例模式来实现。
 - 依赖注入：需要实现依赖注入的功能，包括属性注入、构造函数注入、方法注入等，可以考虑使用反射机制和XML配置文件来实现。
 - Bean的作用域：需要支持多种Bean作用域，比如单例、原型、会话、请求等，可以考虑使用Map来存储不同作用域的Bean实例。
@@ -580,7 +816,7 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 - 配置文件加载：需要支持从不同的配置文件中加载Bean的相关信息，可以考虑使用XML、注解或者Java配置类来实现。
 
 
-### Spring给我们提供了很多扩展点，这些有了解吗？（2023美团）
+### Spring给我们提供了很多扩展点，这些有了解吗？（2023 美团）
 1. BeanFactoryPostProcessor：允许在Spring容器实例化bean之前修改bean的定义。常用于修改bean属性或改变bean的作用域。
 2. BeanPostProcessor：可以在bean实例化、配置以及初始化之后对其进行额外处理。常用于代理bean、修改bean属性等。
 3. PropertySource：用于定义不同的属性源，如文件、数据库等，以便在Spring应用中使用。
@@ -590,7 +826,7 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 7. Spring Boot的自动配置：通过创建自定义的自动配置类，可以实现对框架和第三方库的自动配置。
 8. 自定义注解：创建自定义注解，用于实现特定功能或约定，如权限控制、日志记录等。
 
-### 大致了解SpringMVC的处理流程吗？（2023美团）
+### 大致了解SpringMVC的处理流程吗？（2023 美团）
 1. **接收请求**：用户发送请求至前端控制器DispatcherServlet。
 2. **查找处理器映射**：DispatcherServlet收到请求后，调用HandlerMapping处理器映射器。
 3. **处理器映射返回处理器执行链**：HandlerMapping根据请求的URL找到对应的Controller并返回一个HandlerExecutionChain对象（包含一个Handler处理器（页面控制器）对象，多个HandlerInterceptor拦截器对象）。
@@ -599,7 +835,7 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 6. **视图解析**：DispatcherServlet通过视图解析器进行解析（根据逻辑视图名解析成实际视图/页面），并将ModelAndView对象中的模型数据填充到request域对象中。
 7. **返回视图**：DispatcherServlet把返回的视图对象返回给用户。
 
-###  SpringAOP主要想解决什么问题（2023美团）
+###  SpringAOP主要想解决什么问题（2023 美团）
 
 1. 代码分离：在许多应用程序中，你可能会发现你需要在多个方法或对象中重复相同的代码块，比如日志记录、事务管理、权限检查等。这种情况下，代码不是真正的分离，各部分功能模块的职责并不清晰。通过使用AOP，你可以把这些代码集中在一起，然后应用到程序的其他部分，实现"横切关注点"（cross-cutting concerns）的有效管理。
 2. 维护性：如果你需要修改一些重复的代码（比如更改日志记录的格式），你可能需要在多个位置进行更改。使用AOP，你只需要在一个地方更改，减少了出错的可能性，提高了代码的维护性。
@@ -608,29 +844,44 @@ MyBatis中的Mapper接口并不需要实现，它只是定义了一组方法签�
 
 总的来说，Spring AOP能够让开发者更好地关注业务逻辑的开发，而将诸如日志记录、安全控制、事务处理等公共任务抽象和集中处理，从而提高代码的可维护性、可读性和可重用性。
 
-### SpringAOP的原理了解吗（2023美团、2023完美世界）
-Spring AOP (Aspect-Oriented Programming)其主要目的是将业务逻辑与系统服务解耦。在 Spring 中，AOP 的实现主要通过代理实现。下面是一些关于其工作原理的关键点：
-1. **代理模式**：Spring AOP 的实现主要依赖于代理模式。在运行时，Spring AOP 动态地在目标对象与实际对象之间创建一个代理对象，然后通过代理对象实现对目标对象的访问。
-2. **JoinPoint**：这是程序执行过程中明确的点，比如方法的调用或特定的异常被抛出。在 Spring AOP 中，一个 JoinPoint 总是代表一个方法的执行。
-3. **PointCut**：这是一组 JoinPoint，你可以通过表达式或规则定义。
-4. **Advice**：这是实际要在程序特定的 JoinPoint 执行的动作。它的类型可以是 Before, After, AfterReturning, AfterThrowing, Around 等。
-5. **Aspect**：这是一个关注点的模块化，这种关注点实现了某一种跨越一个应用程序的功能，通常包含一些 Advices 和 PointCuts。
-6. **Target Object**：代理模式的目标对象。
-7. **AOP Proxy**：AOP 框架创建的对象，包含了 advice。
+### 🔥 SpringAOP的原理了解吗（2023 美团、2023 完美世界、2023 影石360、2023 快手）
 
-Spring AOP 使用这些元素来确保横切关注点（cross-cutting concerns）在应用中适当的位置被执行。Spring 可以在运行时动态地将 Advice 应用到目标对象上，从而实现了解耦和代码重用。
+#### 序言
 
-在 Spring AOP 中，有两种类型的 AOP 代理：
-- 基于 JDK 的动态代理：如果被代理的目标对象实现了至少一个接口，则会使用 JDK 动态代理。在这种情况下，生成的代理对象会实现被代理对象所实现的接口。
-- CGLIB 代理：如果被代理的目标对象没有实现任何接口，则 Spring AOP 会创建一个被代理对象的子类，然后增强被代理对象的方法，这就是所谓的 CGLIB 代理。
-所有这些都为开发者提供了一个强大的工具，使他们能够将业务逻辑和系统服务（如事务管理、日志、安全等）分开，从而使业务代码更简洁、更易于维护和复用。
+面向切面编程（AOP）是一种编程范式，它允许开发人员定义跨多个方法和类的关注点。AOP 的主要目的是将程序中分散的功能（例如日志、安全等）模块化，并能够在不修改核心业务逻辑代码的情况下，将这些功能插入到程序的不同部分。
+
+#### 核心概念和原则
+
+1. **切面（Aspect）**: 切面是一个模块，其中定义了一个或多个“关注点”或“交叉关注点”。简单来说，它是我们想要实现的功能或行为。例如，日志记录、事务管理和安全性都可以是切面。
+2. **连接点（Join Point）**: 连接点是程序中的某个特定位置，如方法执行、异常处理等，我们可以在这些位置插入切面的代码。在Spring AOP中，连接点主要是指方法执行。
+3. **通知（Advice）**: 通知是切面在特定的连接点执行的代码片段。Spring AOP包括以下五种类型的通知：
+   - **前置通知（Before advice）**: 在连接点之前执行。
+   - **后置通知（After returning advice）**: 在连接点成功执行后执行。
+   - **异常通知（After throwing advice）**: 如果在连接点抛出异常，则执行。
+   - **最终通知（After (finally) advice）**: 在连接点执行后，无论成功还是异常都会执行。
+   - **环绕通知（Around advice）**: 在连接点前后都可以执行。
+4. **切点（Pointcut）**: 切点是一组表达式，用于指定哪些连接点需要被通知。它告诉AOP框架在何处应用通知。
+5. **目标对象（Target Object）**: 目标对象是包含连接点的对象。Spring AOP代理的目标对象通常是一个被代理的对象。
+6. **代理（Proxy）**: AOP代理是用于实现切面的对象。在Spring中，AOP代理可以是JDK动态代理或CGLIB代理。
+7. **织入（Weaving）**: 织入是将切面插入到目标对象中以创建代理对象的过程。这可以在编译时、加载时或运行时完成。
+
+#### 步骤
+
+1. **定义切面**: 创建一个类，并在该类中定义需要注入的关注点。
+2. **定义通知**: 在切面类中，定义一些方法，并使用Spring AOP的注解来标注这些方法是哪种类型的通知。
+3. **定义切点**: 使用`@Pointcut`注解定义表达式，指定在哪些方法上应用通知。
+4. **应用切面**: 使用Spring的配置（XML或Java）来启用AOP并应用切面。
+
+总的来说，Spring AOP提供了一种强大而灵活的方式来增加关注点或行为，而无需修改原始代码。这大大简化了例如日志记录、事务管理和安全性等交叉关注点的实现。希望这个解释有助于您了解Spring AOP的基本原则！如果您有进一步的问题或需要详细的示例，请告诉我！
+
+
 
 > 面试的时候可以这样回答：
 > 🙋‍♂️ "Spring AOP 是一种面向切面编程的实现，它通过动态代理方式解耦了业务逻辑和系统服务。其主要组成部分包括 JoinPoint（程序执行过程中的某个特定点，如方法调用），PointCut（一组可以通过表达式或规则定义的 JoinPoint），Advice（在特定的 JoinPoint 执行的代码），和 Aspect（包含 Advice 和 PointCut 的模块）。
 > Spring AOP 根据目标对象是否实现接口来选择使用 JDK 动态代理还是 CGLIB 代理。如果目标对象实现了接口，Spring AOP 就会用 JDK 动态代理，否则会用 CGLIB 代理。这样，在运行时，Spring AOP 可以动态地将 Advice 应用到目标对象，实现系统服务和业务逻辑的解耦。
 > 通过这种方式，我们可以将一些通用的系统服务（比如事务管理、日志、安全等）抽象出来，从而使业务代码更简洁、更易于维护和复用。"
 
-### 拦截器有几个方法，分别在什么时候执行，对比过滤器（2023完美世界）
+### 拦截器有几个方法，分别在什么时候执行，对比过滤器（2023 完美世界）
 拦截器和过滤器是Web开发中常用的两种处理方法。这里我假设你指的是Spring MVC拦截器和Java Servlet过滤器。
 拦截器 (Interceptor) 在Spring MVC中通常有3个方法：
 - `preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)`: 在请求被处理之前调用。如果返回true，处理流程继续；如果返回false，处理流程结束，不会调用后续的拦截器和处理器。
@@ -647,7 +898,7 @@ Spring AOP 使用这些元素来确保横切关注点（cross-cutting concerns�
 - 过滤器则主要用于请求的过滤处理，包括日志记录、请求压缩、安全检查、用户登录校验等。它的运行速度一般比拦截器快，但功能上不如拦截器强大。
 
 
-### 导入一个 jar 包怎么让 springboot 知道哪些需要自动配置（2023完美世界）
+### 导入一个 jar 包怎么让 springboot 知道哪些需要自动配置（2023 完美世界）
 Spring Boot自动配置是通过@EnableAutoConfiguration注解实现的。它基本上是通过查找并加载META-INF/spring.factories配置文件来完成的。
 如果你想要将你的jar包在Spring Boot项目中进行自动配置，你需要以下步骤：
 1. 在你的jar包中创建一个spring.factories文件，并将其放入META-INF目录下
@@ -664,13 +915,21 @@ com.yourpackage.YourAutoConfigurationClass
 
 另外，你可能需要使用@Conditional注解以避免在不需要的情况下创建bean。
 
-## 📑 数据库
+## 🐬 MySQL
 
-### 可重复读和已提交读隔离级别表现的现象是什么，区别是什么样的？（2023美团）
+### 可重复读和已提交读隔离级别表现的现象是什么，区别是什么样的？（2023 美团）
 - 读提交，指一个事务提交之后，它做的变更才能被其他事务看到，会有不可重复读、幻读的问题。
 - 可重复读，指一个事务执行过程中看到的数据，一直跟这个事务启动时看到的数据是一致的，MySQL InnoDB 引擎的默认隔离级别，解决了不可重复读的问题，并且以很大程度上避免幻读现象的发生。
 
-### 数据文件大体分成哪几种数据文件？（2023美团）
+
+
+### 数据库引擎知道哪些？（2023 美团）
+
+MySQL 常见的存储引擎 InnoDB、MyISAM 和 Memory 分别支持的索引类型。
+
+
+
+### 数据文件大体分成哪几种数据文件？（2023 美团）
 我们每创建一个 database（数据库） 都会在 /var/lib/mysql/ 目录里面创建一个以 database 为名的目录，然后保存表结构和表数据的文件都会存放在这个目录里。
 
 比如，我这里有一个名为 my_test 的 database，该 database 里有一张名为 t_order 数据库表。
@@ -687,10 +946,10 @@ t_order.ibd
 - t_order.frm ，t_order 的表结构会保存在这个文件。在 MySQL 中建立一张表都会生成一个.frm 文件，该文件是用来保存每个表的元数据信息的，主要包含表结构定义。
 - t_order.ibd，t_order 的表数据会保存在这个文件。表数据既可以存在共享表空间文件（文件名：ibdata1）里，也可以存放在独占表空间文件（文件名：表名字.ibd）。这个行为是由参数 innodb_file_per_table 控制的，若设置了参数 innodb_file_per_table 为 1，则会将存储的数据、索引等信息单独存储在一个独占表空间，从 MySQL 5.6.6 版本开始，它的默认值就是 1 了，因此从这个版本之后， MySQL 中每一张表的数据都存放在一个独立的 .ibd 文件。
 
-### 对一个慢sql怎么去排查？（2023美团）
+### 对一个慢sql怎么去排查？（2023 美团）
 可通过开启mysql的慢日志查询，设置好时间阈值，进行捕获
 
-### 索引字段是不是建的越多越好（2023美团）
+### 索引字段是不是建的越多越好（2023 美团）
 索引越多，在写入频繁的场景下，对于B+树的维护所付出的性能消耗也会越大
 
 ### 什么是覆盖索引？（2023 快手）
@@ -770,273 +1029,15 @@ SELECT `name`, `age`, `address` FROM `tbl_user` WHERE `name` = 'John' AND `age` 
 > - https://www.red-gate.com/simple-talk/databases/sql-server/learn/using-covering-indexes-to-improve-query-performance/ 使用覆盖索引以提高查询性能
 
 
-### redis怎么实现分布式锁 set nx命令有什么问题 如何解决？（2023小红书）
 
-Redis实现分布式锁的基本思路是使用SET命令的NX（Not eXists）选项。NX选项表示只有当键不存在时，才会设置键值对。这样可以确保在分布式环境中，只有一个客户端能够成功地获取锁。以下是一个简单的示例：
-```shell
-SET lock_key some_value NX PX 30000
-```
-这个命令尝试设置一个名为lock_key的键，值为some_value，并且使用NX选项。PX选项表示设置一个过期时间，单位为毫秒，在这个例子中是30000毫秒（30秒）。
-然而，使用SET NX命令实现分布式锁存在一些问题：
-1. 非原子操作：在某些情况下，客户端可能在设置锁和设置过期时间之间崩溃，导致锁永远不会被释放。这可以通过使用SET命令的PX选项来解决，它可以在设置锁的同时设置过期时间，确保操作是原子的。
-2. 无法解决锁超时问题：如果持有锁的客户端在锁过期之前没有完成任务，其他客户端可能会获取到锁，导致并发问题。为了解决这个问题，可以在获取锁时设置一个唯一的值（例如UUID），并在释放锁时检查该值。这样可以确保只有锁的持有者才能释放锁。
-3. 无法解决锁释放问题：如果持有锁的客户端在释放锁之前崩溃，锁可能永远不会被释放。为了解决这个问题，可以使用一个后台线程定期检查并释放过期的锁。
-4. 无法实现公平锁：SET NX命令无法保证公平性，即等待时间最长的客户端不一定能够优先获取锁。要实现公平锁，可以使用Redis的LIST数据结构，将等待锁的客户端按照先进先出（FIFO）的顺序排队。
-综上所述，虽然SET NX命令可以实现基本的分布式锁功能，但在实际应用中可能需要考虑更多的问题。为了解决这些问题，可以使用成熟的Redis分布式锁库，如Redlock。Redlock提供了一个更加健壮和可靠的分布式锁实现，可以解决上述问题
-
-### 什么情况使用 redis 反而降低性能（2023完美世界）
-
-- 数据集过大：Redis 将数据存储在内存中，如果数据集过大，超出了服务器可用内存的限制，就会导致 Redis 使用交换空间（swap space）或者频繁地从磁盘加载数据，从而严重影响性能。
-- 内存碎片化：当 Redis 频繁地进行写入、更新和删除操作时，可能会导致内存碎片化。这会导致 Redis 需要更多的内存来存储相同的数据，最终导致性能下降。
-- 大量的键过期操作：当 Redis 中有大量的键需要过期处理时，Redis 会执行定期清理操作来删除过期的键。如果这个清理操作耗时较长，会导致 Redis 在执行其他操作时的性能下降。
-- 高并发写入操作：当有大量的并发写入操作时，Redis 可能会因为竞争条件而降低性能。这种情况下，可以考虑使用 Redis 的事务功能来减少竞争并发。
-- 复杂的数据结构操作：Redis 提供了多种复杂的数据结构，如列表、集合和有序集合等。当对这些数据结构进行复杂的操作时，例如对大型列表进行频繁的插入和删除操作，可能会导致性能下降。
-
-需要注意的是，这些情况并不意味着 Redis 总是会降低性能，而是在特定的场景下可能会出现性能下降的情况。为了优化 Redis 的性能，可以根据具体的情况进行调整和优化，例如增加内存、合理设置过期时间、使用合适的数据结构等。
-
-> 参考资料：
-> 1. https://loadforge.com/guides/troubleshooting-redis-performance-issues
-> 2. https://severalnines.com/blog/performance-tuning-redis/
-
-### mysql的隔离级别是什么?mysql是如何实现的？（2023阿里）
+### mysql的隔离级别是什么?mysql是如何实现的？（2023 阿里）
 MySQL InnoDB 引擎的默认隔离级别虽然是「可重复读」，但是它很大程度上避免幻读现象（并不是完全解决了），解决的方案有两种：
 - 针对**快照读**（普通 select 语句），是通过 MVCC 方式解决了幻读，因为可重复读隔离级别下，事务执行过程中看到的数据，一直跟这个事务启动时看到的数据是一致的，即使中途有其他事务插入了一条数据，是查询不出来这条数据的，所以就很好了避免幻读问题。
 - 针对**当前读**（select ... for update 等语句），是通过 next-key lock（记录锁+间隙锁）方式解决了幻读，因为当执行 select ... for update 语句的时候，会加上 next-key lock，如果有其他事务在 next-key lock 锁范围内插入了一条记录，那么这个插入语句就会被阻塞，无法成功插入，所以就很好了避免幻读问题。
 - 
 > 参考：https://xiaolincoding.com/mysql/transaction/mvcc.html
 
-### Redis大key如何解决（2023 滴滴）
-Redis大key通常指的是存储在Redis中的数据结构（例如字符串、列表、集合、哈希表和有序集合）的数据量特别大的key。例如，一个列表中的元素数量巨大，或者一个哈希表的字段数量很多。这些大key可能会导致在执行某些操作时消耗过多的CPU和内存资源，进而影响Redis的性能。
-例如：字符串(String)：一个字符串value的长度非常大，例如超过10KB。
-```c
-SET bigkey "a very large string....."  # string长度非常大
-```
-列表(List)：列表中的元素数量非常多，例如超过10000个。
-```c
-LPUSH bigkey item1 item2 item3 ... item10001  # 列表元素数量非常多
-```
-哈希(Hash)：哈希中的字段数量非常多，例如超过10000个。
-```c
-HMSET bigkey field1 value1 field2 value2 ... field10001 value10001  # 哈希字段数量非常多
-```
-以上的数值（例如10KB，10000个等）仅作为参考，具体定义大key的阈值需要根据实际业务和Redis的配置来决定。如果这些key对Redis的性能产生了影响，就应当考虑对其进行优化。
 
-> 什么是大key总结
-- String 类型的值大于 10 KB；
-- Hash、List、Set、ZSet 类型的元素的个数超过 5000个；
-
-> 大 key 会造成什么问题？
-
-大 key 会带来以下四种影响：
-- **客户端超时阻塞**。由于 Redis 执行命令是单线程处理，然后在操作大 key 时会比较耗时，那么就会阻塞 Redis，从客户端这一视角看，就是很久很久都没有响应。
-- **引发网络阻塞**。每次获取大 key 产生的网络流量较大，如果一个 key 的大小是 1 MB，每秒访问量为 1000，那么每秒会产生 1000MB 的流量，这对于普通千兆网卡的服务器来说是灾难性的。
-- **阻塞工作线程**。如果使用 del 删除大 key 时，会阻塞工作线程，这样就没办法处理后续的命令。
-- **内存分布不均**。集群模型在 slot 分片均匀情况下，会出现数据和查询倾斜情况，部分有大 key 的 Redis 节点占用内存多，QPS 也会比较大。
-
-> 如何找到大 key ？
-
-1. redis-cli --bigkeys 查找大key
-
-可以通过 redis-cli --bigkeys 命令查找大 key：
-```
-redis-cli -h 127.0.0.1 -p6379 -a "password" -- bigkeys
-```
-使用的时候注意事项：
-- 最好选择在从节点上执行该命令。因为主节点上执行时，会阻塞主节点；
-- 如果没有从节点，那么可以选择在 Redis 实例业务压力的低峰阶段进行扫描查询，以免影响到实例的正常运行；或者可以使用 -i 参数控制扫描间隔，避免长时间扫描降低 Redis 实例的性能。
-该方式的不足之处：
-- 这个方法只能返回每种类型中最大的那个 bigkey，无法得到大小排在前 N 位的 bigkey；
-- 对于集合类型来说，这个方法只统计集合元素个数的多少，而不是实际占用的内存量。但是，一个集合中的元素个数多，并不一定占用的内存就多。因为，有可能每个元素占用的内存很小，这样的话，即使元素个数有很多，总内存开销也不大；
-
-2. 使用 SCAN 命令查找大 key
-使用 SCAN 命令对数据库扫描，然后用 TYPE 命令获取返回的每一个 key 的类型。
-对于 String 类型，可以直接使用 STRLEN 命令获取字符串的长度，也就是占用的内存空间字节数。
-对于集合类型来说，有两种方法可以获得它占用的内存大小：
-- 如果能够预先从业务层知道集合元素的平均大小，那么，可以使用下面的命令获取集合元素的个数，然后乘以集合元素的平均大小，这样就能获得集合占用的内存大小了。List 类型：LLEN 命令；Hash 类型：HLEN 命令；Set 类型：SCARD 命令；Sorted Set 类型：ZCARD 命令；
-- 如果不能提前知道写入集合的元素大小，可以使用 MEMORY USAGE 命令（需要 Redis 4.0 及以上版本），查询一个键值对占用的内存空间。
-
-3. 使用 RdbTools 工具查找大 key
-使用 RdbTools 第三方开源工具，可以用来解析 Redis 快照（RDB）文件，找到其中的大 key。
-比如，下面这条命令，将大于 10 kb 的  key  输出到一个表格文件。
-```
-rdb dump.rdb -c memory --bytes 10240 -f redis.csv
-```
-
-> 如何删除大 key
-
-删除操作的本质是要释放键值对占用的内存空间，不要小瞧内存的释放过程。
-
-释放内存只是第一步，为了更加高效地管理内存空间，在应用程序释放内存时，操作系统需要把释放掉的内存块插入一个空闲内存块的链表，以便后续进行管理和再分配。这个过程本身需要一定时间，而且会阻塞当前释放内存的应用程序。
-
-所以，如果一下子释放了大量内存，空闲内存块链表操作时间就会增加，相应地就会造成 Redis 主线程的阻塞，如果主线程发生了阻塞，其他所有请求可能都会超时，超时越来越多，会造成 Redis 连接耗尽，产生各种异常。
-
-因此，删除大 key 这一个动作，我们要小心。具体要怎么做呢？这里给出两种方法：
-- 分批次删除
-- 异步删除（Redis 4.0版本以上）
-
-1. 分批次删除
-
-对于删除大 Hash，使用 hscan 命令，每次获取 100 个字段，再用 hdel 命令，每次删除 1 个字段。
-
-Python代码：
-```python
-def del_large_hash():
-  r = redis.StrictRedis(host='redis-host1', port=6379)
-    large_hash_key ="xxx" #要删除的大hash键名
-    cursor = '0'
-    while cursor != 0:
-        # 使用 hscan 命令，每次获取 100 个字段
-        cursor, data = r.hscan(large_hash_key, cursor=cursor, count=100)
-        for item in data.items():
-                # 再用 hdel 命令，每次删除1个字段
-                r.hdel(large_hash_key, item[0])
-```
-
-对于删除大 List，通过 ltrim 命令，每次删除少量元素。
-
-Python代码：
-```python
-def del_large_list():
-  r = redis.StrictRedis(host='redis-host1', port=6379)
-  large_list_key = 'xxx'  #要删除的大list的键名
-  while r.llen(large_list_key)>0:
-      #每次只删除最右100个元素
-      r.ltrim(large_list_key, 0, -101) 
-```
-对于删除大 Set，使用 sscan 命令，每次扫描集合中 100 个元素，再用 srem 命令每次删除一个键。
-
-Python代码：
-```python
-def del_large_set():
-  r = redis.StrictRedis(host='redis-host1', port=6379)
-  large_set_key = 'xxx'   # 要删除的大set的键名
-  cursor = '0'
-  while cursor != 0:
-    # 使用 sscan 命令，每次扫描集合中 100 个元素
-    cursor, data = r.sscan(large_set_key, cursor=cursor, count=100)
-    for item in data:
-      # 再用 srem 命令每次删除一个键
-      r.srem(large_size_key, item)
-```
-
-对于删除大 ZSet，使用 zremrangebyrank 命令，每次删除 top 100个元素。
-
-Python代码：
-```python
-def del_large_sortedset():
-  r = redis.StrictRedis(host='large_sortedset_key', port=6379)
-  large_sortedset_key='xxx'
-  while r.zcard(large_sortedset_key)>0:
-    # 使用 zremrangebyrank 命令，每次删除 top 100个元素
-    r.zremrangebyrank(large_sortedset_key,0,99) 
-```
-
-2. 异步删除
-从 Redis 4.0 版本开始，可以采用异步删除法，用 unlink 命令代替 del 来删除。
-这样 Redis 会将这个 key 放入到一个异步线程中进行删除，这样不会阻塞主线程。
-除了主动调用 unlink 命令实现异步删除之外，我们还可以通过配置参数，达到某些条件的时候自动进行异步删除。
-主要有 4 种场景，默认都是关闭的：
-```
-lazyfree-lazy-eviction no
-lazyfree-lazy-expire no
-lazyfree-lazy-server-del
-noslave-lazy-flush no
-```
-
-它们代表的含义如下：
-- lazyfree-lazy-eviction：表示当 Redis 运行内存超过 maxmeory 时，是否开启 lazy free 机制删除；
-- lazyfree-lazy-expire：表示设置了过期时间的键值，当过期之后是否开启 lazy free 机制删除；
-- lazyfree-lazy-server-del：有些指令在处理已存在的键时，会带有一个隐式的 del 键的操作，比如 rename 命令，当目标键已存在，Redis 会先删除目标键，如果这些目标键是一个 big key，就会造成阻塞删除的问题，此配置表示在这种场景中是否开启 lazy free 机制删除；
-- slave-lazy-flush：针对 slave (从节点) 进行全量数据同步，slave 在加载 master 的 RDB 文件前，会运行 flushall 来清理自己的数据，它表示此时是否开启 lazy free 机制删除。
-
-建议开启其中的 lazyfree-lazy-eviction、lazyfree-lazy-expire、lazyfree-lazy-server-del 等配置，这样就可以有效的提高主线程的执行效率。
-
-
-> 解决
-1. **对大Key进行拆分**：将一个Big Key拆分为多个key-value这样的小Key，并确保每个key的成员数量或者大小在合理范围内，然后再进行存储，通过get不同的key或者使用mget批量获取。
-2. **对大Key进行清理**：对Redis中的大Key进行清理，从Redis中删除此类数据。Redis自4.0起提供了UNLINK命令，该命令能够以非阻塞的方式缓慢逐步的清理传入的Key，通过UNLINK，你可以安全的删除大Key甚至特大Key。
-3. **监控Redis的内存、网络带宽、超时等指标**：通过监控系统并设置合理的Redis内存报警阈值来提醒我们此时可能有大Key正在产生，如：Redis内存使用率超过70%，Redis内存1小时内增长率超过20%等。
-4. **定期清理失效数据**：如果某个Key有业务不断以增量方式写入大量的数据，并且忽略了其时效性，这样会导致大量的失效数据堆积。可以通过定时任务的方式，对失效数据进行清理。
-5. **压缩value**：使用序列化、压缩算法将key的大小控制在合理范围内，但是需要注意序列化、反序列化都会带来一定的消耗。如果压缩后，value还是很大，那么可以进一步对key进行拆分。
-
-> 参考：
-> 1. https://blog.csdn.net/Weixiaohuai/article/details/125391957
-> 2. https://min.news/en/news/a1b1f8acadd9af9be99514da7504de1b.html
-> 3. https://www.dragonflydb.io/error-solutions/redis-big-key-problem
-> 4. https://xiaolincoding.com/redis/base/redis_interview.html#redis-的大-key-如何处理
-
-### 什么是热key？如何解决热key问题（2023 滴滴，2023 小红书）
->小红书的问法是：Redis中，如果单key过热怎么处理？
-
-热key是指在Redis中被频繁访问的key。当大量的请求都集中在一小部分key上时，就会形成热key。这可能导致Redis服务器负载不均，甚至可能导致部分业务瘫痪。
-
-#### 如何发现热key？
-
-- 凭借业务经验，预估热 Key 出现：根据业务系统上线的一些活动和功能，我们是可以在某些场景下提前预估热 `Key` 的出现的，比如业务需要进行一场商品秒杀活动，秒杀商品信息和数量一般都会缓存到 `Redis` 中，这种场景极有可能出现热 `Key` 问题的。
-- 客户端进行收集：一般我们在连接 `Redis` 服务器时都要使用专门的 SDK（比如：`Java` 的客户端工具 `Jedis`、`Redisson`），我们可以对客户端工具进行封装，在发送请求前进行收集采集，同时定时把收集到的数据上报到统一的服务进行聚合计算。
-- 在代理层进行收集：如果所有的 `Redis` 请求都经过 `Proxy`（代理）的话，可以考虑改动 `Proxy` 代码进行收集，思路与客户端基本类似。
-- hotkeys 参数：`Redis` 在 `4.0.3` 版本中添加了 [hotkeys](https://github.com/redis/redis/pull/4392) 查找特性，可以直接利用 `redis-cli --hotkeys` 获取当前 `keyspace` 的热点 `key`，实现上是通过 `scan + object freq` 完成的。
-- monitor 命令：`monitor` 命令可以实时抓取出 `Redis` 服务器接收到的命令，通过 `redis-cli monitor` 抓取数据，同时结合一些现成的分析工具，比如 [redis-faina](https://github.com/facebookarchive/redis-faina)，统计出热 Key。
-- Redis 节点抓包分析：`Redis` 客户端使用 `TCP` 协议与服务端进行交互，通信协议采用的是 `RESP` 协议。自己写程序监听端口，按照 `RESP` 协议规则解析数据，进行分析。或者我们可以使用一些抓包工具，比如 `tcpdump` 工具，抓取一段时间内的流量进行解析。
-
-#### 如何解决热key？
-
-常用方案：
-
-1. **【强力推荐】分片**：这是一种常见的解决方式，将数据分散到多个 Redis 实例中去，这样可以分散访问压力，避免单个 Redis 实例被过度访问。之所以出现热 `Key`，是因为有大量的对同一个 `Key` 的请求落到同一个 `Redis` 实例上，如果我们可以有办法将这些请求打散到不同的实例上，防止出现流量倾斜的情况，那么热 `Key` 问题也就不存在了。
-
-   那么如何将对某个热 `Key` 的请求打散到不同实例上呢？我们就可以通过热 `Key` 备份的方式，基本的思路就是，我们可以给热 `Key` 加上前缀或者后缀，把一个热 `Key` 的数量变成 `Redis` 实例个数 `N` 的倍数 `M`，从而由访问一个 `Redis` `Key` 变成访问 `N * M` 个 `Redis` `Key`。 `N * M` 个 `Redis` `Key` 经过分片分布到不同的实例上，将访问量均摊到所有实例。
-
-2. 二级缓存（本地缓存）：当出现热 `Key` 以后，把热 `Key` 加载到系统的 `JVM` 中。后续针对这些热 `Key` 的请求，会直接从 `JVM` 中获取，而不会走到 `Redis` 层。这些本地缓存的工具很多，比如 `Ehcache`，或者 `Google Guava` 中 `Cache` 工具，或者直接使用 `HashMap` 作为本地缓存工具都是可以的。
-
-其他解决方案：
-
-1. [MemCached](https://www.memcached.org/) / [Redission](https://redisson.org/) + Redis主从复制：这个方案也可以说是分片的具体实现了[2]。复制热点数据到多个节点，这样可以分摊读取压力。Redis 具有内建的主从复制功能，可以使用它来实现热点数据的复制。Memcached 不直接支持复制，但你可以在上层实现。同样，Redission 自身并不直接解决热点键（HotKeys）问题，但支持多种集群模式，包括分片，可以将数据更均匀地分布在多个节点上，从而降低热点键对单个节点的影响。
-
-![](https://dz2cdn1.dzone.com/storage/temp/11309552-screen-shot-2019-02-19-at-62001-pm.png)
-
-2. 代理+读写分离+SLB（服务器负载均衡（Server Load Balancing））：
-   1. 负载均衡在SLB层实现
-   2. 在代理层实现读写分离和自动路由
-   3. 写请求由主节点处理
-   4. 读请求由从节点处理
-   5. HA（High Availability，互联网黑话）在从节点和主节点上实现
-
-![](https://dz2cdn1.dzone.com/storage/temp/11309553-screen-shot-2019-02-19-at-62011-pm.png)
-
-
-
-> 参考：
-> 1. https://dzone.com/articles/redis-hotspot-key-discovery-and-common-solutions
-> 2. https://dongzl.github.io/2021/01/14/03-Redis-Hot-Key/index.html
-> 3. https://abhivendrasingh.medium.com/understanding-and-solving-hotkey-and-bigkey-and-issues-in-redis-1198f98b17a5
-> 4. https://developerknow.com/what-is-the-hot-key-problem-in-redis-how-to-solve-the-hot-key-problem/
-> 5. https://www.programmersought.com/article/54911114988/
-
-### 讲下Redis的ZSet（2023 滴滴）
-Redis的ZSet（有序集合）是一种数据结构，它与普通的集合相比，在存储每个元素时关联了一个分数（score）。这个分数用于对集合中的元素进行排序，并且每个元素都是唯一的。当多个字符串具有相同分数时，这些字符串按字典顺序排列。一些有序集合的用途包括： 
-- 排行榜。例如，您可以使用有序集合轻松地维护大型在线游戏中得分最高的有序列表。 
-- 速率限制器。特别是，您可以使用有序集合构建滑动窗口速率限制器，以防止过多的API请求。
-
-ZSet中的每个元素都有一个分数，根据分数的大小对元素进行排序。不同的元素可以有相同的分数，但每个元素在集合中必须是唯一的。
-Redis内部使用了跳跃表（skip list）和压缩列表（ziplist）两种数据结构来实现ZSet。跳跃表用于提供有序性，而散列表用于快速查找元素。
-Redis的ZSet提供了高效的操作，包括插入、删除和查找操作。这些操作的时间复杂度通常为O(log N)，其中N是ZSet中元素的数量。
-
-> 参考：
-> 1. https://redis.io/docs/data-types/sorted-sets/
-> 2. https://www.educba.com/redis-zset/
-> 3. https://redis.io/commands/zadd/
-
-### ZSet的范围查询的时间复杂度是多少（2023 滴滴）
-Redis的ZSet范围查询的时间复杂度是O(log N + M)，其中N是ZSet中的元素数量，M是范围内的元素数量。
-
-具体来说，范围查询是通过指定最小和最大分数值来检索元素。Redis内部使用跳跃表（skip list）这种有序数据结构来存储ZSet，并且通过跳跃表可以高效地进行范围查询。
-
-在进行范围查询时，Redis首先会通过二分查找在跳跃表中找到最小分数大于等于指定最小分数的节点，然后从这个节点开始，按照指定的最大分数遍历跳跃表，直到找到最后一个分数小于等于指定最大分数的节点。这个过程的时间复杂度是O(log N)。
-
-然后，Redis会从找到的节点开始向后遍历，并收集在范围内的元素，直到遍历完所有符合条件的元素或达到范围内的元素数量上限。这个过程的时间复杂度是O(M)，其中M是范围内的元素数量。
-
-综上所述，Redis的ZSet范围查询的时间复杂度是O(log N + M)，其中N是ZSet中的元素数量，M是范围内的元素数量。请注意，这是一种平均情况下的时间复杂度，具体的性能还受到硬件环境和实际数据分布的影响。
 
 ### MySQL中delete 和 truncate 的区别？（2023 阿里实习）
 1. **命令类型**：DELETE是一个DML（数据操作语言）命令，而TRUNCATE是一个DDL（数据定义语言）命令。
@@ -1065,61 +1066,6 @@ SELECT * FROM People WHERE FirstName = 'John' AND LastName = 'Doe';
 CREATE INDEX idx_firstname_lastname ON People (FirstName, LastName);
 ```
 然后，你的查询可以直接利用这个联合索引，大大提高查询效率。
-
-### redis 批处理？（2023 阿里实习）
-
-Redis 批处理通常指的是通过使用 Redis 的管道 (pipeline) 功能来一次性执行多个命令。这样做可以提高效率，因为它减少了客户端与服务器之间的通信开销。在 Redis 的管道中，客户端会一次性发送多个命令，然后 Redis 服务器依次执行这些命令并返回结果。
-
-使用 Redis 批处理时，请注意以下几点：
-1. 批处理并不保证原子性，这意味着如果管道中的某个命令失败，其他命令仍可能执行成功。如果你需要原子性，可以考虑使用 Redis 的事务功能。
-2. 由于管道中的命令是按顺序执行的，因此命令之间可能存在依赖关系。在这种情况下，可以通过在添加命令时检查前一个命令的结果来处理这些依赖关系。
-3. 在添加大量命令到管道时，要注意内存使用情况。如果可能的话，可以分批执行管道，以避免一次性执行过多的命令。
-
-在 Java 中，可以使用 Jedis 库来进行 Redis 批处理操作。Jedis 是一个用于操作 Redis 的 Java 客户端库。请先确保已将 Jedis 添加到项目的依赖中。如果使用 Maven，可以在 pom.xml 文件中添加以下依赖：
-```xml
-<dependency>
-    <groupId>redis.clients</groupId>
-    <artifactId>jedis</artifactId>
-    <version>3.7.0</version>
-</dependency>
-```
-示例
-```java
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.Pipeline;
-import redis.clients.jedis.Response;
-
-public class RedisBatchExample {
-    public static void main(String[] args) {
-        // 连接到 Redis 服务器
-        Jedis jedis = new Jedis("localhost", 6379);
-
-        // 创建一个管道
-        Pipeline pipeline = jedis.pipelined();
-
-        // 向管道中添加命令
-        pipeline.set("key1", "value1");
-        pipeline.set("key2", "value2");
-        pipeline.set("key3", "value3");
-
-        // 执行管道中的命令
-        pipeline.sync();
-
-        // 获取执行结果
-        String value1 = jedis.get("key1");
-        String value2 = jedis.get("key2");
-        String value3 = jedis.get("key3");
-
-        // 输出结果
-        System.out.println("key1: " + value1);
-        System.out.println("key2: " + value2);
-        System.out.println("key3: " + value3);
-
-        // 关闭连接
-        jedis.close();
-    }
-}
-```
 
 ### SQL explain 会输出哪些信息？（2023 阿里实习）
 - ID：表示查询执行计划中每个操作的唯一标识符。
@@ -1190,16 +1136,9 @@ COMMIT;
 >参考：
 >1. https://dev.mysql.com/doc/refman/8.0/en/system-schema.html
 
-### RDB fork子进程去写日志的时候，如果宕机了是不是有数据就丢失了（2023 小红书）
-是的，当Redis使用RDB持久化策略时，如果Redis服务在RDB进程fork出子进程写RDB文件的时候宕机，那么此时还没有写到RDB文件的数据将会丢失。
 
-Redis RDB的工作原理是：
-1. Redis主进程fork出一个子进程
-2. 子进程负责将数据库快照写入到硬盘上的RDB文件中
-3. 如果在此期间Redis主进程被kill，那么正在被子进程写入RDB文件的那部分数据将丢失
-4. RDB文件写入完成后，子进程退出，Redis主进程继续服务客户端请求
 
-所以，RDB持久化最大的问题就是可能导致数据丢失，虽然概率很小，但数据依然存在一定风险。
+
 
 
 
@@ -1272,6 +1211,48 @@ MySQL实现事务持久性主要依赖于其使用的存储引擎，比如InnoDB
 这些机制共同确保了MySQL事务的持久性，即使在系统崩溃后，已提交的事务所做的修改也能被正确地恢复。
 
 > 具体如何刷盘可以看：https://javaguide.cn/database/mysql/mysql-logs.html#%E5%88%B7%E7%9B%98%E6%97%B6%E6%9C%BA
+
+
+
+### 事务的这四个特性是怎么实现的？(2023 阿里)
+
+- 持久性是通过 redo log （重做日志）来保证的；
+- 原子性是通过 undo log（回滚日志） 来保证的；
+- 隔离性是通过 MVCC（多版本并发控制） 或锁机制来保证的；
+- 一致性则是通过持久性+原子性+隔离性来保证；
+
+
+
+### MySQL死锁的案例(2023 阿里)
+
+`t_order` 表里现在已经有了 6 条记录，其中 id 字段为主键索引，order_no 字段普通索引，也就是非唯一索引：
+
+![](./giant_images/deadlock-1.webp)
+
+有两事务，一个事务要插入订单 1007 ，另外一个事务要插入订单 1008，因为需要对订单做幂等性校验，所以两个事务先要查询该订单是否存在，不存在才插入记录，过程如下：
+
+![](./giant_images/deadlock-2.webp)
+
+可以看到，两个事务都陷入了等待状态，原因：
+
+- T1: 事务 a 在执行 select id from t_order where order_no = 1007 for update，会在二级索引（INDEX_NAME : index_order）上加的是 X 型的 next-key 锁，锁范围是`(1006, +∞]`。
+- T2: 事务 b 在执行 select id from t_order where order_no = 1008 for update，会在二级索引（INDEX_NAME : index_order）上加的是 X 型的 next-key 锁，锁范围是`(1006, +∞]`。
+- T3：事务 a 往事务 A next-key 锁的范围 (1006, +∞] 里插入 id = 1007 的记录就会被锁住：因为当我们执行以下插入语句时，会在插入间隙上获取插入意向锁，而插入意向锁与间隙锁是冲突的，所以当其它事务持有该间隙的间隙锁时，需要等待其它事务释放间隙锁之后，才能获取到插入意向锁
+- T4：事务 b 往事务 a next-key 锁的范围 (1006, +∞] 里插入 id = 1008 的记录就会被锁住，原因也是一样，申请插入意向锁的时候阻塞了。
+
+案例中的事务 A 和事务 B 在执行完后 `select ... for update` 语句后，都持有范围为`(1006,+∞]`的next-key 锁，而接下来的插入操作为了获取到插入意向锁，都在等待对方事务的间隙锁释放，于是就造成了循环等待，导致死锁。
+
+
+
+### MySQL分库分表之后怎么确保每个表的id都是唯一的？（2023 阿里）
+
+可以使用雪花算法算法来生成分布式 id，**它会生成一个 `64 bit` 的整数**，可以保证不同进程主键的不重复性，以及相同进程主键的有序性。
+
+![](./giant_images/partition-sharding-mysql-1.webp)
+
+在同一个进程中，它首先是通过时间位保证不重复，如果时间相同则是通过序列位保证。同时由于时间位是单调递增的，且各个服务器如果大体做了时间同步，那么生成的主键在分布式环境可以认为是总体有序的，这就保证了对索引字段的插入的高效性。
+
+但是雪花算法有缺点，雪花算法是强依赖于时间的，而如果机器时间发生回拨，有可能会生成重复的 ID。可以用美团提供的分布式 ID 解决方案 Leaf，他是不依赖时间戳的
 
 
 
@@ -1351,6 +1332,522 @@ Read View 有四个重要的字段：
 
 
 
+### MySQL中，什么样的数据不推荐加索引？（2023 影石360）
+
+1. **低基数列**：如果列的值大多数都是相同的，例如性别列（只有男、女两种值），那么对这种列添加索引可能并不高效。
+2. **频繁变化的列**：如果某个列的数据频繁变动，那么每次数据变动时索引都需要重建，这会导致性能下降。
+3. **大文本列**：对于非常长的文本，建立索引可能会非常耗费资源。如果需要，可以考虑使用全文索引或者其他搜索引擎解决方案。
+4. **冗余索引**：如果已经有了一个多列索引，例如 `(A, B, C)`，那么对于 `A` 列的单独索引可能就是冗余的，因为 `(A, B, C)` 已经包含了 `A` 的索引。
+5. **存储开销**：每个索引都需要占用额外的磁盘空间。如果有太多的索引，不仅会浪费存储空间，还可能导致额外的I/O开销。
+6. **插入、删除、更新操作**：索引虽然可以加速查询，但也会减慢插入、删除和更新操作的速度，因为每次这些操作发生时，索引也需要更新。
+
+当然，是否为某列添加索引还需要根据实际的查询需求、数据分布和业务场景来决定。在决定加索引之前，最好进行性能测试和分析，确保索引能带来预期的效果。
+
+
+
+### 数据库自增id，当id值大于MAXINT时，数据库如何做 ？（2023 快手）
+
+- 做分库分表之类的优化了
+- 调整数据类型，修改为BIGINT数据类型，但是要注意数据太多，DDL执行时长问题
+
+
+
+### 了解过前缀索引吗？（2023 快手）
+
+使用前缀索引是为了减小索引字段大小，可以增加一个索引页中存储的索引值，有效提高索引的查询速度。在一些大字符串的字段作为索引时，使用前缀索引可以帮助我们减小索引项的大小。
+
+
+
+### 介绍一下联合索引？最左匹配原则是什么？（2023 快手）
+
+通过将多个字段组合成一个索引，该索引就被称为联合索引。
+
+比如，将商品表中的 product_no 和 name 字段组合成联合索引`(product_no, name)`，创建联合索引的方式如下：
+
+```sql
+CREATE INDEX index_product_no_name ON product(product_no, name);
+```
+
+联合索引`(product_no, name)` 的 B+Tree 示意图如下（图中叶子节点之间我画了单向链表，但是实际上是双向链表，原图我找不到了，修改不了，偷个懒我不重画了，大家脑补成双向链表就行）。
+
+![](./giant_images/ks-unionIndex-leftmostMatch-1.webp)
+
+可以看到，联合索引的非叶子节点用两个字段的值作为 B+Tree 的 key 值。当在联合索引查询数据时，先按 product_no 字段比较，在 product_no 相同的情况下再按 name 字段比较。
+
+也就是说，联合索引查询的 B+Tree 是先按 product_no 进行排序，然后再 product_no 相同的情况再按 name 字段排序。
+
+因此，使用联合索引时，存在**最左匹配原则**，也就是按照最左优先的方式进行索引的匹配。在使用联合索引进行查询的时候，如果不遵循「最左匹配原则」，联合索引会失效，这样就无法利用到索引快速查询的特性了。
+
+比如，如果创建了一个 `(a, b, c)` 联合索引，如果查询条件是以下这几种，就可以匹配上联合索引：
+
+- where a=1；
+- where a=1 and b=2 and c=3；
+- where a=1 and b=2；
+
+需要注意的是，因为有查询优化器，所以 a 字段在 where 子句的顺序并不重要。
+
+但是，如果查询条件是以下这几种，因为不符合最左匹配原则，所以就无法匹配上联合索引，联合索引就会失效:
+
+- where b=2；
+- where c=3；
+- where b=2 and c=3；
+
+上面这些查询条件之所以会失效，是因为`(a, b, c)` 联合索引，是先按 a 排序，在 a 相同的情况再按 b 排序，在 b 相同的情况再按 c 排序。所以，**b 和 c 是全局无序，局部相对有序的**，这样在没有遵循最左匹配原则的情况下，是无法利用到索引的。
+
+我这里举联合索引（a，b）的例子，该联合索引的 B+ Tree 如下（图中叶子节点之间我画了单向链表，但是实际上是双向链表，原图我找不到了，修改不了，偷个懒我不重画了，大家脑补成双向链表就行）。
+
+![](./giant_images/ks-unionIndex-leftmostMatch-2.webp)
+
+可以看到，a 是全局有序的（1, 2, 2, 3, 4, 5, 6, 7 ,8），而 b 是全局是无序的（12，7，8，2，3，8，10，5，2）。因此，直接执行`where b = 2`这种查询条件没有办法利用联合索引的，**利用索引的前提是索引里的 key 是有序的**。
+
+只有在 a 相同的情况才，b 才是有序的，比如 a 等于 2 的时候，b 的值为（7，8），这时就是有序的，这个有序状态是局部的，因此，执行`where a = 2 and b = 7`是 a 和 b 字段能用到联合索引的，也就是联合索引生效了。
+
+联合索引有一些特殊情况，**并不是查询过程使用了联合索引查询，就代表联合索引中的所有字段都用到了联合索引进行索引查询**，也就是可能存在部分字段用到联合索引的 B+Tree，部分字段没有用到联合索引的 B+Tree 的情况。
+
+这种特殊情况就发生在范围查询。联合索引的最左匹配原则会一直向右匹配直到遇到「范围查询」就会停止匹配。**也就是范围查询的字段可以用到联合索引，但是在范围查询字段的后面的字段无法用到联合索引**。
+
+
+
+## ♨️ Redis
+
+### Redis string底层的结构？（2023 美团）
+
+Redis 的字符串是一个动态字符串实现，它能够容纳任意长度的二进制安全的字符串。这意味着在 Redis 中，你不仅可以保存例如 "Hello, World!" 这样的字符串，还可以保存 JPEG 图像或者任何其他二进制数据。
+
+在底层，Redis 的字符串是由以下结构表示的：
+
+```c
+struct sdshdr {
+    // 保存字符串长度的字节大小
+    int len;
+    
+    // 保存未使用的字节大小，这样当字符串需要扩展时可以避免不必要的重新分配
+    int free;
+    
+    // 实际的字符串数据，这是一个字符数组
+    char buf[];
+};
+```
+
+这里的 `buf` 字段是一个柔性数组（flexible array member）。实际的数据长度比 `buf` 的大小更大，这取决于 `len` 字段的值。`free` 字段表示 `buf` 后面有多少未使用的字节，这使得字符串追加变得更加高效。
+
+这种动态字符串结构意味着：
+
+1. 字符串可以在不重新分配内存的情况下增长，只要 `free` 字段所示的未使用空间允许。
+2. 字符串可以包含二进制数据，因为它们是二进制安全的。
+3. 字符串可以知道其长度，因为 `len` 字段提供了这一信息，这意味着取长度是 O(1) 操作。
+
+注意：这里给出的 `sdshdr` 结构是一个简化版本。在不同的 Redis 版本中，为了支持大字符串或优化存储，可能会有不同的实现或细微的差别。
+
+
+
+### Redis 分布式锁的实现？过期时间怎样设置的？（2023 美团）
+
+Redis 分布式锁通常使用 `SETNX`（Set if Not eXists）或者 `SET` 命令配合某些参数来实现。这种锁可以保证在分布式系统中的多个节点之间的互斥性。
+
+以下是使用 Redis 实现分布式锁的基本步骤：
+
+1. **加锁**:
+   - 使用 `SETNX lock:key value` 尝试设置一个锁。如果返回 `1`，表示获取锁成功。如果返回 `0`，表示其他客户端已经持有这个锁。
+   - 为了避免死锁（例如，持有锁的客户端崩溃导致其他客户端永远无法获取锁），你需要给锁设置一个过期时间。这可以通过 `EXPIRE` 命令实现，但更安全的方法是使用 `SET` 命令的 `PX` 或 `EX` 选项。例如：`SET lock:key value NX PX 30000` 会尝试设置一个锁，它在 30 秒后过期。
+2. **执行业务操作**:
+   - 如果成功获得锁，执行需要保护的业务操作。
+3. **解锁**:
+   - 使用 `DEL lock:key` 来释放锁。
+   - 为了确保只有锁的持有者可以释放锁（避免误解锁），释放锁的操作应该是原子的。这通常使用 Redis 的 Lua 脚本实现。脚本会检查锁的值是否与期望相匹配，只有在匹配的情况下才删除它。
+
+设置锁的过期时间是一个权衡：
+
+- **太短**：业务操作可能没有完成就已经过期，这可能会导致其他客户端在当前操作还在进行时获得锁。
+- **太长**：如果持有锁的客户端崩溃，其他客户端可能需要等待很长时间才能获取锁。
+
+因此，设置的过期时间应该比预期的业务操作时间稍微长一些，但也不宜过长。
+
+注意：Redis 的 `Redlock` 算法是一个更复杂、更健壮的分布式锁实现。如果需要在多个 Redis 实例或集群之间实现真正的分布式锁，可以考虑使用这个算法。
+
+
+
+### redis怎么实现分布式锁 set nx命令有什么问题 如何解决？（2023小红书）
+
+Redis实现分布式锁的基本思路是使用SET命令的NX（Not eXists）选项。NX选项表示只有当键不存在时，才会设置键值对。这样可以确保在分布式环境中，只有一个客户端能够成功地获取锁。以下是一个简单的示例：
+
+```shell
+SET lock_key some_value NX PX 30000
+```
+
+这个命令尝试设置一个名为lock_key的键，值为some_value，并且使用NX选项。PX选项表示设置一个过期时间，单位为毫秒，在这个例子中是30000毫秒（30秒）。
+然而，使用SET NX命令实现分布式锁存在一些问题：
+
+1. 非原子操作：在某些情况下，客户端可能在设置锁和设置过期时间之间崩溃，导致锁永远不会被释放。这可以通过使用SET命令的PX选项来解决，它可以在设置锁的同时设置过期时间，确保操作是原子的。
+2. 无法解决锁超时问题：如果持有锁的客户端在锁过期之前没有完成任务，其他客户端可能会获取到锁，导致并发问题。为了解决这个问题，可以在获取锁时设置一个唯一的值（例如UUID），并在释放锁时检查该值。这样可以确保只有锁的持有者才能释放锁。
+3. 无法解决锁释放问题：如果持有锁的客户端在释放锁之前崩溃，锁可能永远不会被释放。为了解决这个问题，可以使用一个后台线程定期检查并释放过期的锁。
+4. 无法实现公平锁：SET NX命令无法保证公平性，即等待时间最长的客户端不一定能够优先获取锁。要实现公平锁，可以使用Redis的LIST数据结构，将等待锁的客户端按照先进先出（FIFO）的顺序排队。
+   综上所述，虽然SET NX命令可以实现基本的分布式锁功能，但在实际应用中可能需要考虑更多的问题。为了解决这些问题，可以使用成熟的Redis分布式锁库，如Redlock。Redlock提供了一个更加健壮和可靠的分布式锁实现，可以解决上述问题
+
+### 什么情况使用 redis 反而降低性能（2023 完美世界）
+
+- 数据集过大：Redis 将数据存储在内存中，如果数据集过大，超出了服务器可用内存的限制，就会导致 Redis 使用交换空间（swap space）或者频繁地从磁盘加载数据，从而严重影响性能。
+- 内存碎片化：当 Redis 频繁地进行写入、更新和删除操作时，可能会导致内存碎片化。这会导致 Redis 需要更多的内存来存储相同的数据，最终导致性能下降。
+- 大量的键过期操作：当 Redis 中有大量的键需要过期处理时，Redis 会执行定期清理操作来删除过期的键。如果这个清理操作耗时较长，会导致 Redis 在执行其他操作时的性能下降。
+- 高并发写入操作：当有大量的并发写入操作时，Redis 可能会因为竞争条件而降低性能。这种情况下，可以考虑使用 Redis 的事务功能来减少竞争并发。
+- 复杂的数据结构操作：Redis 提供了多种复杂的数据结构，如列表、集合和有序集合等。当对这些数据结构进行复杂的操作时，例如对大型列表进行频繁的插入和删除操作，可能会导致性能下降。
+
+需要注意的是，这些情况并不意味着 Redis 总是会降低性能，而是在特定的场景下可能会出现性能下降的情况。为了优化 Redis 的性能，可以根据具体的情况进行调整和优化，例如增加内存、合理设置过期时间、使用合适的数据结构等。
+
+> 参考资料：
+>
+> 1. https://loadforge.com/guides/troubleshooting-redis-performance-issues
+> 2. https://severalnines.com/blog/performance-tuning-redis/
+
+
+
+### Redis大key如何解决（2023 滴滴）
+
+Redis大key通常指的是存储在Redis中的数据结构（例如字符串、列表、集合、哈希表和有序集合）的数据量特别大的key。例如，一个列表中的元素数量巨大，或者一个哈希表的字段数量很多。这些大key可能会导致在执行某些操作时消耗过多的CPU和内存资源，进而影响Redis的性能。
+例如：字符串(String)：一个字符串value的长度非常大，例如超过10KB。
+
+```c
+SET bigkey "a very large string....."  # string长度非常大
+```
+
+列表(List)：列表中的元素数量非常多，例如超过10000个。
+
+```c
+LPUSH bigkey item1 item2 item3 ... item10001  # 列表元素数量非常多
+```
+
+哈希(Hash)：哈希中的字段数量非常多，例如超过10000个。
+
+```c
+HMSET bigkey field1 value1 field2 value2 ... field10001 value10001  # 哈希字段数量非常多
+```
+
+以上的数值（例如10KB，10000个等）仅作为参考，具体定义大key的阈值需要根据实际业务和Redis的配置来决定。如果这些key对Redis的性能产生了影响，就应当考虑对其进行优化。
+
+> 什么是大key总结
+
+- String 类型的值大于 10 KB；
+- Hash、List、Set、ZSet 类型的元素的个数超过 5000个；
+
+> 大 key 会造成什么问题？
+
+大 key 会带来以下四种影响：
+
+- **客户端超时阻塞**。由于 Redis 执行命令是单线程处理，然后在操作大 key 时会比较耗时，那么就会阻塞 Redis，从客户端这一视角看，就是很久很久都没有响应。
+- **引发网络阻塞**。每次获取大 key 产生的网络流量较大，如果一个 key 的大小是 1 MB，每秒访问量为 1000，那么每秒会产生 1000MB 的流量，这对于普通千兆网卡的服务器来说是灾难性的。
+- **阻塞工作线程**。如果使用 del 删除大 key 时，会阻塞工作线程，这样就没办法处理后续的命令。
+- **内存分布不均**。集群模型在 slot 分片均匀情况下，会出现数据和查询倾斜情况，部分有大 key 的 Redis 节点占用内存多，QPS 也会比较大。
+
+> 如何找到大 key ？
+
+1. redis-cli --bigkeys 查找大key
+
+可以通过 redis-cli --bigkeys 命令查找大 key：
+
+```
+redis-cli -h 127.0.0.1 -p6379 -a "password" -- bigkeys
+```
+
+使用的时候注意事项：
+
+- 最好选择在从节点上执行该命令。因为主节点上执行时，会阻塞主节点；
+- 如果没有从节点，那么可以选择在 Redis 实例业务压力的低峰阶段进行扫描查询，以免影响到实例的正常运行；或者可以使用 -i 参数控制扫描间隔，避免长时间扫描降低 Redis 实例的性能。
+  该方式的不足之处：
+- 这个方法只能返回每种类型中最大的那个 bigkey，无法得到大小排在前 N 位的 bigkey；
+- 对于集合类型来说，这个方法只统计集合元素个数的多少，而不是实际占用的内存量。但是，一个集合中的元素个数多，并不一定占用的内存就多。因为，有可能每个元素占用的内存很小，这样的话，即使元素个数有很多，总内存开销也不大；
+
+2. 使用 SCAN 命令查找大 key
+   使用 SCAN 命令对数据库扫描，然后用 TYPE 命令获取返回的每一个 key 的类型。
+   对于 String 类型，可以直接使用 STRLEN 命令获取字符串的长度，也就是占用的内存空间字节数。
+   对于集合类型来说，有两种方法可以获得它占用的内存大小：
+
+- 如果能够预先从业务层知道集合元素的平均大小，那么，可以使用下面的命令获取集合元素的个数，然后乘以集合元素的平均大小，这样就能获得集合占用的内存大小了。List 类型：LLEN 命令；Hash 类型：HLEN 命令；Set 类型：SCARD 命令；Sorted Set 类型：ZCARD 命令；
+- 如果不能提前知道写入集合的元素大小，可以使用 MEMORY USAGE 命令（需要 Redis 4.0 及以上版本），查询一个键值对占用的内存空间。
+
+3. 使用 RdbTools 工具查找大 key
+   使用 RdbTools 第三方开源工具，可以用来解析 Redis 快照（RDB）文件，找到其中的大 key。
+   比如，下面这条命令，将大于 10 kb 的  key  输出到一个表格文件。
+
+```
+rdb dump.rdb -c memory --bytes 10240 -f redis.csv
+```
+
+> 如何删除大 key
+
+删除操作的本质是要释放键值对占用的内存空间，不要小瞧内存的释放过程。
+
+释放内存只是第一步，为了更加高效地管理内存空间，在应用程序释放内存时，操作系统需要把释放掉的内存块插入一个空闲内存块的链表，以便后续进行管理和再分配。这个过程本身需要一定时间，而且会阻塞当前释放内存的应用程序。
+
+所以，如果一下子释放了大量内存，空闲内存块链表操作时间就会增加，相应地就会造成 Redis 主线程的阻塞，如果主线程发生了阻塞，其他所有请求可能都会超时，超时越来越多，会造成 Redis 连接耗尽，产生各种异常。
+
+因此，删除大 key 这一个动作，我们要小心。具体要怎么做呢？这里给出两种方法：
+
+- 分批次删除
+- 异步删除（Redis 4.0版本以上）
+
+1. 分批次删除
+
+对于删除大 Hash，使用 hscan 命令，每次获取 100 个字段，再用 hdel 命令，每次删除 1 个字段。
+
+Python代码：
+
+```python
+def del_large_hash():
+  r = redis.StrictRedis(host='redis-host1', port=6379)
+    large_hash_key ="xxx" #要删除的大hash键名
+    cursor = '0'
+    while cursor != 0:
+        # 使用 hscan 命令，每次获取 100 个字段
+        cursor, data = r.hscan(large_hash_key, cursor=cursor, count=100)
+        for item in data.items():
+                # 再用 hdel 命令，每次删除1个字段
+                r.hdel(large_hash_key, item[0])
+```
+
+对于删除大 List，通过 ltrim 命令，每次删除少量元素。
+
+Python代码：
+
+```python
+def del_large_list():
+  r = redis.StrictRedis(host='redis-host1', port=6379)
+  large_list_key = 'xxx'  #要删除的大list的键名
+  while r.llen(large_list_key)>0:
+      #每次只删除最右100个元素
+      r.ltrim(large_list_key, 0, -101) 
+```
+
+对于删除大 Set，使用 sscan 命令，每次扫描集合中 100 个元素，再用 srem 命令每次删除一个键。
+
+Python代码：
+
+```python
+def del_large_set():
+  r = redis.StrictRedis(host='redis-host1', port=6379)
+  large_set_key = 'xxx'   # 要删除的大set的键名
+  cursor = '0'
+  while cursor != 0:
+    # 使用 sscan 命令，每次扫描集合中 100 个元素
+    cursor, data = r.sscan(large_set_key, cursor=cursor, count=100)
+    for item in data:
+      # 再用 srem 命令每次删除一个键
+      r.srem(large_size_key, item)
+```
+
+对于删除大 ZSet，使用 zremrangebyrank 命令，每次删除 top 100个元素。
+
+Python代码：
+
+```python
+def del_large_sortedset():
+  r = redis.StrictRedis(host='large_sortedset_key', port=6379)
+  large_sortedset_key='xxx'
+  while r.zcard(large_sortedset_key)>0:
+    # 使用 zremrangebyrank 命令，每次删除 top 100个元素
+    r.zremrangebyrank(large_sortedset_key,0,99) 
+```
+
+2. 异步删除
+   从 Redis 4.0 版本开始，可以采用异步删除法，用 unlink 命令代替 del 来删除。
+   这样 Redis 会将这个 key 放入到一个异步线程中进行删除，这样不会阻塞主线程。
+   除了主动调用 unlink 命令实现异步删除之外，我们还可以通过配置参数，达到某些条件的时候自动进行异步删除。
+   主要有 4 种场景，默认都是关闭的：
+
+```
+lazyfree-lazy-eviction no
+lazyfree-lazy-expire no
+lazyfree-lazy-server-del
+noslave-lazy-flush no
+```
+
+它们代表的含义如下：
+
+- lazyfree-lazy-eviction：表示当 Redis 运行内存超过 maxmeory 时，是否开启 lazy free 机制删除；
+- lazyfree-lazy-expire：表示设置了过期时间的键值，当过期之后是否开启 lazy free 机制删除；
+- lazyfree-lazy-server-del：有些指令在处理已存在的键时，会带有一个隐式的 del 键的操作，比如 rename 命令，当目标键已存在，Redis 会先删除目标键，如果这些目标键是一个 big key，就会造成阻塞删除的问题，此配置表示在这种场景中是否开启 lazy free 机制删除；
+- slave-lazy-flush：针对 slave (从节点) 进行全量数据同步，slave 在加载 master 的 RDB 文件前，会运行 flushall 来清理自己的数据，它表示此时是否开启 lazy free 机制删除。
+
+建议开启其中的 lazyfree-lazy-eviction、lazyfree-lazy-expire、lazyfree-lazy-server-del 等配置，这样就可以有效的提高主线程的执行效率。
+
+
+> 解决
+
+1. **对大Key进行拆分**：将一个Big Key拆分为多个key-value这样的小Key，并确保每个key的成员数量或者大小在合理范围内，然后再进行存储，通过get不同的key或者使用mget批量获取。
+2. **对大Key进行清理**：对Redis中的大Key进行清理，从Redis中删除此类数据。Redis自4.0起提供了UNLINK命令，该命令能够以非阻塞的方式缓慢逐步的清理传入的Key，通过UNLINK，你可以安全的删除大Key甚至特大Key。
+3. **监控Redis的内存、网络带宽、超时等指标**：通过监控系统并设置合理的Redis内存报警阈值来提醒我们此时可能有大Key正在产生，如：Redis内存使用率超过70%，Redis内存1小时内增长率超过20%等。
+4. **定期清理失效数据**：如果某个Key有业务不断以增量方式写入大量的数据，并且忽略了其时效性，这样会导致大量的失效数据堆积。可以通过定时任务的方式，对失效数据进行清理。
+5. **压缩value**：使用序列化、压缩算法将key的大小控制在合理范围内，但是需要注意序列化、反序列化都会带来一定的消耗。如果压缩后，value还是很大，那么可以进一步对key进行拆分。
+
+> 参考：
+>
+> 1. https://blog.csdn.net/Weixiaohuai/article/details/125391957
+> 2. https://min.news/en/news/a1b1f8acadd9af9be99514da7504de1b.html
+> 3. https://www.dragonflydb.io/error-solutions/redis-big-key-problem
+> 4. https://xiaolincoding.com/redis/base/redis_interview.html#redis-的大-key-如何处理
+
+### 什么是热key？如何解决热key问题（2023 滴滴，2023 小红书）
+
+>小红书的问法是：Redis中，如果单key过热怎么处理？
+
+热key是指在Redis中被频繁访问的key。当大量的请求都集中在一小部分key上时，就会形成热key。这可能导致Redis服务器负载不均，甚至可能导致部分业务瘫痪。
+
+#### 如何发现热key？
+
+- 凭借业务经验，预估热 Key 出现：根据业务系统上线的一些活动和功能，我们是可以在某些场景下提前预估热 `Key` 的出现的，比如业务需要进行一场商品秒杀活动，秒杀商品信息和数量一般都会缓存到 `Redis` 中，这种场景极有可能出现热 `Key` 问题的。
+- 客户端进行收集：一般我们在连接 `Redis` 服务器时都要使用专门的 SDK（比如：`Java` 的客户端工具 `Jedis`、`Redisson`），我们可以对客户端工具进行封装，在发送请求前进行收集采集，同时定时把收集到的数据上报到统一的服务进行聚合计算。
+- 在代理层进行收集：如果所有的 `Redis` 请求都经过 `Proxy`（代理）的话，可以考虑改动 `Proxy` 代码进行收集，思路与客户端基本类似。
+- hotkeys 参数：`Redis` 在 `4.0.3` 版本中添加了 [hotkeys](https://github.com/redis/redis/pull/4392) 查找特性，可以直接利用 `redis-cli --hotkeys` 获取当前 `keyspace` 的热点 `key`，实现上是通过 `scan + object freq` 完成的。
+- monitor 命令：`monitor` 命令可以实时抓取出 `Redis` 服务器接收到的命令，通过 `redis-cli monitor` 抓取数据，同时结合一些现成的分析工具，比如 [redis-faina](https://github.com/facebookarchive/redis-faina)，统计出热 Key。
+- Redis 节点抓包分析：`Redis` 客户端使用 `TCP` 协议与服务端进行交互，通信协议采用的是 `RESP` 协议。自己写程序监听端口，按照 `RESP` 协议规则解析数据，进行分析。或者我们可以使用一些抓包工具，比如 `tcpdump` 工具，抓取一段时间内的流量进行解析。
+
+#### 如何解决热key？
+
+常用方案：
+
+1. **【强力推荐】分片**：这是一种常见的解决方式，将数据分散到多个 Redis 实例中去，这样可以分散访问压力，避免单个 Redis 实例被过度访问。之所以出现热 `Key`，是因为有大量的对同一个 `Key` 的请求落到同一个 `Redis` 实例上，如果我们可以有办法将这些请求打散到不同的实例上，防止出现流量倾斜的情况，那么热 `Key` 问题也就不存在了。
+
+   那么如何将对某个热 `Key` 的请求打散到不同实例上呢？我们就可以通过热 `Key` 备份的方式，基本的思路就是，我们可以给热 `Key` 加上前缀或者后缀，把一个热 `Key` 的数量变成 `Redis` 实例个数 `N` 的倍数 `M`，从而由访问一个 `Redis` `Key` 变成访问 `N * M` 个 `Redis` `Key`。 `N * M` 个 `Redis` `Key` 经过分片分布到不同的实例上，将访问量均摊到所有实例。
+
+2. 二级缓存（本地缓存）：当出现热 `Key` 以后，把热 `Key` 加载到系统的 `JVM` 中。后续针对这些热 `Key` 的请求，会直接从 `JVM` 中获取，而不会走到 `Redis` 层。这些本地缓存的工具很多，比如 `Ehcache`，或者 `Google Guava` 中 `Cache` 工具，或者直接使用 `HashMap` 作为本地缓存工具都是可以的。
+
+其他解决方案：
+
+1. [MemCached](https://www.memcached.org/) / [Redission](https://redisson.org/) + Redis主从复制：这个方案也可以说是分片的具体实现了[2]。复制热点数据到多个节点，这样可以分摊读取压力。Redis 具有内建的主从复制功能，可以使用它来实现热点数据的复制。Memcached 不直接支持复制，但你可以在上层实现。同样，Redission 自身并不直接解决热点键（HotKeys）问题，但支持多种集群模式，包括分片，可以将数据更均匀地分布在多个节点上，从而降低热点键对单个节点的影响。
+
+![](https://dz2cdn1.dzone.com/storage/temp/11309552-screen-shot-2019-02-19-at-62001-pm.png)
+
+2. 代理+读写分离+SLB（服务器负载均衡（Server Load Balancing））：
+   1. 负载均衡在SLB层实现
+   2. 在代理层实现读写分离和自动路由
+   3. 写请求由主节点处理
+   4. 读请求由从节点处理
+   5. HA（High Availability，互联网黑话）在从节点和主节点上实现
+
+![](https://dz2cdn1.dzone.com/storage/temp/11309553-screen-shot-2019-02-19-at-62011-pm.png)
+
+
+
+> 参考：
+>
+> 1. https://dzone.com/articles/redis-hotspot-key-discovery-and-common-solutions
+> 2. https://dongzl.github.io/2021/01/14/03-Redis-Hot-Key/index.html
+> 3. https://abhivendrasingh.medium.com/understanding-and-solving-hotkey-and-bigkey-and-issues-in-redis-1198f98b17a5
+> 4. https://developerknow.com/what-is-the-hot-key-problem-in-redis-how-to-solve-the-hot-key-problem/
+> 5. https://www.programmersought.com/article/54911114988/
+
+### 讲下Redis的ZSet（2023 滴滴）
+
+Redis的ZSet（有序集合）是一种数据结构，它与普通的集合相比，在存储每个元素时关联了一个分数（score）。这个分数用于对集合中的元素进行排序，并且每个元素都是唯一的。当多个字符串具有相同分数时，这些字符串按字典顺序排列。一些有序集合的用途包括： 
+
+- 排行榜。例如，您可以使用有序集合轻松地维护大型在线游戏中得分最高的有序列表。 
+- 速率限制器。特别是，您可以使用有序集合构建滑动窗口速率限制器，以防止过多的API请求。
+
+ZSet中的每个元素都有一个分数，根据分数的大小对元素进行排序。不同的元素可以有相同的分数，但每个元素在集合中必须是唯一的。
+Redis内部使用了跳跃表（skip list）和压缩列表（ziplist）两种数据结构来实现ZSet。跳跃表用于提供有序性，而散列表用于快速查找元素。
+Redis的ZSet提供了高效的操作，包括插入、删除和查找操作。这些操作的时间复杂度通常为O(log N)，其中N是ZSet中元素的数量。
+
+> 参考：
+>
+> 1. https://redis.io/docs/data-types/sorted-sets/
+> 2. https://www.educba.com/redis-zset/
+> 3. https://redis.io/commands/zadd/
+
+### ZSet的范围查询的时间复杂度是多少（2023 滴滴）
+
+Redis的ZSet范围查询的时间复杂度是O(log N + M)，其中N是ZSet中的元素数量，M是范围内的元素数量。
+
+具体来说，范围查询是通过指定最小和最大分数值来检索元素。Redis内部使用跳跃表（skip list）这种有序数据结构来存储ZSet，并且通过跳跃表可以高效地进行范围查询。
+
+在进行范围查询时，Redis首先会通过二分查找在跳跃表中找到最小分数大于等于指定最小分数的节点，然后从这个节点开始，按照指定的最大分数遍历跳跃表，直到找到最后一个分数小于等于指定最大分数的节点。这个过程的时间复杂度是O(log N)。
+
+然后，Redis会从找到的节点开始向后遍历，并收集在范围内的元素，直到遍历完所有符合条件的元素或达到范围内的元素数量上限。这个过程的时间复杂度是O(M)，其中M是范围内的元素数量。
+
+综上所述，Redis的ZSet范围查询的时间复杂度是O(log N + M)，其中N是ZSet中的元素数量，M是范围内的元素数量。请注意，这是一种平均情况下的时间复杂度，具体的性能还受到硬件环境和实际数据分布的影响。
+
+### redis 批处理？（2023 阿里实习）
+
+Redis 批处理通常指的是通过使用 Redis 的管道 (pipeline) 功能来一次性执行多个命令。这样做可以提高效率，因为它减少了客户端与服务器之间的通信开销。在 Redis 的管道中，客户端会一次性发送多个命令，然后 Redis 服务器依次执行这些命令并返回结果。
+
+使用 Redis 批处理时，请注意以下几点：
+
+1. 批处理并不保证原子性，这意味着如果管道中的某个命令失败，其他命令仍可能执行成功。如果你需要原子性，可以考虑使用 Redis 的事务功能。
+2. 由于管道中的命令是按顺序执行的，因此命令之间可能存在依赖关系。在这种情况下，可以通过在添加命令时检查前一个命令的结果来处理这些依赖关系。
+3. 在添加大量命令到管道时，要注意内存使用情况。如果可能的话，可以分批执行管道，以避免一次性执行过多的命令。
+
+在 Java 中，可以使用 Jedis 库来进行 Redis 批处理操作。Jedis 是一个用于操作 Redis 的 Java 客户端库。请先确保已将 Jedis 添加到项目的依赖中。如果使用 Maven，可以在 pom.xml 文件中添加以下依赖：
+
+```xml
+<dependency>
+    <groupId>redis.clients</groupId>
+    <artifactId>jedis</artifactId>
+    <version>3.7.0</version>
+</dependency>
+```
+
+示例
+
+```java
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
+
+public class RedisBatchExample {
+    public static void main(String[] args) {
+        // 连接到 Redis 服务器
+        Jedis jedis = new Jedis("localhost", 6379);
+
+        // 创建一个管道
+        Pipeline pipeline = jedis.pipelined();
+
+        // 向管道中添加命令
+        pipeline.set("key1", "value1");
+        pipeline.set("key2", "value2");
+        pipeline.set("key3", "value3");
+
+        // 执行管道中的命令
+        pipeline.sync();
+
+        // 获取执行结果
+        String value1 = jedis.get("key1");
+        String value2 = jedis.get("key2");
+        String value3 = jedis.get("key3");
+
+        // 输出结果
+        System.out.println("key1: " + value1);
+        System.out.println("key2: " + value2);
+        System.out.println("key3: " + value3);
+
+        // 关闭连接
+        jedis.close();
+    }
+}
+```
+
+### RDB fork子进程去写日志的时候，如果宕机了是不是有数据就丢失了（2023 小红书）
+
+是的，当Redis使用RDB持久化策略时，如果Redis服务在RDB进程fork出子进程写RDB文件的时候宕机，那么此时还没有写到RDB文件的数据将会丢失。
+
+Redis RDB的工作原理是：
+
+1. Redis主进程fork出一个子进程
+2. 子进程负责将数据库快照写入到硬盘上的RDB文件中
+3. 如果在此期间Redis主进程被kill，那么正在被子进程写入RDB文件的那部分数据将丢失
+4. RDB文件写入完成后，子进程退出，Redis主进程继续服务客户端请求
+
+所以，RDB持久化最大的问题就是可能导致数据丢失，虽然概率很小，但数据依然存在一定风险。
+
+
+
+### redis服务器挂了后，redis缓存问题考虑过吗？（2023 快手）
+
+以下是一些需要考虑的关键点：
+
+1. **数据丢失**：如果你没有为Redis设置持久化策略（如RDB或AOF），那么在Redis宕机后重启时，可能会丢失数据。
+2. **高可用性**：可以使用Redis Sentinel或者Redis Cluster来提高Redis的高可用性，这样即使某个Redis实例宕机，系统仍然可以正常运行。
+3. **应用程序处理**：应用程序需要能够处理Redis宕机的情况。这可能包括重新连接尝试、回退到其他缓存机制或直接从数据库查询数据。
+4. **监控与报警**：通过监控工具实时了解Redis的运行状态，并在出现问题时迅速发出报警，以便及时处理。
+5. **备份与恢复**：定期备份Redis数据，并确保在出现问题时可以快速恢复。
+
 ## ♻️ JVM
 
 ### 堆是如何管理内存的（2023 快手）
@@ -1385,7 +1882,43 @@ Read View 有四个重要的字段：
 > - https://www.cnblogs.com/hongdada/p/12016020.html JVM-卡表（Card Table）
 > - http://blog.ragozin.info/2011/06/understanding-gc-pauses-in-jvm-hotspots.html Alexey Ragozin
 
-### 每次回收都要从GC ROOT开始吗（2023 快手）
+
+
+### 元空间还会存放什么东西？（2023 影石360）
+
+1. **类的元数据**：这包括类的名字、方法、字段等信息。
+2. **常量池**：包含了类的字面量（如文本字符串）和代码中的符号引用。
+3. **类加载器的数据**：Java中的每个类加载器也都有相关的元数据存储在元空间中。
+4. **即时编译器的优化数据**：即时编译器可能会在元空间中存储一些数据以提高运行时的性能。
+5. **运行时常量池**：这是方法区的一部分，包含了编译期生成的各种字面量和符号引用。
+
+
+
+### 对于static变量的理解？static变量分配内存的时候发生在哪个环节？（2023 影石360）
+
+在Java中，`static`关键字用于修饰类的成员变量和方法。对于静态变量（static variable）和静态方法（static method），它们不依赖于任何实例，可以直接通过类名进行访问。
+
+以下是关于静态变量的一些关键特性：
+
+- 静态变量是类的所有实例共享的，即一个类的所有对象共享同一个静态变量。如果一个对象修改了一个静态变量，那么这个改变对其他所有对象都是可见的。
+- 静态变量存在于方法区（Java 8之前）或元空间（Java 8及以后），而不是堆内存中。
+- 静态变量在内存中只有一份存储空间。
+- 静态变量在类加载的时候进行初始化，只会被初始化一次。
+
+对于静态变量分配内存以及初始化的时间，它们发生在类加载的“初始化”阶段。类加载的过程主要包括加载、验证、准备、解析和初始化五个阶段：
+
+1. **加载**：查找并加载类的二进制数据。
+2. **验证**：确保被加载的类符合Java虚拟机规范，没有安全问题。
+3. **准备**：为类的静态变量分配内存，并将其初始化为默认值。例如，对于类型为int的静态变量，它会被初始化为0。
+4. **解析**：把类中的符号引用转换为直接引用。
+5. **初始化**：为类的静态变量赋予正确的初始值。这是静态变量的初始值被赋值的地方。
+
+因此，静态变量分配内存发生在“准备”阶段，而静态变量的初始化则发生在“初始化”阶段。
+
+
+
+### 每次回收都要从GC ROOT开始吗？哪些对象可以作为GC root？类加载器可以作为GC root吗？（2023 快手）
+
 是的，每次垃圾回收都会从GC Roots开始。GC Roots是垃圾回收算法开始工作的一组必要的"根"对象。
 
 Java中可以作为GC Roots的对象包括：
@@ -1397,6 +1930,16 @@ Java中可以作为GC Roots的对象包括：
 垃圾回收器在对堆进行回收前，会先从GC Roots开始对堆中的对象进行可达性分析。只有当对象在GC Roots到该对象之间没有任何引用链可达时（换句话说，GC Roots到该对象不可达），这个对象才会被判定为可回收的垃圾对象。
 
 这种通过GC Roots进行可达性分析的方式，保证了只有真正不再使用的对象会被回收，从而避免了错误地回收仍在使用的对象。
+
+
+
+> 类加载器（ClassLoader）可以作为垃圾回收（Garbage Collection，GC）的根（Roots）。在Java中，GC Roots 是垃圾收集器用来确定对象是否可以被安全回收的起始点。通常情况下，如果一个对象不能从GC Roots直接或者间接地被访问到，那么这个对象就是可以被回收的。
+>
+> 类加载器是一个很重要的GC Root。这是因为Class对象通常存储在永久代（Java 8之前）或者元空间（Java 8之后），并且Class对象包含对其类加载器的引用，同时还会引用它加载的其他类。这意味着，如果一个类加载器实例可以被直接或者间接访问到，则该类加载器加载的所有类以及这些类实例化的对象都不能被垃圾回收。
+>
+> 这也是为什么需要注意类加载器内存泄漏问题，特别是在一些使用了多个类加载器的环境中，例如各种Java EE容器，OSGi等，否则可能会导致OutOfMemoryError错误。
+
+
 
 
 ### 垃圾回收过程如何判断每个阶段已经完成，可以进入下一个阶段（2023 快手）
@@ -1549,27 +2092,35 @@ java -Xmx256m OOMExample
 
 这些优化措施可以从JVM参数调优、代码层面上防止对象过度创建和减少GC工作量，有效减少Full GC的频率。
 
-## 🦸‍♀️中间件
+## 📭 中间件
 ### 请求很多，消息堆积处理不过来了如何应对（2023滴滴）
 如果发现消息中间件中的消息正在堆积，这可能意味着生产者生产的消息速度大于消费者的消费速度。有几种可能的策略可以缓解这个问题：
 1. 扩展消息中间件**集群**：考虑对消息中间件进行水平扩展，提高整体的处理能力。例如，在RabbitMQ中，可以增加节点来实现集群扩展。
 2. **降级**：在降级策略中，当发现消息处理速度不足以应对积压的情况时，可以决定对某些类型或优先级较低的消息进行降级处理。降级处理的方式可能包括减慢处理这些消息的速度、暂时忽略这些消息，或者将这些消息转移到一个低优先级的队列等待处理。这样，系统可以把更多的资源用于处理高优先级的消息。
 3. **熔断**：熔断是一种防止系统过载并快速失败的机制，类似于电路中的熔断器。当发现消息处理系统的压力过大时，可以启动熔断机制。这可能意味着暂时拒绝接收更多的消息，或者对新到的消息进行快速失败处理（例如立即返回错误，而不是将其放入队列）。一旦启动了熔断机制，就需要有一个机制去检测何时可以“闭合”熔断器，也就是何时可以恢复正常处理消息。这通常涉及到对系统的负载和性能进行监控，并设置合适的阈值。
 
-### 用户在消息堆积时以为卡了多次请求怎么处理（2023滴滴）
-当用户在消息堆积时多次发送相同的请求，这可能会进一步加重系统的压力。有几种策略可以帮助应对这个问题：
-1. **前端防抖（Debounce）**：可以在客户端实现防抖机制，防止用户在短时间内多次点击发送重复的请求。例如，用户提交表单后，可以禁用提交按钮一段时间，防止多次提交。
-2. **后端去重**：后端可以记录每个请求的ID或者其他唯一标识，然后判断是否有重复的请求。如果检测到重复请求，可以选择忽略或者返回已处理的结果。
-3. **用户反馈**：在用户发送请求后，及时给出反馈，让用户知道请求已经被接收，正在处理中，以防止用户因为等待时间过长而重复发送请求。例如，可以显示一个进度条或者"正在处理"的提示。
-4. **超时和重试策略**：对于超时的请求，可以设置一个合理的超时时间，超过这个时间后，可以让用户选择是否重新发送请求。此外，可以设置自动重试策略，但需要注意控制重试次数和间隔，以防止过度重试加重系统压力。
 
-## 🤹‍♂️微服务、分布式
+
+### 消息堆积时，用户以为卡了，多次请求怎么处理（2023滴滴）
+当消息积累时，用户认为它卡住了，应该如何处理多个请求？以下是可能的处理方式：
+
+1. **限流策略**：可以通过限制每个用户在特定时间段内的请求次数来控制消息的积累。例如，可以使用令牌桶或漏桶算法来实现。
+2. **异步处理**：如果服务器无法及时响应所有请求，可以考虑将请求放入队列中，并通过后台进程异步处理。这样用户不必等待请求完成，可以降低卡顿的感觉。
+3. **加载均衡**：通过使用多台服务器来分担负载，可以有效地分散请求，减轻单个服务器的压力。
+4. **反馈机制**：可以向用户提供反馈，告知他们请求正在处理中或在队列中排队。这样，即使有消息积累，用户也会明白情况并等待。
+5. **优化处理逻辑**：如果问题出在处理请求的逻辑上，可以尝试优化代码，提高处理速度。
+6. **错误处理**：如果有请求失败或卡住，应提供相应的错误处理机制，如重试、超时等，确保不会阻塞后续的请求。
+7. **缓存机制**：对于一些重复的或者计算量大的请求，可以考虑使用缓存来减轻服务器的负载。
+
+
+
+## 🔗 微服务、分布式
 ### RPC如何进行序列化？（2023 阿里）
 RPC的序列化是将数据结构或对象转换成可以通过网络传输的格式的过程。序列化后的数据可以通过网络传输，并在另一端反序列化，以重建原始数据结构或对象。
 有很多方法可以序列化RPC数据，包括使用二进制格式，如Protocol Buffers1、JSON、XML等。
 
 
-### dubbo 的请求处理流程（2023完美世界）
+### dubbo 的请求处理流程（2023 完美世界）
 Dubbo 的请求处理流程如下：
 1. 服务消费方(客户端)调用远程服务的代理对象(Proxy)发起 RPC 调用。
 2. Proxy 接收到调用后,将调用信息转换成 Request 对象,然后发送到 Dubbo 的核心线程池 Executor 中。
@@ -1612,8 +2163,118 @@ Dubbo 的请求处理流程如下：
 简单、易用，可以选择 Thrift 或 Dubbo。
 跨语言，可以选择 gRPC 或 Thrift。
 
+
+
+### 设计一个RPC框架需要注意什么？（2023 美团）
+
+随便说说吧，下面是比较全面的一些总结
+
+1. **通信协议**：
+   - **传输协议**：可以选择基于TCP、HTTP/2、UDP等的协议。比如gRPC基于HTTP/2。
+   - **数据编码/解码**：选择一个高效且跨语言的序列化/反序列化机制，如Protocol Buffers、Avro、Thrift、JSON等。
+2. **服务发现和注册**：
+   - 服务注册：允许服务提供者将其可用服务注册到服务目录中。
+   - 服务发现：允许服务消费者查询和查找服务目录以找到服务提供者。
+3. **负载均衡**：提供服务间的负载均衡机制，可以是客户端负载均衡或服务端负载均衡。
+4. **超时与重试策略**：为调用设置合适的超时时间，并根据需要制定重试策略。
+5. **错误处理**：如何处理网络失败、服务不可用、数据不一致等情况。
+6. **安全性**：
+   - **认证和授权**：确定谁可以调用服务，以及他们可以做什么。
+   - **加密**：在传输数据时，确保数据的机密性。
+7. **跟踪和监控**：
+   - 为服务调用提供日志、监控和跟踪功能。
+   - 收集关于服务的性能、错误率、延迟等的统计信息。
+8. **版本控制**：允许多版本的服务并行运行，确保新旧版本之间的兼容性。
+9. **容错和备份**：确保系统在部分失败的情况下仍然可以运行。
+10. **并发和线程模型**：如何处理多个并发的服务调用，可能涉及到线程池管理、事件驱动模型等。
+11. **流量控制和背压**：避免因大量请求而导致的服务或网络拥塞。
+12. **客户端和服务端的开发经验**：简化客户端和服务端的开发，可能涉及到代码生成、开发工具等。
+13. **跨语言支持**：确保框架支持多种编程语言，以便于不同的服务和客户端之间的互操作性。
+14. **文档和社区支持**：为开发者提供详细的文档和强大的社区支持，帮助他们更容易地使用和扩展框架。
+15. **可扩展性**：考虑到框架的模块化，使得未来可以容易地增加新功能或替换现有组件。
+
+
+
+### 为什么项目中一个使用了zookeeper一个使用了nacos，有什么区别（2023 美团）
+
+主要是说区别，一个是AP/CP都行-nacos，一个是CP-zookeeper，还有可能是项目很老，以前我参与的项目就有Spring Cloud Netflix混着Alibaba用
+
+它们之间的一些区别：
+
+1. **出生背景**：
+   - **ZooKeeper**：ZooKeeper 是 Apache 的一个子项目，最初由雅虎创建。它主要被设计为一个分布式协调服务，为大数据应用如 Hadoop 和 HBase 提供服务。
+   - **Nacos**：Nacos 是阿里巴巴开源的一个更现代的项目，主要用于云原生环境。它除了提供服务发现和配置管理外，还支持动态服务管理。
+2. **主要功能**：
+   - **ZooKeeper**：虽然 ZooKeeper 被广泛用于服务发现和配置管理，但它本质上是一个分布式的协调服务，提供的原子性操作可以帮助开发者实现分布式锁、集群选举等功能。
+   - **Nacos**：Nacos 的核心功能是服务发现、配置管理和动态服务管理。
+3. **易用性**：
+   - **ZooKeeper**：需要一定的学习曲线，尤其是对于ZooKeeper的znode、watcher等概念的理解。
+   - **Nacos**：相比之下，Nacos 设计得更加友好，界面直观，使用起来更简单。
+4. **性能**：
+   - **ZooKeeper**：为了保证强一致性，ZooKeeper 使用了 Paxos 协议变种的 ZAB 协议，可能会在某些场景下产生性能瓶颈。
+   - **Nacos**：更注重可用性和性能，因此在某些场景下可能优于 ZooKeeper。
+5. **生态**：
+   - **ZooKeeper**：由于历史原因，ZooKeeper 在很多大数据技术中得到了广泛应用，如 Hadoop、Kafka、HBase 等。
+   - **Nacos**：更倾向于云原生应用和微服务架构，和 Spring Cloud、Dubbo 等技术集成得很好。
+6. **持久化**：
+   - **ZooKeeper**：使用文件系统进行持久化。
+   - **Nacos**：可以使用MySQL数据库进行持久化。
+
+为什么项目中一个使用了 ZooKeeper，一个使用了 Nacos，可能是基于以下几种考虑：
+
+1. **项目历史**：旧的项目可能在 ZooKeeper 盛行时期开始，而新的项目可能更偏向于选择 Nacos 这样的现代解决方案。
+2. **功能需求**：如果项目更多地需要协调服务，例如分布式锁，那么 ZooKeeper 可能是更好的选择。而对于服务发现和动态配置管理，Nacos 可能更合适。
+3. **团队经验**：团队对某一技术的熟悉程度和历史经验也可能影响技术选择。
+
+
+
+### NGINX中正向代理和反向代理的区别？（2023 美团）
+
+正向代理：
+
+1. **客户端知晓**：在正向代理中，客户端明确知道有一个代理在中间。
+2. **请求流向**：客户端发送请求到代理服务器，代理服务器再发送请求到目标服务器。
+3. **目的**：常用于访问受限资源（例如，绕过地域限制或防火墙）。
+4. **安全性与隐私**：可提供匿名访问，隐藏客户端 IP。
+5. **缓存与过滤**：可以进行内容过滤或者数据缓存。
+
+示例应用：
+
+- 内网访问外网
+- 访问受限制的网站
+- 数据缓存和网页过滤（例如，在教育机构或企业内）
+
+---
+
+反向代理：
+
+1. **客户端不一定知晓**：通常情况下，客户端并不知道请求被代理。
+2. **请求流向**：客户端发送请求到“服务器”，实际上是反向代理接收了这些请求，然后代理决定将请求路由到哪个后端服务器。
+3. **目的**：常用于负载均衡、缓存静态资源、SSL 终结等。
+4. **安全性与加速**：可以提供应用层防火墙，减轻后端服务器的压力。
+5. **透明性**：通常对客户端是透明的，客户端通常认为自己直接和后端服务器通信。
+
+示例应用：
+
+- 负载均衡
+- CDN（内容分发网络）
+- Web 应用防火墙
+- SSL 终结
+- HTTP 缓存
+
+
+
+### 了解哪些分布式事务？（2023 快手）
+
+1. 两阶段提交（Two-Phase Commit，2PC）：2PC是一种经典的分布式事务协议，它通过协调者和参与者的两个阶段来确保事务的一致性。在第一阶段，协调者向所有参与者发送事务准备请求，参与者将准备好的事务状态反馈给协调者。在第二阶段，协调者根据参与者的反馈决定是否提交或中止事务。2PC的主要缺点是阻塞问题和单点故障。
+2. 三阶段提交（Three-Phase Commit，3PC）：3PC是对2PC的改进，主要解决了2PC的阻塞问题。与2PC不同，3PC引入了预提交阶段，使得参与者在准备完成之后可以继续处理其他事务。3PC在保证一致性的同时，也增加了一定的复杂性。
+3. 补偿事务（Compensating Transaction）：补偿事务是一种基于补偿机制的分布式事务处理方法。在补偿事务中，每个参与者执行事务时记录一些可以用于回滚操作的补偿操作，并在需要回滚时依次执行这些补偿操作，将系统恢复到原始状态。补偿事务在容错和扩展性方面有一定优势，但可能需要额外的开发工作。
+4. Saga模式：Saga模式是一种事件驱动的分布式事务模式，将复杂的分布式事务分解为多个局部事务，每个局部事务负责处理自己的业务逻辑和状态变更，并通过发布和订阅事件的方式进行协调。Saga模式具有较好的可扩展性和灵活性，但需要开发人员对业务逻辑进行分解和编排。
+
+
+
 ## 🌐 计算机网络
-### 服务端出现大量 close_wait 状态，可能的情况？（2023美团）
+### 服务端出现大量 close_wait 状态，可能的情况？（2023 美团）
 
 `CLOSE_WAIT`状态通常意味着你的程序在关闭连接时有一些问题，或者说，它没有正确地关闭套接字连接。这通常发生在程序接收到了服务端的完成（FIN）信号，但是程序自身没有正确地关闭套接字，或者没有在适当的时间内关闭。当这种情况发生时，你会看到大量的连接处于`CLOSE_WAIT`状态。
 
@@ -1725,7 +2386,7 @@ TCP（传输控制协议）连接建立后，如果客户端下线或断开，�
 
 
 
-### HTTP1.1， 2.0区别（2023 百度提前批，2023 字节客户端）
+### 🔥 HTTP1.1， 2.0区别（2023 热门问题之一：2023 百度提前批，2023 字节客户端，影石360）
 
 HTTP/1.1 和 HTTP/2 是两个不同的协议版本，用于在客户端和服务器之间进行通信。以下是它们之间的一些主要区别：
 
@@ -1748,7 +2409,7 @@ HTTP/1.1 和 HTTP/2 是两个不同的协议版本，用于在客户端和服务
 
 
 
-### tcp 是怎么实现可靠传输的？（2023 字节）
+### tcp 是怎么实现可靠传输的？（2023 字节、2023 影石360）
 
 - 序列号与确认应答：TCP将每个发送的数据包进行编号（序列号），接收方通过发送确认应答（ACK）来告知发送方已成功接收到数据。如果发送方在一定时间内未收到确认应答，会进行超时重传。
 - 数据校验：TCP使用校验和来验证数据的完整性。接收方会计算接收到的数据的校验和，并与发送方发送的校验和进行比较，以检测数据是否在传输过程中发生了错误。
@@ -1757,6 +2418,8 @@ HTTP/1.1 和 HTTP/2 是两个不同的协议版本，用于在客户端和服务
 - 拥塞控制：TCP使用拥塞控制算法来避免网络拥塞。通过动态调整发送速率和窗口大小，TCP可以根据网络的拥塞程度来进行适当的调整，以提高网络的利用率和稳定性。
 
 
+
+> [TCP 重传、滑动窗口、流量控制、拥塞控制](https://xiaolincoding.com/network/3_tcp/tcp_feature.html#_4-2-tcp-%E9%87%8D%E4%BC%A0%E3%80%81%E6%BB%91%E5%8A%A8%E7%AA%97%E5%8F%A3%E3%80%81%E6%B5%81%E9%87%8F%E6%8E%A7%E5%88%B6%E3%80%81%E6%8B%A5%E5%A1%9E%E6%8E%A7%E5%88%B6)
 
 ### IP数据报的报头有哪些字段？（2023 字节）
 
@@ -1774,13 +2437,15 @@ TTL的主要目的是防止数据报在网络中无限循环，避免由于路�
 
 ### 如何实现一个可靠UDP？（2023 美团）
 
-可以通过以下方法实现一个可靠的UDP：
-
-1. 应用层协议设计：在应用层上设计一个自定义的协议，通过在UDP数据包中添加序列号、校验和、确认应答等字段来实现可靠性。发送方发送数据时，需要等待接收方的确认应答，如果没有收到确认应答或者收到了错误的确认应答，就进行重传。
-2. 超时重传：发送方在发送数据后设置一个超时时间，如果在超时时间内没有收到确认应答，就进行重传。接收方在接收到数据后发送确认应答，如果发送方没有收到确认应答，就进行重传。
-3. 数据校验：在发送方和接收方都进行数据校验，例如使用校验和算法（如CRC）来检测数据是否被篡改。如果校验失败，就进行重传。
-4. 应答机制：发送方发送数据后，接收方需要发送确认应答来告知发送方数据已经接收成功。如果发送方没有收到确认应答，就进行重传。
-5. 流量控制和拥塞控制：在发送方和接收方之间进行流量控制和拥塞控制，以防止数据包的丢失和网络拥塞。
+1. **分包与组包**: 由于UDP有数据包大小的限制，所以可能需要将大数据切分成多个小数据包进行发送，接收方则需要将这些小数据包重新组装。
+2. **序列号**: 对每一个UDP数据包分配一个唯一的序列号，这样接收方就可以知道是否有数据包丢失或是数据包到达的顺序是否正确。
+3. **确认与重传**:
+   - **确认（ACK）**: 当接收方收到数据包时，它应该发送一个确认包（ACK）给发送方。
+   - **超时与重传**: 发送方需要为每个已发送的数据包设置一个超时计时器。如果在超时时间内没有收到对应的确认包，发送方应重传数据包。
+4. **滑动窗口**: 为了控制数据包的流量和避免网络拥塞，可以实现一个滑动窗口机制。这意味着发送方在任何时候只能有固定数量的未被确认的数据包在网络中。
+5. **顺序控制**: 由于网络的原因，数据包可能会乱序到达接收方。接收方应该使用数据包的序列号对其进行重新排序，并确保上层应用按正确的顺序接收数据。
+6. **错误检测**: 可以使用诸如CRC（循环冗余检查）这样的技术来检查数据包在传输过程中是否被损坏。
+7. **流量控制与拥塞控制**: 根据网络的状态和接收方的处理能力，动态地调整发送速率，避免造成网络拥塞或接收方的资源不足。
 
 
 
@@ -1851,12 +2516,142 @@ ICMP 数据包内包含多个字段，最重要的是两个：
 
 
 
+### cookie和session区别？（2023 快手）
+
+- 存储位置：Cookie存储在客户端（浏览器）中，而Session存储在服务器端。
+- 安全性：由于Cookie存储在客户端，因此容易受到安全攻击，如跨站脚本攻击（XSS）和跨站请求伪造（CSRF）。而Session存储在服务器端，对客户端不可见，相对来说更安全。
+- 存储容量：Cookie的存储容量有限，通常为4KB左右，而Session的存储容量较大，受限于服务器的配置。
 
 
-## 🖥️操作系统
+
+## 🖥️ 操作系统
+
+### 🔥  进程和线程的概念和区别？（2023 热门问题之一：快手、影石360）
+
+看了一遍排在前面的答案，类似”**进程是资源分配的最小单位，线程是CPU调度的最小单位“**这样的回答感觉太抽象，都不太容易让人理解。
+
+做个简单的比喻：进程=火车，线程=车厢
+
+- 线程在进程下行进（单纯的车厢无法运行）
+- 一个进程可以包含多个线程（一辆火车可以有多个车厢）
+- 不同进程间数据很难共享（一辆火车上的乘客很难换到另外一辆火车，比如站点换乘）
+- 同一进程下不同线程间数据很易共享（A车厢换到B车厢很容易）
+- 进程要比线程消耗更多的计算机资源（采用多列火车相比多个车厢更耗资源）
+- 进程间不会相互影响，一个线程挂掉将导致整个进程挂掉（一列火车不会影响到另外一列火车，但是如果一列火车上中间的一节车厢着火了，将影响到所有车厢）
+- 进程可以拓展到多机，进程最多适合多核（不同火车可以开在多个轨道上，同一火车的车厢不能在行进的不同的轨道上）
+- 进程使用的内存地址可以上锁，即一个线程使用某些共享内存时，其他线程必须等它结束，才能使用这一块内存。（比如火车上的洗手间）－"互斥锁"
+- 进程使用的内存地址可以限定使用量（比如火车上的餐厅，最多只允许多少人进入，如果满了需要在门口等，等有人出来了才能进去）－“信号量”
+
+> [来自biaodianfu回答](https://www.zhihu.com/question/25532384)
+
+
+
+### 用户态和内核态的区别？（2023 影石360）
+
+Kernel 运行在超级权限模式（Supervisor Mode）下，所以拥有很高的权限。按照权限管理的原则，多数应用程序应该运行在最小权限下。因此，很多操作系统，将内存分成了两个区域：
+
+- 内核空间（Kernal Space），这个空间只有内核程序可以访问；
+- 用户空间（User Space），这部分内存专门给应用程序使用。
+
+用户空间中的代码被限制了只能使用一个局部的内存空间，我们说这些程序在**用户态（User Mode）** 执行。内核空间中的代码可以访问所有内存，我们称这些程序在**内核态（Kernal Mode）** 执行。
+
+划分来说有以下区别：
+
+1. **权限**：内核模式具有访问所有硬件资源的权限，而用户模式的权限则受到限制。
+2. **功能**：内核模式用于执行关键的系统任务，如设备管理、内存管理和文件系统操作。用户模式主要用于运行应用程序。
+3. **安全性**：当程序在用户模式下运行时，它不能直接访问硬件或其他关键资源，这为系统提供了一层保护。如果应用程序需要访问硬件或执行其他特权操作，它必须通过系统调用请求内核来执行。
+4. **错误处理**：在用户模式下出现的错误通常不会导致整个系统崩溃，而在内核模式下出现的错误可能会导致系统崩溃。
+
+
+
+### 为什么用户态和内核态之间的切换会影响到线程的执行效率，真正慢的点在哪里？（2023 影石360）
+
+每个上下文切换都涉及保存CPU的当前状态（包括程序计数器、CPU寄存器和进程控制块），加载新进程或线程的状态，然后恢复新进程或线程的执行。这需要时间并消耗CPU资源，这会使系统变慢。
+
+
+
+> - https://blog.netdata.cloud/understanding-context-switching-and-its-impact-on-system-performance/ 了解上下文切换及其对系统性能的影响
+> - https://www.quora.com/Why-is-context-switching-fast-in-a-user-level-thread-and-slow-in-a-kernel-level-thread 为什么上下文切换在用户级线程中快速而在内核级线程中缓慢？- Quora
+
+
+
+### CPU和内存之间的三级缓存有了解吗?（2023 影石360）
+
+#### 序言
+
+计算机上的程序和应用程序被设计为一组指令，由中央处理器解释和运行。当你运行一个程序时，指令从主存储（你的硬盘）到达中央处理器。这就是内存层次结构发挥作用的地方。
+
+数据首先被加载到内存中，然后被发送到中央处理器。中央处理器每秒能够执行大量的指令。为了充分利用它的力量，中央处理器需要访问超高速内存，这就是中央处理器缓存的用武之地。
+
+内存控制器从RAM中获取数据并将其发送到CPU缓存。
+
+
+
+#### 三级缓存
+
+- **L1缓存**：是最小和最快的内存级别。通常为64KB大小，但处理器的每个核心都有自己独立的L1缓存，所以四核CPU的总共L1缓存大小为256KB。如果你在类似于CPU-Z的工具中查看内存详细信息，你会注意到L1缓存还分为两个更细的级别：L1-I（指令）和L1-D（数据）。L1指令缓存处理将要传送给处理器的信息，而数据缓存保存将写入主内存的信息。一级缓存能够以与CPU的最大操作速度一样快甚至更快地传输数据，使其非常高效。如果处理器在L1中找不到所需的数据，它将在L2和L3缓存中查找。
+- **L2缓存**：是一种次级内存缓存，也嵌入在CPU的各个独立核心中。它通常比L1有更多的存储空间，但速度较慢，尽管仍远快于内存速度。一些高端处理器的L2缓存可能总共有32MB，但6-12MB可能是平均水平。正如前面提到的，这个缓存均分给所有核心使用，使每个核心能够独立地访问自己的缓存。
+- **L3缓存**：作为一个共享存储池，整个处理器都可以访问。它比L1和L2缓存要慢得多，可能只有RAM速度的两倍快，但却是三个内存级别中最大的。如果CPU在缓存中找不到它需要的数据，它必须从较慢的系统内存中请求数据。这被称为缓存未命中。引入L3缓存降低了未命中的概率，因此有助于提高性能。在刚刚开发时，L3缓存通常位于主板上的一个单独芯片中。现代CPU几乎全部都将L3缓存集成到了内部以提高效率。
+
+
+
+通过cpu-z可以看到三级缓存分布：
+
+![](https://static1.makeuseofimages.com/wordpress/wp-content/uploads/2021/02/cpu-z-caches-tab.png?q=50&fit=crop&w=1500&dpr=1.5)
+
+
+
+#### CPU缓存是如何工作的？
+
+数据从RAM流向L3缓存，然后是L2，最后是L1。当处理器寻找数据进行操作时，首先尝试在L1缓存中找到它。如果CPU找到了，这种情况被称为缓存命中。然后继续在L2和L3中寻找。
+
+如果CPU在任何内存缓存中找不到数据，它将尝试从系统内存（RAM）中访问它。当发生这种情况时，称为缓存未命中。
+
+现在，我们知道缓存的设计是为了加快主内存和CPU之间信息的来回传输。从内存访问数据所需的时间称为“延迟”。
+
+L1缓存具有最低的延迟，是最快且最接近核心的，而L3具有最高的延迟。当CPU必须从系统内存中检索数据时，内存缓存延迟会增加，即发生缓存未命中。
+
+
+
+> - https://www.howtogeek.com/891526/l1-vs-l2-vs-l3-cache/ L1、L2和L3缓存：有什么区别？
+> - https://www.makeuseof.com/tag/what-is-cpu-cache/ CPU缓存如何工作以及什么是L1、L2和L3缓存？
+
+
+
+### 多核CPU下，三级缓存对于每个内核来说是共享的吗？那你知道它的数据存储以及指令存储的方式有了解过吗？（2023 影石360）
+
+在多核CPU中，三级缓存（L3缓存）通常是为所有内核共享的，但这取决于CPU的设计。相比之下，L1和L2缓存通常是每个内核独立拥有的。
+
+关于数据存储和指令存储：
+
+1. **L1缓存**：这是最靠近CPU核心的缓存，并且其访问速度也是最快的。它通常分为两部分：一部分用于存储指令（称为I-Cache），另一部分用于存储数据（称为D-Cache）。因为它位于核心最近，所以它的大小相对较小，但访问速度非常快。
+2. **L2缓存**：L2缓存是L1缓存后的第二层，它的大小通常比L1缓存大，但访问速度稍慢。在某些设计中，L2缓存也可能被分为指令和数据缓存，但在其他设计中，它可能是统一的缓存，同时存储指令和数据。
+3. **L3缓存**：这是多核CPU中为所有内核共享的缓存层。它的大小比L1和L2缓存都要大，但访问速度相对较慢。L3缓存通常是统一的缓存，用于存储指令和数据。
+
+缓存的基本工作原理是预先加载最有可能被CPU核心访问的数据和指令，从而减少从主内存中获取数据的延迟。为了实现这一点，CPU使用了复杂的预测算法来尝试确定将来可能需要的数据和指令。
+
+
+
+### CPU指令重排序的好处？（2023 影石360）
+
+CPU指令重排序（Instruction Reordering）是现代处理器为了提高执行效率而采用的一种优化策略。当指令之间不存在数据依赖性时，处理器可以改变指令的执行顺序。这种重排序可以在多个层次发生，例如编译器级别或微体系结构级别。
+
+CPU指令重排序的好处如下：
+
+1. **提高流水线利用率**：现代CPU使用指令流水线来并行执行多个指令。当某些指令（如访存指令）需要等待某些事件（例如缓存命中）时，而其后的指令又不依赖于它，重排序可以使后续指令继续执行，而不是空闲等待，从而提高流水线的利用率。
+2. **减少延迟**：某些指令，特别是内存访问指令，可能需要数个时钟周期才能完成。通过重排序，处理器可以先执行其他不依赖的指令，而不是空闲等待，这样可以掩盖这些高延迟指令的影响。
+3. **优化缓存利用**：通过指令重排序，处理器可以调整内存访问的顺序，提前预取数据，或使连续的内存访问更为集中，从而更有效地利用缓存。
+4. **并行执行**：在多核或多执行单元的CPU中，指令重排序可以帮助确保各个执行单元都能得到足够的工作，从而实现真正的指令级并行。
+5. **改善能效**：通过减少不必要的等待和提高指令执行的并行度，可以在较短的时间内完成更多的工作，从而提高能效。
+
+但是，指令重排序也给多线程编程带来了复杂性，因为它可能会打破程序员预期的指令执行顺序，导致数据竞态或其他并发问题。为了正确地处理这些问题，程序员需要使用内存屏障、锁或其他同步机制
+
+
 
 ### linux有几种IO模型（2023 阿里）
 > 参考：https://linyunwen.github.io/2022/01/02/linux-io-model/
+
+
 
 
 ### 分配给进程的资源有哪些（2023 滴滴）
@@ -2023,7 +2818,25 @@ top命令是一个用于实时监控系统资源和进程的命令，它可以�
 
 
 
-## 数据结构
+### Docker镜像文件是怎样的？（2023 快手）
+
+Docker 镜像的文件系统是由多个层次组成的，这些层次是叠加起来构建出最终的镜像的。当我们创建一个 Docker 容器时，Docker 会在已有的镜像层之上添加一个新的可写层，也就是容器层。
+
+以下是 Docker 镜像文件系统的特点：
+
+1. **联合文件系统**：Docker 使用联合文件系统（如 Overlay2, AUFS 等）来叠加多个层。每个层都是前一个层的增量更改。
+2. **不可变性**：除了最上面的容器层，所有的镜像层都是只读的。
+3. **重用与共享**：多个容器可以共享相同的底层镜像层，这使得容器启动非常快速且节省了磁盘空间。
+4. **增量存储**：每次我们基于现有镜像创建新的 Docker 镜像或通过 Dockerfile 执行指令时，就会创建一个新的层。这种方式使得镜像的存储非常高效。
+5. **容器层**：当容器运行时，所有的更改（例如写文件、删除文件）都会在容器层上发生。这保证了底层镜像的不可变性。
+
+要查看 Docker 镜像的各个层，可以使用 `docker history <image_name>` 命令。
+
+简而言之，Docker 镜像的文件系统是由多个叠加的层组成，这些层构建了一个统一、完整的文件系统视图，但实际上每一层都是独立存储的。
+
+
+
+## 🧩 数据结构
 
 ### 红黑树说一下，跳表说一下？（2023 美团）
 
@@ -2061,8 +2874,42 @@ top命令是一个用于实时监控系统资源和进程的命令，它可以�
 
 
 
+### 平衡二叉树和完全二叉树的概念和区别？（2023 影石360）
+
+#### 平衡二叉树
+
+平衡二叉树是一种特殊的二叉搜索树，其中每个节点的两个子树的高度差最多为一。这种平衡保证了树的高度大致保持在 log(n)，其中 n 是树中节点的数量。这种平衡可以确保在二叉搜索树上的操作（如查找、插入和删除）的时间复杂度为 O(log n)。AVL树和红黑树都是平衡二叉树的例子。
+
+#### 完全二叉树
+
+完全二叉树是一种二叉树，其中除了最底层外，其他所有层都被完全填充，并且所有节点都尽可能向左聚集。在实践中，完全二叉树主要用于实现优先队列和堆结构。
+
+#### 区别
+
+1. 平衡性：平衡二叉树要求每个节点的左右子树的高度差最多为1，而完全二叉树没有这样的要求。
+2. 完整性：完全二叉树要求除了最底层外，其他所有层都被完全填充，并且所有节点都尽可能向左聚集。平衡二叉树没有这样的要求。
+3. 用途：平衡二叉树常用于实现高效的搜索操作，因为它们的高度大致是 log(n)，保证了操作的时间复杂度为 O(log n)。而完全二叉树主要用于实现优先队列和堆。
+4. 结构：平衡二叉树在插入和删除后，可能需要通过旋转操作来重新平衡。而完全二叉树在插入和删除后，通过上浮（upheap）或下沉（downheap）操作来保持其完整性。
+
+
+
+### 有了解过哈希表吗？哈希表如何解决冲突？（2023 影石360）
+
+#### 哈希表
+
+哈希表（也称为哈希映射）是一种数据结构，它实现了关联数组抽象数据类型，也就是可以将键映射到值。哈希表使用哈希函数将键（也称为哈希键）转换为数组的索引：如果两个键映射到了同一个索引，则产生了冲突。哈希表的主要优点是查找、插入和删除的平均时间复杂度都是 O(1)。
+
+#### 冲突解决
+
+哈希表的冲突解决主要有以下两种技术：
+
+1. **开放寻址法**：当哈希函数导致冲突时，开放寻址法会寻找其他未被使用的哈希地址。常见的开放寻址法有线性探查、二次探查和双重哈希等。这种方法的一个主要挑战是处理“聚集”问题，即冲突的哈希键聚集在哈希表的某些区域，导致查找时间的增加。
+2. **链地址法（拉链法）**：每一个哈希地址对应一条链表，所有映射到同一哈希地址的键都存储在这条链表中。当冲突发生时，只需在相应的链表中进行查找、插入或删除操作。这种方法的一个主要挑战是如果冲突太多，链表可能会变得很长，导致查找时间的增加。
+
+
+
 ## 🎨 设计模式
-### 适配器模式、装饰器模式、代理模式有什么区别？（2023小红书）
+### 适配器模式、装饰器模式、代理模式有什么区别？（2023 小红书）
 - **适配器模式**：适配器模式就像是一个电源适配器，它允许两个不兼容的接口可以一起工作。例如，一个类的接口与客户端代码需要的接口不一致时，可以通过创建一个适配器类来转换接口，使得客户端代码能够利用现有的类。
 - **装饰器模式**：装饰器模式可以动态地向对象添加额外的职责，而不改变其实现。装饰器封装了一个类，并提供和该类相同的接口，但在调用其方法时，可以额外执行一些操作。装饰器可以被无限地堆叠，每个装饰器都添加一些额外的行为。
 - **代理模式**：代理模式在不改变接口的前提下，为其他对象提供一个代理或占位符以控制对这个对象的访问。代理可以用于许多不同的目的，如安全控制、复杂性隐藏、延迟加载等。代理通常控制对其委托对象的访问，并可能选择创建或删除它。
@@ -2071,11 +2918,11 @@ top命令是一个用于实时监控系统资源和进程的命令，它可以�
 
 
 
-## 🖼️场景题
+## 🖼️ 场景题
 
 
 
-### Java 程序运行了一周，发现老年代内存溢出，分析一下？（2023美团）
+### Java 程序运行了一周，发现老年代内存溢出，分析一下？（2023 美团）
 老年代内存溢出表现为java.lang.OutOfMemoryError: Java heap space，通常是因为Java堆内存中长期存活的对象占用的空间过大，导致内存无法分配。下面从浅入深分析可能的原因和解决方法
 
 1. **堆内存设置不合理**
@@ -2099,7 +2946,7 @@ top命令是一个用于实时监控系统资源和进程的命令，它可以�
 
 综上所述，发生老年代内存溢出时，可以从设置合理的堆内存大小、优化代码减少长期存活对象、排查内存泄漏、使用内存分析工具和垃圾回收器调优等方面入手，全面分析和解决问题。
 
-### 如果核心线程数是 5，已经启动 4 个任务，后面又进来 1 个，是优先复用前面四个任务中的空闲线程还是重新创建新线程（2023完美世界）
+### 如果核心线程数是 5，已经启动 4 个任务，后面又进来 1 个，是优先复用前面四个任务中的空闲线程还是重新创建新线程（2023  完美世界）
 > 线程池是为了限制系统中执行线程的数量。根据系统的任务负载和资源容量，线程池可以灵活地调整线程的数量，优化线程的管理，这样可以减少线程创建和销毁带来的额外开销。
 
 这个问题的答案取决于你使用的是什么样的线程池。如果你使用的是Java的ThreadPoolExecutor线程池，其行为会按照以下规则：
@@ -2108,7 +2955,7 @@ top命令是一个用于实时监控系统资源和进程的命令，它可以�
 3. 如果当前运行的线程数量等于最大线程数且任务队列已满，新任务将会被拒绝。
 所以，在你提供的这种情况下，如果线程池使用的是Java的ThreadPoolExecutor，且核心线程数是5，已经启动4个任务，后面又进来1个任务，会新开一个线程处理新的任务，而不是复用前面四个任务中的空闲线程。这是因为核心线程数没有被用完，线程池会优先创建新的线程。
 
-### 如果大量请求进来你怎么限流（2023美团）
+### 如果大量请求进来你怎么限流（2023 美团）
 一些通用的限流手段是：
 1. **令牌桶**：在令牌桶限流策略中，系统有一个令牌桶，桶中的令牌以一定的速率被添加。当一个新的请求到来时，系统会从桶中取出一个令牌。如果桶是空的，那么新的请求就会被拒绝。这种策略允许突然的大量请求，只要桶中有足够的令牌。在SpringCloud中可以使用spring-boot-starter-data-redis-reactive的令牌桶算法，根据Spring Cloud Gateway的客户端实际IP地址限制传入请求的速率。 简而言之，可以在路由上设置RequestRateLimiter过滤器，然后配置网关使用IP地址限制唯一客户端的请求。
 在Spring Cloud中，你可以通过整合Redis以及使用Reactive编程模式来实现令牌桶算法。以下是一个基本的步骤：
@@ -2199,7 +3046,7 @@ public String test() {
 3. 使用**消息队列** (MQ) 进行限流也是一个常见的做法。通过将请求放入消息队列中，然后通过调整处理请求的速度来实现限流。例如，你可以使用 RabbitMQ、Kafka 等消息队列技术，这种方式也可以起到异步处理的作用，提高系统的吞吐量。
 
 
-### 写 MQ 时程序宕机了怎么办？（2023美团）
+### 写 MQ 时程序宕机了怎么办？（2023 美团）
 如果在使用消息队列（MQ）时，生产者（Producer）程序在写入消息队列时宕机，那么你可能会面临消息丢失的问题。以下是一些可行的解决方案：
 1. **消息持久化**：大多数消息队列系统（如RabbitMQ，Kafka）都支持消息的持久化。持久化的消息即使在宕机情况下也不会丢失，因为它们被存储在磁盘上。当服务器恢复后，可以继续从存储介质上读取并处理这些消息。但是，使用持久化会增加系统的开销并可能影响性能。
 2. **高可用配置**：配置高可用集群可以提高系统的稳定性。对于Kafka，可以配置多个副本，当某个节点宕机时，其他节点可以继续提供服务。RabbitMQ 也支持类似的镜像队列（Mirrored Queues）机制。
@@ -2316,7 +3163,41 @@ jstack <PID> > thread_dump.txt
 
 以上步骤需要进行的IO操作相当多，会消耗较大的时间。这是因为我们是在内存不足的情况下处理大数据问题，所以要通过牺牲时间来换取空间。在实际的大数据处理中，我们通常会使用更高效的工具如Spark、Hadoop等分布式处理工具来进行处理。
 
-## 其他
+
+
+### 一瞬间提交140个请求，核心线程数为40，最大线程数为100，请求最大延迟为5ms，平均rt为3ms，如何设计线程池参数降低处理延迟？(2023 快手)
+
+为了降低处理延迟，首先要确保线程池参数配置合理。考虑到您的场景，这里是一个建议的线程池参数配置：
+
+1. **核心线程数 (Core Pool Size)**: 由于你提到核心线程数为40，这是一个合理的起点，因为这确保了常驻的40个线程随时等待处理新的请求。
+2. **最大线程数 (Maximum Pool Size)**: 考虑到一瞬间会有140个请求，100的最大线程数似乎也是合理的。但请确保服务器的硬件可以同时处理这么多线程，否则可能会导致性能下降。
+3. **等待队列 (Queue)**: 你可以选择使用一个有界队列，如 `LinkedBlockingQueue`，其容量可以设置为`(总的一瞬间的请求数 - 最大线程数)`，即40。这样，在瞬间涌入的140个请求中，100个请求会立即被100个工作线程处理，其余的40个请求会被放入等待队列中。
+4. **拒绝策略 (RejectedExecutionHandler)**: 当所有线程都在工作，而且队列也满了时，你需要一个策略来处理新进来的请求。一个合理的选择是`CallerRunsPolicy`，它实际上是在调用者的线程中运行任务，从而实现一种回压效应。
+5. **线程超时 (Keep-alive times)**: 如果你不希望非核心线程长时间空闲等待，可以设置一个合理的超时时间，例如60秒，这样线程在空闲超过这个时间后就会被终止。
+
+代码如下：
+
+```java
+ThreadPoolExecutor executor = new ThreadPoolExecutor(
+    40,  // 核心线程数
+    100,  // 最大线程数
+    60L,  // 线程空闲时间
+    TimeUnit.SECONDS,  // 线程空闲时间的单位
+    new LinkedBlockingQueue<Runnable>(40),  // 等待队列
+    new ThreadPoolExecutor.CallerRunsPolicy());  // 拒绝策略
+```
+
+最后，还要考虑操作系统和硬件的限制。如果你发现线程上下文切换太频繁，导致性能问题，那么可能需要减少最大线程数。同时，确保系统的其他应用或服务不会与此线程池争用太多的资源。
+
+
+
+### 一个保存字符串的超大文件，如何判断一个字符串在不在这个文件这种。（2023 快手）
+
+- 分治 + hashmap
+
+
+
+## 🌀 其他
 ### 讲一讲cms？
 内容管理系统（英语：content management system，缩写为 CMS）是指在一个合作模式下，用于管理工作流程的一套制度。该系统可应用于手工操作中，也可以应用到电脑或网络里。作为一种中央储存器（central repository），内容管理系统可将相关内容集中储存并具有群组管理、版本控制等功能。版本控制是内容管理系统的一个主要优势。
 

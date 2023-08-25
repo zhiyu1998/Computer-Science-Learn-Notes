@@ -1029,7 +1029,7 @@ protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value) {
 
 `newTaskFor` 方法返回了一个 `FutureTask` 对象。
 
-### ⭐如何创建线程池
+### 🔥 如何创建线程池
 
 《阿里巴巴 Java 开发手册》中强制线程池不允许使用 Executors 去创建，而是通过 ThreadPoolExecutor 的方式，这样的处理方式让写的同学更加明确线程池的运行规则，规避资源耗尽的风险
 

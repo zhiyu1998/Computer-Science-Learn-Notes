@@ -171,6 +171,12 @@ Key: key2, Value: null
 
 
 
+### 双亲委派机制的双亲是哪双亲呢？
+
+类加载器（ClassLoader）
+
+
+
 ## 🕝并发
 ### 为什么不推荐使用内置线程池创建方式？
 Java中的内置线程池创建方式（如Executors.newFixedThreadPool()、Executors.newCachedThreadPool()）并不是最佳实践，原因如下：
