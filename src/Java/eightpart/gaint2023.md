@@ -115,7 +115,7 @@ Hashtable和Collections.synchronizedMap返回的装饰器类SynchronizedMap都�
 
 
 
-### ArrayList的并发修改异常了解吗？单线程情况下会发生吗？（2023小红书）
+### ArrayList的并发修改异常了解吗？单线程情况下会发生吗？（2023 小红书）
 
 这种异常通常发生在对ArrayList进行遍历时，同时尝试修改它的结构（例如添加或删除元素）。这种异常被称为ConcurrentModificationException。
 
@@ -131,7 +131,16 @@ Hashtable和Collections.synchronizedMap返回的装饰器类SynchronizedMap都�
 > 1. https://stackoverflow.com/questions/602636/why-is-a-concurrentmodificationexception-thrown-and-how-to-debug-it 为什么会抛出它会抛出ConcurrentModificationException异常以及如何调试它
 > 2. https://www.javatpoint.com/concurrentmodificationexception-in-java
 
+
+
+### 什么情况下会导致并发修改异常？（2023 快手）
+
+在Java集合（如List、Set、Map）被一个线程进行迭代操作时，如果另一个线程同时修改了该集合的结构（如添加或删除元素），就有可能导致ConcurrentModificationException的发生
+
+
+
 ### 面向过程的方法存在哪些问题？（2023 美团）
+
 1. 可维护性较差：面向过程编程主要依赖于函数和过程，随着代码规模的增大，可能会导致代码结构复杂，不易维护。
 2. 可复用性较低：面向过程编程难以实现模块化，导致代码难以复用，进一步增加开发时间和成本。
 3. 扩展性不足：面向过程编程在代码逻辑发生变化时，往往需要对程序进行大量的修改，这样的代码扩展性不足。
@@ -420,6 +429,335 @@ finally块中的return语句会覆盖try块中的return返回，因此，该语�
 其次，在String的构造方法中传递了一个字符串abc，由于这里的abc是被final修饰的属性，所以它是一个字符串常量。在首次构建这个对象时，JVM拿字面量"abc"去字符串常量池试图获取其对应String对象的引用。于是在堆中创建了一个"abc"的String对象，并将其引用保存到字符串常量池中，然后返回；
 
 所以，**如果abc这个字符串常量不存在，则创建两个对象，分别是abc这个字符串常量，以及new String这个实例对象。如果abc这字符串常量存在，则只会创建一个对象**。
+
+
+
+### Default修饰符和Proteted修饰符区别（2023 用友）
+
+在Java中，访问修饰符决定了类及其成员的可见性。Java提供了四种访问级别，但在此我们将专注于“默认”（无修饰符）和“protected”修饰符。
+
+1. **默认访问修饰符（没有修饰符）**:
+
+   - 当一个类或其成员没有使用任何访问修饰符，它使用默认访问级别。
+   - 这被称为“包私有”或“包默认”。
+   - 在这种情况下，类或成员只能被其所在包内的其他类访问。
+   - 它们不能被包外的任何类访问。
+
+   ```java
+   // 在somepackage包中
+   class DefaultModifierClass {
+       void defaultMethod() {
+           System.out.println("This is a default method");
+       }
+   }
+   ```
+
+   上述类`DefaultModifierClass`及其方法`defaultMethod`只能在`somepackage`包中被访问。
+
+2. **protected 访问修饰符**:
+
+   - 当类或其成员使用protected修饰符时，它可以被其所在包中的所有类访问。
+   - 更重要的是，它还可以被外部包中的子类访问，但只能通过子类对象来访问。
+   - 不能直接被外部包中的其他类访问。
+
+   ```java
+   // 在somepackage包中
+   public class ProtectedModifierClass {
+       protected void protectedMethod() {
+           System.out.println("This is a protected method");
+       }
+   }
+   ```
+
+   `ProtectedModifierClass`中的`protectedMethod`方法可以在`somepackage`中的任何地方被访问，并且还可以在其他包中的`ProtectedModifierClass`的子类中被访问。
+
+
+
+### 自定义排序怎么实现？（2023 用友）
+
+在Java中，实现自定义排序可以通过以下几种方法：
+
+1. 实现Comparable接口：该接口定义了一个compareTo方法，用于定义对象之间的比较规则。自定义的类需要实现Comparable接口，并在compareTo方法中实现比较逻辑。然后可以使用Arrays.sort()或Collections.sort()进行排序。
+2. 实现Comparator接口：Comparator接口定义了一个compare方法，用于定义对象之间的比较规则。自定义的类可以创建一个实现Comparator接口的比较器类，在比较器类中实现compare方法。然后可以使用Arrays.sort()或Collections.sort()并传入比较器对象进行排序。
+
+下面是使用实现Comparable接口和Comparator接口的示例代码：
+
+使用实现Comparable接口的方法：
+
+```java
+public class Person implements Comparable<Person> {
+    private String name;
+    private int age;
+
+    // 构造函数和getter/setter方法省略
+
+    @Override
+    public int compareTo(Person other) {
+        if (this.age == other.age) {
+            return this.name.compareTo(other.name);
+        } else {
+            return Integer.compare(this.age, other.age);
+        }
+    }
+}
+
+// 使用Arrays.sort()进行排序
+Person[] people = new Person[3];
+people[0] = new Person("Alice", 23);
+people[1] = new Person("Bob", 25);
+people[2] = new Person("Charlie", 20);
+
+Arrays.sort(people);
+```
+
+使用实现Comparator接口的方法：
+
+```java
+public class PersonAgeComparator implements Comparator<Person> {
+    @Override
+    public int compare(Person p1, Person p2) {
+        return Integer.compare(p1.getAge(), p2.getAge());
+    }
+}
+
+// 使用Collections.sort()进行排序
+List<Person> people = new ArrayList<>();
+people.add(new Person("Alice", 23));
+people.add(new Person("Bob", 25));
+people.add(new Person("Charlie", 20));
+
+Collections.sort(people, new PersonAgeComparator());
+```
+
+以上是两种常用的实现自定义排序的方法。通过实现Comparable接口或实现Comparator接口，可以根据自定义的比较规则对对象进行排序。
+
+
+
+### arraylist的addAll方法，如果容量为1，addAll一个容量为100000的数组，怎么扩容？（2023 用友）
+
+在 Java 的 `ArrayList` 类中，当你使用 `addAll` 方法添加一个大量元素的集合时，内部会进行动态数组扩容。这个过程大致可以分为以下几步：
+
+1. **检查是否需要扩容**：首先，会检查当前的 `ArrayList` 是否有足够的空间来容纳新增的元素。如果没有，就需要进行扩容。
+2. **计算新的容量**：`ArrayList` 的扩容机制通常是：新的容量 = `(旧容量 * 3)/2 + 1`。然而，在调用 `addAll` 的情况下，如果需要添加的元素数量比这个扩容后的新容量还要大，那么新容量将会设为需要添加的元素数量。
+3. **分配新数组并复制元素**：根据计算出的新容量，会创建一个新的内部数组。然后，旧数组的元素会被复制到这个新数组中。
+4. **添加新元素**：新的元素会被添加到新数组中的适当位置。
+
+假设初始容量为1，然后你使用 `addAll` 添加一个容量为 100,000 的数组。在这种情况下，`ArrayList` 会首先计算需要多大的新容量才能存储所有新添加的元素，即最小需要 100,001 的容量。然后，它会创建一个这么大的新数组，并把旧数组和新添加的数组中的元素都复制到这个新数组中。
+
+这样的扩容机制通常是为了优化性能。通过一次性分配一个足够大的数组，`ArrayList` 减少了多次扩容和数组复制的需要，从而提高了效率。
+
+请注意，扩容操作是有代价的，因为它涉及到数组的复制。因此，在初始化 `ArrayList` 时，如果你已经知道会存储大量的元素，最好通过构造函数指定一个足够大的初始容量，以减少后续的扩容操作。
+
+
+
+### 枚举类，可以new出来么（2023 用友）
+
+Java枚举类是一种特殊的类，用于定义一组固定的常量。枚举类的实例在定义时就已经固定，无需使用new操作符进行实例化。
+
+枚举类的实例必须放在第一行显示，每个实例都是public static final修饰的，最终以分号结束。在Java中，枚举类的定义方式如下：
+
+```java
+public enum DayOfWeek {
+    SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY
+}
+```
+
+在上述代码中，DayOfWeek是一个枚举类，它包含了一周的所有天数。这些枚举实例SUNDAY, MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY都是DayOfWeek类的实例，可以通过DayOfWeek.SUNDAY等方式进行访问。
+
+枚举类的实例在编译时即已确定，无法通过new操作符再次实例化。枚举类中的构造函数默认为私有化，不允许被外部调用。
+
+
+
+### Java抽象类和抽象方法抽象字段之间的因果关系？（2023 用友）
+
+在Java中，抽象类、抽象方法和“抽象字段”之间的关系并不是真正的因果关系，但它们是紧密相关的。首先，我们来澄清各自的定义和概念：
+
+1. **抽象类 (Abstract Class)**：不能被实例化的类。它可能包含抽象方法和具体方法。它通常作为其他类的基类，并由子类提供实现。创建抽象类的目的是为了提供一个通用的、不能被实例化的基础框架。
+
+   ```java
+   public abstract class Animal {
+       // ... 其他代码
+   }
+   ```
+
+2. **抽象方法 (Abstract Method)**：在抽象类中声明但没有实现的方法。子类继承抽象类时，必须实现这些抽象方法，除非子类也是抽象类。
+
+   ```java
+   public abstract class Animal {
+       public abstract void makeSound();
+   }
+   ```
+
+3. Java实际上并没有“抽象字段”的概念。当我们在抽象类中声明字段时，这些字段都是具有实际存储值的字段，即使它们在抽象类中。但是，你可以在抽象类中定义字段并期望子类提供具体的值或使用。
+
+关系总结：
+
+- 一个类如果有一个或多个抽象方法，那么这个类必须被声明为抽象类。
+- 抽象类可以没有抽象方法。
+- 抽象类不能被实例化，但它可以有构造方法，这通常用于子类调用。
+- 抽象方法必须在子类中被实现，除非子类也是一个抽象类。
+- 抽象类可以有字段（成员变量），这些字段不是抽象的，并且可以被子类使用或重写。
+
+这种设计使得Java能够强制实现某些方法，而不仅仅是提供一个接口的框架，这为面向对象设计提供了很大的灵活性。
+
+
+
+### 多线程下如何保证HashSet的安全性？（2023 用友）
+
+在Java中，`HashSet` 是非线程安全的，这意味着如果多个线程同时修改一个`HashSet`，而没有适当的同步，那么它的行为是不确定的。要在多线程环境中保证 `HashSet` 的安全性，您可以考虑以下方法：
+
+1. **使用`Collections.synchronizedSet()`**: Java 的 `Collections` 类提供了一个 `synchronizedSet()` 方法，可以将给定的集合包装成线程安全的集合。
+
+   ```java
+   Set<Object> set = Collections.synchronizedSet(new HashSet<>());
+   ```
+
+   使用这种方式时，需要注意的是，迭代这个集合仍然需要外部同步，因为可能在迭代期间其他线程进行了修改。例如：
+
+   ```java
+   synchronized(set) {
+       for(Object item : set) {
+           // do something
+       }
+   }
+   ```
+
+2. **使用`ConcurrentHashMap` 为基础的 `Set`**: `ConcurrentHashMap` 是一个线程安全的Map实现。虽然它是一个Map，但我们可以使用它来创建一个线程安全的Set：
+
+   ```java
+   Set<Object> set = Collections.newSetFromMap(new ConcurrentHashMap<>());
+   ```
+
+   这样得到的 `Set` 是线程安全的，并且它的并发性能通常比 `synchronizedSet` 更好。
+
+3. **使用 `CopyOnWriteArraySet`**: 如果你预计集合的写操作相对较少，而读操作非常频繁，那么 `CopyOnWriteArraySet` 可能是一个很好的选择。这个集合在每次写操作时都会复制一份数据，从而确保读操作永远不会受到并发修改的干扰。但是，如果写操作非常频繁，性能可能会受到很大的影响。
+
+   ```java
+   Set<Object> set = new CopyOnWriteArraySet<>();
+   ```
+
+4. **手动同步**: 你可以选择为 `HashSet` 操作添加自己的同步机制。但这通常是不推荐的，因为容易出错。
+
+
+
+### 线程池的 BlockingQueue 有什么需要特别注意的（长度溢出相关）？（2023 得物）
+
+Java线程池中的BlockingQueue是一种特殊的队列，它在多线程环境下实现了线程安全和阻塞的功能。在使用Java线程池中的BlockingQueue时，有几点需要特别注意：
+
+1. 类型选择：Java线程池提供了不同类型的BlockingQueue，例如ArrayBlockingQueue、LinkedBlockingQueue等，不同的类型适用于不同的场景。需要根据具体需求选择合适的BlockingQueue类型。
+2. 🌟 容量限制：线程池的BlockingQueue可以设置容量上限，这是为了控制任务的排队和执行。需要根据实际情况合理设置队列的容量，避免任务积压过多或者队列溢出。（高负载情况下，如果队列过长，可能会积累大量的任务，这样会占用大量的内存。设置过大的队列可能会导致内存溢出或者资源过度占用。）
+3. 阻塞机制：当BlockingQueue已满时，新的任务将被阻塞，直到队列中有空余位置。同样，当BlockingQueue为空时，获取任务的操作也会被阻塞，直到有新任务加入队列。需要注意处理好阻塞机制，避免出现死锁或线程饥饿等问题。
+4. **内存使用**: 高负载情况下，如果队列过长，可能会积累大量的任务，这样会占用大量的内存。
+
+引入专门的监控体系可以帮助你了解队列的使用状态，例如队列长度、处理速度等，这样可以及时进行调整。
+
+
+
+### ConcurrentHashMap 为什么 key 和 value 不能为 null？（2023 美团）
+
+设计ConcurrentHashMap的作者是这样回答的：`The main reason that nulls aren't allowed in ConcurrentMaps (ConcurrentHashMaps, ConcurrentSkipListMaps) is that ambiguities that may be just barely tolerable in non-concurrent maps can't be accommodated. The main one is that if map.get(key) returns null, you can't detect whether the key explicitly maps to null vs the key isn't mapped. In a non-concurrent map, you can check this via map.contains(key), but in a concurrent one, the map might have changed between calls.`
+
+主要原因是并发映射（ConcurrentMaps，ConcurrentHashMaps，ConcurrentSkipListMaps）不允许使用null的原因是，在非并发映射中可能勉强可以容忍的歧义无法适应。主要的一个问题是，如果map.get(key)返回null，你无法检测到该键是显式映射到null还是该键未映射（意思是：如果map可以保存null，则无法判断get返回null，是因为该值没有键，还是因为该值为null）。在非并发映射中，您可以通过map.contains(key)来检查此问题，但在并发映射中，调用之间可能会更改映射。
+
+> 参考：
+>
+> https://stackoverflow.com/questions/698638/why-does-concurrenthashmap-prevent-null-keys-and-values
+
+如果不理解则进一步解释：当 `map.get(key)` 返回 `null` 时，我们不能确定这个 `null` 是因为键值实际上被映射为 `null`，还是因为这个键在映射中不存在。在一个非并发的 `HashMap` 中，你可以通过额外调用 `map.contains(key)` 来解决这个问题，从而确认这个键是否真的存在于映射中。然而，在并发环境下，这种额外的检查并不可靠，因为映射可能在 `get` 和 `contains` 调用之间被其他线程修改。也就是说，即使 `contains` 返回 `true`，也没有办法保证键仍然存在于映射中，或者其值没有被改变。这样的不确定性在并发环境中可能导致严重的问题或bug。为了解决这个问题，`ConcurrentHashMap` 简单地禁止了 `null` 值，这样 `get` 方法返回 `null` 就唯一地表示该键在映射中不存在。这消除了潜在的歧义，并使得代码更容易理解和维护。
+
+
+
+### HashMap在多线程情况下会产生哪些问题？会产生死锁吗？（2023 得物）
+
+在多线程环境下，HashMap可能会遇到以下几个问题：
+
+1. 数据不一致：多个线程同时修改HashMap，可能导致数据状态不一致。
+2. 死循环：在扩容（rehashing）的过程中，如果两个线程同时尝试对同一个键进行插入，可能会造成链表转为环形，从而导致死循环。
+3. 结构不一致：一个线程在遍历HashMap的元素时，另一个线程修改了HashMap的结构（比如添加或删除元素），可能会抛出`ConcurrentModificationException`。
+
+至于死锁，HashMap本身的操作通常不会导致死锁，因为它不涉及多个资源的锁定。然而，在特定的使用场景或复杂的操作序列中，还是有可能产生死锁，但这通常是由于应用逻辑，而非HashMap本身造成的。如果需要在多线程环境下使用，建议使用线程安全的版本，如`ConcurrentHashMap`。
+
+
+
+对于会变成环状的情况，在Java的HashMap实现中，有一个转移（transfer）的操作，该操作在HashMap扩容时进行。在这个过程中，如果两个线程同时尝试进行这个操作并且没有合适的同步机制，可能会导致链表形成一个环，从而使得HashMap进入一个无限循环状态。
+
+这个问题在JDK 1.7中尤为明显，因为在这个版本中，链表没有优化为红黑树（JDK 1.8之后对这点进行了优化）。
+
+下面的代码段是一个简化示例，并不是实际HashMap源码。但它可以用来说明在不同步的环境下如何可能导致一个循环链表。
+
+```java
+class Node {
+    int key;
+    int value;
+    Node next;
+
+    Node(int key, int value) {
+        this.key = key;
+        this.value = value;
+    }
+}
+
+public class SimpleHashMap {
+    private Node[] table;
+    private int size;
+
+    public SimpleHashMap(int initialCapacity) {
+        table = new Node[initialCapacity];
+        size = 0;
+    }
+
+    public void put(int key, int value) {
+        if (size >= table.length * 0.75) { // 假设负载因子为0.75
+            resize();
+        }
+
+        int index = indexFor(key, table.length);
+        Node newNode = new Node(key, value);
+        newNode.next = table[index];
+        table[index] = newNode;
+        size++;
+    }
+
+    private void resize() {
+        Node[] newTable = new Node[table.length * 2];
+        transfer(newTable);
+        table = newTable;
+    }
+
+    private void transfer(Node[] newTable) {
+        for (Node node : table) {
+            if (node != null) {
+                // 下面的代码只是一个示例，没有考虑所有的细节。
+                // 如果两个线程同时执行这一段代码，可能会导致链表的环形结构。
+                int newIndex = indexFor(node.key, newTable.length);
+                Node newNode = new Node(node.key, node.value);
+                newNode.next = newTable[newIndex];
+                newTable[newIndex] = newNode;
+            }
+        }
+    }
+
+    private int indexFor(int key, int length) {
+        return key % length;
+    }
+}
+```
+
+这个简化的HashMap实现在`put`方法中包含一个`resize`操作，该操作会在HashMap达到某个负载因子时被触发。
+
+如果两个线程同时执行`transfer`方法，并且尝试修改相同的链表，由于没有适当的同步，可能会导致这些链表项互相引用，形成一个环。
+
+要注意，这个例子只是为了演示可能的问题，并不是实际的HashMap实现。在实际的JDK实现中，这种问题可能更难以复现，但理论上是可能的。
+
+
+
+### 假设有个hashmap上锁put，get不上锁会有线程安全问题吗？为什么？（2023 快手）
+
+这样的做法会有线程安全问题。当你对HashMap进行put操作上锁，但get操作不上锁时，以下几种情况可能发生：
+
+1. 数据不一致：一个线程正在进行put操作，而另一个线程在进行get操作，这可能导致get操作返回一个不一致或者错误的数据。
+2. 内部结构问题：HashMap在扩容或者重新哈希时，其内部数据结构会发生变化。如果在这一过程中进行get操作，可能会导致不可预料的行为或错误。
+3. 可见性：如果一个线程修改了一个元素，但这个修改没有被其他线程看到（因为没有适当的内存屏障），那么其他线程获取到的将是一个过期或不正确的值。
 
 
 
@@ -915,6 +1253,241 @@ com.yourpackage.YourAutoConfigurationClass
 
 另外，你可能需要使用@Conditional注解以避免在不需要的情况下创建bean。
 
+
+
+### Spring IOC 中的 FactoryBean和BeanFactory？（2023 京东）
+
+BeanFactory
+
+1. **职责**：`BeanFactory` 是 Spring 的核心接口，负责管理容器中的 Bean。它维护着 Bean 的定义以及依赖关系，还负责创建和装配 Bean。
+2. **生命周期**：`BeanFactory` 负责整个 Bean 的生命周期，包括 Bean 的创建、初始化、依赖注入、销毁等。
+3. **配置**：通常来说，我们很少直接使用 `BeanFactory`，更多情况下我们使用的是 `ApplicationContext`，这是一个更高级的容器，也是 `BeanFactory` 的一个子接口。
+4. **使用场景**：通常在小型应用或者资源受限的环境下，我们可能会直接使用 `BeanFactory`。
+
+
+
+FactoryBean
+
+1. **职责**：`FactoryBean` 是一个特殊的 Bean，用于生成其他 Bean 实例。通常当创建某个 Bean 需要复杂的初始化逻辑时，会使用 `FactoryBean`。
+2. **生命周期**：`FactoryBean` 自身也是一个 Bean，因此它也是由 `BeanFactory` 管理的。当其他 Bean 依赖于由 `FactoryBean` 创建的 Bean 时，`FactoryBean.getObject()` 方法会被调用，用于生成那个 Bean。
+3. **配置**：`FactoryBean` 通常在 Spring 配置文件中定义，就像其他普通的 Bean 一样。
+4. **使用场景**：`FactoryBean` 在 Spring 框架自身和第三方库中被广泛使用，用于生成如 `JdbcTemplate`、`SessionFactory` 等复杂对象。
+
+我们先看一下FactoryBean的接口：
+
+```java
+public interface FactoryBean {
+    T getObject() throws Exception;
+    Class<?> getObjectType();
+    boolean isSingleton();
+}
+```
+
+- getObject() – 返回工厂生成的对象，这是 Spring 容器将使用的对象
+- getObjectType() – 返回此 FactoryBean 生成的对象的类型
+- isSingleton() – 表示此 FactoryBean 生成的对象是否是单例
+
+现在，让我们实现一个示例 FactoryBean。我们将实现一个 ToolFactory 来生成 Tool 类型的对象：
+
+```java
+public class Tool {
+
+    private int id;
+
+    // standard constructors, getters and setters
+}
+```
+
+工具工厂本身：
+
+```java
+public class ToolFactory implements FactoryBean<Tool> {
+
+    private int factoryId;
+    private int toolId;
+
+    @Override
+    public Tool getObject() throws Exception {
+        return new Tool(toolId);
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return Tool.class;
+    }
+
+    @Override
+    public boolean isSingleton() {
+        return false;
+    }
+
+    // standard setters and getters
+}
+```
+
+我们可以看到，ToolFactory是一个FactoryBean，它可以产生Tool对象。
+
+测试 Tool 对象是否正确注入：
+
+```java
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = FactoryBeanAppConfig.class)
+public class FactoryBeanJavaConfigTest {
+
+    @Autowired
+    private Tool tool;
+ 
+    @Resource(name = "&tool")
+    private ToolFactory toolFactory;
+
+    @Test
+    public void testConstructWorkerByJava() {
+        assertThat(tool.getId(), equalTo(2));
+        assertThat(toolFactory.getFactoryId(), equalTo(7070));
+    }
+}
+```
+
+Spring 提供 AbstractFactoryBean 作为 FactoryBean 实现的简单模板超类。有了这个基类，我们现在可以更方便地实现创建单例或原型对象的工厂 bean。
+
+让我们实现一个 SingleToolFactory 和 NonSingleToolFactory 来展示如何将 AbstractFactoryBean 用于单例和原型类型：
+
+```java
+public class SingleToolFactory extends AbstractFactoryBean<Tool> {
+
+    private int factoryId;
+    private int toolId;
+
+    @Override
+    public Class<?> getObjectType() {
+        return Tool.class;
+    }
+
+    @Override
+    protected Tool createInstance() throws Exception {
+        return new Tool(toolId);
+    }
+
+    // standard setters and getters
+}
+```
+
+现在是非单例实现：
+
+```java
+public class NonSingleToolFactory extends AbstractFactoryBean<Tool> {
+
+    private int factoryId;
+    private int toolId;
+
+    public NonSingleToolFactory() {
+        setSingleton(false);
+    }
+
+    @Override
+    public Class<?> getObjectType() {
+        return Tool.class;
+    }
+
+    @Override
+    protected Tool createInstance() throws Exception {
+        return new Tool(toolId);
+    }
+
+    // standard setters and getters
+}
+```
+
+可以测试 Worker 对象的属性是否按照我们的预期注入：
+
+```java
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations = { "classpath:factorybean-abstract-spring-ctx.xml" })
+public class AbstractFactoryBeanTest {
+
+    @Resource(name = "singleTool")
+    private Tool tool1;
+ 
+    @Resource(name = "singleTool")
+    private Tool tool2;
+ 
+    @Resource(name = "nonSingleTool")
+    private Tool tool3;
+ 
+    @Resource(name = "nonSingleTool")
+    private Tool tool4;
+
+    @Test
+    public void testSingleToolFactory() {
+        assertThat(tool1.getId(), equalTo(1));
+        assertTrue(tool1 == tool2);
+    }
+
+    @Test
+    public void testNonSingleToolFactory() {
+        assertThat(tool3.getId(), equalTo(2));
+        assertThat(tool4.getId(), equalTo(2));
+        assertTrue(tool3 != tool4);
+    }
+}
+```
+
+使用 FactoryBean 是一种很好的做法，可以封装复杂的构造逻辑或使在 Spring 中配置高度可配置的对象变得更容易。
+
+
+
+> 参考：
+>
+> 1. https://www.baeldung.com/spring-factorybean
+> 2. https://howtodoinjava.com/spring-core/how-to-create-beans-using-spring-factorybean/
+> 3. https://www.cnblogs.com/yichunguo/p/13922189.html
+> 4. https://www.cnblogs.com/jingzh/p/16711876.html
+
+
+
+### Spring Boot启动时进行初始化的操作（2023 得物）
+
+一种常见的方式是通过实现`ApplicationRunner`接口或`CommandLineRunner`接口来实现初始化操作。这两个接口在Spring Boot中专门用于在应用程序启动后执行初始化任务。我们可以创建一个类，并实现其中一个接口的`run`方法，在该方法中编写初始化逻辑。例如，可以在该方法中加载配置文件、初始化数据库连接等。这样，在应用程序启动后，Spring Boot会自动调用这些初始化方法。
+
+1. `ApplicationRunner`接口：该接口提供了一个`run`方法，该方法在Spring Boot应用程序完全启动后执行。您可以创建一个实现`ApplicationRunner`接口的Bean，并在其中编写初始化逻辑。例如：
+
+```java
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyApplicationRunner implements ApplicationRunner {
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        // 执行初始化逻辑
+        System.out.println("应用程序启动完成，进行初始化操作...");
+    }
+}
+```
+
+2. `CommandLineRunner`接口：与`ApplicationRunner`类似，但它接受命令行参数作为方法参数。您可以创建一个实现`CommandLineRunner`接口的Bean，并在其中编写初始化逻辑。例如：
+
+```java
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Component
+public class MyCommandLineRunner implements CommandLineRunner {
+
+    @Override
+    public void run(String... args) throws Exception {
+        // 执行初始化逻辑
+        System.out.println("应用程序启动完成，进行初始化操作...");
+    }
+}
+```
+
+另一种方式是使用注解`@PostConstruct`来标记一个方法，在Spring容器初始化过程中，该方法会在依赖注入完成后自动执行。通过在这个方法中编写初始化逻辑，可以实现在Spring Boot启动时进行初始化操作。
+
+
+
 ## 🐬 MySQL
 
 ### 可重复读和已提交读隔离级别表现的现象是什么，区别是什么样的？（2023 美团）
@@ -1358,6 +1931,40 @@ Read View 有四个重要的字段：
 
 
 
+假设有一个包含用户名的MySQL表`users`，表结构如下：
+
+```sql
+CREATE TABLE users (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255)
+);
+```
+
+对`username`字段创建完整索引可能会占用较多空间。如果知道大多数查询只会使用用户名的前几个字符，可以创建前缀索引。例如，为`username`字段的前4个字符创建索引：
+
+```sql
+ALTER TABLE users ADD INDEX idx_username_prefix(username(4));
+```
+
+之后，以下查询将使用前缀索引，从而更快地返回结果：
+
+```sql
+SELECT * FROM users WHERE username LIKE 'John%';
+```
+
+但是，像这样的查询将无法使用前缀索引：
+
+```sql
+SELECT * FROM users WHERE username LIKE '%John';
+```
+
+前缀索引减少了索引的大小，但也有局限性：
+
+- order by 就无法使用前缀索引；
+- 无法把前缀索引用作覆盖索引；
+
+
+
 ### 介绍一下联合索引？最左匹配原则是什么？（2023 快手）
 
 通过将多个字段组合成一个索引，该索引就被称为联合索引。
@@ -1405,6 +2012,96 @@ CREATE INDEX index_product_no_name ON product(product_no, name);
 联合索引有一些特殊情况，**并不是查询过程使用了联合索引查询，就代表联合索引中的所有字段都用到了联合索引进行索引查询**，也就是可能存在部分字段用到联合索引的 B+Tree，部分字段没有用到联合索引的 B+Tree 的情况。
 
 这种特殊情况就发生在范围查询。联合索引的最左匹配原则会一直向右匹配直到遇到「范围查询」就会停止匹配。**也就是范围查询的字段可以用到联合索引，但是在范围查询字段的后面的字段无法用到联合索引**。
+
+
+
+### MySQL的索引为什么是b+树（2023 得物）
+
+因为 B+ 树具有以下几个优点：
+
+1. **查询效率稳定**: B+ 树的高度较矮，因此查询时需要的磁盘 I/O 操作次数较少。这有助于实现更高的查询速度和更稳定的性能。
+2. **范围查询方便**: B+ 树的所有叶子节点都位于同一层，并且通过指针连接，这使得范围查询更加高效。
+3. **更适合磁盘**: 数据库存储通常依赖于磁盘，而磁盘的 I/O 操作通常具有高成本。B+ 树允许更有效地读取数据块，减少了 I/O 操作。
+4. **高扇出率**: 由于 B+ 树节点可以存储大量子节点的引用，树的高度相对较低，这进一步减少了查询需要的磁盘 I/O 操作次数。
+5. **适应性强**: B+ 树可以容易地插入、删除和查找操作，而且能自动平衡，这是数据库系统中非常需要的特性。
+6. **数据局部性**: B+ 树有助于实现数据的局部性原理，即经常一起使用的数据也应该一起存储。这有助于提高缓存和磁盘 I/O 效率。
+7. **易于维护**: B+ 树易于分裂和合并，这样在数据插入和删除时能保持良好的平衡性。
+8. **多路复用**: 在多用户或并发环境下，B+ 树能更好地支持多路复用。
+
+
+
+### 一个sql语句，判断是否用了索引，是否回表（2023 得物）
+
+`EXPLAIN`
+
+
+
+### mysql的死锁问题（2023 得物）
+
+MySQL在以下情况下可能会出现死锁问题：
+
+1. 并发读写冲突：当多个事务同时读取和写入同一行数据时，可能会导致死锁问题。例如，事务A先获取了锁并读取了某一行数据，同时事务B也需要读取该行数据，但事务A还未释放锁，导致事务B无法继续执行，从而可能导致死锁。
+2. 加锁顺序不一致：当事务在执行过程中获取锁的顺序不一致时，也可能会导致死锁。例如，事务A先锁住了表A的某一行，然后想要锁住表B的某一行；而事务B先锁住了表B的某一行，然后想要锁住表A的某一行。这种情况下，两个事务可能会因为互相等待对方释放锁而发生死锁。
+3. 高并发场景：当有大量并发的事务同时请求锁资源时，可能增加了发生死锁的概率。特别是在数据库设计不合理或应用程序并发控制不当的情况下，死锁的发生可能更为频繁。
+4. 锁超时设置不合理：如果在事务中设置了过长的锁超时时间，那么在并发量较大的情况下，可能会导致事务持有锁的时间过长，从而增加了死锁发生的可能性。
+
+
+
+解决MySQL死锁问题的方法有很多，以下是一些常见的方法：
+
+1. 死锁检测和处理: MySQL的InnoDB存储引擎可以自动检测死锁，并回滚其中一个事务，释放资源，使其他事务能够继续执行。应用程序可以通过监控错误日志来获取有关死锁的信息，并采取适当的措施来处理。
+2. 优化事务和锁策略: 在设计数据库架构时，应该合理设置事务的隔离级别、锁的粒度和加锁顺序。例如，尽量使用较低的隔离级别，减少锁的持有时间，以及确保所有事务加锁的顺序一致。
+3. 提高并发能力: 通过增加硬件资源（例如内存、磁盘）或者优化查询语句的性能，可以提高数据库的并发能力，从而减少发生死锁的可能性。
+4. 减少事务时间: 尽量在事务内完成尽可能少的工作，减少事务的持有时间，以便其他事务能够更快地获得所需的锁资源。
+5. 设置超时时间：MySQL的InnoDB存储引擎通过参数innodb_lock_wait_timeout来设置锁等待的时间，超过这个时间后会报错并释放锁资源。默认的超时时间是50秒。通过适当调整这个超时时间，可以在一定程度上减少死锁发生的可能性。
+
+
+
+### 手写个sql死锁，如果字段非索引会发生死锁吗（2023 快手）
+
+SQL死锁通常发生在两个或更多个事务相互等待对方释放锁时。下面是一个简单的MySQL示例，演示了如何产生一个死锁。假设我们有一个名为`students`的表，该表有`id`和`name`两个字段。
+
+```sql
+CREATE TABLE students (
+    id INT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+INSERT INTO students (id, name) VALUES (1, 'Alice');
+INSERT INTO students (id, name) VALUES (2, 'Bob');
+```
+
+现在假设我们有两个并发的事务：
+
+事务1：
+
+```sql
+START TRANSACTION;
+UPDATE students SET name='Charlie' WHERE id=1;
+-- 事务1在这里暂停，等待事务2
+UPDATE students SET name='David' WHERE id=2;
+COMMIT;
+```
+
+事务2：
+
+```sql
+START TRANSACTION;
+UPDATE students SET name='Emily' WHERE id=2;
+-- 事务2在这里暂停，等待事务1
+UPDATE students SET name='Frank' WHERE id=1;
+COMMIT;
+```
+
+这两个事务会造成死锁，因为事务1锁定了`id=1`的记录，而事务2锁定了`id=2`的记录。然后，它们都等待对方释放锁。
+
+
+
+如果字段非索引会发生死锁吗？
+
+实际上非索引字段可能会增加发生死锁的机会。这是因为在非索引字段上执行更新或者锁定操作通常需要全表扫描，这将锁定更多的行。这样，与其他事务的锁竞争可能性就更高了，从而更容易导致死锁。
+
+然而，要注意的是，是否会发生死锁还取决于很多其他因素，包括数据库管理系统的内部机制、事务的隔离级别等等。所以，即使是非索引字段也不一定总是会导致死锁。但是，使用索引通常可以减少全表扫描和锁竞争，从而降低死锁的风险。
 
 
 
@@ -1848,6 +2545,134 @@ Redis RDB的工作原理是：
 4. **监控与报警**：通过监控工具实时了解Redis的运行状态，并在出现问题时迅速发出报警，以便及时处理。
 5. **备份与恢复**：定期备份Redis数据，并确保在出现问题时可以快速恢复。
 
+
+
+### Redis切片集群中，数据量多了，加实例还是加内存，为什么？加实例要注意什么问题？（2023 得物）
+
+加实例（水平扩展）
+
+1. 优点：
+   - **更好的分布负载**：更多的实例意味着每个实例处理的请求更少。
+   - **更高的可用性**：一个实例出问题不会影响其他实例。
+   - **更易于管理大数据量**：通过增加实例数，你可以在多个硬件上分布数据和负载。
+2. 缺点：
+   - **复杂性增加**：你需要管理更多的实例和可能更复杂的数据路由。
+   - **成本**：需要更多的硬件和维护。
+
+加内存（垂直扩展）
+
+1. 优点：
+   - **简单**：你不需要改变代码或者重新配置你的应用。
+   - **低延迟**：单个实例通常比多实例场景有更低的网络延迟。
+2. 缺点：
+   - **成本高**：内存通常比其他硬件更贵。
+   - **可用性下降**：如果这个实例出现问题，可能会影响更多的数据和服务。
+   - **扩展性限制**：单个实例总会有内存和计算能力的上限。
+
+综合考虑
+
+- 如果你关心**高可用性、分布式负载均衡**，并且需要**大规模扩展**，那么增加实例通常是更好的选择。
+- 如果你的应用是**内存密集型**而不是计算密集型，并且你想要**最小化延迟**，那么加内存可能是更合适的。
+- 在选择之前，一定要**做性能和成本的评估**，以便找到最适合你需求的方案。
+- 注意也可以**两者结合**，既增加实例也增加每个实例的内存，具体取决于你的需求和预算。
+
+
+
+加实例需要注意问题：
+
+1. 数据迁移与重平衡
+   1. **迁移计划**: 在添加新实例后，现有的数据需要被重新平衡到新的实例上。这一过程应该事先规划好，以最小化对业务的影响。
+   2. **数据一致性**: 在数据迁移过程中要确保数据的一致性，防止数据丢失或者重复。
+2. 资源和性能
+   1. **硬件规格**: 新加入的实例应具有与现有实例相似的硬件规格（CPU、内存等），以确保性能的一致性。
+   2. **网络延迟**: 新实例应部署在与现有实例网络延迟较低的位置，以避免成为性能瓶颈。
+3. 可用性与容错
+   1. **主从配置**: 如果使用主从配置，确保新实例也有相应的从实例，以提供高可用性。
+   2. **数据备份**: 在添加新实例之前和之后都应执行数据备份操作。
+4. 集群配置和元数据
+   1. **更新配置**: 集群的配置信息（例如，哪些实例负责哪些键的范围等）需要更新。
+   2. **客户端更新**: 如果客户端代码中硬编码了集群信息，那么添加新实例后，客户端可能需要更新。
+5. 监控与告警
+   1. **性能监控**: 在新实例添加之后，应增加相应的监控，以追踪其性能和健康状况。
+   2. **告警设置**: 应该为新实例设置相应的告警条件和阈值。
+6. 测试与验证
+   1. **功能测试**: 在正式投入使用前，要在测试环境中验证新实例的功能和性能。
+   2. **回滚计划**: 如果新实例出现问题，应准备好相应的回滚方案。
+
+
+
+### Redis的主库崩溃了会怎么样（2023 得物）
+
+1. **数据可用性**：主库崩溃会导致数据不可用，直到主库恢复或者手动切换到一个备库（Slave）。
+2. **数据一致性**：如果主库在崩溃前有尚未同步到备库的写操作，这些数据可能会丢失。
+3. **性能**：备库通常用于读操作以减轻主库的压力。主库崩溃可能导致读操作性能下降，尤其是在高读取负载的系统中。
+
+
+
+解决：
+
+1. **主从切换（Failover）**：手动或自动将一个备库提升为新的主库。
+2. **哨兵模式（Sentinel）**：Redis Sentinel 可以自动检测主库崩溃，并自动选举新的主库。
+3. **集群模式（Cluster）**：在Redis集群模式中，数据分布在多个主库中。一个主库的崩溃可能只影响到该主库负责的数据分片。
+4. **持久化**：通过合适的持久化策略（如 RDB 快照或 AOF 日志文件）来最小化数据丢失。
+5. **监控和报警**：使用工具如 Prometheus、Grafana 或其他监控工具来及时发现问题。
+6. **应用层重试和熔断机制**：应用代码可以设计成在主库崩溃时尝试重新连接或者路由到备库。
+7. **负载均衡器**：在多主或主-多从架构中，负载均衡器可以帮助重新路由流量。
+8. **备份和恢复**：定期备份 Redis 数据，并在必要时进行恢复。
+
+
+
+### Redis数据更新成功，MySQL更新失败怎么办？（2023 用友）
+
+**事务**：如果你使用的是支持事务的MySQL版本（例如InnoDB），可以尝试先在MySQL中开始一个事务，进行数据更新，然后更新Redis。如果Redis更新失败，可以回滚MySQL的事务，确保两者保持一致。
+
+**补偿策略**：如果Redis更新成功，而MySQL更新失败，可以考虑再次尝试更新MySQL。如果多次尝试后MySQL仍然失败，则可以记录这个失败事件，以便稍后进行人工干预或通过其他自动化工具进行修复。
+
+**双写一致性策略**：你可以使用一个队列或日志系统，例如Kafka，来记录需要在两个系统中进行的更改。然后，可以有一个消费者或工作进程从队列中读取更改，并确保它们在两个系统中都被应用。
+
+**缓存失效策略**：当Redis数据更新成功而MySQL更新失败时，可以设置Redis的过期时间较短，使得在数据过期后从数据库中读取最新的值并回填到缓存中。这样，在MySQL更新失败的情况下，后续的读请求仍可以从数据库获取最新值。
+
+
+
+### Redis保存数据有什么安全性问题？（2023 用友）
+
+存储问题：
+
+1. **明文传输**：默认情况下，Redis 数据在网络中的传输是不加密的。
+2. **无身份验证**：默认设置下，任何人都可以连接到 Redis 服务器并执行所有命令。
+3. **持久化问题**：Redis 支持多种持久化机制，但如果配置不当，可能导致敏感数据泄漏。
+4. **代码注入**：虽然风险较低，但由于 Redis 支持复杂的数据结构，不当的使用还是有注入攻击的风险。
+5. **配置风险**：不当的配置（比如绑定所有IP地址或没有设置密码）可能会导致安全问题。
+
+
+
+保存方式问题：
+
+1. RDB快照：RDB是一种定时保存策略，它会在指定的时间间隔内创建数据库的快照。这种方式可能会导致数据丢失的风险。如果在快照创建过程中发生系统崩溃或硬件故障，那么Redis将无法恢复到发生故障之前的那个状态，因为在快照创建后到故障发生的这段时间内的所有写操作都没有被记录下来。为了解决这个问题，你可以设置多个RDB快照，并在不同的时间间隔下执行。这样可以在一定程度上减少数据丢失的风险。
+2. AOF日志：AOF日志是Redis将每次写操作都记录到一个文件中，当需要恢复数据时，只需读取该文件并将内容重新执行一遍即可。然而，AOF日志可能会变得非常大，这可能导致磁盘空间不足的问题。此外，如果AOF日志文件损坏或者丢失，那么Redis将无法恢复数据。为了解决这些问题，你应该定期对AOF日志进行压缩，以减小其大小;同时，确保在多个地方存储备份AOF日志文件，以防万一。
+
+
+
+### 在分布式锁中，Redis中A申请锁1min，30s B能获取这个锁吗？（2023 得物）
+
+在分布式锁中，如果A已经成功申请了一个锁并设置了1分钟（60秒）的过期时间，那么在这60秒内，B是不能获取到这个锁的，除非A主动释放了这个锁或者锁因某种原因提前过期了。
+
+如果A持有的锁在1分钟内没有被释放或者过期，那么B必须等到这1分钟过后才有可能获取到这个锁。
+
+
+
+### redisson底层是怎么实现的（2023 快手）
+
+Redisson底层的实现原理包括以下几个方面：
+
+1. 连接管理：Redisson通过连接池管理与Redis服务器的连接，使用NIO（非阻塞I/O）技术进行网络通信，提高通信效率和吞吐量。
+2. 序列化：Redisson通过序列化技术将Java对象转换为字节流进行存储和传输。常用的序列化技术包括Java内置的序列化（Serializable）和常用的第三方序列化库，如FastJson、Kryo等。
+3. 命令封装：Redisson封装了Redis服务器的各种命令，比如字符串操作、哈希表操作、列表操作等，以便开发者可以直接调用相应的方法进行操作。
+4. 分布式锁：Redisson实现了分布式锁的功能，通过Lua脚本在Redis服务器上执行加锁和解锁的操作，确保分布式环境下的数据一致性和并发控制。
+5. 分布式对象：Redisson提供了分布式对象的支持，如分布式集合、分布式列表、分布式映射等。它们通过将数据存储在Redis服务器上，实现了数据的分布式共享和协同操作。
+
+
+
 ## ♻️ JVM
 
 ### 堆是如何管理内存的（2023 快手）
@@ -1976,7 +2801,9 @@ G1垃圾回收器将堆内存划分为多个小块（Region），每个小块可
 > 1. https://stackoverflow.com/questions/24766118/when-is-a-full-gc-triggered
 
 
+
 ### 可以在代码中捕获oom异常吗？（2023 小红书）
+
 可以通过代码捕获 OOM(OutOfMemory)异常。例如:
 ```java
 try {
@@ -1988,7 +2815,9 @@ try {
 当 JVM 的可用内存不足以满足应用的内存需求时,会抛出 OOM 异常。捕获这个异常可以让应用优雅地处理 OOM 错误,而不是直接崩溃。
 
 
+
 ### 能不能说一下堆区具体怎么划分，为什么这样划分（2023百度）
+
 Java虚拟机（JVM）的堆区（Heap）是JVM所管理的最大的一块内存空间，也是Java内存管理中最关键的部分。它主要用于存放各种对象实例，包括Java类的实例和数组。
 
 堆区的具体划分可能会随着不同的JVM实现（例如HotSpot、JRockit、IBM J9等）和版本有所不同，但一般来说，可以划分为以下几个部分：
@@ -2092,7 +2921,134 @@ java -Xmx256m OOMExample
 
 这些优化措施可以从JVM参数调优、代码层面上防止对象过度创建和减少GC工作量，有效减少Full GC的频率。
 
+
+
+### Java线程之间通知怎么处理？（2023 得物）
+
+1. 使用`synchronized`关键字，你可以保证一个时刻只有一个线程能访问同步代码块。这通常用于资源共享或者确保数据一致性。
+
+   ```java
+   public synchronized void myMethod() {
+     // Do something
+   }
+   ```
+
+2. 在`synchronized`代码块或者方法中，你可以使用`wait()`，`notify()`和`notifyAll()`方法来控制线程的执行。这些方法属于Java的`Object`类。
+
+   - `wait()`: 当前线程进入等待状态，释放锁。
+   - `notify()`: 唤醒一个在该对象监视器上等待的线程。
+   - `notifyAll()`: 唤醒所有在该对象监视器上等待的线程。
+
+   ```java
+   synchronized(sharedObject) {
+     while(conditionNotMet) {
+       sharedObject.wait();
+     }
+     // Do something
+     sharedObject.notify();  // 或者 sharedObject.notifyAll();
+   }
+   ```
+
+3. Java标准库中的`java.util.concurrent`包提供了一些高级同步工具，比如`Semaphore`、`CountDownLatch`、`CyclicBarrier`等。
+
+   - **Semaphore**: 控制同时访问特定资源的线程数量。
+   - **CountDownLatch**: 允许一个或多个线程等待直到一组操作完成。
+   - **CyclicBarrier**: 允许一组线程互相等待直到所有线程都准备完毕。
+
+   ```java
+   Semaphore semaphore = new Semaphore(1);  // 允许一个线程访问
+   
+   semaphore.acquire();  // 获取一个许可
+   // critical section
+   semaphore.release();  // 释放一个许可
+   ```
+
+4. 阻塞队列也是一种常用的线程通信手段。它可以用于生产者-消费者模型。
+
+   ```java
+   BlockingQueue<String> queue = new LinkedBlockingQueue<>(10);
+   
+   // 生产者
+   queue.put("item");
+   
+   // 消费者
+   String item = queue.take();
+   ```
+
+
+
+### 比如说有一个队列当中，有批量线程去处理的任务，然后一个任务处理失败之后要终止其他任务，这个怎么处理？（2023 得物）
+
+1. **共享状态标志**: 使用一个共享的状态标志（比如一个布尔变量），一旦一个线程失败，就设置这个标志。其他线程需要不断检查这个标志，如果发现标志被设置为失败，就自行终止。
+2. **线程池和Future**: 如果使用线程池，通常每个任务的执行状态会被封装在一个`Future`对象中。你可以通过检查这个`Future`对象来决定是否取消其他任务。
+3. **异常处理**: 设计任务代码以抛出特定类型的异常表示失败。捕获这些异常并在捕获到异常后终止其他任务。
+4. **消息队列**: 使用一个消息队列来发送停止信号给其他线程。
+5. **中断**: 在Java这样支持线程中断的语言里，可以调用线程的`interrupt()`方法来尝试终止它。但注意，线程需要正确处理中断才会实际停止。
+
+
+
+### 新生代频繁Minor GC原因，解决办法？（2023 得物）
+
+1. 新生代空间设置过小
+2. 对象生命周期短，快速进入新生代并变得不可达
+3. 大量临时对象的创建
+4. 高并发或者高吞吐量的应用
+
+解决办法：
+
+1. **增加新生代大小**：通过调整JVM参数（例如，`-Xmn`）来增大新生代空间。
+2. **对象池化**：重用对象，而不是不断创建新对象。
+3. **代码优化**：减少临时对象的创建，优化数据结构和算法。
+4. **调优GC参数**：使用不同的垃圾收集器或者调整垃圾收集器的参数。
+5. **监控与诊断**：使用工具（如JVisualVM, MAT等）来监控内存使用情况和对象的生命周期。
+6. **减少线程数或请求并发量**：如果应用不能承受高并发，适当降低并发量。
+7. **使用适当的数据结构和缓存策略**：以减少不必要的对象创建。
+8. **合理分配老年代和新生代的比例**：可以使用`-XX:NewRatio`进行调整。
+
+
+
+### 频繁Full GC（老年代GC）的原因？解决办法？（2023 得物）
+
+1. **老年代空间不足**：当老年代空间不足以容纳新晋升的对象时，会触发Full GC。
+2. **内存泄漏**：长时间运行后，无法回收的对象会不断累积。
+3. **大对象或长生命周期的对象**：这些对象直接进入老年代，增加了GC的频率。
+4. **系统调用或外部因素**：比如使用`System.gc()`手动触发。
+5. **不合适的GC策略或参数设置**：比如不合适的堆大小或其他JVM参数。
+
+解决办法：
+
+1. **增加老年代空间**：使用JVM参数（例如，`-Xmx`）增加堆内存大小。
+2. **内存泄漏排查**：使用内存分析工具（如MAT、VisualVM等）定位和修复内存泄漏。
+3. **避免大对象和长生命周期对象**：优化代码以减少这类对象或延长新生代大小。
+4. **调优GC策略和参数**：根据应用需求选择合适的GC算法（如G1、CMS等）并进行参数调优。
+5. **避免手动触发GC**：不要使用`System.gc()`。
+6. **应用层面的优化**：比如使用缓存来减少数据库查询，从而减少对象创建。
+7. **监控和日志分析**：持续监控GC日志和系统性能，根据实际情况作出调整。
+
+
+
+### G1回收器 hop参数（2023 快手）
+
+
+
+
+
+### G1回收器如何回收老年代对象（2023 快手）
+
+根据我的搜索结果，关于Java G1回收器如何回收老年代对象，有几个方面需要注意。
+
+首先，在G1回收器中，老年代对象的回收是通过并发标记和并发清除来实现的。G1回收器将整个Java堆划分为多个大小相等的独立区域（Region），每个区域可以属于新生代或老年代。在垃圾回收过程中，G1会根据垃圾的分布情况，选择最有价值的区域进行回收，这也包括了老年代的区域。
+
+其次，G1回收器采用了分代收集的策略，可以同时处理新生代和老年代的垃圾回收。在回收老年代对象时，G1回收器执行的操作包括标记、混合和清除。首先，G1回收器会对Java堆进行并发标记，标记出被引用的对象和不可达的对象。然后，G1会进行混合收集（Mixed Collection），即同时回收新生代和部分老年代的对象，并留下一部分老年代的区域未被回收。最后，G1回收器会在需要进行全局垃圾回收时，对剩余的老年代区域进行并发清除。
+
+另外，G1回收器还实现了一些优化技术来提高老年代对象的回收效率。例如，“Humongous Objects”技术可以高效回收占据大量空间的对象；[“String Deduplication”技术可以并发地回收重复的字符串对象](https://docs.oracle.com/en/java/javase/17/gctuning/garbage-first-g1-garbage-collector1.html)。
+
+总结一下，Java G1回收器通过并发标记、混合收集和并发清除等步骤，实现了对老年代对象的回收。它采用分代收集的策略，并结合了一些优化技术，以达到低延迟、高效率的垃圾回收目标。
+
+
+
 ## 📭 中间件
+
 ### 请求很多，消息堆积处理不过来了如何应对（2023滴滴）
 如果发现消息中间件中的消息正在堆积，这可能意味着生产者生产的消息速度大于消费者的消费速度。有几种可能的策略可以缓解这个问题：
 1. 扩展消息中间件**集群**：考虑对消息中间件进行水平扩展，提高整体的处理能力。例如，在RabbitMQ中，可以增加节点来实现集群扩展。
@@ -2111,6 +3067,68 @@ java -Xmx256m OOMExample
 5. **优化处理逻辑**：如果问题出在处理请求的逻辑上，可以尝试优化代码，提高处理速度。
 6. **错误处理**：如果有请求失败或卡住，应提供相应的错误处理机制，如重试、超时等，确保不会阻塞后续的请求。
 7. **缓存机制**：对于一些重复的或者计算量大的请求，可以考虑使用缓存来减轻服务器的负载。
+
+
+
+### ES的索引？索引存储空间占用？ES索引和b+树索引区别？（2023 用友）
+
+ES的索引：
+
+Elasticsearch使用的倒排索引。基于倒排索引数据结构的数据压缩技术。在倒排索引中，每篇文档都对应一个文档编号，以及若干个单词（或词项）和它们在文档中出现的位置，将这些编号以及位置等元信息通过一定算法先进行预处理再进行压缩存储，从而大大减小了存储空间，降低了I/O读写的时间成本，提高了索引的检索效率。倒排索引采用了倒序和跳表技术，可以快速定位并遍历文档，然后进行词项匹配，减少了无效遍历，同时也缓解了内部节点可能产生的磁盘或内存I/O压力。倒排索引中词项的基数相对比较小，遍历检索时无需遍历整个索引，可以更加快速地找到文档，节约了遍历索引时的时间开销。
+
+
+
+索引存储空间占用：
+
+倒排索引的存储空间取决于多个因素，包括索引的大小、文档的数量和字段的类型等。倒排索引的存储空间主要包括两部分：词典和倒排表。词典存储了所有不重复的词项，并为每个词项分配一个唯一的标识符。词典的大小取决于索引中的不重复词项数量。倒排表存储了每个词项在文档中的出现位置信息。倒排表的大小与文档数量、文档长度和词项的频率等有关。在倒排表中，每个词项都对应一个包含该词项的文档列表，这些文档列表记录了词项在相应文档中出现的位置。综合来看，倒排索引的存储空间占用主要受以下几个因素影响：
+
+1. 文档数量：文档数量越多，倒排索引占用的存储空间就越大。
+2. 字段类型：不同类型的字段在倒排索引中所占用的存储空间可能会有所差异。例如，文本类型的字段可能需要更多的存储空间来存储词项信息。
+3. 词项重复性：如果一个词项在多个文档中频繁出现，倒排索引会占用更多的存储空间来记录这些文档列表。
+
+
+
+ES索引和b+树索引区别：
+
+1. 数据结构：倒排索引是一种基于词项的数据结构，它将文档中的每个词项与其所在的文档进行关联。而B+Tree索引则是一种树状结构，根据索引键值构建有序的索引树。
+2. 存储方式：倒排索引以文档为单位存储词项信息，每个词项指向包含它的文档列表。而B+Tree索引是将索引键值与对应的数据记录进行关联。
+3. 适用范围：倒排索引适合处理文本类数据，尤其在全文搜索和关键字匹配方面具有出色的性能。而B+Tree索引适用于更一般的数据结构，常见于关系型数据库的索引实现。
+4. 检索效率：由于倒排索引的存储结构和搜索算法的优化，它在处理大规模文本数据时通常具有更高的检索效率。B+Tree索引则在处理更多样化的数据和范围查询时更具优势。
+
+
+
+> 参考：
+>
+> 1. https://www.jianshu.com/p/4aea8af7a9ea
+> 2. https://blog.csdn.net/truelove12358/article/details/105577414
+> 3. https://juejin.cn/post/7023203644807839780
+
+
+
+### kafka是基于磁盘存储，为什么高性能（2023 得物）
+
+1. **批处理和缓冲**: Kafka 将数据分批存储和发送，这样能够减少网络调用的次数和成本。
+2. **分布式架构**: Kafka 集群由多个 brokers 组成，数据可以平行地存储和处理，这大大提高了系统的吞吐量。
+3. **分区和副本**: 每个 Kafka 主题（Topic）可以被划分为多个分区（Partition），每个分区可以有一个或多个副本。这样能提供数据冗余，也使得并行读写成为可能。
+4. **高效的存储格式**: Kafka 使用了高效的数据结构和存储格式（例如 snappy 或 lz4 压缩）来减少磁盘 I/O。
+5. **顺序读写**: 磁盘顺序读写通常比随机读写要快得多。由于 Kafka 的日志结构存储，数据通常以顺序的方式写入和读取。
+6. **生产者和消费者解耦**: Kafka 的发布-订阅模型允许生产者和消费者解耦，使系统具有更好的可扩展性和容错性。
+7. **低延迟**: Kafka 设计用于保证低延迟，通过在 broker 和客户端之间有效地移动数据，并且能够处理数十万条消息/秒。
+8. **持久性**: Kafka 可以配置为多种数据持久性选项，从不保留数据到永久存储，根据需要可灵活配置。
+9. **客户端多样性**: Kafka 提供了多种语言的客户端库，易于集成到现有的架构和应用中。
+10. **监控和管理**: Kafka 有丰富的监控和管理工具，方便对集群进行维护和优化。
+
+
+
+### kafka ack机制（2023 得物）
+
+Kafka的ack机制是指生产者发送消息后，需要接收到分区的leader发送的确认收到的回复。在Kafka的配置参数中，有三个可选值：0、1和-1（或者all）。默认情况下，ack的值为1，表示生产者发送后需要接收到分区的leader发送的确认收到的回复[4](https://blog.csdn.net/zhouxiaozxx/article/details/120569086)。
+
+具体来说，不同的ack参数取值有以下含义：
+
+- ack=0：生产者发送一次消息后就不再进行任何确认。这意味着无论消息是否发送成功，生产者都不会知道，因此可能会发生消息丢失的情况。
+- ack=1：生产者发送消息后需要接收到分区的leader发送的确认收到的回复。只有当leader副本成功写入消息时，生产者才会认为消息发送成功。这种模式可以提供较高的可靠性，但可能会牺牲部分吞吐量。
+- ack=-1（或者all）：生产者发送消息后需要等待leader将消息同步给所有的follower。只有当所有follower都成功复制了消息后，生产者才会认为消息发送成功。这种模式可以提供最高的可靠性，但可能会降低吞吐量。
 
 
 
@@ -2270,6 +3288,27 @@ Dubbo 的请求处理流程如下：
 2. 三阶段提交（Three-Phase Commit，3PC）：3PC是对2PC的改进，主要解决了2PC的阻塞问题。与2PC不同，3PC引入了预提交阶段，使得参与者在准备完成之后可以继续处理其他事务。3PC在保证一致性的同时，也增加了一定的复杂性。
 3. 补偿事务（Compensating Transaction）：补偿事务是一种基于补偿机制的分布式事务处理方法。在补偿事务中，每个参与者执行事务时记录一些可以用于回滚操作的补偿操作，并在需要回滚时依次执行这些补偿操作，将系统恢复到原始状态。补偿事务在容错和扩展性方面有一定优势，但可能需要额外的开发工作。
 4. Saga模式：Saga模式是一种事件驱动的分布式事务模式，将复杂的分布式事务分解为多个局部事务，每个局部事务负责处理自己的业务逻辑和状态变更，并通过发布和订阅事件的方式进行协调。Saga模式具有较好的可扩展性和灵活性，但需要开发人员对业务逻辑进行分解和编排。
+
+
+
+### 负载均衡算法有哪些？（2023 得物）
+
+负载均衡算法是用来分配服务器负载的算法。根据搜索结果，负载均衡算法可以分为静态负载均衡算法和动态负载均衡算法。
+
+静态负载均衡算法包括：
+
+1. 轮询算法（Round Robin）：按顺序将请求分配给后端服务器，实现均衡分配。
+2. 随机算法（Random）：根据随机算法选择一个后端服务器。
+3. 加权轮询算法（Weighted Round Robin）：根据服务器配置的权重分配请求，权重高的服务器处理更多的请求。
+4. 加权最少连接算法（Weighted Least Connections）：根据服务器的权重和当前连接数选择一个合适的服务器进行分配。
+5. 源地址哈希算法（IP Hash）：根据客户端的源IP地址计算哈希值，选择一个固定的服务器来处理该请求。
+
+动态负载均衡算法包括：
+
+1. 最少连接数算法（Least Connections）：将请求分配给当前连接数最少的服务器，以保证负载均衡。
+2. 最快响应速度算法（Fastest Response）：根据服务器的响应时间选择最快的服务器来处理请求。
+3. 观察方法（Observation Method）：根据系统运行状态观察后端服务器的负载情况，选择合适的服务器进行负载均衡。
+4. 预测法（Prediction Method）：根据预测算法预测后端服务器的负载情况，选择合适的服务器进行负载均衡。
 
 
 
@@ -2521,6 +3560,96 @@ ICMP 数据包内包含多个字段，最重要的是两个：
 - 存储位置：Cookie存储在客户端（浏览器）中，而Session存储在服务器端。
 - 安全性：由于Cookie存储在客户端，因此容易受到安全攻击，如跨站脚本攻击（XSS）和跨站请求伪造（CSRF）。而Session存储在服务器端，对客户端不可见，相对来说更安全。
 - 存储容量：Cookie的存储容量有限，通常为4KB左右，而Session的存储容量较大，受限于服务器的配置。
+
+
+
+### TCP的粘包与拆包（2023 得物）
+
+TCP的粘包与拆包是在TCP协议中可能出现的一种现象。TCP是一种面向字节流的协议，没有固定的消息边界，因此在数据传输过程中，发送方发送的多个数据包可能会被粘成一包传输（粘包），或者一个数据包可能被拆分成多个小包传输（拆包）。
+
+造成TCP粘包的原因是，发送方在发送数据时，会通过缓冲区进行优化。如果一次请求发送的数据量小于缓冲区大小，则TCP会将多个请求合并为同一个请求进行发送，从而导致粘包问题。而当一次请求发送的数据量超过缓冲区大小时，TCP会将其拆分为多次发送，就会发生拆包现象。
+
+粘包和拆包问题在数据链路层、网络层以及传输层都有可能发生。但由于UDP协议具有消息保护边界，不会发生粘包和拆包问题，因此粘包和拆包问题主要发生在TCP协议中。
+
+关于TCP粘包和拆包问题的解决方案，有一些常用的方法。比如可以使用定长包和定界符包，即在数据包中加入包长度或使用特定字符来标识包的边界。此外，也可以利用消息头中的长度字段进行处理，或者使用基于时间的策略进行包的分割和重组。
+
+在实际应用中，为了解决TCP粘包和拆包问题，开发者可以根据具体场景选择合适的解决方案，并进行相应的调试和优化。
+
+所以，TCP的粘包与拆包是指在TCP协议中可能出现的数据包传输现象，其中粘包是指多个数据包被粘合在一起传输，拆包是指一个数据包被拆分成多个小包传输。解决TCP粘包与拆包问题可以采用定长包、定界符包、长度字段等方法。
+
+
+
+### HTTP 2 流式连接是怎么实现的？（2023 快手）
+
+我们都知道 HTTP/1.1 的实现是基于请求-响应模型的。同一个连接中，HTTP 完成一个事务（请求与响应），才能处理下一个事务，也就是说在发出请求等待响应的过程中，是没办法做其他事情的，如果响应迟迟不来，那么后续的请求是无法发送的，也造成了队头阻塞的问题。
+
+而 HTTP/2 就很牛逼了，通过 Stream 这个设计，多个 Stream 复用一条 TCP 连接，达到并发的效果，解决了 HTTP/1.1 队头阻塞的问题，提高了 HTTP 传输的吞吐量。
+
+为了理解 HTTP/2 的并发是怎样实现的，我们先来理解 HTTP/2 中的 Stream、Message、Frame 这 3 个概念。
+
+![](https://camo.githubusercontent.com/eac74b0353c82f43301e48df402dceba83c7cfc652cc1160e62cba22b08042df/68747470733a2f2f63646e2e7869616f6c696e636f64696e672e636f6d2f67682f7869616f6c696e636f6465722f496d616765486f737434406d61696e2f2545372542442539312545372542422539432f68747470322f73747265616d2e706e67)
+
+你可以从上图中看到：
+
+- 1 个 TCP 连接包含一个或者多个 Stream，Stream 是 HTTP/2 并发的关键技术；
+- Stream 里可以包含 1 个或多个 Message，Message 对应 HTTP/1 中的请求或响应，由 HTTP 头部和包体构成；
+- Message 里包含一条或者多个 Frame，Frame 是 HTTP/2 最小单位，以二进制压缩格式存放 HTTP/1 中的内容（头部和包体）；
+
+因此，我们可以得出个结论：多个 Stream 跑在一条 TCP 连接，同一个 HTTP 请求与响应是跑在同一个 Stream 中，HTTP 消息可以由多个 Frame 构成， 一个 Frame 可以由多个 TCP 报文构成。
+
+![](https://camo.githubusercontent.com/128362dd941849f0b1f34f32e80d8ca2c4c1fdb2cb454be65adc99da2c94470b/68747470733a2f2f63646e2e7869616f6c696e636f64696e672e636f6d2f67682f7869616f6c696e636f6465722f496d616765486f737434406d61696e2f2545372542442539312545372542422539432f68747470322f73747265616d322e706e67)
+
+在 HTTP/2 连接上，**不同 Stream 的帧是可以乱序发送的（因此可以并发不同的 Stream ）**，因为每个帧的头部会携带 Stream ID 信息，所以接收端可以通过 Stream ID 有序组装成 HTTP 消息，而**同一 Stream 内部的帧必须是严格有序的**。
+
+比如下图，服务端**并行交错地**发送了两个响应： Stream 1 和 Stream 3，这两个 Stream 都是跑在一个 TCP 连接上，客户端收到后，会根据相同的 Stream ID 有序组装成 HTTP 消息。
+
+![](https://camo.githubusercontent.com/27096f135de66a7d4a2f71c3eedba56437cbdb066a1b2b76c5ecf86db236541e/68747470733a2f2f63646e2e7869616f6c696e636f64696e672e636f6d2f67682f7869616f6c696e636f6465722f6e6574776f726b2f687474702f68747470322545352541342539412545382542372541462545352541342538442545372539342541382e6a706567)
+
+客户端和服务器**双方都可以建立 Stream**，因为服务端可以主动推送资源给客户端， 客户端建立的 Stream 必须是奇数号，而服务器建立的 Stream 必须是偶数号。
+
+比如下图，Stream 1 是客户端向服务端请求的资源，属于客户端建立的 Stream，所以该 Stream 的 ID 是奇数（数字 1）；Stream 2 和 4 都是服务端主动向客户端推送的资源，属于服务端建立的 Stream，所以这两个 Stream 的 ID 是偶数（数字 2 和 4）。
+
+![](https://camo.githubusercontent.com/dbc0b26395aeefa91d48c1e7dc38d2497096e62e2e6e2e816e9a5caba039c5f6/68747470733a2f2f696d672d626c6f672e6373646e696d672e636e2f38333434353538316461666534303964386366643263353733623237383161632e706e67)
+
+同一个连接中的 Stream ID 是不能复用的，只能顺序递增，所以当 Stream ID 耗尽时，需要发一个控制帧 `GOAWAY`，用来关闭 TCP 连接。
+
+在 Nginx 中，可以通过 `http2_max_concurrent_Streams` 配置来设置 Stream 的上限，默认是 128 个。
+
+HTTP/2 通过 Stream 实现的并发，比 HTTP/1.1 通过 TCP 连接实现并发要牛逼的多，**因为当 HTTP/2 实现 100 个并发 Stream 时，只需要建立一次 TCP 连接，而 HTTP/1.1 需要建立 100 个 TCP 连接，每个 TCP 连接都要经过 TCP 握手、慢启动以及 TLS 握手过程，这些都是很耗时的。**
+
+HTTP/2 还可以对每个 Stream 设置不同**优先级**，帧头中的「标志位」可以设置优先级，比如客户端访问 HTML/CSS 和图片资源时，希望服务器先传递 HTML/CSS，再传图片，那么就可以通过设置 Stream 的优先级来实现，以此提高用户体验。
+
+
+
+### 什么是dns中间人攻击？（2023 快手）
+
+DNS中间人攻击（DNS Man-in-the-Middle Attack）是一种网络安全威胁。攻击者使用各种技术手段，拦截DNS（Domain Name System）查询流量并篡改其内容，从而使用户被导向恶意网站或受到其他攻击。这种攻击会破坏正常的DNS解析过程，导致用户无法访问正确的网站，或者向错误的服务器发送敏感信息。
+
+中间人攻击是一种“间接”的入侵攻击，通过将攻击者控制的计算机放置在受害者和目标之间，实现恶意操作。在DNS中间人攻击中，攻击者通常会拦截用户的DNS查询请求，然后伪造响应，返回错误的IP地址或重定向用户到恶意站点。这样一来，用户在访问网站时就会被导向攻击者控制的网站，从而暴露于各种网络威胁之下。
+
+
+
+> 参考：
+>
+> 1. https://www.fortinet.com/resources/cyberglossary/man-in-the-middle-attack
+> 2. https://www.howtogeek.com/668989/what-is-a-man-in-the-middle-attack/
+
+
+
+### 如何解决syn泛洪攻击？（2023 快手）
+
+SYN泛洪攻击是一种常见的拒绝服务(Denial of Service，DoS)攻击，它通过发送大量伪造的TCP连接请求（SYN包）来消耗目标服务器的资源，使其无法正常工作。解决SYN泛洪攻击，可以采取以下几种措施：
+
+1. 过滤和阻断恶意流量：使用防火墙或入侵防御系统(IDS/IPS)等安全设备，过滤和阻断来自攻击者的SYN泛洪攻击流量。这些设备可以根据网络流量的规则和行为进行检测和过滤，有效防止恶意流量进入网络。
+2. SYN Cookie技术：SYN Cookie是一种抵御SYN泛洪攻击的技术，它通过在服务器响应SYN包时，将部分状态信息嵌入到服务器生成的序列号中。当客户端返回ACK确认时，服务器可以通过解析序列号还原出完整的连接状态。这种方法可以减轻服务器的负担，并有效降低SYN泛洪攻击的影响。
+3. 加强网络设备的性能和容量：通过升级硬件设备、增加带宽和加强服务器的处理能力，可以提高网络设备的性能和容量，从而能够更好地抵御SYN泛洪攻击。增加设备的处理能力和带宽可以承受更多的连接请求，减少因攻击而导致的服务不可用情况。
+
+
+
+> 参考：
+>
+> 1. https://www.netscout.com/what-is-ddos/syn-flood-attacks
+> 2. https://info.support.huawei.com/info-finder/encyclopedia/en/SYN+Flood.html
 
 
 
@@ -2836,6 +3965,51 @@ Docker 镜像的文件系统是由多个层次组成的，这些层次是叠加�
 
 
 
+### 时间轮的概念（2023 得物）
+
+时间轮是一种调度模型，用于有效地处理批量周期性任务。它将大量的定时任务绑定在一个调度器上，并通过这个调度器来进行统一管理和触发。时间轮算法利用线程资源实现批量化调度，使得延迟任务和周期性任务能够高效地进行调度和执行。
+
+时间轮的工作原理可以简单理解为一个环形的数据结构，包含多个槽(slot)，每个槽又包含一个任务链表。时间轮按照一定的时间间隔（例如1秒）不断地进行转动，当时间轮的指针指向某个槽时，就触发该槽中的所有任务。任务链表中的任务可以根据自身的定时规则进行触发，例如延迟一段时间后执行或在指定的时间点执行。
+
+时间轮的实现方式有多种，一种常见的方式是使用哈希表和链表来实现。哈希表用于将任务按照其触发时间进行索引，而链表用于存储具体任务的执行信息。通过这种方式，时间轮能够快速地找到需要触发的任务，并按照预期的时间顺序进行执行。
+
+时间轮算法具有较高的性能和扩展性，适用于延迟任务和周期性任务的调度。它在实际应用中有广泛的应用，例如定时器、网络框架、消息引擎等领域。
+
+
+
+### linux内存中的 reserver ，commited代表什么意思（2023 快手）
+
+"reserved"是指在Linux系统中，一部分内存被保留起来并不被分配给应用程序使用。这部分内存是由内核保留的，一般无法通过普通的应用程序访问到。保留内存可以包括一些特殊用途的内存区域，例如专门用于虚拟化或系统服务的预留内存区域。
+
+"committed"代表已分配的内存，即已经由进程申请并由内核分配的内存空间。这块内存已经在页表中有了记录，保证了其他进程不会被占用。在Java中，"committed"也可以表示通过mmaped PROT_NONE方式申请的虚拟地址空间，已在页表中有对应记录。
+
+
+
+### Java线程几种状态？linux进程几种状态？（2023 快手）
+
+Java线程的状态有以下几种：
+
+1. **新建状态 (NEW)**: 当创建了线程对象后，即处于这种状态，例如：`Thread t = new Thread()`
+2. **就绪状态 (RUNNABLE)**: 当调用线程对象的 `start()` 方法，线程即处于就绪状态。此时，它已加入到调度队列，等待获取CPU的执行权。
+3. **运行状态 (RUNNING)**: 线程获取CPU的执行权后，即处于运行状态。
+4. **阻塞状态 (BLOCKED)**: 当线程等待锁时进入阻塞状态。
+5. **等待状态 (WAITING)**: 当线程调用 `Object.wait()`, `Thread.join()` 或 `LockSupport.park()` 时，它会进入等待状态。
+6. **超时等待状态 (TIMED_WAITING)**: 当线程调用有超时参数的方法如 `Thread.sleep(long millis)`, `Object.wait(long timeout)`, 或 `Thread.join(long millis)` 时，它会进入超时等待状态。
+7. **终止状态 (TERMINATED)**: 线程执行完毕或者因异常终止。
+
+
+
+Linux进程的状态有以下几种：
+
+1. **运行 (Running)**: 进程正在运行或在运行队列中等待运行。
+2. **中断 (Interruptible sleep)**: 进程正在等待某个条件的出现。
+3. **不中断 (Uninterruptible sleep)**: 进程在等待某些特定的事件，此时不能被中断。
+4. **僵尸 (Zombie)**: 进程已终止，但是父进程还没有获取其终止状态。
+5. **停止 (Stopped)**: 进程已停止，通常是因为它接收到一个`SIGSTOP`, `SIGTSTP`, `SIGTTIN` 或 `SIGTTOU` 信号。
+6. **追踪 (Traced or Paged)**: 进程因调试而被停止。
+
+
+
 ## 🧩 数据结构
 
 ### 红黑树说一下，跳表说一下？（2023 美团）
@@ -2905,6 +4079,14 @@ Docker 镜像的文件系统是由多个层次组成的，这些层次是叠加�
 
 1. **开放寻址法**：当哈希函数导致冲突时，开放寻址法会寻找其他未被使用的哈希地址。常见的开放寻址法有线性探查、二次探查和双重哈希等。这种方法的一个主要挑战是处理“聚集”问题，即冲突的哈希键聚集在哈希表的某些区域，导致查找时间的增加。
 2. **链地址法（拉链法）**：每一个哈希地址对应一条链表，所有映射到同一哈希地址的键都存储在这条链表中。当冲突发生时，只需在相应的链表中进行查找、插入或删除操作。这种方法的一个主要挑战是如果冲突太多，链表可能会变得很长，导致查找时间的增加。
+
+
+
+### nogo算法（2023 快手）
+
+参考：https://github.com/huawei-noah/vega/blob/master/docs/en/algorithms/nago.md，https://github.com/rubinxin/vega_NAGO
+
+Nagao算法是一种快速统计文本中所有子串频次的算法，[由东京大学的长尾真教授在1994年提出](https://zhuanlan.zhihu.com/p/32265502?utm_id=0)。该算法的核心思想是通过对文本中的射串进行排序来实现快速统计。
 
 
 
@@ -3194,6 +4376,39 @@ ThreadPoolExecutor executor = new ThreadPoolExecutor(
 ### 一个保存字符串的超大文件，如何判断一个字符串在不在这个文件这种。（2023 快手）
 
 - 分治 + hashmap
+
+
+
+### 假如有成千上百万条数据，内存空间无限大，怎么快速的往HashMap中插入数据？（2023 快手）
+
+1. 预估容量和负载因子
+
+在创建HashMap实例时，你可以预估数据量并据此设置初始容量。这有助于减少rehashing（重新哈希）的次数。
+
+```java
+javaCopy codeint initialCapacity = 1000000;  // 根据预估的数据量设置
+float loadFactor = 0.75f; // 默认值，可以根据需要调整
+HashMap<String, String> map = new HashMap<>(initialCapacity, loadFactor);
+```
+
+2. 并发插入
+
+如果数据插入没有依赖关系，你可以考虑使用多线程进行并发插入。不过，请注意，普通的HashMap是非线程安全的。你可以使用`ConcurrentHashMap`来进行线程安全的并发插入。
+
+```java
+ConcurrentHashMap<String, String> concurrentMap = new ConcurrentHashMap<>(initialCapacity, loadFactor);
+```
+
+3. 批量插入
+
+最直接的方式是使用`putAll`方法，该方法接受一个Map参数，将其中所有键-值对都插入到目标HashMap中。但是要注意，这并不会比逐一使用`put`方法插入快得多。
+
+```java
+Map<String, String> existingMap = new HashMap<>();
+Map<String, String> newEntries = new HashMap<>();
+// ...填充newEntries
+existingMap.putAll(newEntries);
+```
 
 
 

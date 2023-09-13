@@ -880,6 +880,14 @@ public class EnsureCapacityTest {
 
 通过运行结果，我们可以看出向 ArrayList 添加大量元素之前使用ensureCapacity 方法可以提升性能。不过，这个性能差距几乎可以忽略不计。而且，实际项目根本也不可能往 ArrayList 里面添加这么多元素。
 
+
+
+## LinkedList
+
+@todo
+
+
+
 ## 🍓HashMap
 > 源码：https://github.com/wupeixuan/JDKSourceCode1.8/blob/master/src/java/util/HashMap.java
 
@@ -1183,7 +1191,7 @@ final Node<K,V>[] resize() {
 
 ```
 
-### #HashMap 常用方法测试
+### 常用方法测试
 
 ```java
 package map;

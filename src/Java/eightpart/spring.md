@@ -328,11 +328,173 @@ if(mappedHandler.getHandler() instanceof MultiActionController){
 
 Spring 中配置 DataSource 的时候，DataSource  可能是不同的数据库和数据源。我们能否根据客户的需求在少修改原有类的代码下动态切换不同的数据源？这个时候就要用到装饰者模式(这一点我自己还没太理解具体原理)。Spring 中用到的包装器模式在类名上含有 `Wrapper`或者 `Decorator`。这些类基本上都是动态地给一个对象添加一些额外的职责
 
-### Starter的底层实现
+### Spring IOC 的底层原理
 
-@todo
+建议阅读大佬的文章：https://www.javadoop.com/post/spring-ioc
 
-### SpringBoot 自动装配
+下面进行面试的时候快速诉说：
+
+1. 通过XmlApplicationContext子类(如ClassPathXmlApplicationContext)读取xml配置文件,构建ApplicationContext实例。
+2. ApplicationContext调用refresh()方法,进行容器初始化工作。
+3. refresh()方法中实例化DefaultListableBeanFactory工厂类。
+4. 利用XmlBeanDefinitionReader解析xml文件,将每个Bean定义解析成BeanDefinition。
+5. XmlBeanDefinitionReader创建BeanDefinitionHolder,持有BeanDefinition实例（BeanDefinitionHolder是对BeanDefinition的包装类，持有BeanDefinition的名称和别名，底层的数据结构是Map和ArrayList，在Spring容器中，BeanDefinitionHolder用来承载BeanDefinition的名称和映射信息。具体而言，BeanDefinitionHolder是一个包含BeanDefinition名称、别名以及其他相关映射信息的数据结构。它可以作为内部Bean的占位符进行注册，并在解析BeanDefinition时起到重要的作用。）。
+6. 逐个调用registerBeanDefinition()方法,将BeanDefinition注册到DefaultListableBeanFactory中。
+7. 注册完成后进行后续BeanFactoryPostProcessor的执行和容器后置处理工作。
+8. 最后调用finishBeanFactoryInitialization(),初始化剩余的单例Bean。
+
+
+
+🤔可能进一步思考的问题：
+
+1. 可能需要解释一下什么是`BeanDefinition`，以及它如何用于描述一个Bean。
+2. 你可以解释一下`BeanFactoryPostProcessor`的角色和用途。它们在Spring初始化过程中起到了什么样的作用？
+3. 你提到了“容器后置处理工作”，这里可以稍微具体一点，比如涉及到什么类型的后置处理，以及这一步为什么是必要的。
+4. 对于`finishBeanFactoryInitialization()`方法，可进一步解释其作用，以及它如何与懒加载和非懒加载的Bean有关。
+5. 如果可能，提一下Spring如何处理依赖注入，因为这也是IOC容器一个非常重要的功能。
+6. 最后，如果面试官特别对性能或者高级特性感兴趣，你也可以提到Spring如何优化Bean的创建和管理，比如单例模式下Bean的缓存等。
+
+
+
+关于问题可能的回答：
+
+1. 什么是`BeanDefinition`，以及它如何用于描述一个Bean？
+
+`BeanDefinition`是一个接口，它定义了一个Bean在Spring容器中的行为和如何被创建的元数据。这些元数据可以包括以下几种信息：
+
+- Bean的全类名：告诉Spring应该使用哪个Java类去创建这个Bean。
+- Bean的生命周期作用域：比如单例（singleton）或者原型（prototype）。
+- 构造器参数和其他属性值：这些用于Bean的初始化。
+- 初始化方法和销毁方法：Bean在创建和销毁时需要调用的方法。
+- 依赖信息：该Bean依赖哪些其他Bean。
+
+通过`BeanDefinition`，Spring容器能够知道如何去创建一个Bean实例，以及如何初始化它，当需要的时候如何装配与之相关联的其他Bean。
+
+`BeanDefinition`通常是通过XML配置文件或者Java注解来定义的，但也可以通过编程方式在运行时动态创建。
+
+在容器初始化过程中，这些`BeanDefinition`会被解析并注册到`BeanFactory`（通常是`DefaultListableBeanFactory`实现）中，之后就可以用来创建和管理实际的Bean实例。
+
+
+
+2. 你可以解释一下BeanFactoryPostProcessor的角色和用途。它们在Spring初始化过程中起到了什么样的作用？
+
+`BeanFactoryPostProcessor`是一个Spring框架的扩展点，用于修改或者自定义Bean定义的元数据。在Spring容器启动并完成Bean定义的注册，但在Bean实例被创建之前，`BeanFactoryPostProcessor`会被调用。
+
+它的主要角色和用途如下：
+
+1. **自定义修改Bean定义**: `BeanFactoryPostProcessor`可以访问所有的Bean定义（即`BeanDefinition`对象），并有机会在Bean实例化之前对其进行修改。
+2. **条件化配置**: 通过它，你可以根据环境或配置动态地更改Bean的属性或是依赖。
+3. **激活Profile**: 可用于根据不同环境（开发、测试、生产等）激活不同的Bean定义。
+4. **注册额外的Bean定义**: 虽然不常用，但理论上也可以动态地添加更多的Bean定义。
+5. **设置占位符值**: 例如，使用`PropertyPlaceholderConfigurer`来替换配置文件中的占位符。
+6. **类型安全配置**: 可以用于进行类型检查或约束，确保容器中的Bean满足某些条件。
+
+在Spring容器的生命周期中，`BeanFactoryPostProcessor`通常在加载Bean定义之后、初始化Bean之前的阶段执行。由于它能改变Bean定义，这个特点使得`BeanFactoryPostProcessor`成为一个非常强大但需要谨慎使用的工具。
+
+总的来说，`BeanFactoryPostProcessor`提供了一种机制，允许我们在Spring容器完成Bean定义的加载和注册后，但在Bean被实例化和初始化前，对Bean的定义进行自定义或修改。
+
+
+
+3. 你提到了“容器后置处理工作”，这里可以稍微具体一点，比如涉及到什么类型的后置处理，以及这一步为什么是必要的。
+
+“容器后置处理工作”通常涉及一系列在Spring容器初始化过程中执行的额外任务和扩展点，这些任务通常出现在Bean定义被解析和注册之后、所有Bean被初始化之前或之后。这些处理工作通常由特定的接口和实现类来完成，比如`BeanFactoryPostProcessor`、`BeanPostProcessor`、`InitializingBean`、`DisposableBean`等。
+
+以下是一些常见类型的后置处理工作：
+
+1. **Bean属性设置与验证**: 在所有的Bean定义被加载和注册后，可能需要进行进一步的属性设置或验证。
+2. **依赖解析与注入**: 这是Spring IoC容器最核心的部分，需要解析Bean之间的依赖并进行相应的注入。
+3. **Bean的生命周期回调**: 例如，调用标有`@PostConstruct`、`@PreDestroy`注解的方法，或者实现了`InitializingBean`和`DisposableBean`接口的Bean的回调方法。
+4. **AOP代理创建**: 如果你使用了Spring AOP，这个阶段会创建相应的AOP代理。
+5. **事件发布**: 在某些场景下，你可能希望在容器初始化完成后发布某些事件。
+6. **自定义逻辑**: 通过实现`BeanPostProcessor`接口，你可以在Bean初始化前后添加自定义的初始化或销毁逻辑。
+
+这一步为什么是必要的？
+
+- **灵活性与扩展性**: 后置处理提供了一个机会，让你可以插入自己的逻辑，或者更改Spring的默认行为。
+- **生命周期管理**: 它允许更精细地控制Bean的生命周期，例如初始化和销毁。
+- **依赖解析**: 它是进行依赖注入的关键步骤，确保所有Bean都能得到它们所需的依赖。
+- **完整性与验证**: 在所有Bean都准备好之前，你可能需要进行一些完整性检查或配置验证。
+
+
+
+4. 对于`finishBeanFactoryInitialization()`方法，可进一步解释其作用，以及它如何与懒加载和非懒加载的Bean有关。
+
+该方法是Spring容器初始化过程中的一个关键步骤，它主要负责：
+
+1. **初始化剩余的单例Bean**: 在这个阶段，Spring容器会尝试创建并初始化所有配置为单例（singleton）作用域的Bean。这包括对Bean属性的注入以及其他自定义初始化方法的调用。
+2. **处理`FactoryBean`**: 如果容器中有`FactoryBean`，`finishBeanFactoryInitialization()`会确保它们被正确地初始化，并且会从这些`FactoryBean`中获取相应的Bean实例。
+3. **触发`BeanPostProcessor`**: 在Bean初始化的各个阶段，例如属性注入后或自定义初始化方法（如`@PostConstruct`方法）调用后，所有注册的`BeanPostProcessor`都会被触发。
+
+
+
+- **非懒加载的Bean**: 在`finishBeanFactoryInitialization()`方法执行时，所有标记为非懒加载（`lazy-init="false"`或者没有设置`lazy-init`属性）的单例Bean都会被立即初始化。
+- **懒加载的Bean**: 相反，标记为懒加载（`lazy-init="true"`）的Bean不会在这一步被初始化。它们只会在被实际需要（例如，通过依赖注入或者手动调用`getBean()`方法）时才会被初始化。
+
+这种方式给了开发者更多的控制权，允许他们优化应用的启动性能和资源使用。对于那些初始化代价很高或者很少使用的Bean，开发者通常会选择懒加载。
+
+总体而言，`finishBeanFactoryInitialization()`是Spring容器初始化流程中非常关键的一步，它确保所有必要的Bean都被正确地初始化，同时也处理了懒加载和非懒加载Bean的逻辑。
+
+
+
+5. pass
+6. 如果面试官特别对性能或者高级特性感兴趣，你也可以提到Spring如何优化Bean的创建和管理，比如单例模式下Bean的缓存等。
+
+单例Bean的缓存
+
+- 在单例模式下，Spring容器会缓存已经初始化的Bean实例，这样当同一个Bean需要被多次注入或通过`getBean()`方法获取时，都会直接从缓存中取，而不会重新创建。
+
+对象池
+
+- 对于某些特定的Bean，比如数据库连接池，Spring使用对象池技术来重用Bean，以减少创建和销毁对象的开销。
+
+延迟加载（懒加载）
+
+- 如前所述，懒加载可以推迟Bean的初始化时间，直到实际需要该Bean时才进行初始化，从而优化应用启动时间。
+
+初始化预测
+
+- Spring有时候会预先解析哪些Bean会在启动过程中立即需要，以便优化启动流程。
+
+属性编辑器和转换服务
+
+- Spring内部使用一组高效的属性编辑器和转换服务，使得从配置源到Bean属性的数据转换更加高效。
+
+AOP代理的优化
+
+- Spring AOP框架使用了一些优化手段，如缓存来提高代理对象的性能。
+
+Event Listener的有选择性触发
+
+- Spring事件监听机制只会触发那些实际对特定事件感兴趣的监听器，以减少不必要的方法调用。
+
+使用索引进行依赖查找
+
+- Spring内部维护了依赖关系的索引，当进行依赖注入时，可以更快地找到相应的Bean。
+
+
+
+### Spring AOP 的底层原理
+
+同样是阅读大佬的文章：https://www.javadoop.com/post/spring-aop-intro、https://www.javadoop.com/post/spring-aop-source
+
+1. 当调用ApplicationContext的getBean()方法时,会调用AbstractAutowireCapableBeanFactory的doCreateBean()方法创建Bean实例。
+2. 在初始化Bean的过程中,会调用initializeBean()方法。
+3. initializeBean()方法会调用BeanPostProcessor的postProcessAfterInitialization()方法。
+4. DefaultAdvisorAutoProxyCreator作为BeanPostProcessor,会在此方法中对Bean进行包装生成AOP代理。
+   1. DefaultAdvisorAutoProxyCreator实现了BeanPostProcessor接口。
+   2. 在Bean初始化的后置处理阶段,DefaultAdvisorAutoProxyCreator的postProcessAfterInitialization方法被调用。
+   3. 在这个方法内,它会判断当前Bean是否需要生成代理,如果需要,就利用看文章分析的ProxyFactory机制来创建AopProxy。
+   4. 创建好的AopProxy会在postProcessAfterInitialization方法内返回,相当于替换掉了原有的Bean对象。
+   5. 这样一来,之后 BeanFactory.getBean()获取到的就是AopProxy代理对象了。
+   6. 每次目标方法调用都会委托给AopProxy,它来检查是否需要切面增强。
+5. DefaultAdvisorAutoProxyCreator会通过ProxyFactory来创建AopProxy,生成JDK动态代理或CGLIB代理。
+6. 如果满足条件会使用JDK动态代理,否则使用CGLIB代理。代理类实现对应的接口和父类方法拦截功能。
+7. 当请求代理类方法时,会委派给对应通知组成的MethodInterceptor链进行拦截增强处理。
+8. 最终返回增强后的结果,完成一个简单的AOP代理流程,而无需考虑配置方式的具体差异。
+
+
+
+### Spring Boot 自动装配
 
 我们现在提到自动装配的时候，一般会和 Spring Boot 联系在一起。但是，实际上 Spring Framework 早就实现了这个功能。Spring Boot 只是在其基础上，通过 SPI 的方式，做了进一步优化。
 >SpringBoot 定义了一套接口规范，这套规范规定：SpringBoot 在启动时会扫描外部引用 jar 包中的META-INF/spring.factories文件，将文件中配置的类型信息加载到 Spring 容器（此处涉及到 JVM 类加载机制与 Spring 的容器知识），并执行类中定义的各种操作。对于外部 jar 来说，只需要按照 SpringBoot 定义的标准，就能将自己的功能装置进 SpringBoot。
@@ -535,7 +697,41 @@ AutoConfigurationEntry(Collection<String> configurations, Collection<String> exc
 5. **通知监听者**：
    - **通知应用启动完成**：使用`SpringApplicationRunListener`通知所有监听者，表明应用启动完成。
 
-### 🌟 Spring Bean生命周期
+
+
+### Spring Boot 启动流程
+
+1. 从spring.factories配置文件中加载EventPublishingRunListener对象，该对象拥有SimpleApplicationEventMulticaster属性，即在SpringBoot启动过程的不同阶段用来发射内置的生命周期事件;
+2. 准备环境变量，包括系统变量，环境变量，命令行参数，默认变量，servlet相关配置变量，随机值以及配置文件（比如application.properties）等;
+3. 控制台打印SpringBoot的bannner标志；
+4. 根据不同类型环境创建不同类型的applicationcontext容器，因为这里是servlet环境，所以创建的AnnotationConfigServletWebServerApplicationContext容器对象；
+5. 从spring.factories配置文件中加载FailureAnalyzers对象,用来报告SpringBoot启动过程中的异常；
+6. 为刚创建的容器对象做一些初始化工作，准备一些容器属性值等，对ApplicationContext应用一些相关的后置处理和调用各个ApplicationContextInitializer的初始化方法来执行一些初始化逻辑等；
+7. 刷新容器，这一步至关重要。比如调用bean factory的后置处理器，注册BeanPostProcessor后置处理器，初始化事件广播器且广播事件，初始化剩下的单例bean和SpringBoot创建内嵌的Tomcat服务器等等重要且复杂的逻辑都在这里实现，主要步骤可见代码的注释，关于这里的逻辑会在以后的spring源码分析专题详细分析；
+8. 执行刷新容器后的后置处理逻辑，注意这里为空方法；
+9. 调用ApplicationRunner和CommandLineRunner的run方法，我们实现这两个接口可以在spring容器启动后需要的一些东西比如加载一些业务数据等;
+10. 报告启动异常，即若启动过程中抛出异常，此时用FailureAnalyzers来报告异常;
+11. 最终返回容器对象，这里调用方法没有声明对象来接收。
+
+
+
+帮助记忆：
+
+1. **事件监听器加载** - 加载EventPublishingRunListener并初始化SimpleApplicationEventMulticaster。
+2. **环境变量准备** - 集成各种来源的环境变量。
+3. **Banner打印** - 控制台展示Spring Boot的banner。
+4. **创建容器对象** - 基于环境类型创建ApplicationContext。
+5. **失败分析器加载** - 加载FailureAnalyzers以报告启动异常。
+6. **容器初始化** - 对新创建的ApplicationContext进行属性设置和初始化。
+7. **容器刷新** - 执行核心逻辑，如Bean初始化和内嵌Tomcat启动。
+8. **后置处理** - 执行容器刷新后的额外逻辑（通常为空）。
+9. **业务逻辑执行** - 调用ApplicationRunner和CommandLineRunner。
+10. **异常报告** - 使用FailureAnalyzers报告启动过程中的异常。
+11. **返回容器对象** - 完成启动，返回ApplicationContext对象。
+
+
+
+### 🌟 Spring Bean 生命周期
 
 ![img](./personal_images/20220709213529.webp)
 
